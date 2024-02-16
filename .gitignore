@@ -28,7 +28,9 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
+/tests/__pycache__
+/examples/__pycache__
+/datasets/__pycache__
 
 # Google GitHub Actions credentials files created by:
 # https://github.com/google-github-actions/auth
