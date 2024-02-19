@@ -11,9 +11,12 @@ from .models import ValueMapping, Base
 import typing
 from typing import Optional, Dict, Tuple, List, Any
 import hashlib
+from azure.core.settings import settings
+from azure.core.tracing.ext.opentelemetry_span import OpenTelemetrySpan
+settings.tracing_implementation = OpenTelemetrySpan
 
 # Logging
-logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+# logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 
 class DataFog:
