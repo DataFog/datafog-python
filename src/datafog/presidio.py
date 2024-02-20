@@ -1,9 +1,11 @@
 import polars as pl
-from presidio_analyzer import (
-    AnalyzerEngine,
-    BatchAnalyzerEngine,
-)
+from posthog import Posthog
+from presidio_analyzer import AnalyzerEngine, BatchAnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine, BatchAnonymizerEngine
+
+posthog = Posthog(
+    "phc_v6vMICyVCGoYZ2s2xUWB4qoTPoMNFGv2u1q0KnBpaIb", host="https://app.posthog.com"
+)
 
 
 class PresidioPolarFog:
@@ -12,10 +14,19 @@ class PresidioPolarFog:
         self.batch_analyzer = BatchAnalyzerEngine(analyzer_engine=self.analyzer)
         self.anonymizer = AnonymizerEngine()
         self.batch_anonymizer = BatchAnonymizerEngine()
+        posthog.capture("device_id", "presidiopolarfog_init")
 
     def __call__(self, file_path: str) -> None:
         # Convert file to dataframe
         df = pl.read_csv(file_path)
+        posthog.capture(
+            "device_id", "presidiopolarfog_read_csv", properties={"num_rows": len(df)}
+        )
+        posthog.capture(
+            "device_id",
+            "presidiopolarfog_read_csv",
+            properties={"num_columns": len(df.columns)},
+        )
 
         # Scrub the dataframe
         df_dict = {col: df[col].to_list() for col in df.columns}
