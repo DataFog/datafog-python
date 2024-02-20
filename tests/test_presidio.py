@@ -1,11 +1,12 @@
 import os
-import tempfile
 
 import polars as pl
 import pytest
 
 import datafog
 from datafog.presidio import PresidioPolarFog
+
+# import tempfile
 
 
 @pytest.fixture
