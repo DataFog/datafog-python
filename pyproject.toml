@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "datafog"
+version = "2.0.0"
+description = "Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system."
+authors = ["Sid Mohan <sid@datafog.ai>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+presidio-analyzer = "^2.2.353"
+presidio-anonymizer = "^2.2.353"
+polars = "^0.20.10"
+posthog = "^3.4.2"
+numpy = "^1.26.4"
+pytest = "^8.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

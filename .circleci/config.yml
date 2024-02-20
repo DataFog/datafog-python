@@ -1,0 +1,33 @@
+version: 2
+
+jobs:
+  lint:
+    docker:
+      - image: circleci/python:3
+    steps:
+      - checkout
+      - run: pip install black flake8 isort
+      - run: isort --check .
+      - run: black --check .
+      - run: flake8 .
+  build:
+    working_directory: ~/work
+    docker:
+      - image: circleci/python:3
+    steps:
+      - run: pip install tox
+      - checkout
+      # The tests
+      - run:
+          command: tox -- --cov datafog --cov-report xml --cov-report term
+          env:
+            MPLBACKEND: Agg
+      # submit to codecov
+      - run: bash <(curl -s https://codecov.io/bash)
+
+workflows:
+  version: 2
+  lint_and_build:
+    jobs:
+      - lint
+      - build
