@@ -1,3 +1,4 @@
+# datafog-python/src/datafog/__init__.py
 from posthog import Posthog
 
 from .__about__ import __version__
