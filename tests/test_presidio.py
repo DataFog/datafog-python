@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 import polars as pl
 import pytest
@@ -6,18 +7,15 @@ import pytest
 import datafog
 from datafog.presidio import PresidioPolarFog
 
-# import tempfile
-
 
 @pytest.fixture
 def sample_csv_file():
     # Setup: Create a temporary CSV file
-    # with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as tmpfile:
-    #     tmpfile.write(
-    #         "name,email\nJohn Doe,john.doe@example.com\nJane Doe,jane.doe@example.com"
-    #     )
-    #     return tmpfile.name
-    return "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/sample.csv"
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as tmpfile:
+        tmpfile.write(
+            "name,email\nJohn Doe,john.doe@example.com\nJane Doe,jane.doe@example.com"
+        )
+        return tmpfile.name
 
 
 # test init of PresidioPolarFog
