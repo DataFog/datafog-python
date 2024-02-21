@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "datafog"
-version = "2.0.0"
+version = "2.0.1"
 description = "Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system."
 authors = ["Sid Mohan <sid@datafog.ai>"]
 license = "MIT"
@@ -14,6 +14,7 @@ polars = "^0.20.10"
 posthog = "^3.4.2"
 numpy = "^1.26.4"
 pytest = "^8.0.1"
+requests-mock = "^1.11.0"
 
 
 [build-system]

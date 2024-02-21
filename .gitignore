@@ -10,4 +10,7 @@ build/
 .pytest_cache/
 .tox/
 /src/datafog/__pycache__/
+/src/datafog/pii_tools/__pycache__/
 /tests/__pycache__/
+node_modules
+

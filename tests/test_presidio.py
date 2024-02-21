@@ -1,42 +1,43 @@
-import os
-import tempfile
-
-import polars as pl
 import pytest
+import requests_mock
+from polars import DataFrame
 
-import datafog
-from datafog.presidio import PresidioPolarFog
+from datafog.pii_tools import presidio  # Adjust the import path as necessary
 
 
 @pytest.fixture
-def sample_csv_file():
-    # Setup: Create a temporary CSV file
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as tmpfile:
-        tmpfile.write(
-            "name,email\nJohn Doe,john.doe@example.com\nJane Doe,jane.doe@example.com"
-        )
-        return tmpfile.name
+def presidio_engine():
+    return presidio.PresidioEngine()
 
 
-# test init of PresidioPolarFog
-def test_init_presidio_polar_fog():
-    presidio = datafog.PresidioPolarFog()
-    assert presidio is not None
+def test_process_input_http(presidio_engine):
+    test_url = "https://gist.githubusercontent.com/sidmohan0/1aa3ec38b4e6594d3c34b113f2e0962d/raw/42e57146197be0f85a5901cd1dcdd9ad15b31bab/sotu_2023.txt"
+    test_data = "name,age\nJohn Doe,30\nJane Doe,25"
+    with requests_mock.Mocker() as m:
+        m.get(test_url, text=test_data)
+        df = presidio_engine.process_input(test_url)
+    assert isinstance(df, DataFrame)
+    assert len(df) >= 1  # Assuming your CSV has two rows of data
 
 
-def test_presidio_call(sample_csv_file):
-    presidio = PresidioPolarFog()
-    output_file_path = sample_csv_file.rsplit(".", 1)[0] + "_scanned.csv"
+def test_process_input_csv_string(presidio_engine):
+    test_data = "jerome powell is chair of the federal reserve"
+    df = presidio_engine.process_input(test_data)
+    assert isinstance(df, DataFrame)
 
-    # Action: Process the file
-    presidio(sample_csv_file)
 
-    # Assertion: Check the output file exists
-    assert os.path.exists(output_file_path), "Output file was not created"
+def test_process_input_csv_file(tmp_path, presidio_engine):
+    d = tmp_path / "sub"
+    d.mkdir()
+    p = d / "test.csv"
+    p.write_text("name,age\nJohn Doe,30\nJane Doe,25")
+    df = presidio_engine.process_input(str(p))
+    assert isinstance(df, DataFrame)
+    assert len(df) == 2
 
-    # Optional: Read the output file and assert content changes
-    scrubbed_df = pl.read_csv(output_file_path)
-    assert scrubbed_df.shape
-    # Teardown: Remove temporary files
-    # os.remove(sample_csv_file)
-    # os.remove(output_file_path)
+
+def test_process_input_non_csv(presidio_engine):
+    test_data = "Just a simple string"
+    df = presidio_engine.process_input(test_data)
+    assert isinstance(df, DataFrame)
+    # Check the DataFrame content or structure as needed
