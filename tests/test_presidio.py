@@ -83,15 +83,3 @@ def test_piiscan_url_detection():
         for entity in pii_detected:
             f.write(entity.entity_type)
             f.write("\n")
-
-
-# delete the output files
-def test_delete_output_files():
-    os.remove("tests/files/output_files/output.json")
-    os.remove("tests/files/output_files/output.csv")
-    os.remove("tests/files/output_files/output.txt")
-    os.remove("tests/files/output_files/output.md")
-    assert not os.path.exists("tests/files/output_files/output.json")
-    assert not os.path.exists("tests/files/output_files/output.csv")
-    assert not os.path.exists("tests/files/output_files/output.txt")
-    assert not os.path.exists("tests/files/output_files/output.md")
