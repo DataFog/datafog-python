@@ -14,6 +14,8 @@ polars = "^0.20.10"
 numpy = "^1.26.4"
 pytest = "^8.0.1"
 requests-mock = "^1.11.0"
+spacy = "3.4.4"
+en-spacy-pii-fast = {url = "https://huggingface.co/beki/en_spacy_pii_fast/resolve/main/en_spacy_pii_fast-any-py3-none-any.whl"}
 
 [build-system]
 requires = ["poetry-core"]
