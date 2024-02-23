@@ -12,7 +12,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/datafog/datafog-python.svg?style=flat-square&logo=github&label=Stars&logoColor=white)](https://github.com/datafog/datafog-python)
 [![PyPi downloads](https://img.shields.io/pypi/dm/datafog.svg?style=flat-square)](https://pypistats.org/packages/datafog)
 
-<!-- [![gh-actions](https://img.shields.io/github/workflow/status/datafog/datafog-python/ci?style=flat-square)](https://github.com/datafog/datafog-python/actions?query=workflow%3Aci) -->
+[![gh-actions](https://img.shields.io/github/workflow/status/datafog/datafog-python/ci?style=flat-square)](https://github.com/datafog/datafog-python/actions?query=workflow%3Aci)
 
 [![codecov](https://img.shields.io/codecov/c/github/datafog/datafog-python.svg?style=flat-square)](https://codecov.io/gh/datafog/datafog-python)
 
