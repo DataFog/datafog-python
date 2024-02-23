@@ -1,0 +1,38 @@
+[
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "+1234567890",
+      "address": "123 Main St, Anytown, USA"
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "phone": "+1987654321",
+      "address": "456 Elm St, Newtown, USA"
+    },
+    {
+      "id": 3,
+      "name": "Alice Johnson",
+      "email": "alice.johnson@example.com",
+      "phone": "+1122334455",
+      "address": "789 Oak St, Smalltown, USA"
+    },
+    {
+      "id": 4,
+      "name": "Bob Brown",
+      "email": "bob.brown@example.com",
+      "phone": "+1555666777",
+      "address": "987 Pine St, Ruralville, USA"
+    },
+    {
+      "id": 5,
+      "name": "Emily Davis",
+      "email": "emily.davis@example.com",
+      "phone": "+1444333222",
+      "address": "654 Cedar St, Villagetown, USA"
+    }
+  ]
+  

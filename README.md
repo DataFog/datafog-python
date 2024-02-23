@@ -36,6 +36,34 @@ DataFog can be installed via pip:
 pip install datafog # python client
 ```
 
+## Usage
+
+We're going to build up functionality starting with support for the Microsoft Presidio library. If you have any custom requests that would be of benefit to the community, please let us know!
+
+```
+  import requests
+  from datafog import PresidioEngine as presidio
+
+  # Example: Detecting PII in a String
+  pii_detected = presidio.scan("My name is John Doe and my email is johndoe@genai.com")
+  print("PII Detected:", pii_detected)
+
+  # Example: Detecting PII in a File
+  sample_filepath = "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/input_files/sample.csv"
+  with open(sample_filepath, "r") as f:
+      original_value = f.read()
+  pii_detected = presidio.scan(original_value)
+  print("PII Detected in File:", pii_detected)
+
+  # Example: Detecting PII in a URL
+  sample_url = "https://gist.githubusercontent.com/sidmohan0/1aa3ec38b4e6594d3c34b113f2e0962d/raw/42e57146197be0f85a5901cd1dcdd9ad15b31bab/sotu_2023.txt"
+  response = requests.get(sample_url)
+  original_value = response.text
+  pii_detected = presidio.scan(original_value)
+  print("PII Detected in URL Content:", pii_detected)
+
+```
+
 ## Dev Notes
 
 - Clone repo
@@ -51,10 +79,16 @@ pip install datafog # python client
 To run the datafog unit tests, check out this repository and do
 
 ```
+
 tox
+
 ```
 
 ### License
 
 This software is published under the [MIT
 license](https://en.wikipedia.org/wiki/MIT_License).
+
+```
+
+```
