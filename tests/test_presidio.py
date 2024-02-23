@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 def test_piiscan_json_detection():
     # Assuming sample_file already contains the data you want to test
-    sample_file = "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/input_files/sample.json"
+    sample_file = "tests/files/input_files/sample.json"
 
     # Read the contents of sample_file into original_value
     with open(sample_file, "r") as f:
@@ -20,7 +20,7 @@ def test_piiscan_json_detection():
 
     # write pii_detected to a JSON file called output.json in the same directory as sample_file
     with open(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.json",
+        "tests/files/output_files/output.json",
         "w",
     ) as f:
         for entity in pii_detected:
@@ -30,7 +30,7 @@ def test_piiscan_json_detection():
 
 def test_piiscan_csv_detection():
     # Assuming sample_file already contains the data you want to test
-    sample_file = "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/input_files/sample.csv"
+    sample_file = "tests/files/input_files/sample.csv"
 
     # Read the contents of sample_file into original_value
     with open(sample_file, "r") as f:
@@ -40,7 +40,7 @@ def test_piiscan_csv_detection():
 
     # write pii_detected to a JSON file called output.json in the same directory as sample_file
     with open(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.csv",
+        "tests/files/output_files/output.csv",
         "w",
     ) as f:
         for entity in pii_detected:
@@ -50,7 +50,7 @@ def test_piiscan_csv_detection():
 
 def test_piiscan_txt_detection():
     # Assuming sample_file already contains the data you want to test
-    sample_file = "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/input_files/sample.txt"
+    sample_file = "tests/files/input_files/sample.txt"
     # Read the contents of sample_file into original_value
     with open(sample_file, "r") as f:
         original_value = f.read()
@@ -59,7 +59,7 @@ def test_piiscan_txt_detection():
 
     # write pii_detected to a JSON file called output.json in the same directory as sample_file
     with open(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.txt",
+        "tests/files/output_files/output.txt",
         "w",
     ) as f:
         for entity in pii_detected:
@@ -77,7 +77,7 @@ def test_piiscan_url_detection():
 
     # write pii_detected to a output.md in the same directory as sample_url
     with open(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.md",
+        "tests/files/output_files/output.md",
         "w",
     ) as f:
         for entity in pii_detected:
@@ -87,27 +87,11 @@ def test_piiscan_url_detection():
 
 # delete the output files
 def test_delete_output_files():
-    os.remove(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.json"
-    )
-    os.remove(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.csv"
-    )
-    os.remove(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.txt"
-    )
-    os.remove(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.md"
-    )
-    assert not os.path.exists(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.json"
-    )
-    assert not os.path.exists(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.csv"
-    )
-    assert not os.path.exists(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.txt"
-    )
-    assert not os.path.exists(
-        "/Users/sidmohan/Desktop/v2.0.0/datafog-python/tests/files/output_files/output.md"
-    )
+    os.remove("tests/files/output_files/output.json")
+    os.remove("tests/files/output_files/output.csv")
+    os.remove("tests/files/output_files/output.txt")
+    os.remove("tests/files/output_files/output.md")
+    assert not os.path.exists("tests/files/output_files/output.json")
+    assert not os.path.exists("tests/files/output_files/output.csv")
+    assert not os.path.exists("tests/files/output_files/output.txt")
+    assert not os.path.exists("tests/files/output_files/output.md")
