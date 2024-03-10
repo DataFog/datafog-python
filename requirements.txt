@@ -1,5 +1,5 @@
-spacy==3.4.4
-thinc==8.1.0
+# spacy==3.4.4
+# thinc==8.1.0
 presidio_analyzer==2.2.353
 pandas==2.2.1
 pytest==8.0.2
