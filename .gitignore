@@ -14,4 +14,5 @@ build/
 /tests/__pycache__/
 /tests/scratch.py
 node_modules
-
+datafog_debug.log
+sotu_2023.txt

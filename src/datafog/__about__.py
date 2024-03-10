@@ -1,1 +1,2 @@
-__version__ = "2.1.1"
+# SSOT for the package version
+__version__ = "2.2.0-beta1"
