@@ -8,7 +8,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="datafog",
-    version= "2.2.0b1",
+    version="2.2.0b1",
     author="Sid Mohan",
     author_email="sid@datafog.ai",
     description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
@@ -22,8 +22,7 @@ setup(
         "spacy==3.4.4",
         "en_spacy_pii_fast",
     ],
-    python_requires='>=3.10',
-
+    python_requires=">=3.10",
     classifiers=[
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",

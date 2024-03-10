@@ -7,7 +7,6 @@ logger = logging.getLogger("presidio-module")
 
 
 class CustomSpacyRecognizer(LocalRecognizer):
-
     ENTITIES = [
         "LOCATION",
         "PERSON",
