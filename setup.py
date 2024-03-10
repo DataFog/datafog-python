@@ -20,8 +20,7 @@ setup(
         "pytest==8.0.2",
         "Requests==2.31.0",
         "spacy==3.4.4",
-        'en_spacy_pii_fast @ https://huggingface.co/beki/en_spacy_pii_fast/resolve/main/en_spacy_pii_fast-any-py3-none-any.whl',
-
+        "en_spacy_pii_fast",
     ],
     python_requires='>=3.10',
 
