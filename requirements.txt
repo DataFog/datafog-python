@@ -1,6 +1,6 @@
-'https://huggingface.co/beki/en_spacy_pii_fast/resolve/main/en_spacy_pii_fast-any-py3-none-any.whl'
 pandas==2.2.1
 presidio_analyzer==2.2.353
 pytest==8.0.2
 Requests==2.31.0
 spacy
+https://huggingface.co/beki/en_spacy_pii_fast/resolve/main/en_spacy_pii_fast-any-py3-none-any.whl
