@@ -14,7 +14,7 @@ def create_ad_hoc_deny_list_recognizer(
         return None
 
     deny_list_recognizer = PatternRecognizer(
-        supported_entity="GENERIC_PII", deny_list=deny_list
+        supported_entity="CUSTOM_PII", deny_list=deny_list
     )
     return deny_list_recognizer
 
@@ -37,6 +37,25 @@ def analyzer_engine():
     configuration = {
         "nlp_engine_name": "spacy",
         "models": [{"lang_code": "en", "model_name": "en_spacy_pii_fast"}],
+        "ner_model_configuration": {
+            "model_to_presidio_entity_mapping": {
+                "PER": "PERSON",
+                "PERSON": "PERSON",
+                "NORP": "NRP",
+                "FAC": "FACILITY",
+                "LOC": "LOCATION",
+                "GPE": "LOCATION",
+                "LOCATION": "LOCATION",
+                "ORG": "ORGANIZATION",
+                "ORGANIZATION": "ORGANIZATION",
+                "DATE": "DATE_TIME",
+                "TIME": "DATE_TIME",
+            },
+            "low_confidence_score_multiplier": 0.4,
+            "low_score_entity_names": ["ORG", "ORGANIZATION"],
+            "labels_to_ignore": ["DATE_TIME"],
+        },
+        
     }
 
     # Create NLP engine based on configuration
