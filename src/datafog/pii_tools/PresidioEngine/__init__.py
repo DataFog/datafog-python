@@ -1,10 +1,35 @@
-from presidio_analyzer import AnalyzerEngine, RecognizerRegistry
+from presidio_analyzer import AnalyzerEngine, RecognizerRegistry, RecognizerResult, PatternRecognizer, Pattern
 from presidio_analyzer.nlp_engine import NlpEngineProvider
-
+from typing import List, Optional, Tuple
+import logging
 from .analyzer import CustomSpacyRecognizer
 
+logger = logging.getLogger("presidio-engine-init").setLevel(logging.ERROR)
 
 # Helper methods
+def create_ad_hoc_deny_list_recognizer(
+    deny_list=Optional[List[str]],
+) -> Optional[PatternRecognizer]:
+    if not deny_list:
+        return None
+
+    deny_list_recognizer = PatternRecognizer(
+        supported_entity="GENERIC_PII", deny_list=deny_list
+    )
+    return deny_list_recognizer
+
+
+def create_ad_hoc_regex_recognizer(
+    regex: str, entity_type: str, score: float, context: Optional[List[str]] = None
+) -> Optional[PatternRecognizer]:
+    if not regex:
+        return None
+    pattern = Pattern(name="Regex Pattern", regex=regex, score=score)
+    regex_recognizer = PatternRecognizer(
+        supported_entity=entity_type, patterns=[pattern], context=context
+    )
+    return regex_recognizer
+
 def analyzer_engine():
     """Return AnalyzerEngine."""
 
@@ -59,6 +84,23 @@ def scan(text, **kwargs):
     kwargs.setdefault("language", "en")
     kwargs.setdefault("score_threshold", 0.35)
     kwargs.setdefault("nlp_artifacts", None)
+    kwargs.setdefault("entities", [])
+    kwargs.setdefault("allow_list", [])
+    kwargs.setdefault("deny_list", [])
+
+    """Analyze input using Analyzer engine and input arguments (kwargs)."""
+    if "entities" not in kwargs or "All" in kwargs["entities"]:
+        kwargs["entities"] = None
+
+    if "deny_list" in kwargs and kwargs["deny_list"] is not None:
+        ad_hoc_recognizer = create_ad_hoc_deny_list_recognizer(kwargs["deny_list"])
+        kwargs["ad_hoc_recognizers"] = [ad_hoc_recognizer] if ad_hoc_recognizer else []
+        del kwargs["deny_list"]
+
+    if "regex_params" in kwargs and len(kwargs["regex_params"]) > 0:
+        ad_hoc_recognizer = create_ad_hoc_regex_recognizer(*kwargs["regex_params"])
+        kwargs["ad_hoc_recognizers"] = [ad_hoc_recognizer] if ad_hoc_recognizer else []
+        del kwargs["regex_params"]
 
     # init analyzer instance
     analyzer = analyzer_engine()
