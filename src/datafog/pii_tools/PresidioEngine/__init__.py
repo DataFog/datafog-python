@@ -1,10 +1,18 @@
-from presidio_analyzer import AnalyzerEngine, RecognizerRegistry, RecognizerResult, PatternRecognizer, Pattern
-from presidio_analyzer.nlp_engine import NlpEngineProvider
-from typing import List, Optional, Tuple
 import logging
+from typing import List, Optional
+
+from presidio_analyzer import (
+    AnalyzerEngine,
+    Pattern,
+    PatternRecognizer,
+    RecognizerRegistry,
+)
+from presidio_analyzer.nlp_engine import NlpEngineProvider
+
 from .analyzer import CustomSpacyRecognizer
 
 logger = logging.getLogger("presidio-engine-init").setLevel(logging.ERROR)
+
 
 # Helper methods
 def create_ad_hoc_deny_list_recognizer(
@@ -29,6 +37,7 @@ def create_ad_hoc_regex_recognizer(
         supported_entity=entity_type, patterns=[pattern], context=context
     )
     return regex_recognizer
+
 
 def analyzer_engine():
     """Return AnalyzerEngine."""
@@ -55,7 +64,6 @@ def analyzer_engine():
             "low_score_entity_names": ["ORG", "ORGANIZATION"],
             "labels_to_ignore": ["DATE_TIME"],
         },
-        
     }
 
     # Create NLP engine based on configuration

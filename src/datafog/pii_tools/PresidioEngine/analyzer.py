@@ -6,7 +6,6 @@ from presidio_analyzer import AnalysisExplanation, LocalRecognizer, RecognizerRe
 logger = logging.getLogger("custom-spacy-recognizer").setLevel(logging.ERROR)
 
 
-
 class CustomSpacyRecognizer(LocalRecognizer):
     ENTITIES = [
         "LOCATION",

@@ -1,5 +1,6 @@
 # datafog-python/src/datafog/__init__.py
 import json
+import logging
 
 import pandas as pd
 import requests
@@ -7,6 +8,8 @@ import spacy
 
 from .__about__ import __version__
 from .pii_tools import PresidioEngine
+
+logger = logging.getLogger(__name__).setLevel(logging.ERROR)
 
 __all__ = [
     "__version__",
