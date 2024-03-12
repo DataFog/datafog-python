@@ -3,7 +3,7 @@ from typing import List, Optional, Set, Tuple
 
 from presidio_analyzer import AnalysisExplanation, LocalRecognizer, RecognizerResult
 
-logger = logging.getLogger("presidio-module")
+logger = logging.getLogger("custom-spacy-recognizer").setLevel(logging.ERROR)
 
 
 class CustomSpacyRecognizer(LocalRecognizer):
