@@ -8,7 +8,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="datafog",
-    version="2.2.0",
+    version="2.3.0",
     author="Sid Mohan",
     author_email="sid@datafog.ai",
     description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
