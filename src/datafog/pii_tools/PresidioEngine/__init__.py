@@ -14,10 +14,17 @@ from .analyzer import CustomSpacyRecognizer
 logger = logging.getLogger("presidio-engine-init").setLevel(logging.ERROR)
 
 
-# Helper methods
-def create_ad_hoc_deny_list_recognizer(
-    deny_list=Optional[List[str]],
-) -> Optional[PatternRecognizer]:
+def create_ad_hoc_deny_list_recognizer(deny_list=Optional[List[str]],) -> Optional[PatternRecognizer]:
+    """
+    Create an ad-hoc recognizer based on a provided deny list.
+
+    Args:
+        deny_list (Optional[List[str]]): List of terms to be denied. Default is None.
+
+    Returns:
+        Optional[PatternRecognizer]: A PatternRecognizer based on the provided deny list,
+            or None if no deny list is provided.
+    """
     if not deny_list:
         return None
 
@@ -28,8 +35,20 @@ def create_ad_hoc_deny_list_recognizer(
 
 
 def create_ad_hoc_regex_recognizer(
-    regex: str, entity_type: str, score: float, context: Optional[List[str]] = None
-) -> Optional[PatternRecognizer]:
+    regex: str, entity_type: str, score: float, context: Optional[List[str]] = None) -> Optional[PatternRecognizer]:
+    """
+    Create an ad-hoc recognizer based on a provided regular expression.
+
+    Args:
+        regex (str): The regular expression pattern to match.
+        entity_type (str): The entity type associated with the pattern.
+        score (float): The confidence score for the pattern.
+        context (Optional[List[str]]): Additional context for the pattern. Default is None.
+
+    Returns:
+        Optional[PatternRecognizer]: A PatternRecognizer based on the provided regex,
+            or None if no regex is provided.
+    """
     if not regex:
         return None
     pattern = Pattern(name="Regex Pattern", regex=regex, score=score)
@@ -40,7 +59,12 @@ def create_ad_hoc_regex_recognizer(
 
 
 def analyzer_engine():
-    """Return AnalyzerEngine."""
+    """
+    Create and configure an AnalyzerEngine.
+
+    Returns:
+        AnalyzerEngine: The configured AnalyzerEngine instance.
+    """
 
     spacy_recognizer = CustomSpacyRecognizer()
     configuration = {
@@ -87,6 +111,17 @@ def analyzer_engine():
 
 
 def annotate(text, analysis_results):
+    """
+    Annotate the input text with the analysis results.
+
+    Args:
+        text (str): The input text to annotate.
+        analysis_results (List[AnalysisResult]): The list of analysis results.
+
+    Returns:
+        List[Union[str, Tuple[str, str]]]: The annotated text as a list of tokens,
+            where each token is either a string or a tuple of (text, entity_type).
+    """
     tokens = []
     # sort by start index
     results = sorted(analysis_results, key=lambda x: x.start)
@@ -107,7 +142,22 @@ def annotate(text, analysis_results):
 
 
 def scan(text, **kwargs):
-    # Set default values for any parameters not provided
+    """
+    Analyze the input text using the Analyzer engine and provided arguments.
+
+    Args:
+        text (str): The input text to analyze.
+        **kwargs: Additional keyword arguments for the analysis.
+            - language (str): The language of the input text. Default is "en".
+            - score_threshold (float): The minimum score threshold for entity recognition. Default is 0.35.
+            - nlp_artifacts (Optional[NlpArtifacts]): NLP artifacts to use for analysis. Default is None.
+            - entities (List[str]): List of entities to analyze. Default is an empty list.
+            - allow_list (List[str]): List of terms to allow. Default is an empty list.
+            - deny_list (List[str]): List of terms to deny. Default is an empty list.
+
+    Returns:
+        List[AnalysisResult]: The list of analysis results.
+    """
     kwargs.setdefault("language", "en")
     kwargs.setdefault("score_threshold", 0.35)
     kwargs.setdefault("nlp_artifacts", None)
