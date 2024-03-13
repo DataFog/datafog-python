@@ -24,7 +24,7 @@
 
 ## Overview
 
-DataFog works by scanning and redacting-out PII in files **before** are uploaded to a RAG system.
+DataFog works by scanning and redacting-out PII in files **before** they get uploaded to a RAG system.
 
 ## How it works
 
