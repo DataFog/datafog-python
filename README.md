@@ -4,7 +4,7 @@
 
 <p align="center">
     <b>Open-source PII Detection for Retrieval Systems</b>. <br />
-    Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system. 
+    Scan, redact, and manage PII in your documents before they get uploaded to a Generative AI system. 
 </p>
 
 <p align="center">
