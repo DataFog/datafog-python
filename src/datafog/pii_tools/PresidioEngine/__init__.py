@@ -14,7 +14,9 @@ from .analyzer import CustomSpacyRecognizer
 logger = logging.getLogger("presidio-engine-init").setLevel(logging.ERROR)
 
 
-def create_ad_hoc_deny_list_recognizer(deny_list=Optional[List[str]],) -> Optional[PatternRecognizer]:
+def create_ad_hoc_deny_list_recognizer(
+    deny_list=Optional[List[str]],
+) -> Optional[PatternRecognizer]:
     """
     Create an ad-hoc recognizer based on a provided deny list.
 
@@ -35,7 +37,8 @@ def create_ad_hoc_deny_list_recognizer(deny_list=Optional[List[str]],) -> Option
 
 
 def create_ad_hoc_regex_recognizer(
-    regex: str, entity_type: str, score: float, context: Optional[List[str]] = None) -> Optional[PatternRecognizer]:
+    regex: str, entity_type: str, score: float, context: Optional[List[str]] = None
+) -> Optional[PatternRecognizer]:
     """
     Create an ad-hoc recognizer based on a provided regular expression.
 
@@ -86,7 +89,7 @@ def analyzer_engine():
             },
             "low_confidence_score_multiplier": 0.4,
             "low_score_entity_names": ["ORG", "ORGANIZATION"],
-            "labels_to_ignore": ["DATE_TIME"],
+            "labels_to_ignore": ["DATE_TIME", "NRP"],
         },
     }
 

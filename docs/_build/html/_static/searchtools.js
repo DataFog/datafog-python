@@ -90,20 +90,23 @@ const _displayItem = (item, searchTerms, highlightTerms) => {
     listItem.appendChild(document.createElement("span")).innerHTML =
       " (" + descr + ")";
     // highlight search terms in the description
-    if (SPHINX_HIGHLIGHT_ENABLED)  // set in sphinx_highlight.js
-      highlightTerms.forEach((term) => _highlightText(listItem, term, "highlighted"));
-  }
-  else if (showSearchSummary)
+    if (SPHINX_HIGHLIGHT_ENABLED)
+      // set in sphinx_highlight.js
+      highlightTerms.forEach((term) =>
+        _highlightText(listItem, term, "highlighted"),
+      );
+  } else if (showSearchSummary)
     fetch(requestUrl)
       .then((responseData) => responseData.text())
       .then((data) => {
         if (data)
-          listItem.appendChild(
-            Search.makeSearchSummary(data, searchTerms)
-          );
+          listItem.appendChild(Search.makeSearchSummary(data, searchTerms));
         // highlight search terms in the summary
-        if (SPHINX_HIGHLIGHT_ENABLED)  // set in sphinx_highlight.js
-          highlightTerms.forEach((term) => _highlightText(listItem, term, "highlighted"));
+        if (SPHINX_HIGHLIGHT_ENABLED)
+          // set in sphinx_highlight.js
+          highlightTerms.forEach((term) =>
+            _highlightText(listItem, term, "highlighted"),
+          );
       });
   Search.output.appendChild(listItem);
 };
@@ -112,11 +115,11 @@ const _finishSearch = (resultCount) => {
   Search.title.innerText = _("Search Results");
   if (!resultCount)
     Search.status.innerText = Documentation.gettext(
-      "Your search did not match any documents. Please make sure that all words are spelled correctly and that you've selected enough categories."
+      "Your search did not match any documents. Please make sure that all words are spelled correctly and that you've selected enough categories.",
     );
   else
     Search.status.innerText = _(
-      `Search finished, found ${resultCount} page(s) matching the search query.`
+      `Search finished, found ${resultCount} page(s) matching the search query.`,
     );
 };
 const _displayNextItem = (
@@ -131,7 +134,7 @@ const _displayNextItem = (
     _displayItem(results.pop(), searchTerms, highlightTerms);
     setTimeout(
       () => _displayNextItem(results, resultCount, searchTerms, highlightTerms),
-      5
+      5,
     );
   }
   // search finished, update title and status message
@@ -147,9 +150,10 @@ const _displayNextItem = (
  * This is the same as ``\W+`` in Python, preserving the surrogate pair area.
  */
 if (typeof splitQuery === "undefined") {
-  var splitQuery = (query) => query
+  var splitQuery = (query) =>
+    query
       .split(/[^\p{Letter}\p{Number}_\p{Emoji_Presentation}]+/gu)
-      .filter(term => term)  // remove remaining empty strings
+      .filter((term) => term); // remove remaining empty strings
 }
 
 /**
@@ -161,12 +165,17 @@ const Search = {
   _pulse_status: -1,
 
   htmlToText: (htmlString) => {
-    const htmlElement = new DOMParser().parseFromString(htmlString, 'text/html');
-    htmlElement.querySelectorAll(".headerlink").forEach((el) => { el.remove() });
+    const htmlElement = new DOMParser().parseFromString(
+      htmlString,
+      "text/html",
+    );
+    htmlElement.querySelectorAll(".headerlink").forEach((el) => {
+      el.remove();
+    });
     const docContent = htmlElement.querySelector('[role="main"]');
     if (docContent !== undefined) return docContent.textContent;
     console.warn(
-      "Content block not found. Sphinx search tries to obtain it via '[role=main]'. Could you check your theme or template."
+      "Content block not found. Sphinx search tries to obtain it via '[role=main]'. Could you check your theme or template.",
     );
     return "";
   },
@@ -260,10 +269,7 @@ const Search = {
 
       // maybe skip this "word"
       // stopwords array is from language_data.js
-      if (
-        stopwords.indexOf(queryTermLower) !== -1 ||
-        queryTerm.match(/^\d+$/)
-      )
+      if (stopwords.indexOf(queryTermLower) !== -1 || queryTerm.match(/^\d+$/))
         return;
 
       // stem the word
@@ -276,8 +282,12 @@ const Search = {
       }
     });
 
-    if (SPHINX_HIGHLIGHT_ENABLED) {  // set in sphinx_highlight.js
-      localStorage.setItem("sphinx_highlight_terms", [...highlightTerms].join(" "))
+    if (SPHINX_HIGHLIGHT_ENABLED) {
+      // set in sphinx_highlight.js
+      localStorage.setItem(
+        "sphinx_highlight_terms",
+        [...highlightTerms].join(" "),
+      );
     }
 
     // console.debug("SEARCH: searching for:");
@@ -290,9 +300,12 @@ const Search = {
 
     const queryLower = query.toLowerCase();
     for (const [title, foundTitles] of Object.entries(allTitles)) {
-      if (title.toLowerCase().includes(queryLower) && (queryLower.length >= title.length/2)) {
+      if (
+        title.toLowerCase().includes(queryLower) &&
+        queryLower.length >= title.length / 2
+      ) {
         for (const [file, id] of foundTitles) {
-          let score = Math.round(100 * queryLower.length / title.length)
+          let score = Math.round((100 * queryLower.length) / title.length);
           results.push([
             docNames[file],
             titles[file] !== title ? `${titles[file]} > ${title}` : title,
@@ -307,9 +320,9 @@ const Search = {
 
     // search for explicit entries in index directives
     for (const [entry, foundEntries] of Object.entries(indexEntries)) {
-      if (entry.includes(queryLower) && (queryLower.length >= entry.length/2)) {
+      if (entry.includes(queryLower) && queryLower.length >= entry.length / 2) {
         for (const [file, id] of foundEntries) {
-          let score = Math.round(100 * queryLower.length / entry.length)
+          let score = Math.round((100 * queryLower.length) / entry.length);
           results.push([
             docNames[file],
             titles[file],
@@ -324,7 +337,7 @@ const Search = {
 
     // lookup as object
     objectTerms.forEach((term) =>
-      results.push(...Search.performObjectSearch(term, objectTerms))
+      results.push(...Search.performObjectSearch(term, objectTerms)),
     );
 
     // lookup as search terms in fulltext
@@ -353,7 +366,11 @@ const Search = {
     // note the reversing of results, so that in the case of duplicates, the highest-scoring entry is kept
     let seen = new Set();
     results = results.reverse().reduce((acc, result) => {
-      let resultStr = result.slice(0, 4).concat([result[5]]).map(v => String(v)).join(',');
+      let resultStr = result
+        .slice(0, 4)
+        .concat([result[5]])
+        .map((v) => String(v))
+        .join(",");
       if (!seen.has(resultStr)) {
         acc.push(result);
         seen.add(resultStr);
@@ -384,7 +401,7 @@ const Search = {
     const results = [];
 
     const objectSearchCallback = (prefix, match) => {
-      const name = match[4]
+      const name = match[4];
       const fullname = (prefix ? prefix + "." : "") + name;
       const fullnameLower = fullname.toLowerCase();
       if (fullnameLower.indexOf(object) < 0) return;
@@ -435,9 +452,7 @@ const Search = {
       ]);
     };
     Object.keys(objects).forEach((prefix) =>
-      objects[prefix].forEach((array) =>
-        objectSearchCallback(prefix, array)
-      )
+      objects[prefix].forEach((array) => objectSearchCallback(prefix, array)),
     );
     return results;
   },
@@ -509,7 +524,7 @@ const Search = {
 
       // as search terms with length < 3 are discarded
       const filteredTermCount = [...searchTerms].filter(
-        (term) => term.length > 2
+        (term) => term.length > 2,
       ).length;
       if (
         wordList.length !== searchTerms.size &&
@@ -524,7 +539,7 @@ const Search = {
             terms[term] === file ||
             titleTerms[term] === file ||
             (terms[term] || []).includes(file) ||
-            (titleTerms[term] || []).includes(file)
+            (titleTerms[term] || []).includes(file),
         )
       )
         break;
@@ -565,7 +580,8 @@ const Search = {
 
     let summary = document.createElement("p");
     summary.classList.add("context");
-    summary.textContent = top + text.substr(startWithContext, 240).trim() + tail;
+    summary.textContent =
+      top + text.substr(startWithContext, 240).trim() + tail;
 
     return summary;
   },

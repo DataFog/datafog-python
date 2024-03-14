@@ -19,6 +19,7 @@ class CustomSpacyRecognizer(LocalRecognizer):
         MODEL_LANGUAGES (Dict[str, str]): Mapping of language codes to pre-trained model names.
         PRESIDIO_EQUIVALENCES (Dict[str, str]): Mapping of Spacy entity labels to Presidio entity types.
     """
+
     ENTITIES = [
         "LOCATION",
         "PERSON",
@@ -57,7 +58,6 @@ class CustomSpacyRecognizer(LocalRecognizer):
         context: Optional[List[str]] = None,
         ner_strength: float = 0.85,
     ):
-        
         """
         Initialize the CustomSpacyRecognizer.
 
@@ -95,7 +95,6 @@ class CustomSpacyRecognizer(LocalRecognizer):
     def build_spacy_explanation(
         self, original_score: float, explanation: str
     ) -> AnalysisExplanation:
-        
         """
         Create explanation for why this result was detected.
         :param original_score: Score given by this recognizer

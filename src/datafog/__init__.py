@@ -28,6 +28,7 @@ class DataFog:
     Attributes:
         nlp (spacy.lang): Spacy language model for PII detection.
     """
+
     def __init__(self):
         """
         Initialize the DataFog instance.
