@@ -18,14 +18,51 @@ __all__ = [
 
 
 class DataFog:
+    """
+    DataFog class for performing privacy operations on input data.
+
+    This class uses the Spacy library to process and analyze input data for
+    personally identifiable information (PII) and applies specified privacy
+    operations to protect sensitive data.
+
+    Attributes:
+        nlp (spacy.lang): Spacy language model for PII detection.
+    """
+
     def __init__(self):
+        """
+        Initialize the DataFog instance.
+
+        Loads the Spacy language model for PII detection.
+        """
         self.nlp = spacy.load("en_spacy_pii_fast")
 
     @staticmethod
     def client():
+        """
+        Create a new instance of the DataFog client.
+
+        Returns:
+            DataFog: A new instance of the DataFog client.
+        """
         return DataFog()
 
     def __call__(self, input_source, privacy_operation):
+        """
+        Process the input data and apply the specified privacy operation.
+
+        Args:
+            input_source (Union[str, pd.DataFrame]): The input data source.
+                Can be a URL, file path, or a string containing the data.
+                Supported file formats: CSV, TXT, JSON, Parquet.
+            privacy_operation (str): The privacy operation to apply.
+                Supported operations: 'redact', 'annotate'.
+        Returns:
+            str: The processed text with the applied privacy operation.
+
+        Raises:
+            ValueError: If an unsupported input source type or privacy operation is provided.
+        """
         if isinstance(input_source, str):
             if input_source.startswith(("http://", "https://")):
                 print("Downloading file from URL")
@@ -64,6 +101,5 @@ class DataFog:
                     raise ValueError(
                         f"Unsupported privacy operation: {privacy_operation}"
                     )
-                # Add more privacy operations as needed
 
         return text

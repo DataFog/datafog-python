@@ -7,6 +7,19 @@ logger = logging.getLogger("custom-spacy-recognizer").setLevel(logging.ERROR)
 
 
 class CustomSpacyRecognizer(LocalRecognizer):
+    """
+    Custom Spacy Recognizer for PII detection.
+
+    This recognizer uses a pre-trained Spacy model to identify PII entities in text.
+
+    Attributes:
+        ENTITIES (List[str]): List of supported entities.
+        DEFAULT_EXPLANATION (str): Default explanation format for recognized entities.
+        CHECK_LABEL_GROUPS (List[Tuple[Set, Set]]): Groups of labels to check for entity matching.
+        MODEL_LANGUAGES (Dict[str, str]): Mapping of language codes to pre-trained model names.
+        PRESIDIO_EQUIVALENCES (Dict[str, str]): Mapping of Spacy entity labels to Presidio entity types.
+    """
+
     ENTITIES = [
         "LOCATION",
         "PERSON",
@@ -45,6 +58,17 @@ class CustomSpacyRecognizer(LocalRecognizer):
         context: Optional[List[str]] = None,
         ner_strength: float = 0.85,
     ):
+        """
+        Initialize the CustomSpacyRecognizer.
+
+        Args:
+            supported_language (str): The language supported by the recognizer. Default is "en".
+            supported_entities (Optional[List[str]]): List of supported entities. If None, defaults to ENTITIES.
+            check_label_groups (Optional[Tuple[Set, Set]]): Groups of labels to check for entity matching.
+                If None, defaults to CHECK_LABEL_GROUPS.
+            context (Optional[List[str]]): Additional context for the recognizer. Default is None.
+            ner_strength (float): The strength of the named entity recognition. Default is 0.85.
+        """
         self.ner_strength = ner_strength
         self.check_label_groups = (
             check_label_groups if check_label_groups else self.CHECK_LABEL_GROUPS
@@ -61,8 +85,10 @@ class CustomSpacyRecognizer(LocalRecognizer):
 
     def get_supported_entities(self) -> List[str]:
         """
-        Return supported entities by this model.
-        :return: List of the supported entities.
+        Get the list of supported entities by the recognizer.
+
+        Returns:
+            List[str]: List of supported entities.
         """
         return self.supported_entities
 
@@ -83,6 +109,17 @@ class CustomSpacyRecognizer(LocalRecognizer):
         return explanation
 
     def analyze(self, text, entities, nlp_artifacts=None):  # noqa D102
+        """
+        Analyze the given text for specified entities using the provided NLP artifacts.
+
+        Args:
+            text (str): The text to analyze.
+            entities (List[str]): The list of entities to look for in the text.
+            nlp_artifacts (Optional[NlpArtifacts]): The NLP artifacts to use for analysis. If None, an empty list is returned.
+
+        Returns:
+            List[RecognizerResult]: The list of recognized entities in the text.
+        """
         results = []
         if not nlp_artifacts:
             logger.warning("No NLP artifacts provided for analysis")
@@ -120,6 +157,17 @@ class CustomSpacyRecognizer(LocalRecognizer):
     def __check_label(
         entity: str, label: str, check_label_groups: Tuple[Set, Set]
     ) -> bool:
+        """
+        Check if the given entity and label belong to any of the specified label groups.
+
+        Args:
+            entity (str): The entity to check.
+            label (str): The label to check.
+            check_label_groups (Tuple[Set, Set]): The groups of labels to check against.
+
+        Returns:
+            bool: True if the entity and label belong to any of the label groups, False otherwise.
+        """
         return any(
             [entity in egrp and label in lgrp for egrp, lgrp in check_label_groups]
         )
