@@ -1,10 +1,18 @@
-#  package using pip, navigate to the directory that contains the setup.py file and type pip install .
 
 from setuptools import setup
 
 # Read README for the long description
 with open("README.md", "r") as f:
     long_description = f.read()
+
+
+project_urls = {
+    'Homepage': 'https://datafog.ai',
+    'Documentation': 'https://docs.datafog.ai',
+    'Discord': 'https://discord.gg/bzDth394R4',
+    'Twitter': 'https://twitter.com/datafoginc',
+    'GitHub': 'https://github.com/datafog/datafog-python',}
+
 
 setup(
     name="datafog",
@@ -38,10 +46,7 @@ setup(
     keywords="pii, redaction, nlp, rag, retrieval augmented generation",
     maintainer="DataFog",
     maintainer_email="hi@datafog.ai",
-    url="https://github.com/datafog/datafog-python",
-    download_url="https://github.com/datafog/datafog-python/archive/refs/tags/2.3.1.tar.gz",
-    packages=["datafog"],
-    package_dir={"datafog": "datafog"},
-    include_package_data=True,
+    url="https://datafog.ai",
+    project_urls=project_urls,
     license="MIT",
 )
