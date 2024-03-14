@@ -16,5 +16,4 @@ build/
 node_modules
 datafog_debug.log
 sotu_2023.txt
-/examples/*
 .DS_Store
