@@ -1,4 +1,3 @@
-
 from setuptools import setup
 
 # Read README for the long description
@@ -7,16 +6,17 @@ with open("README.md", "r") as f:
 
 
 project_urls = {
-    'Homepage': 'https://datafog.ai',
-    'Documentation': 'https://docs.datafog.ai',
-    'Discord': 'https://discord.gg/bzDth394R4',
-    'Twitter': 'https://twitter.com/datafoginc',
-    'GitHub': 'https://github.com/datafog/datafog-python',}
+    "Homepage": "https://datafog.ai",
+    "Documentation": "https://docs.datafog.ai",
+    "Discord": "https://discord.gg/bzDth394R4",
+    "Twitter": "https://twitter.com/datafoginc",
+    "GitHub": "https://github.com/datafog/datafog-python",
+}
 
 
 setup(
     name="datafog",
-    version="2.3.1",
+    version="2.3.2b1",
     author="DataFog",
     author_email="hi@datafog.ai",
     description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
@@ -41,7 +41,6 @@ setup(
         "Intended Audience :: Science/Research",
         "Intended Audience :: Information Technology",
         "Intended Audience :: System Administrators",
-
     ],
     keywords="pii, redaction, nlp, rag, retrieval augmented generation",
     maintainer="DataFog",
