@@ -5,6 +5,10 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 
+def __version__():
+    return "2.3.2"
+
+
 project_urls = {
     "Homepage": "https://datafog.ai",
     "Documentation": "https://docs.datafog.ai",
@@ -16,7 +20,7 @@ project_urls = {
 
 setup(
     name="datafog",
-    version="2.3.2b1",
+    version=__version__(),
     author="DataFog",
     author_email="hi@datafog.ai",
     description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
