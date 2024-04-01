@@ -1,10 +1,13 @@
 # datafog-python/src/datafog/__init__.py
 import json
 import logging
-
+import tempfile
 import pandas as pd
 import requests
 import spacy
+from unstructured.partition.auto import partition
+from io import BytesIO
+from pathlib import Path
 
 from .__about__ import __version__
 from .pii_tools import PresidioEngine
@@ -37,6 +40,7 @@ class DataFog:
         """
         self.nlp = spacy.load("en_spacy_pii_fast")
 
+
     @staticmethod
     def client():
         """
@@ -46,7 +50,26 @@ class DataFog:
             DataFog: A new instance of the DataFog client.
         """
         return DataFog()
+    
+    @staticmethod
+    def upload_file(uploaded_file_path):
+        uploaded_file_path = Path(uploaded_file_path)
+        bytes_data = uploaded_file_path.read_bytes()
+        texts = {}
 
+        if not uploaded_file_path.exists():
+            return "File not found."
+        else:
+            temp_file = tempfile.NamedTemporaryFile(delete=True, suffix=uploaded_file_path.suffix)
+            temp_file.write(bytes_data)
+            elements = partition(temp_file.name)
+            text = ""
+            for element in elements:
+                text += element.text + "\n"
+            texts[uploaded_file_path.name] = text
+
+        return texts
+    
     def __call__(self, input_source, privacy_operation):
         """
         Process the input data and apply the specified privacy operation.
