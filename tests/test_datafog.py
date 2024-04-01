@@ -1,6 +1,5 @@
 # test_datafog.py
 import pytest
-import requests
 
 from datafog import DataFog
 
@@ -9,11 +8,14 @@ from datafog import DataFog
 def datafog():
     return DataFog()
 
+
 def test_upload_file(datafog):
-    uploaded_file="tests/files/input_files/agi-builder-meetup.pdf"
+    uploaded_file = "tests/files/input_files/agi-builder-meetup.pdf"
     result = datafog.upload_file(uploaded_file_path=uploaded_file)
-    file_text = result[uploaded_file.split('/')[-1]]  # Extract the text using the file name as key
-    assert "Cloudflare" in file_text  # confirms that OCR is not on 
+    file_text = result[
+        uploaded_file.split("/")[-1]
+    ]  # Extract the text using the file name as key
+    assert "Cloudflare" in file_text  # confirms that OCR is not on
     assert "SF" in file_text
     assert "Laurie" in file_text
     assert "BentoML" in file_text
