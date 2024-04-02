@@ -73,11 +73,15 @@ and in your python environment:
 
 ```
 from datafog import PresidioEngine as presidio
+datafog = datafog.DataFog()
+
 ```
 
 ## Examples
 
 Here are some examples of datafog being used to redact information in business contexts. Please see '/examples' for our [Getting Started](examples/getting-started.ipynb) notebook. We'll be regularly updating content and providing comprehensive guides to using DataFog in production contexts. If you have any ideas for a tutorial or guide that you would like to see, please let us know!
+
+### Scanning a single string
 
 ```
   ceo_email_chunk = "I'm announcing on Friday that Jeff is going to be CTO."
@@ -92,6 +96,20 @@ Here are some examples of datafog being used to redact information in business c
   # PII Detected with deny list: [type: CUSTOM_PII, start: 50, end: 53, score: 1.0, type: PERSON, start: 30, end: 34, score: 0.85]
 
 ```
+
+### Scanning a list of PDFs
+
+```
+file_dir = ["/Users/sidmohan/Desktop/datafog-v2.4.0/datafog-python/tests/files/input_files/agi-builder-meetup.pdf",
+           "/Users/sidmohan/Desktop/datafog-v2.4.0/datafog-python/tests/files/input_files/pypdf-readthedocs-io-en-stable.pdf"]
+datafog = datafog.DataFog()
+result = datafog.upload_files(uploaded_files=file_dir)
+print(result)
+```
+
+The output here will be a dictionary where the keys are the file names and the values are the scan results for that file.
+for ex:
+`{'agi-builder-meetup.pdf': "2/26/24, 2:16 PM\nAGI Builders Meetup SF · Luma\nContact the HostReport Event29\nEvent FullIf youʼd like"}`
 
 ## Contributing
 
