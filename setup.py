@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "2.3.2"
+    return "2.4.0"
 
 
 project_urls = {

@@ -1,10 +1,14 @@
 # datafog-python/src/datafog/__init__.py
 import json
 import logging
+import tempfile
+from pathlib import Path
+from typing import List
 
 import pandas as pd
 import requests
 import spacy
+from unstructured.partition.auto import partition
 
 from .__about__ import __version__
 from .pii_tools import PresidioEngine
@@ -29,6 +33,7 @@ class DataFog:
         nlp (spacy.lang): Spacy language model for PII detection.
     """
 
+    # Maintaining support
     def __init__(self):
         """
         Initialize the DataFog instance.
@@ -46,6 +51,45 @@ class DataFog:
             DataFog: A new instance of the DataFog client.
         """
         return DataFog()
+
+    @staticmethod
+    def upload_file(uploaded_file_path):
+        uploaded_file_path = Path(uploaded_file_path)
+        bytes_data = uploaded_file_path.read_bytes()
+        texts = {}
+
+        if not uploaded_file_path.exists():
+            return "File not found."
+        else:
+
+            temp_file = tempfile.NamedTemporaryFile(
+                delete=True, suffix=uploaded_file_path.suffix
+            )
+            temp_file.write(bytes_data)
+            elements = partition(temp_file.name)
+            text = ""
+            for element in elements:
+                text += element.text + "\n"
+            texts[uploaded_file_path.name] = text
+
+        return texts
+
+    @staticmethod
+    def upload_files(uploaded_files: List[str]):
+        """
+        Process uploaded files.
+
+        Args:
+            uploaded_files (List[str]): A list of file paths uploaded by the user.
+
+        Returns:
+            Dict[str, str]: A dictionary containing the processed text for each uploaded file.
+        """
+        texts = {}
+        for uploaded_file in uploaded_files:
+            result = DataFog.upload_file(uploaded_file)
+            texts.update(result)
+        return texts
 
     def __call__(self, input_source, privacy_operation):
         """
