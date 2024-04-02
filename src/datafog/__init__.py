@@ -3,6 +3,7 @@ import json
 import logging
 import tempfile
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 import requests
@@ -32,6 +33,7 @@ class DataFog:
         nlp (spacy.lang): Spacy language model for PII detection.
     """
 
+    # Maintaining support
     def __init__(self):
         """
         Initialize the DataFog instance.
@@ -59,6 +61,7 @@ class DataFog:
         if not uploaded_file_path.exists():
             return "File not found."
         else:
+
             temp_file = tempfile.NamedTemporaryFile(
                 delete=True, suffix=uploaded_file_path.suffix
             )
@@ -69,6 +72,23 @@ class DataFog:
                 text += element.text + "\n"
             texts[uploaded_file_path.name] = text
 
+        return texts
+
+    @staticmethod
+    def upload_files(uploaded_files: List[str]):
+        """
+        Process uploaded files.
+
+        Args:
+            uploaded_files (List[str]): A list of file paths uploaded by the user.
+
+        Returns:
+            Dict[str, str]: A dictionary containing the processed text for each uploaded file.
+        """
+        texts = {}
+        for uploaded_file in uploaded_files:
+            result = DataFog.upload_file(uploaded_file)
+            texts.update(result)
         return texts
 
     def __call__(self, input_source, privacy_operation):
