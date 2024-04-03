@@ -23,13 +23,10 @@
 
 DataFog is an open-source DevSecOps platform that lets you scan and redact Personally Identifiable Information (PII) out of your Generative AI applications.
 
-### What problem are we solving?
+### Core Problem
 
-**Context**
+![image](https://github.com/DataFog/datafog-python/assets/61345237/57fba4e5-21cc-458f-ac6a-6fbbb70a8de1)
 
-The primary use case today is Retrieval Augmented Generation (RAG) systems. As a refresher, RAG systems operate by retrieving information from a custom knowledge base—constructed by you or your team—and leverage this information, either by directly citing the files in a response or inferred through the model's responses. This knowledge base is assembled through a deliberate process, which involves uploading files into a workflow. These files are then segmented into logical information blocks and tagged according to their contextual significance. There are a thousand ways to add nuance to this characterization, but this suffices for the vast majority of cases!
-
-**Problem**
 
 How do you keep:
 
@@ -42,16 +39,12 @@ How do you keep:
 
 from entering a Generative AI environment in the first place? What you need is a tool to scan and redact your RAG-bound documents based on your organization or team needs.
 
-That's where DataFog comes in. Our solution to this problem is through two major approaches:
-
-**PII Observability** Take in your batch/streaming data and return a scan indicating character-level detection of entities
-**Privacy Filter** DataFog can slot in as a pre-processor that redacts PII from your files before they get uploaded to a RAG database
-
-With this SDK, you can import it into a Python environment (like a Google Colab notebook, check out our [Getting Started](examples/getting-started.ipynb)) and within a few lines of code you're up and running.
+**That's where DataFog comes in.**
 
 ### How it works
 
-<img src="https://www.datafog.ai/hero.png" alt="DataFog Overview" style="width:50%;">
+![image](https://github.com/DataFog/datafog-python/assets/61345237/91f4634a-8a9f-4621-81bc-09930feda78a)
+
 
 ### There's lots of PII tools out there; why DataFog?
 
@@ -60,6 +53,12 @@ In this scenario, there's a very defined problem, a specific set of immutable en
 are purpose-built for the problem that they are solving.
 
 However, Generative AI changes how we think about privacy. There's now a changing set of privacy requirements (new M&A deals, internal discussions means new terms to scan/redact) as well as different and varying document sources to contend with. PII detection is no longer just about compliance, it's an active - and for some, new - internal security threat for CISOs and Eng Leaders to contend with. We want DataFog to be built and driven to meet the needs of the open-source community as they tackle this challenge.
+
+### Roadmap
+DataFog is an active project with regular weekly releases to production (typically on/around Monday evenings US PT).  Here's a snapshot of our coming roadmap; if you have questions or would like to weigh in, join our discord and let us know what we can do to make the product better!
+
+![image](https://github.com/DataFog/datafog-python/assets/61345237/d2f2df27-3327-48cb-90c6-b7490ab7a1c2)
+
 
 ## Installation
 
