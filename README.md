@@ -57,7 +57,8 @@ However, Generative AI changes how we think about privacy. There's now a changin
 ### Roadmap
 DataFog is an active project with regular weekly releases to production (typically on/around Monday evenings US PT).  Here's a snapshot of our coming roadmap; if you have questions or would like to weigh in, join our discord and let us know what we can do to make the product better!
 
-![image](https://github.com/DataFog/datafog-python/assets/61345237/d2f2df27-3327-48cb-90c6-b7490ab7a1c2)
+![image](https://github.com/DataFog/datafog-python/assets/61345237/62964d22-a221-4f1d-a0e6-0cc99de2ba92)
+
 
 
 ## Installation
