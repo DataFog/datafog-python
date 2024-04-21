@@ -1,14 +1,6 @@
-# spacy==3.4.4
-# thinc==8.1.0
-presidio_analyzer==2.2.353
-pandas==2.2.1
+en_spacy_pii_fast==0.0.0
+pandas==2.2.2
+pydantic==1.10.8
 pytest==8.0.2
 Requests==2.31.0
-aiohttp==3.8.2
-yarl==1.8.1
-frozenlist==1.3.1
-en_spacy_pii_fast
-unstructured[pdf]
-unstructured[pptx]
-
-
+setuptools==58.1.0
