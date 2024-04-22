@@ -6,7 +6,7 @@ sotu_url = "https://gist.githubusercontent.com/sidmohan0/1aa3ec38b4e6594d3c34b11
 datafog_instance = DataFog(source_url=sotu_url, pii_detection=True)
 
 # Process the text to extract and detect PII
-processed_result = datafog_instance.process_text()
+processed_result = datafog_instance.detect_pii()
 
 # Display the extracted text and detected entities
 print("Extracted Text:", processed_result.text)
@@ -25,3 +25,28 @@ print("Entities Detected:", processed_result.entities)
 # # Print the extracted text and the entities found
 # print(response.text)
 # print(response.entities)
+
+# Test script for image processing capabilities using DataFog
+
+# # Define the path to an image for testing
+# image_path = "/Users/sidmohan/Desktop/datafog-fresh/datafog-python/src/datafog/test-invoice.png"
+
+# # Test reading the image
+# print("Testing image reading...")
+# read_result = datafog_instance.process_image(image_path=image_path, operation_type="read")
+# print("Read Result:", read_result)
+
+# # Test classifying the image
+# print("Testing image classification...")
+# classify_result = datafog_instance.process_image(image_path=image_path, operation_type="read")
+# print("Classification Result:", classify_result)
+
+# # Test parsing the image
+# print("Testing image parsing...")
+# parse_result = datafog_instance.process_image(image_path=image_path, operation_type="parse")
+# print("Parse Result:", parse_result)
+
+# # Test questioning the image
+# print("Testing image questioning...")
+# question_result = datafog_instance.process_image(image_path=image_path, operation_type="vqa", question="What is shown in this image?")
+# print("Question Result:", question_result)
