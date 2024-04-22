@@ -27,8 +27,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
-        "pandas==2.2.1",
-        "presidio_analyzer==2.2.353",
+        "pandas==2.2.2",
         "pytest==8.0.2",
         "Requests==2.31.0",
         "spacy==3.4.4",
