@@ -29,7 +29,7 @@ print("Entities Detected:", processed_result.entities)
 # Test script for image processing capabilities using DataFog
 
 # # Define the path to an image for testing
-# image_path = "/Users/sidmohan/Desktop/datafog-fresh/datafog-python/src/datafog/test-invoice.png"
+image_path = "/Users/sidmohan/Desktop/datafog-python-v3.0.0-beta/datafog-python/src/datafog/test-invoice.png"
 
 # # Test reading the image
 # print("Testing image reading...")
@@ -41,10 +41,10 @@ print("Entities Detected:", processed_result.entities)
 # classify_result = datafog_instance.process_image(image_path=image_path, operation_type="read")
 # print("Classification Result:", classify_result)
 
-# # Test parsing the image
-# print("Testing image parsing...")
-# parse_result = datafog_instance.process_image(image_path=image_path, operation_type="parse")
-# print("Parse Result:", parse_result)
+# Test parsing the image
+print("Testing image parsing...")
+parse_result = datafog_instance.process_image(image_path=image_path, operation_type="parse")
+print("Parse Result:", parse_result)
 
 # # Test questioning the image
 # print("Testing image questioning...")

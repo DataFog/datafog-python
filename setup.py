@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.0.0-beta.2"
+    return "3.0.0-beta.3"
 
 
 project_urls = {
@@ -28,7 +28,6 @@ setup(
     long_description_content_type="text/markdown",
     install_requires=[
         "pandas==2.2.2",
-        "pytest==8.0.2",
         "Requests==2.31.0",
         "spacy==3.4.4",
         "en_spacy_pii_fast",
