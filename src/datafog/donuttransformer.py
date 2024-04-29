@@ -1,33 +1,46 @@
-
-
+from pydantic import HttpUrl
 from transformers import DonutProcessor, VisionEncoderDecoderModel
 from PIL import Image
 import warnings
 from io import BytesIO
 import re
 import torch
+from enum import Enum
+from .config import OperationConfig, PipelineOperationType
 
-
-model_configs = {
-    'read': {
-        'model': "naver-clova-ix/donut-base-finetuned-rvlcdip",
-        'processor': "naver-clova-ix/donut-base-finetuned-rvlcdip"
-    },
-    'parse': {
-        'model': "naver-clova-ix/donut-base-finetuned-cord-v2",
-        'processor': "naver-clova-ix/donut-base-finetuned-cord-v2"
-    },
-    'vqa': {
-        'model': "naver-clova-ix/donut-base-finetuned-docvqa",
-        'processor': "naver-clova-ix/donut-base-finetuned-docvqa"
-    }
-}
 
 class DonutImageProcessor:
-    def __init__(self, operation_type: str):
-        self.processor = DonutProcessor.from_pretrained(model_configs[operation_type]['processor'])
-        self.model = VisionEncoderDecoderModel.from_pretrained(model_configs[operation_type]['model'])
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+    """
+    A class to process images using the Donut model for different operations like classification, parsing, and question answering.
+
+    Attributes:
+        operation_type (PipelineOperationType): The type of operation to perform (e.g., READ_IMAGE, PARSE_IMAGE).
+        processor (DonutProcessor): The processor associated with the specific Donut model.
+        model (VisionEncoderDecoderModel): The model loaded based on the operation type.
+        device (str): The device on which the model will run (default is 'cpu').
+
+    Methods:
+        read_image(file: bytes) -> Image.Image:
+            Reads an image from bytes, converts it to RGB if necessary, and returns the PIL Image.
+
+        classify_image(image: Image.Image) -> dict:
+            Processes the image for classification using the Donut model.
+
+        parse_image(image: Image.Image) -> dict:
+            Processes the image for parsing key information using the Donut model.
+
+        question_image(image: Image.Image, question: str) -> dict:
+            Processes the image to answer a question about the image using the Donut model.
+
+        _process_image(image: Image.Image, operation_type_prompt: str) -> dict:
+            A helper method to process the image with the model using a specific operation type prompt.
+    """
+    def __init__(self, operation_type: PipelineOperationType):
+        self.operation_type = operation_type
+        model_config = OperationConfig.model_validator(None, {'operation_type': operation_type})
+        self.processor = DonutProcessor.from_pretrained(model_config.processor)
+        self.model = VisionEncoderDecoderModel.from_pretrained(model_config.model)
+        self.device = "cpu"
         self.model.to(self.device)
 
     @staticmethod
@@ -73,39 +86,3 @@ class DonutImageProcessor:
         sequence = re.sub(r"<.*?>", "", sequence, count=1).strip()  # remove first operation_type start token
 
         return self.processor.token2json(sequence)
-    
-# image_path = "/Users/sidmohan/Desktop/datafog-fresh/datafog-python/src/datafog/test-invoice.png"
-
-# # READ IMAGE
-# try:
-#     with open(image_path, "rb") as image_file:
-#         image_bytes = image_file.read()
-#     image = DonutImageProcessor.read_image(image_bytes)
-#     print(image)
-# except Exception as e:
-#     print(f"Failed to process image: {e}")
-
-# # CLASSIFY IMAGE
-# try:
-#     processor = DonutImageProcessor("read")
-#     output = processor.classify_image(image)
-#     print(output)
-# except Exception as e:
-#     print(f"Error during image classification: {e}")
-
-# # PARSE IMAGE
-# try:
-#     processor = DonutImageProcessor("parse")
-#     output = processor.parse_image(image)
-#     print(output)
-# except Exception as e:
-#     print(f"Error during image parsing: {e}")
-
-# # QUESTION IMAGE
-# try:
-#     processor = DonutImageProcessor("vqa")
-#     output = processor.question_image(image)
-#     print(output)
-# except Exception as e:
-#     print(f"Error during PII detection: {e}")
-
