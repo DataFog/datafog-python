@@ -1,9 +1,9 @@
 # Description: Define the data models for the PII Detection Workflow
 
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Tuple
+
 import en_spacy_pii_fast
-import requests
-from pydantic import BaseModel, HttpUrl, FilePath, DirectoryPath
+from pydantic import BaseModel, DirectoryPath, FilePath, HttpUrl
 
 
 class PIIAnnotationModel(BaseModel):
@@ -32,8 +32,7 @@ class PIIAnnotationRequest(BaseModel):
         if not any([self.text, self.file_path, self.url, self.directory_path]):
             raise ValueError("At least one of the fields must be filled out")
         return True
-    
-    
+
 
 class PIIAnnotationResponse(BaseModel):
     text: str
@@ -57,4 +56,3 @@ class PIIAnnotationPipeline(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-

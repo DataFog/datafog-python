@@ -1,10 +1,9 @@
-from .donuttransformer import DonutImageProcessor,  PipelineOperationType
-from PIL import Image
-from .pii_annotation import PIIAnnotationModel, PIIAnnotationRequest, PIIAnnotationPipeline
-from typing import Any, List, Optional, Tuple
-from enum import Enum
-
-
+from .donuttransformer import DonutImageProcessor, PipelineOperationType
+from .pii_annotation import (
+    PIIAnnotationModel,
+    PIIAnnotationPipeline,
+    PIIAnnotationRequest,
+)
 
 
 class DataFog:
@@ -26,7 +25,13 @@ class DataFog:
         process_image_with_text(file: bytes, text: str) -> dict:
             Processes the image for different operations using the Donut model and text for PII entities using the Spacy model.
     """
-    def __init__(self, operation_type: PipelineOperationType, text_pii_annotation: bool = True, image_processor: bool = False):
+
+    def __init__(
+        self,
+        operation_type: PipelineOperationType,
+        text_pii_annotation: bool = True,
+        image_processor: bool = False,
+    ):
         self.text_pii_annotation = text_pii_annotation
         if text_pii_annotation:
             self.text_annotator = PIIAnnotationModel()
@@ -34,13 +39,11 @@ class DataFog:
         if image_processor:
             self.image_processor = DonutImageProcessor(operation_type=operation_type)
 
-
     def process_text(self, text: str) -> list:
         request = PIIAnnotationRequest(text=text)
         workflow = PIIAnnotationPipeline(request=request, model=self.text_annotator)
         entities = workflow.process_request()
         return entities
-    
 
     def process_image(self, file: bytes) -> dict:
         image = DonutImageProcessor.read_image(file)
@@ -49,7 +52,9 @@ class DataFog:
         elif self.image_processor.operation_type == PipelineOperationType.PARSE_IMAGE:
             result = self.image_processor.parse_image(image)
         else:
-            raise ValueError(f"Unsupported operation type: {self.image_processor.operation_type}")
+            raise ValueError(
+                f"Unsupported operation type: {self.image_processor.operation_type}"
+            )
         return result
 
     def annotate_pii_in_images(self, file: bytes) -> dict:
@@ -59,9 +64,8 @@ class DataFog:
             for key, value in result.items():
                 if isinstance(value, list):
                     for item in value:
-                        if 'nm' in item:
-                            item['entities'] = self.process_text(item['nm'])  # Store entities directly within the item
+                        if "nm" in item:
+                            item["entities"] = self.process_text(
+                                item["nm"]
+                            )  # Store entities directly within the item
         return result  # Return the modified result dictionary
-
-
-

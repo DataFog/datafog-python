@@ -27,7 +27,6 @@ DataFog is an open-source DevSecOps platform that lets you scan and redact Perso
 
 ![image](https://github.com/DataFog/datafog-python/assets/61345237/57fba4e5-21cc-458f-ac6a-6fbbb70a8de1)
 
-
 How do you keep:
 
 - Customer PII
@@ -45,7 +44,6 @@ from entering a Generative AI environment in the first place? What you need is a
 
 ![image](https://github.com/DataFog/datafog-python/assets/61345237/91f4634a-8a9f-4621-81bc-09930feda78a)
 
-
 ### There's lots of PII tools out there; why DataFog?
 
 If you look at the landscape of PII detection tools, their very existence was in many cases driven by regulatory requirements (i.e. 'comply with CCPA/GDPR/HIPAA').
@@ -55,11 +53,10 @@ are purpose-built for the problem that they are solving.
 However, Generative AI changes how we think about privacy. There's now a changing set of privacy requirements (new M&A deals, internal discussions means new terms to scan/redact) as well as different and varying document sources to contend with. PII detection is no longer just about compliance, it's an active - and for some, new - internal security threat for CISOs and Eng Leaders to contend with. We want DataFog to be built and driven to meet the needs of the open-source community as they tackle this challenge.
 
 ### Roadmap
-DataFog is an active project with regular weekly releases to production (typically on/around Monday evenings US PT).  Here's a snapshot of our coming roadmap; if you have questions or would like to weigh in, join our discord and let us know what we can do to make the product better!
+
+DataFog is an active project with regular weekly releases to production (typically on/around Monday evenings US PT). Here's a snapshot of our coming roadmap; if you have questions or would like to weigh in, join our discord and let us know what we can do to make the product better!
 
 ![image](https://github.com/DataFog/datafog-python/assets/61345237/62964d22-a221-4f1d-a0e6-0cc99de2ba92)
-
-
 
 ## Installation
 

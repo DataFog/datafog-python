@@ -1,11 +1,10 @@
-from pydantic import HttpUrl
-from transformers import DonutProcessor, VisionEncoderDecoderModel
-from PIL import Image
+import re
 import warnings
 from io import BytesIO
-import re
-import torch
-from enum import Enum
+
+from PIL import Image
+from transformers import DonutProcessor, VisionEncoderDecoderModel
+
 from .config import OperationConfig, PipelineOperationType
 
 
@@ -35,9 +34,12 @@ class DonutImageProcessor:
         _process_image(image: Image.Image, operation_type_prompt: str) -> dict:
             A helper method to process the image with the model using a specific operation type prompt.
     """
+
     def __init__(self, operation_type: PipelineOperationType):
         self.operation_type = operation_type
-        model_config = OperationConfig.model_validator(None, {'operation_type': operation_type})
+        model_config = OperationConfig.model_validator(
+            None, {"operation_type": operation_type}
+        )
         self.processor = DonutProcessor.from_pretrained(model_config.processor)
         self.model = VisionEncoderDecoderModel.from_pretrained(model_config.model)
         self.device = "cpu"
@@ -52,7 +54,9 @@ class DonutImageProcessor:
                 image = image.convert("RGB")
             return image
         except IOError as e:
-            raise ValueError(f"Unable to read the image file: {e}. Ensure it is a valid image.")
+            raise ValueError(
+                f"Unable to read the image file: {e}. Ensure it is a valid image."
+            )
 
     def classify_image(self, image: Image.Image) -> dict:
         return self._process_image(image, operation_type_prompt="<s_rvlcdip>")
@@ -60,12 +64,18 @@ class DonutImageProcessor:
     def parse_image(self, image: Image.Image) -> dict:
         return self._process_image(image, operation_type_prompt="<s_cord-v2>")
 
-    def question_image(self, image: Image.Image, question: str = "what is shown in this image?") -> dict:
-        operation_type_prompt = f"<s_docvqa><s_question>{question}</s_question><s_answer>"
+    def question_image(
+        self, image: Image.Image, question: str = "what is shown in this image?"
+    ) -> dict:
+        operation_type_prompt = (
+            f"<s_docvqa><s_question>{question}</s_question><s_answer>"
+        )
         return self._process_image(image, operation_type_prompt=operation_type_prompt)
 
     def _process_image(self, image: Image.Image, operation_type_prompt: str) -> dict:
-        decoder_input_ids = self.processor.tokenizer(operation_type_prompt, add_special_tokens=False, return_tensors="pt").input_ids
+        decoder_input_ids = self.processor.tokenizer(
+            operation_type_prompt, add_special_tokens=False, return_tensors="pt"
+        ).input_ids
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
         outputs = self.model.generate(
@@ -82,7 +92,11 @@ class DonutImageProcessor:
         )
 
         sequence = self.processor.batch_decode(outputs.sequences)[0]
-        sequence = sequence.replace(self.processor.tokenizer.eos_token, "").replace(self.processor.tokenizer.pad_token, "")
-        sequence = re.sub(r"<.*?>", "", sequence, count=1).strip()  # remove first operation_type start token
+        sequence = sequence.replace(self.processor.tokenizer.eos_token, "").replace(
+            self.processor.tokenizer.pad_token, ""
+        )
+        sequence = re.sub(
+            r"<.*?>", "", sequence, count=1
+        ).strip()  # remove first operation_type start token
 
         return self.processor.token2json(sequence)
