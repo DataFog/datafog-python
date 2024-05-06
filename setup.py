@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.0.0"
+    return "3.0.1"
 
 
 project_urls = {
@@ -31,6 +31,13 @@ setup(
         "Requests==2.31.0",
         "spacy==3.4.4",
         "en_spacy_pii_fast",
+        "transformers",
+        "torch",
+        "pyspark",
+        "pydantic",
+        "Pillow",
+        "sentencepiece",
+        "protobuf",
     ],
     python_requires=">=3.10",
     classifiers=[
