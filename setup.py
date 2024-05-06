@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "2.4.0"
+    return "3.0.0"
 
 
 project_urls = {
@@ -27,9 +27,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
-        "pandas==2.2.1",
-        "presidio_analyzer==2.2.353",
-        "pytest==8.0.2",
+        "pandas==2.2.2",
         "Requests==2.31.0",
         "spacy==3.4.4",
         "en_spacy_pii_fast",
