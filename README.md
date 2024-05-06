@@ -68,68 +68,7 @@ pip install datafog
 
 ## Examples - Updated for v3
 
-
-
-```
-# Example: Annotating PII
-from datafog import PIIAnnotationPipeline, PIIAnnotationRequest
-
-# Initialize the PII annotation pipeline
-pii_pipeline = PIIAnnotationPipeline()
-
-# Provide the text or document containing PII
-pii_text = "Name: John Doe\nAddress: 123 Main St, Anytown, USA"
-
-# Submit the text for PII annotation
-annotated_text = pii_pipeline.annotate_pii(pii_text)
-
-# Print the annotated text with identified PII
-print("Annotated Text:")
-print(annotated_text)
-
-
-# Example: Text Extraction from images
-
-from datafog import DonutImageProcessor, PipelineOperationType
-
-# Initialize the image processor
-processor = DonutImageProcessor(operation_type=PipelineOperationType.PARSE_IMAGE)
-
-# Load the image containing the invoice
-sample_image_path = "path/to/your/invoice/image.png"
-
-# Parse the invoice image to extract details
-result = processor.parse_invoice(sample_image_path)
-
-# Print the extracted details
-print("Invoice Details:")
-for item in result:
-    print(f"- {item['name']}: {item['price']}")
-
-
-
-# Example: Text Extraction 
-from datafog import DataFog, PipelineOperationType
-
-# Initialize DataFog for text processing
-data_processor = DataFog(operation_type=PipelineOperationType.PROCESS_TEXT)
-
-# Provide the text to be analyzed
-text = "Customer: John Smith\nProduct: Laptop\nPrice: $1200"
-
-# Extract entities from the text
-entities = data_processor.extract_entities(text)
-
-# Print the extracted entities
-print("Entities Detected:")
-for entity in entities:
-    print(f"- {entity['type']}: {entity['text']}")
-
-
-
-
-```
-
+Check out for examples to get started with datafog v3: https://colab.research.google.com/drive/1k3HPaOTur3iDfBdWXh7O_EjzsjI_K6wT#scrollTo=WNtUZ497_0kd
 
 
 ## Contributing
