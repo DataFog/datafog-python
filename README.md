@@ -66,47 +66,71 @@ DataFog can be installed via pip:
 pip install datafog
 ```
 
-and in your python environment:
+## Examples - Updated for v3
+
+
 
 ```
-from datafog import PresidioEngine as presidio
-datafog = datafog.DataFog()
+# Example: Annotating PII
+from datafog import PIIAnnotationPipeline, PIIAnnotationRequest
+
+# Initialize the PII annotation pipeline
+pii_pipeline = PIIAnnotationPipeline()
+
+# Provide the text or document containing PII
+pii_text = "Name: John Doe\nAddress: 123 Main St, Anytown, USA"
+
+# Submit the text for PII annotation
+annotated_text = pii_pipeline.annotate_pii(pii_text)
+
+# Print the annotated text with identified PII
+print("Annotated Text:")
+print(annotated_text)
+
+
+# Example: Text Extraction from images
+
+from datafog import DonutImageProcessor, PipelineOperationType
+
+# Initialize the image processor
+processor = DonutImageProcessor(operation_type=PipelineOperationType.PARSE_IMAGE)
+
+# Load the image containing the invoice
+sample_image_path = "path/to/your/invoice/image.png"
+
+# Parse the invoice image to extract details
+result = processor.parse_invoice(sample_image_path)
+
+# Print the extracted details
+print("Invoice Details:")
+for item in result:
+    print(f"- {item['name']}: {item['price']}")
+
+
+
+# Example: Text Extraction 
+from datafog import DataFog, PipelineOperationType
+
+# Initialize DataFog for text processing
+data_processor = DataFog(operation_type=PipelineOperationType.PROCESS_TEXT)
+
+# Provide the text to be analyzed
+text = "Customer: John Smith\nProduct: Laptop\nPrice: $1200"
+
+# Extract entities from the text
+entities = data_processor.extract_entities(text)
+
+# Print the extracted entities
+print("Entities Detected:")
+for entity in entities:
+    print(f"- {entity['type']}: {entity['text']}")
+
+
+
 
 ```
 
-## Examples
 
-Here are some examples of datafog being used to redact information in business contexts. Please see '/examples' for our [Getting Started](examples/getting-started.ipynb) notebook. We'll be regularly updating content and providing comprehensive guides to using DataFog in production contexts. If you have any ideas for a tutorial or guide that you would like to see, please let us know!
-
-### Scanning a single string
-
-```
-  ceo_email_chunk = "I'm announcing on Friday that Jeff is going to be CTO."
-
-  scan_results1 = presidio.scan(ceo_email_chunk)
-  print("PII Detected - base case:", scan_results1)
-  # PII Detected - base case: [type: PERSON, start: 30, end: 34, score: 0.85]
-
-
-  scan_results2 = presidio.scan(ceo_email_chunk, deny_list=['CTO'])
-  print("PII Detected with deny list:", scan_results2)
-  # PII Detected with deny list: [type: CUSTOM_PII, start: 50, end: 53, score: 1.0, type: PERSON, start: 30, end: 34, score: 0.85]
-
-```
-
-### Scanning a list of PDFs
-
-```
-file_dir = ["/Users/sidmohan/Desktop/datafog-v2.4.0/datafog-python/tests/files/input_files/agi-builder-meetup.pdf",
-           "/Users/sidmohan/Desktop/datafog-v2.4.0/datafog-python/tests/files/input_files/pypdf-readthedocs-io-en-stable.pdf"]
-datafog = datafog.DataFog()
-result = datafog.upload_files(uploaded_files=file_dir)
-print(result)
-```
-
-The output here will be a dictionary where the keys are the file names and the values are the scan results for that file.
-for ex:
-`{'agi-builder-meetup.pdf': "2/26/24, 2:16 PM\nAGI Builders Meetup SF · Luma\nContact the HostReport Event29\nEvent FullIf youʼd like"}`
 
 ## Contributing
 
