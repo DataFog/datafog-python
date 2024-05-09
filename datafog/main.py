@@ -46,7 +46,8 @@ class OCRPIIAnnotator:
 
         finally:
             # Ensure Spark resources are released
-            self.spark_processor.spark.stop()
+            # self.spark_processor.spark.stop()
+            pass
 
 
 class TextPIIAnnotator:
