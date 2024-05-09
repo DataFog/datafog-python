@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.0.1"
+    return "3.1.0b7"
 
 
 project_urls = {
@@ -26,15 +26,16 @@ setup(
     description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    packages=["datafog"],
     install_requires=[
-        "pandas==2.2.2",
+        "pandas",
         "Requests==2.31.0",
         "spacy==3.4.4",
-        "en_spacy_pii_fast",
-        "transformers",
-        "torch",
-        "pyspark",
-        "pydantic",
+        "en_spacy_pii_fast==0.0.0",
+        "transformers==4.40.1",
+        "torch==2.2.2",
+        "pyspark==3.4.1",
+        "pydantic==1.10.8",
         "Pillow",
         "sentencepiece",
         "protobuf",

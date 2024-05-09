@@ -1,8 +1,12 @@
 en_spacy_pii_fast==0.0.0
-transformers
-torch
-pyspark
-pydantic
+transformers==4.40.1
+spacy==3.4.4
+torch==2.2.2
+pyspark==3.4.1
+pytest==8.0.2
+Requests==2.31.0
+setuptools==58.1.0
+pydantic==1.10.8
 pandas
 Pillow
 sentencepiece
