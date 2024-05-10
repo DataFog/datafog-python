@@ -1,4 +1,4 @@
-version := `python3 -c "from src.datafog.__about__ import __version__; print(__version__)"`
+version := `python3 -c "from datafog.__about__ import __version__; print(__version__)"`
 
 
 default:
@@ -18,7 +18,7 @@ publish: tag upload
 
 clean:
 	@find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
-	@rm -rf src/*.egg-info/ build/ dist/ .tox/
+	@rm -rf datafog/*.egg-info/ build/ dist/ .tox/
 
 format:
 	isort .

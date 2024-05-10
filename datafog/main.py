@@ -1,10 +1,12 @@
-from .pii_annotation import (
-    ImageProcessor,
-    SpacyPIIAnnotator,
-    SparkProcessor,
-)
 import json
-from .pyspark_udfs import broadcast_pii_annotator_udf, PII_ANNOTATION_LABELS, MAXIMAL_STRING_SIZE, pii_annotator
+
+from .pii_annotation import ImageProcessor, SpacyPIIAnnotator, SparkProcessor
+from .pyspark_udfs import (
+    MAXIMAL_STRING_SIZE,
+    PII_ANNOTATION_LABELS,
+    broadcast_pii_annotator_udf,
+    pii_annotator,
+)
 
 
 class DataFog:
@@ -65,8 +67,7 @@ class TextPIIAnnotator:
                     json.dump(annotated_text, f)
 
             return annotated_text
-        
+
         finally:
             # Ensure Spark resources are released
             pass
-

@@ -56,8 +56,6 @@ However, Generative AI changes how we think about privacy. There's now a changin
 
 DataFog is an active project with regular weekly releases to production (typically on/around Monday evenings US PT). Here's a snapshot of our coming roadmap; if you have questions or would like to weigh in, join our discord and let us know what we can do to make the product better!
 
-![image](https://github.com/DataFog/datafog-python/assets/61345237/62964d22-a221-4f1d-a0e6-0cc99de2ba92)
-
 ## Installation
 
 DataFog can be installed via pip:
@@ -66,10 +64,82 @@ DataFog can be installed via pip:
 pip install datafog
 ```
 
-## Examples - Updated for v3
+## Examples - Updated for v3.1
 
-Check out for examples to get started with datafog v3: https://colab.research.google.com/drive/1k3HPaOTur3iDfBdWXh7O_EjzsjI_K6wT#scrollTo=WNtUZ497_0kd
+### Base case: PII annotation of text-files
 
+```
+from datafog import OCRPIIAnnotator, TextPIIAnnotator
+import json
+import requests
+
+response = requests.get('https://gist.githubusercontent.com/sidmohan0/1aa3ec38b4e6594d3c34b113f2e0962d/raw/42e57146197be0f85a5901cd1dcdd9ad15b31bab/sotu_2023.txt')
+response.raise_for_status()  # Ensure the request was successful
+text = response.text
+# print(text)
+text_annotator = TextPIIAnnotator()
+annotated_text = text_annotator.run(text, output_path=f"sotu_2023_output.json")
+print("Annotated Text:", annotated_text)
+```
+
+### OCR Reference Set (Images)
+
+```
+image_set = {
+    "medical_invoice": "https://s3.amazonaws.com/thumbnails.venngage.com/template/dc377004-1c2d-49f2-8ddf-d63f11c8d9c2.png",
+    "sales_receipt": "https://templates.invoicehome.com/sales-receipt-template-us-classic-white-750px.png",
+    "press_release": "https://newsroom.cisco.com/c/dam/r/newsroom/en/us/assets/a/y2023/m09/cisco_splunk_1200x675_v3.png",
+    "insurance_claim_scanned_form": "https://www.pdffiller.com/preview/101/35/101035394.png",
+    "scanned_internal_record": "https://www.pdffiller.com/preview/435/972/435972694.png",
+    "executive_email": "https://pbs.twimg.com/media/GM3-wpeWkAAP-cX.jpg"
+}
+
+```
+
+### OCR text extraction from images + PII annotation
+
+with this, you can then run the following steps:
+
+```
+from datafog import OCRPIIAnnotator, TextPIIAnnotator
+import json
+
+image_url = image_set["executive_email"]
+
+annotator = OCRPIIAnnotator()
+annotated_text = annotator.run(image_url, output_path=f"executive_email_output.json")
+print("Annotated Text:", annotated_text)
+
+```
+
+and the output should look like this:
+
+```
+Annotated Text: {'DATE_TIME': ['Wednesday', 'June 12, 2019'], 'LOC': [], 'NRP': [], 'ORG': [], 'PER': ['Kevin Scott Sent', 'Satya Nadella', 'Bill Gates Subject', 'Thoughts']}
+
+```
+
+### With PySpark
+
+Note: as of 3.1.0, you'll need to start the Spark session by instancing the DataFog class as shown below
+
+```
+from datafog import DataFog
+from datafog.pii_annotation import ImageProcessor
+datafog = DataFog()
+
+# let's process the images that we shared above
+processed_images = [(name, ImageProcessor().download_image(url=image_url)) for name, image_url in image_set.items()]
+
+from datafog.pii_annotation import SparkProcessor
+parsed_images = [(name, ImageProcessor().parse_image(img)) for name, img in processed_images]
+
+df = SparkProcessor().spark.createDataFrame(parsed_images, ["image_name", "parsed_data"])
+
+# Display DataFrame
+df.show(truncate=False)
+
+```
 
 ## Contributing
 

@@ -145,6 +145,3 @@ class ImageProcessor:
 
         result = self.processor.token2json(sequence)
         return json.dumps(result)
-
-
-
