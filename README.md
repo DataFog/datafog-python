@@ -27,11 +27,9 @@ DataFog is an open-source DevSecOps platform that lets you scan and redact Perso
 
 ![image](https://github.com/DataFog/datafog-python/assets/61345237/57fba4e5-21cc-458f-ac6a-6fbbb70a8de1)
 
-
 ### How it works
 
 ![image](https://github.com/DataFog/datafog-python/assets/61345237/91f4634a-8a9f-4621-81bc-09930feda78a)
-
 
 ## Installation
 
@@ -41,7 +39,82 @@ DataFog can be installed via pip:
 pip install datafog
 ```
 
-## Examples - Updated for v3.1
+## Examples -
+
+### v3.2.0 NEW
+
+Based on the provided test cases, here's a suitable "Getting Started" section for the documentation:
+
+## Getting Started
+
+The DataFog library provides functionality for text and image processing, including PII (Personally Identifiable Information) annotation and OCR (Optical Character Recognition) capabilities.
+
+### Installation
+
+To install the DataFog library, use the following command:
+
+```
+pip install datafog
+```
+
+### Usage
+
+Here are some examples of how to use the DataFog library:
+
+#### Text PII Annotation
+
+To annotate PII in a given text, lets start with a set of clinical notes:
+
+```
+!git clone https://gist.github.com/b43b72693226422bac5f083c941ecfdb.git
+```
+
+```python
+from datafog import TextPIIAnnotator
+
+text = "John Doe lives at 1234 Elm St, Springfield."
+text_annotator = TextPIIAnnotator()
+annotated_text = text_annotator.run(text)
+print(annotated_text)
+```
+
+This will output the annotated text with PII labeled, such as `{"LOC": ["Springfield"]}`.
+
+#### Image Text Extraction and Annotation
+
+To extract text from an image and perform PII annotation, you can use the `DataFog` class:
+
+```python
+from datafog import DataFog
+
+image_url = "https://example.com/image.png"
+datafog = DataFog()
+annotated_text = await datafog.run_ocr_pipeline([image_url])
+print(annotated_text)
+```
+
+This will download the image, extract the text using OCR, and annotate any PII found in the extracted text.
+
+#### Text Processing
+
+To process and annotate text using the DataFog pipeline, you can use the `DataFog` class:
+
+```python
+from datafog import DataFog
+
+text = ["Tokyo is the capital of Japan"]
+datafog = DataFog()
+annotated_text = await datafog.run_text_pipeline(text)
+print(annotated_text)
+```
+
+This will process the given text and annotate entities such as person names and locations.
+
+For more detailed usage and examples, please refer to the API documentation.
+
+Note: The DataFog library uses asynchronous programming, so make sure to use the `async`/`await` syntax when calling the appropriate methods.
+
+### v3.1.0
 
 ### Base case: PII annotation of text-files
 

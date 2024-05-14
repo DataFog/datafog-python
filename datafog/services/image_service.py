@@ -29,22 +29,21 @@ class ImageService:
         self,
         image_urls: List[str],
         image_files: List[Image.Image] = None,
-
     ) -> List[str]:
         if image_files is None:
             image_files = await self.download_images(image_urls)
 
         if self.use_donut and self.use_tesseract:
             raise ValueError("Both OCR processors cannot be selected simultaneously")
-        
+
         if not self.use_donut and not self.use_tesseract:
             raise ValueError("No OCR processor selected")
-        
+
         if self.use_donut:
             return await asyncio.gather(
                 *[self.donut_processor.parse_image(image) for image in image_files]
             )
-        
+
         if self.use_tesseract:
             return await asyncio.gather(
                 *[
@@ -52,5 +51,3 @@ class ImageService:
                     for image in image_files
                 ]
             )
-
-

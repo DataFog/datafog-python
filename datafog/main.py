@@ -1,21 +1,28 @@
 import asyncio
-import json
-from typing import List
 import importlib
-import aiohttp
+import json
 import subprocess
 import sys
+from typing import List
+
+import aiohttp
+
 from .config import OperationType
+from .processing.image_processing.donut_processor import DonutProcessor
+from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
 
-from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
-from .processing.image_processing.donut_processor import DonutProcessor
-
 
 class DataFog:
-    def __init__(self, image_service = ImageService(), text_service = TextService(), spark_service = None, operations: List[OperationType] = [OperationType.ANNOTATE_PII]):
+    def __init__(
+        self,
+        image_service=ImageService(),
+        text_service=TextService(),
+        spark_service=None,
+        operations: List[OperationType] = [OperationType.ANNOTATE_PII],
+    ):
         self.image_service = image_service
         self.text_service = text_service
         self.spark_service: SparkService = spark_service
@@ -44,7 +51,6 @@ class OCRPIIAnnotator:
         self.image_service = ImageService(use_donut=True, use_tesseract=False)
         self.text_annotator = SpacyPIIAnnotator.create()
         self.spark_service: SparkService = None
-
 
     async def run(self, image_urls: List[str], output_path=None):
         try:

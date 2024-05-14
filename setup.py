@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 # Read README for the long description
 with open("README.md", "r") as f:
@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.2.0b16"
+    return "3.2.0"
 
 
 project_urls = {

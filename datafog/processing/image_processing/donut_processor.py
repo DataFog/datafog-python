@@ -1,9 +1,10 @@
+import importlib
 import json
 import re
-from io import BytesIO
-import importlib
 import subprocess
 import sys
+from io import BytesIO
+
 import requests
 from PIL import Image
 
@@ -13,12 +14,12 @@ from .image_downloader import ImageDownloader
 class DonutProcessor:
     def __init__(self, model_path="naver-clova-ix/donut-base-finetuned-cord-v2"):
 
+        self.ensure_installed("torch")
+        self.ensure_installed("transformers")
 
-        self.ensure_installed('torch')
-        self.ensure_installed('transformers')
-
-        from transformers import VisionEncoderDecoderModel, DonutProcessor as TransformersDonutProcessor
         import torch
+        from transformers import DonutProcessor as TransformersDonutProcessor
+        from transformers import VisionEncoderDecoderModel
 
         self.processor = TransformersDonutProcessor.from_pretrained(model_path)
         self.model = VisionEncoderDecoderModel.from_pretrained(model_path)
@@ -31,7 +32,9 @@ class DonutProcessor:
         try:
             importlib.import_module(package_name)
         except ImportError:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", package_name]
+            )
 
     async def parse_image(self, image: Image) -> str:
         """Process the image using DonutProcessor and VisionEncoderDecoderModel and extract text."""

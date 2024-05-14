@@ -17,9 +17,10 @@ from PIL import Image
 from datafog.services.image_service import ImageService
 
 urls = [
-        "https://www.pdffiller.com/preview/101/35/101035394.png",
-        "https://www.pdffiller.com/preview/435/972/435972694.png",
-    ]
+    "https://www.pdffiller.com/preview/101/35/101035394.png",
+    "https://www.pdffiller.com/preview/435/972/435972694.png",
+]
+
 
 @pytest.mark.asyncio
 async def test_download_images():
@@ -28,6 +29,7 @@ async def test_download_images():
     assert len(images) == 2
     assert all(isinstance(image, Image.Image) for image in images)
 
+
 @pytest.mark.asyncio
 async def test_ocr_extract_with_tesseract():
     image_service2 = ImageService(use_tesseract=True, use_donut=False)
@@ -35,11 +37,15 @@ async def test_ocr_extract_with_tesseract():
     assert isinstance(texts, list)
     assert all(isinstance(text, str) for text in texts)
 
+
 @pytest.mark.asyncio
 async def test_ocr_extract_with_both():
     image_service3 = ImageService(use_tesseract=True, use_donut=True)
-    with pytest.raises(ValueError, match="Both OCR processors cannot be selected simultaneously"):
+    with pytest.raises(
+        ValueError, match="Both OCR processors cannot be selected simultaneously"
+    ):
         await image_service3.ocr_extract(urls)
+
 
 @pytest.mark.asyncio
 async def test_ocr_extract_with_donut():
@@ -47,6 +53,7 @@ async def test_ocr_extract_with_donut():
     texts = await image_service4.ocr_extract(urls)
     assert isinstance(texts, list)
     assert all(isinstance(text, str) for text in texts)
+
 
 @pytest.mark.asyncio
 async def test_ocr_extract_no_processor_selected():

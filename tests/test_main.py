@@ -27,12 +27,14 @@ def search_nested_dict(d, target):
                     return True
     return False
 
+
 def test_textpii_annotator():
     """Test the PII annotation functionality."""
     text = "John Doe lives at 1234 Elm St, Springfield."
     text_annotator = TextPIIAnnotator()
     annotated_text = text_annotator.run(text)
     assert "Springfield" in annotated_text["LOC"], "PII not annotated correctly."
+
 
 # @pytest.mark.asyncio
 # async def test_donut_processor():
