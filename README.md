@@ -54,7 +54,7 @@ pip install datafog
 
 ### Usage
 
-The [Getting Started notebook](/datafog-python/examples/getting_started.ipynb)  features a standalone Colab notebook that lets you get up and running in no time. 
+The [Getting Started notebook](/datafog-python/examples/getting_started.ipynb)  features a standalone Colab notebook. 
 
 
 #### Text PII Annotation
@@ -63,54 +63,90 @@ To annotate PII in a given text, lets start with a set of clinical notes:
 
 ```
 !git clone https://gist.github.com/b43b72693226422bac5f083c941ecfdb.git
+# Define the directory path
+folder_path = 'clinical_notes/'
+
+# List all files in the directory
+file_list = os.listdir(folder_path)
+text_files = sorted([file for file in file_list if file.endswith('.txt')])
+
+with open(os.path.join(folder_path, text_files[0]), 'r') as file:
+    clinical_note = file.read()
+
+display(Markdown(clinical_note))
+```
+which looks like this:
 ```
 
-```python
-from datafog import TextPIIAnnotator
+**Date:** April 10, 2024
 
-text = "John Doe lives at 1234 Elm St, Springfield."
-text_annotator = TextPIIAnnotator()
-annotated_text = text_annotator.run(text)
-print(annotated_text)
+**Patient:** Emily Johnson, 35 years old
+
+**MRN:** 00987654
+
+**Chief Complaint:** "I've been experiencing severe back pain and numbness in my legs."
+
+**History of Present Illness:** The patient is a 35-year-old who presents with a 2-month history of worsening back pain, numbness in both legs, and occasional tingling sensations. The patient reports working as a freelance writer and has been experiencing increased stress due to tight deadlines and financial struggles.
+
+**Past Medical History:** Hypothyroidism
+
+**Social History:**
+The patient shares a small apartment with two roommates and relies on public transportation. They mention feeling overwhelmed with work and personal responsibilities, often sacrificing sleep to meet deadlines. The patient expresses concern over the high cost of healthcare and the need for affordable medication options.
+
+**Review of Systems:** Denies fever, chest pain, or shortness of breath. Reports occasional headaches.
+
+**Physical Examination:**
+- General: Appears tired but is alert and oriented.
+- Vitals: BP 128/80, HR 72, Temp 98.6°F, Resp 14/min
+
+**Assessment/Plan:**
+- Continue to monitor blood pressure and thyroid function.
+- Discuss affordable medication options with a pharmacist.
+- Refer to a social worker to address housing concerns and access to healthcare services.
+- Encourage the patient to engage with community support groups for social support.
+- Schedule a follow-up appointment in 4 weeks or sooner if symptoms worsen.
+
+**Comments:** The patient's health concerns are compounded by socioeconomic factors, including employment status, housing stability, and access to healthcare. Addressing these social determinants of health is crucial for improving the patient's overall well-being.
+
 ```
 
-This will output the annotated text with PII labeled, such as `{"LOC": ["Springfield"]}`.
+we can then set up our pipeline to accept these files
 
-#### Image Text Extraction and Annotation
+```
+async def run_text_pipeline_demo():
+  results = await datafog.run_text_pipeline(texts)
+  print("Text Pipeline Results:", results)
+  return results
 
-To extract text from an image and perform PII annotation, you can use the `DataFog` class:
 
-```python
-from datafog import DataFog
-
-image_url = "https://pbs.twimg.com/media/GM3-wpeWkAAP-cX.jpg"
-datafog = DataFog()
-annotated_text = await datafog.run_ocr_pipeline([image_url])
-print(annotated_text)
+texts = [clinical_note]
+loop = asyncio.get_event_loop()
+results = loop.run_until_complete(run_text_pipeline_demo())
 ```
 
-This will download the image, extract the text using OCR, and annotate any PII found in the extracted text.
-
-#### Text Processing
-
-To process and annotate text using the DataFog pipeline, you can use the `DataFog` class:
-
-```python
-from datafog import DataFog
-
-text = ["Tokyo is the capital of Japan"]
-datafog = DataFog()
-annotated_text = await datafog.run_text_pipeline(text)
-print(annotated_text)
-```
-
-This will process the given text and annotate entities such as person names and locations.
-
-For more detailed usage and examples, please refer to the API documentation.
 
 Note: The DataFog library uses asynchronous programming, so make sure to use the `async`/`await` syntax when calling the appropriate methods.
 
+#### OCR PII Annotation
 
+Let's use a image (which could easily be a converted or scanned PDF)
+
+![Executive Email](https://pbs.twimg.com/media/GM3-wpeWkAAP-cX.jpg)
+
+```
+datafog = DataFog(operations='extract_text')
+url_list = ['https://pbs.twimg.com/media/GM3-wpeWkAAP-cX.jpg']
+
+async def run_ocr_pipeline_demo():
+  results = await datafog.run_ocr_pipeline(url_list)
+  print("OCR Pipeline Results:", results)
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(run_ocr_pipeline_demo())
+
+```
+
+You'll notice that we use async functions liberally throughout the SDK - given the nature of the functions we're providing and the extension of DataFog into API/other formats, this allows the functions to be more easily adapted for those uses. 
 
 ## Contributing
 
