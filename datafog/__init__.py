@@ -8,7 +8,7 @@ from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
 
-# from .__about__ import __version__
+from .__about__ import __version__
 
 __all__ = [
     "DonutProcessor",
@@ -22,5 +22,5 @@ __all__ = [
     "SpacyPIIAnnotator",
     "ImageDownloader",
     "PytesseractProcessor",
-    # "__version__",
+    "__version__",
 ]

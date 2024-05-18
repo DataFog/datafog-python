@@ -1,6 +1,5 @@
 version := `python3 -c "from datafog.__about__ import __version__; print(__version__)"`
 
-
 default:
 	@echo "\"just publish\"?"
 
