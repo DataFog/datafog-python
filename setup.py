@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.2.0"
+    return "3.2.1b1"
 
 
 project_urls = {
@@ -34,7 +34,7 @@ setup(
         "en_spacy_pii_fast==0.0.0",
         # "transformers==4.40.1",
         # "torch==2.2.2",
-        "pyspark==3.4.1",
+        # "pyspark==3.4.1",
         "pydantic==1.10.8",
         "Pillow",
         "sentencepiece",

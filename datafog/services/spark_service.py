@@ -1,38 +1,36 @@
 import json
 from typing import Any, List
+import importlib
+import subprocess
+import sys
 
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import udf
-from pyspark.sql.types import ArrayType, StringType
 
 
 class SparkService:
     def __init__(self):
         self.spark = self.create_spark_session()
+        self.ensure_installed("pyspark")
 
-    @staticmethod
-    def create_spark_session() -> SparkSession:
-        """Create and configure a Spark session."""
-        return (
-            SparkSession.builder.appName("DataFog")
-            .config("spark.driver.memory", "8g")
-            .config("spark.executor.memory", "8g")
-            .getOrCreate()
-        )
+        from pyspark.sql import DataFrame, SparkSession
+        from pyspark.sql.functions import udf
+        from pyspark.sql.types import ArrayType, StringType
+        self.SparkSession = SparkSession
+        self.DataFrame = DataFrame
+        self.udf = udf
+        self.ArrayType = ArrayType
+        self.StringType = StringType
 
-    def create_dataframe(self, data: List[tuple], schema: List[str]) -> DataFrame:
-        """Convert a list of tuples to a Spark DataFrame with the specified schema."""
-        return self.spark.createDataFrame(data, schema)
+    def create_spark_session(self):
+        return self.SparkSession.builder.appName("datafog").getOrCreate()
+    
+    def read_json(self, path: str) -> List[dict]:
+        return self.spark.read.json(path).collect()
 
-    def add_pii_annotations(self, df: DataFrame, annotation_udf: udf) -> DataFrame:
-        """Add a new column to DataFrame with PII annotations."""
-        return df.withColumn("pii_annotations", annotation_udf(df["text"]))
+    def ensure_installed(self, package_name):
+        try:
+            importlib.import_module(package_name)
+        except ImportError:
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", package_name]
+            )
 
-    def write_to_json(self, data: Any, output_path: str):
-        """Write data to a JSON file."""
-        with open(output_path, "w") as f:
-            json.dump(data, f)
-
-    def stop(self):
-        """Stop the Spark session."""
-        self.spark.stop()
