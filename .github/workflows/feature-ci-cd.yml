@@ -1,4 +1,4 @@
-name: dev-cicd-tests
+name: feature-cicd-tests
 
 on:
   push:
