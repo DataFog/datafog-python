@@ -13,6 +13,7 @@ from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
+from .telemetry.open_telemetry import Telemetry
 
 
 class DataFog:
@@ -27,6 +28,8 @@ class DataFog:
         self.text_service = text_service
         self.spark_service: SparkService = spark_service
         self.operations: List[OperationType] = operations
+        self.telemetry = Telemetry()
+        self.telemetry.set_tracer()
 
     async def run_ocr_pipeline(self, image_urls: List[str]):
         """Run the OCR pipeline asynchronously."""

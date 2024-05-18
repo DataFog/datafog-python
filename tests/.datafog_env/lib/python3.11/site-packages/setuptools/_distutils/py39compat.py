@@ -18,5 +18,5 @@ def add_ext_suffix_39(vars):
     )
 
 
-needs_ext_suffix = sys.version_info < (3, 10) and platform.system() == 'Windows'
+needs_ext_suffix = sys.version_info < (3, 10) and platform.system() == "Windows"
 add_ext_suffix = add_ext_suffix_39 if needs_ext_suffix else lambda vars: None

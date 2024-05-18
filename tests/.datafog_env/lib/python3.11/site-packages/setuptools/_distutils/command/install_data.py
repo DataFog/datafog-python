@@ -16,16 +16,16 @@ class install_data(Command):
 
     user_options = [
         (
-            'install-dir=',
-            'd',
+            "install-dir=",
+            "d",
             "base directory for installing data files "
             "(default: installation base dir)",
         ),
-        ('root=', None, "install everything relative to this alternate root directory"),
-        ('force', 'f', "force installation (overwrite existing files)"),
+        ("root=", None, "install everything relative to this alternate root directory"),
+        ("force", "f", "force installation (overwrite existing files)"),
     ]
 
-    boolean_options = ['force']
+    boolean_options = ["force"]
 
     def initialize_options(self):
         self.install_dir = None
@@ -37,10 +37,10 @@ class install_data(Command):
 
     def finalize_options(self):
         self.set_undefined_options(
-            'install',
-            ('install_data', 'install_dir'),
-            ('root', 'root'),
-            ('force', 'force'),
+            "install",
+            ("install_data", "install_dir"),
+            ("root", "root"),
+            ("force", "force"),
         )
 
     def run(self):

@@ -3,6 +3,7 @@ Load setuptools configuration from ``pyproject.toml`` files.
 
 **PRIVATE MODULE**: API reserved for setuptools internal usage only.
 """
+
 import logging
 import os
 import warnings
@@ -396,11 +397,13 @@ class _ConfigExpander:
             optional_dependencies_map = self.dynamic_cfg["optional-dependencies"]
             assert isinstance(optional_dependencies_map, dict)
             return {
-                group: _parse_requirements_list(self._expand_directive(
-                    f"tool.setuptools.dynamic.optional-dependencies.{group}",
-                    directive,
-                    {},
-                ))
+                group: _parse_requirements_list(
+                    self._expand_directive(
+                        f"tool.setuptools.dynamic.optional-dependencies.{group}",
+                        directive,
+                        {},
+                    )
+                )
                 for group, directive in optional_dependencies_map.items()
             }
         self._ensure_previously_set(dist, "optional-dependencies")
@@ -490,4 +493,5 @@ class _InvalidFile(UserWarning):
     @classmethod
     def message(cls):
         from inspect import cleandoc
+
         return cleandoc(cls.__doc__)

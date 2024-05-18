@@ -24,7 +24,7 @@ def load_group(value, group):
     """
     # normalize to a single sequence of lines
     lines = yield_lines(value)
-    text = f'[{group}]\n' + '\n'.join(lines)
+    text = f"[{group}]\n" + "\n".join(lines)
     return metadata.EntryPoints._from_text(text)
 
 
@@ -46,8 +46,8 @@ def load(eps):
     Given a Distribution.entry_points, produce EntryPoints.
     """
     groups = itertools.chain.from_iterable(
-        load_group(value, group)
-        for group, value in eps.items())
+        load_group(value, group) for group, value in eps.items()
+    )
     return validate(metadata.EntryPoints(groups))
 
 
@@ -70,17 +70,11 @@ load.register(type(None), lambda x: x)
 
 @pass_none
 def render(eps: metadata.EntryPoints):
-    by_group = operator.attrgetter('group')
+    by_group = operator.attrgetter("group")
     groups = itertools.groupby(sorted(eps, key=by_group), by_group)
 
-    return '\n'.join(
-        f'[{group}]\n{render_items(items)}\n'
-        for group, items in groups
-    )
+    return "\n".join(f"[{group}]\n{render_items(items)}\n" for group, items in groups)
 
 
 def render_items(eps):
-    return '\n'.join(
-        f'{ep.name} = {ep.value}'
-        for ep in sorted(eps)
-    )
+    return "\n".join(f"{ep.name} = {ep.value}" for ep in sorted(eps))

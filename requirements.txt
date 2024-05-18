@@ -1,12 +1,12 @@
-en_spacy_pii_fast==0.0.0
+
 # transformers==4.40.1
-spacy==3.7.4
+spacy==3.4.4
 # torch==2.2.2
 # pyspark==3.4.1
 pytest==8.0.2
 Requests==2.31.0
 setuptools==58.1.0
-pydantic
+pydantic==1.10.15
 fastapi
 pandas
 Pillow
@@ -19,3 +19,4 @@ aiohttp
 pytest-asyncio
 azure-monitor-opentelemetry-exporter==1.0.0b25
 opentelemetry-sdk
+en_spacy_pii_fast==0.0.0

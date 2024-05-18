@@ -14,23 +14,23 @@ class clean(Command):
 
     description = "clean up temporary files from 'build' command"
     user_options = [
-        ('build-base=', 'b', "base build directory (default: 'build.build-base')"),
+        ("build-base=", "b", "base build directory (default: 'build.build-base')"),
         (
-            'build-lib=',
+            "build-lib=",
             None,
             "build directory for all modules (default: 'build.build-lib')",
         ),
-        ('build-temp=', 't', "temporary build directory (default: 'build.build-temp')"),
+        ("build-temp=", "t", "temporary build directory (default: 'build.build-temp')"),
         (
-            'build-scripts=',
+            "build-scripts=",
             None,
             "build directory for scripts (default: 'build.build-scripts')",
         ),
-        ('bdist-base=', None, "temporary directory for built distributions"),
-        ('all', 'a', "remove all build output, not just temporary by-products"),
+        ("bdist-base=", None, "temporary directory for built distributions"),
+        ("all", "a", "remove all build output, not just temporary by-products"),
     ]
 
-    boolean_options = ['all']
+    boolean_options = ["all"]
 
     def initialize_options(self):
         self.build_base = None
@@ -42,13 +42,13 @@ class clean(Command):
 
     def finalize_options(self):
         self.set_undefined_options(
-            'build',
-            ('build_base', 'build_base'),
-            ('build_lib', 'build_lib'),
-            ('build_scripts', 'build_scripts'),
-            ('build_temp', 'build_temp'),
+            "build",
+            ("build_base", "build_base"),
+            ("build_lib", "build_lib"),
+            ("build_scripts", "build_scripts"),
+            ("build_temp", "build_temp"),
         )
-        self.set_undefined_options('bdist', ('bdist_base', 'bdist_base'))
+        self.set_undefined_options("bdist", ("bdist_base", "bdist_base"))
 
     def run(self):
         # remove the build/temp.<plat> directory (unless it's already

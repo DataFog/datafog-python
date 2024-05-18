@@ -4,7 +4,6 @@ Implements the Distutils 'build_clib' command, to build a C/C++ library
 that is included in the module distribution and needed by an extension
 module."""
 
-
 # XXX this module has *lots* of code ripped-off quite transparently from
 # build_ext.py -- not surprisingly really, as the work required to build
 # a static library from a collection of C source files is not really all
@@ -32,17 +31,17 @@ class build_clib(Command):
     description = "build C/C++ libraries used by Python extensions"
 
     user_options = [
-        ('build-clib=', 'b', "directory to build C/C++ libraries to"),
-        ('build-temp=', 't', "directory to put temporary build by-products"),
-        ('debug', 'g', "compile with debugging information"),
-        ('force', 'f', "forcibly build everything (ignore file timestamps)"),
-        ('compiler=', 'c', "specify the compiler type"),
+        ("build-clib=", "b", "directory to build C/C++ libraries to"),
+        ("build-temp=", "t", "directory to put temporary build by-products"),
+        ("debug", "g", "compile with debugging information"),
+        ("force", "f", "forcibly build everything (ignore file timestamps)"),
+        ("compiler=", "c", "specify the compiler type"),
     ]
 
-    boolean_options = ['debug', 'force']
+    boolean_options = ["debug", "force"]
 
     help_options = [
-        ('help-compiler', None, "list available compilers", show_compilers),
+        ("help-compiler", None, "list available compilers", show_compilers),
     ]
 
     def initialize_options(self):
@@ -67,12 +66,12 @@ class build_clib(Command):
         # by-products, at least from the point of view of building Python
         # extensions -- but I want to keep my options open.
         self.set_undefined_options(
-            'build',
-            ('build_temp', 'build_clib'),
-            ('build_temp', 'build_temp'),
-            ('compiler', 'compiler'),
-            ('debug', 'debug'),
-            ('force', 'force'),
+            "build",
+            ("build_temp", "build_clib"),
+            ("build_temp", "build_temp"),
+            ("compiler", "compiler"),
+            ("debug", "debug"),
+            ("force", "force"),
         )
 
         self.libraries = self.distribution.libraries
@@ -103,7 +102,7 @@ class build_clib(Command):
             self.compiler.set_include_dirs(self.include_dirs)
         if self.define is not None:
             # 'define' option is a list of (name,value) tuples
-            for (name, value) in self.define:
+            for name, value in self.define:
                 self.compiler.define_macro(name, value)
         if self.undef is not None:
             for macro in self.undef:
@@ -136,7 +135,7 @@ class build_clib(Command):
                     "must be a string (the library name)"
                 )
 
-            if '/' in name or (os.sep != '/' and os.sep in name):
+            if "/" in name or (os.sep != "/" and os.sep in name):
                 raise DistutilsSetupError(
                     "bad library name '%s': "
                     "may not contain directory separators" % lib[0]
@@ -155,15 +154,15 @@ class build_clib(Command):
             return None
 
         lib_names = []
-        for (lib_name, build_info) in self.libraries:
+        for lib_name, build_info in self.libraries:
             lib_names.append(lib_name)
         return lib_names
 
     def get_source_files(self):
         self.check_library_list(self.libraries)
         filenames = []
-        for (lib_name, build_info) in self.libraries:
-            sources = build_info.get('sources')
+        for lib_name, build_info in self.libraries:
+            sources = build_info.get("sources")
             if sources is None or not isinstance(sources, (list, tuple)):
                 raise DistutilsSetupError(
                     "in 'libraries' option (library '%s'), "
@@ -175,8 +174,8 @@ class build_clib(Command):
         return filenames
 
     def build_libraries(self, libraries):
-        for (lib_name, build_info) in libraries:
-            sources = build_info.get('sources')
+        for lib_name, build_info in libraries:
+            sources = build_info.get("sources")
             if sources is None or not isinstance(sources, (list, tuple)):
                 raise DistutilsSetupError(
                     "in 'libraries' option (library '%s'), "
@@ -190,8 +189,8 @@ class build_clib(Command):
             # First, compile the source code to object files in the library
             # directory.  (This should probably change to putting object
             # files in a temporary build directory.)
-            macros = build_info.get('macros')
-            include_dirs = build_info.get('include_dirs')
+            macros = build_info.get("macros")
+            include_dirs = build_info.get("include_dirs")
             objects = self.compiler.compile(
                 sources,
                 output_dir=self.build_temp,

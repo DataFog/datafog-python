@@ -14,7 +14,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import Status, StatusCode
 
 
-class OTelLogger:
+class Telemetry:
     """A class to handle anonymous telemetry for the DataFog package."""
 
     def __init__(self, instrumentation_key: str = os.getenv("INSTRUMENTATION_KEY")):

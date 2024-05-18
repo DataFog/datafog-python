@@ -21,7 +21,7 @@ class develop(namespaces.DevelopInstaller, easy_install):
         ("egg-path=", None, "Set the path to be used in the .egg-link file"),
     ]
 
-    boolean_options = easy_install.boolean_options + ['uninstall']
+    boolean_options = easy_install.boolean_options + ["uninstall"]
 
     command_consumes_arguments = False  # override base
 
@@ -39,7 +39,7 @@ class develop(namespaces.DevelopInstaller, easy_install):
         self.egg_path = None
         easy_install.initialize_options(self)
         self.setup_path = None
-        self.always_copy_from = '.'  # always copy eggs installed in curdir
+        self.always_copy_from = "."  # always copy eggs installed in curdir
 
     def finalize_options(self):
         ei = self.get_finalized_command("egg_info")
@@ -53,9 +53,9 @@ class develop(namespaces.DevelopInstaller, easy_install):
         self.expand_basedirs()
         self.expand_dirs()
         # pick up setup-dir .egg files only: no .egg-info
-        self.package_index.scan(glob.glob('*.egg'))
+        self.package_index.scan(glob.glob("*.egg"))
 
-        egg_link_fn = ei.egg_name + '.egg-link'
+        egg_link_fn = ei.egg_name + ".egg-link"
         self.egg_link = os.path.join(self.install_dir, egg_link_fn)
         self.egg_base = ei.egg_base
         if self.egg_path is None:
@@ -91,9 +91,9 @@ class develop(namespaces.DevelopInstaller, easy_install):
         setup script resides and ensure that path points to the
         setup path from $install_dir/$egg_path.
         """
-        path_to_setup = egg_base.replace(os.sep, '/').rstrip('/')
+        path_to_setup = egg_base.replace(os.sep, "/").rstrip("/")
         if path_to_setup != os.curdir:
-            path_to_setup = '../' * (path_to_setup.count('/') + 1)
+            path_to_setup = "../" * (path_to_setup.count("/") + 1)
         resolved = pkg_resources.normalize_path(
             os.path.join(install_dir, egg_path, path_to_setup)
         )
@@ -107,11 +107,11 @@ class develop(namespaces.DevelopInstaller, easy_install):
         return path_to_setup
 
     def install_for_development(self):
-        self.run_command('egg_info')
+        self.run_command("egg_info")
 
         # Build extensions in-place
-        self.reinitialize_command('build_ext', inplace=1)
-        self.run_command('build_ext')
+        self.reinitialize_command("build_ext", inplace=1)
+        self.run_command("build_ext")
 
         if setuptools.bootstrap_install_from:
             self.easy_install(setuptools.bootstrap_install_from)

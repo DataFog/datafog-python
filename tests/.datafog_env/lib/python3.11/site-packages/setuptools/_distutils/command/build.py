@@ -20,38 +20,38 @@ class build(Command):
     description = "build everything needed to install"
 
     user_options = [
-        ('build-base=', 'b', "base directory for build library"),
-        ('build-purelib=', None, "build directory for platform-neutral distributions"),
-        ('build-platlib=', None, "build directory for platform-specific distributions"),
+        ("build-base=", "b", "base directory for build library"),
+        ("build-purelib=", None, "build directory for platform-neutral distributions"),
+        ("build-platlib=", None, "build directory for platform-specific distributions"),
         (
-            'build-lib=',
+            "build-lib=",
             None,
             "build directory for all distribution (defaults to either "
             + "build-purelib or build-platlib",
         ),
-        ('build-scripts=', None, "build directory for scripts"),
-        ('build-temp=', 't', "temporary build directory"),
+        ("build-scripts=", None, "build directory for scripts"),
+        ("build-temp=", "t", "temporary build directory"),
         (
-            'plat-name=',
-            'p',
+            "plat-name=",
+            "p",
             "platform name to build for, if supported "
             "(default: %s)" % get_platform(),
         ),
-        ('compiler=', 'c', "specify the compiler type"),
-        ('parallel=', 'j', "number of parallel build jobs"),
-        ('debug', 'g', "compile extensions and libraries with debugging information"),
-        ('force', 'f', "forcibly build everything (ignore file timestamps)"),
-        ('executable=', 'e', "specify final destination interpreter path (build.py)"),
+        ("compiler=", "c", "specify the compiler type"),
+        ("parallel=", "j", "number of parallel build jobs"),
+        ("debug", "g", "compile extensions and libraries with debugging information"),
+        ("force", "f", "forcibly build everything (ignore file timestamps)"),
+        ("executable=", "e", "specify final destination interpreter path (build.py)"),
     ]
 
-    boolean_options = ['debug', 'force']
+    boolean_options = ["debug", "force"]
 
     help_options = [
-        ('help-compiler', None, "list available compilers", show_compilers),
+        ("help-compiler", None, "list available compilers", show_compilers),
     ]
 
     def initialize_options(self):
-        self.build_base = 'build'
+        self.build_base = "build"
         # these are decided only after 'build_base' has its final value
         # (unless overridden by the user or client)
         self.build_purelib = None
@@ -73,7 +73,7 @@ class build(Command):
             # plat-name only supported for windows (other platforms are
             # supported via ./configure flags, if at all).  Avoid misleading
             # other platforms.
-            if os.name != 'nt':
+            if os.name != "nt":
                 raise DistutilsOptionError(
                     "--plat-name only supported on Windows (try "
                     "using './configure --help' on your platform)"
@@ -84,16 +84,16 @@ class build(Command):
         # Make it so Python 2.x and Python 2.x with --with-pydebug don't
         # share the same build directories. Doing so confuses the build
         # process for C modules
-        if hasattr(sys, 'gettotalrefcount'):
-            plat_specifier += '-pydebug'
+        if hasattr(sys, "gettotalrefcount"):
+            plat_specifier += "-pydebug"
 
         # 'build_purelib' and 'build_platlib' just default to 'lib' and
         # 'lib.<plat>' under the base build directory.  We only use one of
         # them for a given distribution, though --
         if self.build_purelib is None:
-            self.build_purelib = os.path.join(self.build_base, 'lib')
+            self.build_purelib = os.path.join(self.build_base, "lib")
         if self.build_platlib is None:
-            self.build_platlib = os.path.join(self.build_base, 'lib' + plat_specifier)
+            self.build_platlib = os.path.join(self.build_base, "lib" + plat_specifier)
 
         # 'build_lib' is the actual directory that we will use for this
         # particular module distribution -- if user didn't supply it, pick
@@ -107,10 +107,10 @@ class build(Command):
         # 'build_temp' -- temporary directory for compiler turds,
         # "build/temp.<plat>"
         if self.build_temp is None:
-            self.build_temp = os.path.join(self.build_base, 'temp' + plat_specifier)
+            self.build_temp = os.path.join(self.build_base, "temp" + plat_specifier)
         if self.build_scripts is None:
             self.build_scripts = os.path.join(
-                self.build_base, 'scripts-%d.%d' % sys.version_info[:2]
+                self.build_base, "scripts-%d.%d" % sys.version_info[:2]
             )
 
         if self.executable is None and sys.executable:
@@ -146,8 +146,8 @@ class build(Command):
         return self.distribution.has_scripts()
 
     sub_commands = [
-        ('build_py', has_pure_modules),
-        ('build_clib', has_c_libraries),
-        ('build_ext', has_ext_modules),
-        ('build_scripts', has_scripts),
+        ("build_py", has_pure_modules),
+        ("build_clib", has_c_libraries),
+        ("build_ext", has_ext_modules),
+        ("build_scripts", has_scripts),
     ]

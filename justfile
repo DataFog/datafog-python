@@ -20,10 +20,10 @@ clean:
 	@rm -rf datafog/*.egg-info/ build/ dist/ .tox/
 
 format:
-	isort .
-	black .
-	blacken-docs README.md
+	isort . 
+	black . 
+	blacken-docs README.md 
 
 lint:
-	black --check .
-	flake8 .
+	black --check . 
+	flake8 . 

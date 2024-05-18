@@ -74,13 +74,13 @@ def make_tarball(
     Returns the output filename.
     """
     tar_compression = {
-        'gzip': 'gz',
-        'bzip2': 'bz2',
-        'xz': 'xz',
-        None: '',
-        'compress': '',
+        "gzip": "gz",
+        "bzip2": "bz2",
+        "xz": "xz",
+        None: "",
+        "compress": "",
     }
-    compress_ext = {'gzip': '.gz', 'bzip2': '.bz2', 'xz': '.xz', 'compress': '.Z'}
+    compress_ext = {"gzip": ".gz", "bzip2": ".bz2", "xz": ".xz", "compress": ".Z"}
 
     # flags for compression program, each element of list will be an argument
     if compress is not None and compress not in compress_ext.keys():
@@ -89,16 +89,16 @@ def make_tarball(
             "'xz' or 'compress'"
         )
 
-    archive_name = base_name + '.tar'
-    if compress != 'compress':
-        archive_name += compress_ext.get(compress, '')
+    archive_name = base_name + ".tar"
+    if compress != "compress":
+        archive_name += compress_ext.get(compress, "")
 
     mkpath(os.path.dirname(archive_name), dry_run=dry_run)
 
     # creating the tarball
     import tarfile  # late import so Python build itself doesn't break
 
-    log.info('Creating tar archive')
+    log.info("Creating tar archive")
 
     uid = _get_uid(owner)
     gid = _get_gid(group)
@@ -113,21 +113,21 @@ def make_tarball(
         return tarinfo
 
     if not dry_run:
-        tar = tarfile.open(archive_name, 'w|%s' % tar_compression[compress])
+        tar = tarfile.open(archive_name, "w|%s" % tar_compression[compress])
         try:
             tar.add(base_dir, filter=_set_uid_gid)
         finally:
             tar.close()
 
     # compression using `compress`
-    if compress == 'compress':
+    if compress == "compress":
         warn("'compress' is deprecated.", DeprecationWarning)
         # the option varies depending on the platform
         compressed_name = archive_name + compress_ext[compress]
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             cmd = [compress, archive_name, compressed_name]
         else:
-            cmd = [compress, '-f', archive_name]
+            cmd = [compress, "-f", archive_name]
         spawn(cmd, dry_run=dry_run)
         return compressed_name
 
@@ -181,12 +181,12 @@ def make_zipfile(base_name, base_dir, verbose=0, dry_run=0):  # noqa: C901
 
             with zip:
                 if base_dir != os.curdir:
-                    path = os.path.normpath(os.path.join(base_dir, ''))
+                    path = os.path.normpath(os.path.join(base_dir, ""))
                     zip.write(path, path)
                     log.info("adding '%s'", path)
                 for dirpath, dirnames, filenames in os.walk(base_dir):
                     for name in dirnames:
-                        path = os.path.normpath(os.path.join(dirpath, name, ''))
+                        path = os.path.normpath(os.path.join(dirpath, name, ""))
                         zip.write(path, path)
                         log.info("adding '%s'", path)
                     for name in filenames:
@@ -199,12 +199,12 @@ def make_zipfile(base_name, base_dir, verbose=0, dry_run=0):  # noqa: C901
 
 
 ARCHIVE_FORMATS = {
-    'gztar': (make_tarball, [('compress', 'gzip')], "gzip'ed tar-file"),
-    'bztar': (make_tarball, [('compress', 'bzip2')], "bzip2'ed tar-file"),
-    'xztar': (make_tarball, [('compress', 'xz')], "xz'ed tar-file"),
-    'ztar': (make_tarball, [('compress', 'compress')], "compressed tar file"),
-    'tar': (make_tarball, [('compress', None)], "uncompressed tar file"),
-    'zip': (make_zipfile, [], "ZIP file"),
+    "gztar": (make_tarball, [("compress", "gzip")], "gzip'ed tar-file"),
+    "bztar": (make_tarball, [("compress", "bzip2")], "bzip2'ed tar-file"),
+    "xztar": (make_tarball, [("compress", "xz")], "xz'ed tar-file"),
+    "ztar": (make_tarball, [("compress", "compress")], "compressed tar file"),
+    "tar": (make_tarball, [("compress", None)], "uncompressed tar file"),
+    "zip": (make_zipfile, [], "ZIP file"),
 }
 
 
@@ -255,7 +255,7 @@ def make_archive(
     if base_dir is None:
         base_dir = os.curdir
 
-    kwargs = {'dry_run': dry_run}
+    kwargs = {"dry_run": dry_run}
 
     try:
         format_info = ARCHIVE_FORMATS[format]
@@ -266,9 +266,9 @@ def make_archive(
     for arg, val in format_info[1]:
         kwargs[arg] = val
 
-    if format != 'zip':
-        kwargs['owner'] = owner
-        kwargs['group'] = group
+    if format != "zip":
+        kwargs["owner"] = owner
+        kwargs["group"] = group
 
     try:
         filename = func(base_name, base_dir, **kwargs)

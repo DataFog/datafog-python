@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.2.1b1"
+    return "3.2.1b3"
 
 
 project_urls = {
@@ -35,7 +35,7 @@ setup(
         # "transformers==4.40.1",
         # "torch==2.2.2",
         # "pyspark==3.4.1",
-        "pydantic==1.10.8",
+        "pydantic==1.10.15",
         "Pillow",
         "sentencepiece",
         "protobuf",

@@ -36,6 +36,7 @@ def disable_importlib_metadata_finder(metadata):
 
 if sys.version_info < (3, 10):
     from setuptools.extern import importlib_metadata as metadata
+
     disable_importlib_metadata_finder(metadata)
 else:
     import importlib.metadata as metadata  # noqa: F401
