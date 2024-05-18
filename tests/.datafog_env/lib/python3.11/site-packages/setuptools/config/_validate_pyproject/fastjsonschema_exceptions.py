@@ -1,6 +1,5 @@
 import re
 
-
 SPLIT_RE = re.compile(r'[\.\[\]]+')
 
 

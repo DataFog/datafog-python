@@ -1,5 +1,5 @@
-import sys
 import platform
+import sys
 
 
 def add_ext_suffix_39(vars):

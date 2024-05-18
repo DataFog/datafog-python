@@ -15,41 +15,20 @@ from ._internal_utils import to_native_string
 from .adapters import HTTPAdapter
 from .auth import _basic_auth_str
 from .compat import Mapping, cookielib, urljoin, urlparse
-from .cookies import (
-    RequestsCookieJar,
-    cookiejar_from_dict,
-    extract_cookies_to_jar,
-    merge_cookies,
-)
-from .exceptions import (
-    ChunkedEncodingError,
-    ContentDecodingError,
-    InvalidSchema,
-    TooManyRedirects,
-)
+from .cookies import (RequestsCookieJar, cookiejar_from_dict,
+                      extract_cookies_to_jar, merge_cookies)
+from .exceptions import (ChunkedEncodingError, ContentDecodingError,
+                         InvalidSchema, TooManyRedirects)
 from .hooks import default_hooks, dispatch_hook
-
 # formerly defined here, reexposed here for backward compatibility
-from .models import (  # noqa: F401
-    DEFAULT_REDIRECT_LIMIT,
-    REDIRECT_STATI,
-    PreparedRequest,
-    Request,
-)
+from .models import (DEFAULT_REDIRECT_LIMIT, REDIRECT_STATI,  # noqa: F401
+                     PreparedRequest, Request)
 from .status_codes import codes
 from .structures import CaseInsensitiveDict
-from .utils import (  # noqa: F401
-    DEFAULT_PORTS,
-    default_headers,
-    get_auth_from_url,
-    get_environ_proxies,
-    get_netrc_auth,
-    requote_uri,
-    resolve_proxies,
-    rewind_body,
-    should_bypass_proxies,
-    to_key_val_list,
-)
+from .utils import (DEFAULT_PORTS, default_headers,  # noqa: F401
+                    get_auth_from_url, get_environ_proxies, get_netrc_auth,
+                    requote_uri, resolve_proxies, rewind_body,
+                    should_bypass_proxies, to_key_val_list)
 
 # Preferred clock, based on which one is more accurate on a given system.
 if sys.platform == "win32":

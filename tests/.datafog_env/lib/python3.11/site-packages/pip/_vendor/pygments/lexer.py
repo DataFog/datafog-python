@@ -12,12 +12,14 @@ import re
 import sys
 import time
 
-from pip._vendor.pygments.filter import apply_filters, Filter
+from pip._vendor.pygments.filter import Filter, apply_filters
 from pip._vendor.pygments.filters import get_filter_by_name
-from pip._vendor.pygments.token import Error, Text, Other, Whitespace, _TokenType
-from pip._vendor.pygments.util import get_bool_opt, get_int_opt, get_list_opt, \
-    make_analysator, Future, guess_decode
 from pip._vendor.pygments.regexopt import regex_opt
+from pip._vendor.pygments.token import (Error, Other, Text, Whitespace,
+                                        _TokenType)
+from pip._vendor.pygments.util import (Future, get_bool_opt, get_int_opt,
+                                       get_list_opt, guess_decode,
+                                       make_analysator)
 
 __all__ = ['Lexer', 'RegexLexer', 'ExtendedRegexLexer', 'DelegatingLexer',
            'LexerContext', 'include', 'inherit', 'bygroups', 'using', 'this',

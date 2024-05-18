@@ -12,10 +12,9 @@
 import sys
 
 from docutils import nodes
-from docutils.statemachine import ViewList
 from docutils.parsers.rst import Directive
+from docutils.statemachine import ViewList
 from sphinx.util.nodes import nested_parse_with_titles
-
 
 MODULEDOC = '''
 .. module:: %s
@@ -90,8 +89,8 @@ class PygmentsDoc(Directive):
 
         The columns are the lexer name, the extensions handled by this lexer
         (or "None"), the aliases and a link to the lexer class."""
-        from pip._vendor.pygments.lexers._mapping import LEXERS
         from pip._vendor.pygments.lexers import find_lexer_class
+        from pip._vendor.pygments.lexers._mapping import LEXERS
         out = []
 
         table = []

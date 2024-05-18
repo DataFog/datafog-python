@@ -37,17 +37,8 @@ import shlex
 import subprocess
 import sys
 import warnings
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Optional,
-    Sequence,
-    TextIO,
-    Tuple,
-    Type,
-)
+from typing import (Any, Callable, Dict, Iterable, Optional, Sequence, TextIO,
+                    Tuple, Type)
 
 try:
     from typing import TypedDict

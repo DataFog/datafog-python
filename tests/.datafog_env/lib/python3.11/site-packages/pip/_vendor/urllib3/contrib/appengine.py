@@ -44,14 +44,8 @@ import io
 import logging
 import warnings
 
-from ..exceptions import (
-    HTTPError,
-    HTTPWarning,
-    MaxRetryError,
-    ProtocolError,
-    SSLError,
-    TimeoutError,
-)
+from ..exceptions import (HTTPError, HTTPWarning, MaxRetryError, ProtocolError,
+                          SSLError, TimeoutError)
 from ..packages.six.moves.urllib.parse import urljoin
 from ..request import RequestMethods
 from ..response import HTTPResponse

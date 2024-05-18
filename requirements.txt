@@ -1,6 +1,6 @@
 en_spacy_pii_fast==0.0.0
 # transformers==4.40.1
-spacy==3.4.4
+spacy==3.7.4
 # torch==2.2.2
 # pyspark==3.4.1
 pytest==8.0.2

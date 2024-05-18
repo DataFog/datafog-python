@@ -23,10 +23,9 @@
 #    black-on-while, so colors like "white background" need to be converted
 #    to "white background, black foreground", etc...
 
-from pip._vendor.pygments.formatter import Formatter
 from pip._vendor.pygments.console import codes
+from pip._vendor.pygments.formatter import Formatter
 from pip._vendor.pygments.style import ansicolors
-
 
 __all__ = ['Terminal256Formatter', 'TerminalTrueColorFormatter']
 

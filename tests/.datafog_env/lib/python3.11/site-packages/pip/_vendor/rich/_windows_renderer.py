@@ -1,6 +1,7 @@
 from typing import Iterable, Sequence, Tuple, cast
 
-from pip._vendor.rich._win32_console import LegacyWindowsTerm, WindowsCoordinates
+from pip._vendor.rich._win32_console import (LegacyWindowsTerm,
+                                             WindowsCoordinates)
 from pip._vendor.rich.segment import ControlCode, ControlType, Segment
 
 

@@ -8,10 +8,10 @@
     :license: BSD, see LICENSE for details.
 """
 
+import fnmatch
 import re
 import sys
 import types
-import fnmatch
 from os.path import basename
 
 from pip._vendor.pygments.lexers._mapping import LEXERS

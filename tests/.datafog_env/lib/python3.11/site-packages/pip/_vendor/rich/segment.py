@@ -3,26 +3,11 @@ from functools import lru_cache
 from itertools import filterfalse
 from logging import getLogger
 from operator import attrgetter
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    Iterable,
-    List,
-    NamedTuple,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import (TYPE_CHECKING, Dict, Iterable, List, NamedTuple, Optional,
+                    Sequence, Tuple, Type, Union)
 
-from .cells import (
-    _is_single_cell_widths,
-    cached_cell_len,
-    cell_len,
-    get_character_cell_size,
-    set_cell_size,
-)
+from .cells import (_is_single_cell_widths, cached_cell_len, cell_len,
+                    get_character_cell_size, set_cell_size)
 from .repr import Result, rich_repr
 from .style import Style
 

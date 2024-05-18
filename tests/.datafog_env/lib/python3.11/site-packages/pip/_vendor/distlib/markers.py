@@ -13,9 +13,9 @@ Parser for the environment markers micro-language defined in PEP 508.
 # as ~= and === which aren't in Python, necessitating a different approach.
 
 import os
+import platform
 import re
 import sys
-import platform
 
 from .compat import string_types
 from .util import in_venv, parse_marker

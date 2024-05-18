@@ -1,7 +1,8 @@
 import re
 from ast import literal_eval
 from operator import attrgetter
-from typing import Callable, Iterable, List, Match, NamedTuple, Optional, Tuple, Union
+from typing import (Callable, Iterable, List, Match, NamedTuple, Optional,
+                    Tuple, Union)
 
 from ._emoji_replace import _emoji_replace
 from .emoji import EmojiVariant

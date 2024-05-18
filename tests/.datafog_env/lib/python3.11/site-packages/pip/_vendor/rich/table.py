@@ -1,15 +1,6 @@
 from dataclasses import dataclass, field, replace
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    Iterable,
-    List,
-    NamedTuple,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-)
+from typing import (TYPE_CHECKING, Dict, Iterable, List, NamedTuple, Optional,
+                    Sequence, Tuple, Union)
 
 from . import box, errors
 from ._loop import loop_first_last, loop_last
@@ -25,14 +16,8 @@ from .style import Style, StyleType
 from .text import Text, TextType
 
 if TYPE_CHECKING:
-    from .console import (
-        Console,
-        ConsoleOptions,
-        JustifyMethod,
-        OverflowMethod,
-        RenderableType,
-        RenderResult,
-    )
+    from .console import (Console, ConsoleOptions, JustifyMethod,
+                          OverflowMethod, RenderableType, RenderResult)
 
 
 @dataclass

@@ -4,9 +4,8 @@ name that have meaning.
 import re
 from typing import Dict, Iterable, List
 
-from pip._vendor.packaging.tags import Tag
-
 from pip._internal.exceptions import InvalidWheelFilename
+from pip._vendor.packaging.tags import Tag
 
 
 class Wheel:

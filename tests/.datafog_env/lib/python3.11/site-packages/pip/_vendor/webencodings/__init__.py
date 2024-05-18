@@ -18,7 +18,6 @@ import codecs
 
 from .labels import LABELS
 
-
 VERSION = '0.5.1'
 
 

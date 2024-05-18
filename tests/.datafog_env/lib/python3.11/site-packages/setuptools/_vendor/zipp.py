@@ -1,10 +1,10 @@
-import io
-import posixpath
-import zipfile
-import itertools
 import contextlib
-import sys
+import io
+import itertools
 import pathlib
+import posixpath
+import sys
+import zipfile
 
 if sys.version_info < (3, 7):
     from collections import OrderedDict

@@ -32,20 +32,8 @@ license and by oscrypto's:
 from __future__ import absolute_import
 
 import platform
-from ctypes import (
-    CDLL,
-    CFUNCTYPE,
-    POINTER,
-    c_bool,
-    c_byte,
-    c_char_p,
-    c_int32,
-    c_long,
-    c_size_t,
-    c_uint32,
-    c_ulong,
-    c_void_p,
-)
+from ctypes import (CDLL, CFUNCTYPE, POINTER, c_bool, c_byte, c_char_p,
+                    c_int32, c_long, c_size_t, c_uint32, c_ulong, c_void_p)
 from ctypes.util import find_library
 
 from ...packages.six import raise_from

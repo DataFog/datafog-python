@@ -10,7 +10,6 @@
 
 from pip._vendor.pygments.formatter import Formatter
 
-
 __all__ = ['PangoMarkupFormatter']
 
 

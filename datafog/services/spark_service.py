@@ -1,9 +1,8 @@
-import json
-from typing import Any, List
 import importlib
+import json
 import subprocess
 import sys
-
+from typing import Any, List
 
 
 class SparkService:
@@ -14,6 +13,7 @@ class SparkService:
         from pyspark.sql import DataFrame, SparkSession
         from pyspark.sql.functions import udf
         from pyspark.sql.types import ArrayType, StringType
+
         self.SparkSession = SparkSession
         self.DataFrame = DataFrame
         self.udf = udf
@@ -22,7 +22,7 @@ class SparkService:
 
     def create_spark_session(self):
         return self.SparkSession.builder.appName("datafog").getOrCreate()
-    
+
     def read_json(self, path: str) -> List[dict]:
         return self.spark.read.json(path).collect()
 
@@ -33,4 +33,3 @@ class SparkService:
             subprocess.check_call(
                 [sys.executable, "-m", "pip", "install", package_name]
             )
-
