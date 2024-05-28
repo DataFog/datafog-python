@@ -1,19 +1,8 @@
-import asyncio
 import json
-from typing import List
 
-import aiohttp
 import pytest
 
-from datafog import (
-    DataFog,
-    ImageService,
-    OCRPIIAnnotator,
-    OperationType,
-    SparkService,
-    TextPIIAnnotator,
-    TextService,
-)
+from datafog import DataFog, TextPIIAnnotator
 
 
 def search_nested_dict(d, target):

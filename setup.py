@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.2.0"
+    return "3.2.1"
 
 
 project_urls = {
@@ -34,14 +34,18 @@ setup(
         "en_spacy_pii_fast==0.0.0",
         # "transformers==4.40.1",
         # "torch==2.2.2",
-        "pyspark==3.4.1",
-        "pydantic==1.10.8",
+        # "pyspark==3.4.1",
+        "pydantic==1.10.15",
         "Pillow",
         "sentencepiece",
         "protobuf",
         "pytesseract",
         "aiohttp",
         "pytest-asyncio",
+        "python-dotenv",
+        "azure-monitor-opentelemetry-exporter==1.0.0b25",
+        "opentelemetry-sdk",
+        "azure-monitor-opentelemetry"
     ],
     python_requires=">=3.10",
     classifiers=[

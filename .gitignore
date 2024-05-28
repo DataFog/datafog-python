@@ -13,6 +13,7 @@ build/
 /src/datafog/pii_tools/__pycache__/
 /tests/__pycache__/
 /tests/scratch.py
+/tests/.datafog_env/
 node_modules/
 datafog_debug.log
 sotu_2023.txt
@@ -23,4 +24,5 @@ datafog-python/datafog/processing/text_processing/__pycache__/
 datafog-python/datafog/services/__pycache__/
 datafog-python/datafog/processing/__pycache__/
 datafog-python/datafog/__pycache__/
+.env
 

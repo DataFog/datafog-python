@@ -1,6 +1,5 @@
 version := `python3 -c "from datafog.__about__ import __version__; print(__version__)"`
 
-
 default:
 	@echo "\"just publish\"?"
 
@@ -21,10 +20,10 @@ clean:
 	@rm -rf datafog/*.egg-info/ build/ dist/ .tox/
 
 format:
-	isort .
-	black .
-	blacken-docs README.md
+	isort . 
+	black . 
+	blacken-docs README.md 
 
 lint:
-	black --check .
-	flake8 .
+	black --check . 
+	flake8 . 
