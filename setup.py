@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 
 def __version__():
-    return "3.2.1b3"
+    return "3.2.1b9"
 
 
 project_urls = {
@@ -42,6 +42,10 @@ setup(
         "pytesseract",
         "aiohttp",
         "pytest-asyncio",
+        "python-dotenv",
+        "azure-monitor-opentelemetry-exporter==1.0.0b25",
+        "opentelemetry-sdk",
+        "azure-monitor-opentelemetry"
     ],
     python_requires=">=3.10",
     classifiers=[

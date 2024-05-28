@@ -13,8 +13,34 @@ from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
-from .telemetry.open_telemetry import Telemetry
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+import os
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
+from azure.monitor.opentelemetry import configure_azure_monitor
+import platform
+from opentelemetry.trace import Status, StatusCode
 
+# Use environment variable if available, otherwise fall back to hardcoded value
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from logging import INFO, getLogger
+from dotenv import load_dotenv
+import logging
+
+load_dotenv()  # Load environment variables from .env file
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+configure_azure_monitor(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
+trace.set_tracer_provider(TracerProvider())
+exporter = AzureMonitorTraceExporter(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
+trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
+logger = logging.getLogger("datafog_logger")
+logger.setLevel(INFO)
 
 class DataFog:
     def __init__(
@@ -28,25 +54,52 @@ class DataFog:
         self.text_service = text_service
         self.spark_service: SparkService = spark_service
         self.operations: List[OperationType] = operations
-        self.telemetry = Telemetry()
-        self.telemetry.set_tracer()
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Initializing DataFog class with the following services and operations:")
+        self.logger.info(f"Image Service: {type(image_service)}")
+        self.logger.info(f"Text Service: {type(text_service)}")
+        self.logger.info(f"Spark Service: {type(spark_service) if spark_service else 'None'}")
+        self.logger.info(f"Operations: {operations}")
+        self.tracer = trace.get_tracer(__name__)
 
     async def run_ocr_pipeline(self, image_urls: List[str]):
         """Run the OCR pipeline asynchronously."""
-        extracted_text = await self.image_service.ocr_extract(image_urls)
-        if OperationType.ANNOTATE_PII in self.operations:
-            annotated_text = await self.text_service.batch_annotate_texts(
-                extracted_text
-            )
-            return annotated_text
-        return extracted_text
+        with self.tracer.start_as_current_span("run_ocr_pipeline") as span:
+            try:
+                extracted_text = await self.image_service.ocr_extract(image_urls)
+                self.logger.info(f"OCR extraction completed for {len(image_urls)} images.")
+                self.logger.debug(f"Total length of extracted text: {sum(len(text) for text in extracted_text)}")
 
+                if OperationType.ANNOTATE_PII in self.operations:
+                    annotated_text = await self.text_service.batch_annotate_texts(extracted_text)
+                    self.logger.info(f"Text annotation completed with {len(annotated_text)} annotations.")
+                    return annotated_text
+                
+                return extracted_text
+            except Exception as e:
+                self.logger.error(f"Error in run_ocr_pipeline: {str(e)}")
+                span.set_status(Status(StatusCode.ERROR, str(e)))
+                raise
     async def run_text_pipeline(self, texts: List[str]):
         """Run the text pipeline asynchronously."""
-        if OperationType.ANNOTATE_PII in self.operations:
-            annotated_text = await self.text_service.batch_annotate_texts(texts)
-            return annotated_text
-        return texts
+        with self.tracer.start_as_current_span("run_text_pipeline") as span:
+            try:
+                self.logger.info(f"Starting text pipeline with {len(texts)} texts.")
+                if OperationType.ANNOTATE_PII in self.operations:
+                    annotated_text = await self.text_service.batch_annotate_texts(texts)
+                    self.logger.info(f"Text annotation completed with {len(annotated_text)} annotations.")
+                    return annotated_text
+                
+                self.logger.info("No annotation operation found; returning original texts.")
+                return texts
+            except Exception as e:
+                self.logger.error(f"Error in run_text_pipeline: {str(e)}")
+                span.set_status(Status(StatusCode.ERROR, str(e)))
+                raise
+    def _add_attributes(self, span, attributes: dict):
+        """Add multiple attributes to a span."""
+        for key, value in attributes.items():
+            span.set_attribute(key, value)
 
 
 class OCRPIIAnnotator:

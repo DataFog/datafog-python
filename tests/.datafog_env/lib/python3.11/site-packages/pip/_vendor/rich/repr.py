@@ -25,11 +25,13 @@ class ReprError(Exception):
 
 
 @overload
-def auto(cls: Optional[Type[T]]) -> Type[T]: ...
+def auto(cls: Optional[Type[T]]) -> Type[T]:
+    ...
 
 
 @overload
-def auto(*, angular: bool = False) -> Callable[[Type[T]], Type[T]]: ...
+def auto(*, angular: bool = False) -> Callable[[Type[T]], Type[T]]:
+    ...
 
 
 def auto(
@@ -100,11 +102,13 @@ def auto(
 
 
 @overload
-def rich_repr(cls: Optional[Type[T]]) -> Type[T]: ...
+def rich_repr(cls: Optional[Type[T]]) -> Type[T]:
+    ...
 
 
 @overload
-def rich_repr(*, angular: bool = False) -> Callable[[Type[T]], Type[T]]: ...
+def rich_repr(*, angular: bool = False) -> Callable[[Type[T]], Type[T]]:
+    ...
 
 
 def rich_repr(

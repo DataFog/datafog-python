@@ -5,7 +5,7 @@ spacy==3.4.4
 # pyspark==3.4.1
 pytest==8.0.2
 Requests==2.31.0
-setuptools==58.1.0
+setuptools==70.0.0
 pydantic==1.10.15
 fastapi
 pandas
@@ -18,5 +18,7 @@ asyncio
 aiohttp
 pytest-asyncio
 azure-monitor-opentelemetry-exporter==1.0.0b25
+azure-monitor-opentelemetry
 opentelemetry-sdk
 en_spacy_pii_fast==0.0.0
+python-dotenv

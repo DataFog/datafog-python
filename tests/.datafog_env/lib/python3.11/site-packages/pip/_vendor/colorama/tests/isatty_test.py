@@ -2,13 +2,12 @@
 import sys
 from unittest import TestCase, main
 
-from ..ansitowin32 import AnsiToWin32, StreamWrapper
-from .utils import StreamNonTTY, StreamTTY, pycharm, replace_by, replace_original_by
+from ..ansitowin32 import StreamWrapper, AnsiToWin32
+from .utils import pycharm, replace_by, replace_original_by, StreamTTY, StreamNonTTY
 
 
 def is_a_tty(stream):
     return StreamWrapper(stream, None).isatty()
-
 
 class IsattyTest(TestCase):
 
@@ -54,5 +53,5 @@ class IsattyTest(TestCase):
             self.assertTrue(AnsiToWin32(sys.stderr).stream.isatty())
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
