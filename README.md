@@ -39,7 +39,6 @@ DataFog can be installed via pip:
 pip install datafog
 ```
 
-
 ## Getting Started
 
 The DataFog library provides functionality for text and image processing, including PII (Personally Identifiable Information) annotation and OCR (Optical Character Recognition) capabilities.
@@ -54,8 +53,7 @@ pip install datafog
 
 ### Usage
 
-The [Getting Started notebook](/datafog-python/examples/getting_started.ipynb)  features a standalone Colab notebook. 
-
+The [Getting Started notebook](/datafog-python/examples/getting_started.ipynb) features a standalone Colab notebook.
 
 #### Text PII Annotation
 
@@ -75,7 +73,9 @@ with open(os.path.join(folder_path, text_files[0]), 'r') as file:
 
 display(Markdown(clinical_note))
 ```
+
 which looks like this:
+
 ```
 
 **Date:** April 10, 2024
@@ -124,7 +124,6 @@ loop = asyncio.get_event_loop()
 results = loop.run_until_complete(run_text_pipeline_demo())
 ```
 
-
 Note: The DataFog library uses asynchronous programming, so make sure to use the `async`/`await` syntax when calling the appropriate methods.
 
 #### OCR PII Annotation
@@ -146,7 +145,7 @@ loop.run_until_complete(run_ocr_pipeline_demo())
 
 ```
 
-You'll notice that we use async functions liberally throughout the SDK - given the nature of the functions we're providing and the extension of DataFog into API/other formats, this allows the functions to be more easily adapted for those uses. 
+You'll notice that we use async functions liberally throughout the SDK - given the nature of the functions we're providing and the extension of DataFog into API/other formats, this allows the functions to be more easily adapted for those uses.
 
 ## Contributing
 

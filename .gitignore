@@ -24,4 +24,5 @@ datafog-python/datafog/processing/text_processing/__pycache__/
 datafog-python/datafog/services/__pycache__/
 datafog-python/datafog/processing/__pycache__/
 datafog-python/datafog/__pycache__/
+.env
 

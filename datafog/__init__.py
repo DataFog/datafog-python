@@ -1,3 +1,4 @@
+from .__about__ import __version__
 from .config import OperationType
 from .main import DataFog, OCRPIIAnnotator, TextPIIAnnotator
 from .processing.image_processing.donut_processor import DonutProcessor
@@ -7,8 +8,7 @@ from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
-
-from .__about__ import __version__
+from .telemetry import Telemetry
 
 __all__ = [
     "DonutProcessor",
@@ -23,4 +23,5 @@ __all__ = [
     "ImageDownloader",
     "PytesseractProcessor",
     "__version__",
+    "Telemetry",
 ]
