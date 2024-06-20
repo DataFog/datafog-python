@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 import logging
 
 load_dotenv()  # Load environment variables from .env file
-APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=00bea047-1836-46fa-9652-26d43d63a3fa;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=959cc365-c112-491b-af69-b196d0943ca4"
 configure_azure_monitor(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
 trace.set_tracer_provider(TracerProvider())
 exporter = AzureMonitorTraceExporter(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)

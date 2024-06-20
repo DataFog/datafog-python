@@ -16,7 +16,8 @@ from dotenv import load_dotenv
 from azure.monitor.opentelemetry import configure_azure_monitor
 load_dotenv()
 
-APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=00bea047-1836-46fa-9652-26d43d63a3fa;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=959cc365-c112-491b-af69-b196d0943ca4"
+
 
 class Telemetry:
     def __init__(self):

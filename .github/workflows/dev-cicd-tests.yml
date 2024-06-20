@@ -41,7 +41,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: DataFog/datafog-python
 
-      - name: Run script
+      - name: OpenTelemetry Connection String
         env:
           APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
         run: |
