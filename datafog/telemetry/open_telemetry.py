@@ -1,22 +1,20 @@
 import os
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
-from azure.monitor.opentelemetry import configure_azure_monitor
 import platform
-from opentelemetry.trace import Status, StatusCode
+from logging import INFO, getLogger
+
+from azure.monitor.opentelemetry import configure_azure_monitor
+from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
+from dotenv import load_dotenv
 
 # Use environment variable if available, otherwise fall back to hardcoded value
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from logging import INFO, getLogger
-from dotenv import load_dotenv
-from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry.trace import Status, StatusCode
+
 load_dotenv()
 
-APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=00bea047-1836-46fa-9652-26d43d63a3fa;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=959cc365-c112-491b-af69-b196d0943ca4"
+APPLICATIONINSIGHTS_CONNECTION_STRING = "InstrumentationKey=00bea047-1836-46fa-9652-26d43d63a3fa;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=959cc365-c112-491b-af69-b196d0943ca4"
 
 
 class Telemetry:
@@ -29,7 +27,10 @@ class Telemetry:
             trace.set_tracer_provider(tracer_provider)
 
             # Configure Azure Monitor with the connection string from environment variables
-            configure_azure_monitor(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING, logger_name="datafog_logger")
+            configure_azure_monitor(
+                connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING,
+                logger_name="datafog_logger",
+            )
 
             # Create an exporter that sends data to Application Insights
             exporter = AzureMonitorTraceExporter(
@@ -48,8 +49,6 @@ class Telemetry:
 
         except Exception as e:
             print(f"Error setting up Azure Monitor: {e}")
-
-
 
     def datafog_creation(self, name: str):
         if self.ready:
@@ -70,4 +69,3 @@ class Telemetry:
             return span.set_attribute(key, value)
         except Exception:
             pass
-

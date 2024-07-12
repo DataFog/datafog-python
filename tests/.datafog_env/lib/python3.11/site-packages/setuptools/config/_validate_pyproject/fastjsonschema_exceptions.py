@@ -1,7 +1,6 @@
 import re
 
-
-SPLIT_RE = re.compile(r'[\.\[\]]+')
+SPLIT_RE = re.compile(r"[\.\[\]]+")
 
 
 class JsonSchemaException(ValueError):
@@ -36,7 +35,7 @@ class JsonSchemaValueException(JsonSchemaException):
 
     @property
     def path(self):
-        return [item for item in SPLIT_RE.split(self.name) if item != '']
+        return [item for item in SPLIT_RE.split(self.name) if item != ""]
 
     @property
     def rule_definition(self):

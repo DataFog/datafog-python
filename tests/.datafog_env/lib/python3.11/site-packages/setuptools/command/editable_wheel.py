@@ -369,14 +369,13 @@ class editable_wheel(Command):
 
 
 class EditableStrategy(Protocol):
-    def __call__(self, wheel: "WheelFile", files: List[str], mapping: Dict[str, str]):
-        ...
+    def __call__(
+        self, wheel: "WheelFile", files: List[str], mapping: Dict[str, str]
+    ): ...
 
-    def __enter__(self):
-        ...
+    def __enter__(self): ...
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
-        ...
+    def __exit__(self, _exc_type, _exc_value, _traceback): ...
 
 
 class _StaticPth:
@@ -398,8 +397,7 @@ class _StaticPth:
         _logger.warning(msg + _LENIENT_WARNING)
         return self
 
-    def __exit__(self, _exc_type, _exc_value, _traceback):
-        ...
+    def __exit__(self, _exc_type, _exc_value, _traceback): ...
 
 
 class _LinkTree(_StaticPth):
@@ -412,8 +410,10 @@ class _LinkTree(_StaticPth):
     By collocating ``auxiliary_dir`` and the original source code, limitations
     with hardlinks should be avoided.
     """
+
     def __init__(
-        self, dist: Distribution,
+        self,
+        dist: Distribution,
         name: str,
         auxiliary_dir: _Path,
         build_lib: _Path,
@@ -431,7 +431,7 @@ class _LinkTree(_StaticPth):
         # Files relative to build_lib will be normalized to None
         with suppress(ValueError):
             path = Path(file).resolve().relative_to(self.build_lib)
-            return str(path).replace(os.sep, '/')
+            return str(path).replace(os.sep, "/")
         return None
 
     def _create_file(self, relative_output: str, src_file: str, link=None):
@@ -443,10 +443,7 @@ class _LinkTree(_StaticPth):
     def _create_links(self, outputs, output_mapping):
         self.auxiliary_dir.mkdir(parents=True, exist_ok=True)
         link_type = "sym" if _can_symlink_files(self.auxiliary_dir) else "hard"
-        mappings = {
-            self._normalize_output(k): v
-            for k, v in output_mapping.items()
-        }
+        mappings = {self._normalize_output(k): v for k, v in output_mapping.items()}
         mappings.pop(None, None)  # remove files that are not relative to build_lib
 
         for output in outputs:
@@ -484,10 +481,12 @@ class _TopLevelFinder:
         package_dir = self.dist.package_dir or {}
         roots = _find_package_roots(top_level, package_dir, src_root)
 
-        namespaces_: Dict[str, List[str]] = dict(chain(
-            _find_namespaces(self.dist.packages or [], roots),
-            ((ns, []) for ns in _find_virtual_namespaces(roots)),
-        ))
+        namespaces_: Dict[str, List[str]] = dict(
+            chain(
+                _find_namespaces(self.dist.packages or [], roots),
+                ((ns, []) for ns in _find_virtual_namespaces(roots)),
+            )
+        )
 
         name = f"__editable__.{self.name}.finder"
         finder = _make_identifier(name)
@@ -561,15 +560,12 @@ def _simple_layout(
     >>> _simple_layout([], {"a": "_a", "": "src"}, "/tmp/myproj")
     False
     """
-    layout = {
-        pkg: find_package_path(pkg, package_dir, project_dir)
-        for pkg in packages
-    }
+    layout = {pkg: find_package_path(pkg, package_dir, project_dir) for pkg in packages}
     if not layout:
         return set(package_dir) in ({}, {""})
     parent = os.path.commonpath([_parent_path(k, v) for k, v in layout.items()])
     return all(
-        _normalize_path(Path(parent, *key.split('.'))) == _normalize_path(value)
+        _normalize_path(Path(parent, *key.split("."))) == _normalize_path(value)
         for key, value in layout.items()
     )
 
@@ -584,7 +580,7 @@ def _parent_path(pkg, pkg_path):
     >>> _parent_path("b", "src/c")
     'src/c'
     """
-    parent = pkg_path[:-len(pkg)] if pkg_path.endswith(pkg) else pkg_path
+    parent = pkg_path[: -len(pkg)] if pkg_path.endswith(pkg) else pkg_path
     return parent.rstrip("/" + os.sep)
 
 
@@ -700,16 +696,15 @@ def _is_nested(pkg: str, pkg_path: str, parent: str, parent_path: str) -> bool:
     """
     norm_pkg_path = _normalize_path(pkg_path)
     rest = pkg.replace(parent, "", 1).strip(".").split(".")
-    return (
-        pkg.startswith(parent)
-        and norm_pkg_path == _normalize_path(Path(parent_path, *rest))
+    return pkg.startswith(parent) and norm_pkg_path == _normalize_path(
+        Path(parent_path, *rest)
     )
 
 
 def _normalize_path(filename: _Path) -> str:
     """Normalize a file/dir name for comparison purposes"""
     # See pkg_resources.normalize_path
-    file = os.path.abspath(filename) if sys.platform == 'cygwin' else filename
+    file = os.path.abspath(filename) if sys.platform == "cygwin" else filename
     return os.path.normcase(os.path.realpath(os.path.normpath(file)))
 
 
@@ -727,7 +722,7 @@ def _make_identifier(name: str) -> str:
     >>> _make_identifier("__editable__.myns.pkg-78.9.3_local")
     '__editable___myns_pkg_78_9_3_local'
     """
-    safe = re.sub(r'\W|^(?=\d)', '_', name)
+    safe = re.sub(r"\W|^(?=\d)", "_", name)
     assert safe.isidentifier()
     return safe
 

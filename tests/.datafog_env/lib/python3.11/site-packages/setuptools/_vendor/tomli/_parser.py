@@ -4,8 +4,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 import string
+from collections.abc import Iterable
 from types import MappingProxyType
 from typing import Any, BinaryIO, NamedTuple
 
