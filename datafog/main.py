@@ -2,13 +2,14 @@ import json
 import logging
 from logging import INFO
 from typing import List
+
+from dotenv import load_dotenv
+
 from .config import OperationType
 from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
-from dotenv import load_dotenv
-
 
 load_dotenv()  # Load environment variables from .env file
 logger = logging.getLogger("datafog_logger")

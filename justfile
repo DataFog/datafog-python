@@ -1,4 +1,4 @@
-version := `python3 -c "from datafog.__about__ import __version__; print(__version__)"`
+version := `python -c "from datafog.__about__ import __version__; print(__version__)"`
 
 default:
 	@echo "\"just publish\"?"
@@ -10,7 +10,7 @@ tag:
 upload: clean
 	@if [ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]; then exit 1; fi
 	# https://stackoverflow.com/a/58756491/353337
-	python3 -m build --sdist --wheel .
+	python -m build --sdist --wheel .
 	twine upload dist/*
 
 publish: tag upload
