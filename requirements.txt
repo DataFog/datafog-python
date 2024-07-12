@@ -14,7 +14,6 @@ pytesseract
 asyncio
 aiohttp
 pytest-asyncio
-opentelemetry-sdk
 en_spacy_pii_fast==0.0.0
 python-dotenv
 numpy==2.0.0
