@@ -40,9 +40,3 @@ jobs:
         env:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: DataFog/datafog-python
-
-      - name: Run script
-        env:
-          APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
-        run: |
-          python datafog/telemetry/open_telemetry.py
