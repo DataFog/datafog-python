@@ -1,5 +1,6 @@
 import json
 import logging
+
 from logging import INFO
 from typing import List
 
@@ -8,17 +9,15 @@ from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
-
 logger = logging.getLogger("datafog_logger")
 logger.setLevel(INFO)
-
 
 class DataFog:
     def __init__(
         self,
-        image_service=ImageService(),
-        text_service=TextService(),
-        spark_service=None,
+        image_service = ImageService(),
+        text_service = TextService(),
+        spark_service = None,
         operations: List[OperationType] = [OperationType.ANNOTATE_PII],
     ):
         self.image_service = image_service
@@ -50,7 +49,7 @@ class DataFog:
                     extracted_text
                 )
                 self.logger.info(
-                    f"Text annotation completed with {len(annotated_text)} annotations."
+                    f"Text annotation completed with {len(annotated_text)} annotations." 
                 )
                 return annotated_text
 
