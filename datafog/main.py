@@ -3,6 +3,7 @@ import logging
 from typing import List
 
 from .config import OperationType
+from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
