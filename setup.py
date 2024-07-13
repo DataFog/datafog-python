@@ -4,10 +4,8 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as f:
     long_description = f.read()
 
-
-def __version__():
-    return "3.2.2"
-
+# Use a single source of truth for the version
+__version__ = "3.2.2"
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -17,14 +15,12 @@ project_urls = {
     "GitHub": "https://github.com/datafog/datafog-python",
 }
 
-
 setup(
     name="datafog",
-    version=__version__(),
+    version=__version__,
     author="Sid Mohan",
     author_email="sid@datafog.ai",
-    description="Scan, redact, and manage PII in your documents before they get uploaded "
-    "to a Retrieval Augmented Generation (RAG) system.",
+    description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -41,6 +37,9 @@ setup(
         "aiohttp",
         "pytest-asyncio",
         "numpy>=1.21.0,<2.0.0",
+        "fastapi",
+        "asyncio",
+        "setuptools==70.0.0",
     ],
     python_requires=">=3.10",
     classifiers=[
