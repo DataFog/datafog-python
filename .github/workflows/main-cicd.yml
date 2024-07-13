@@ -1,4 +1,4 @@
-name: main-cicd-tests
+name: main-cicd-setup-and-test
 
 on:
   push:
@@ -8,14 +8,21 @@ on:
     branches:
       - main
 
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install pre-commit
+        run: pip install pre-commit
       - name: Run pre-commit
-        uses: pre-commit/action@v3.0.0
+        run: pre-commit run --all-files
 
   build:
     runs-on: ubuntu-latest
@@ -23,41 +30,36 @@ jobs:
       matrix:
         python-version: ["3.10"]
     steps:
-      - uses: actions/setup-python@v4
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-
-      - uses: actions/checkout@v3
       - name: Install Tesseract OCR
         run: |
           sudo apt-get update
           sudo apt-get install -y software-properties-common
           sudo add-apt-repository -y ppa:alex-p/tesseract-ocr-devel
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr
-          sudo apt-get install -y libtesseract-dev
+          sudo apt-get install -y tesseract-ocr libtesseract-dev
           tesseract --version
           dpkg -l | grep tesseract
-
       - name: Verify Tesseract Installation
         run: |
           which tesseract
           tesseract --list-langs
-
-      - name: Update PATH
-        run: echo "export PATH=$PATH:/usr/bin" >> $GITHUB_ENV
-
-      - name: Install dependencies and run tests
+      - name: Install Dependencies
         run: |
-          pip install tox
-          tox -- --cov datafog --cov-report xml --cov-report term
-
-      - name: Submit to codecov
+          pip install -U pip
+          pip install -e .
+          pip install tox just pre-commit
+      - name: Run Tests with tox
+        run: tox -- --cov datafog --cov-report xml --cov-report term --codeblocks
+      - name: Submit to Codecov
         uses: codecov/codecov-action@v3
-        if: ${{ matrix.python-version == '3.10' }}
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
-        env:
+        with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: DataFog/datafog-python
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
