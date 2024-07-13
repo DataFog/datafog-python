@@ -27,28 +27,35 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/checkout@v3
-      
+
       - name: Install Tesseract OCR
         run: |
           sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y ppa:alex-p/tesseract-ocr-devel
+          sudo apt-get update
           sudo apt-get install -y tesseract-ocr
+          sudo apt-get install -y libtesseract-dev
           tesseract --version
-      
+          dpkg -l | grep tesseract
+
       - name: Verify Tesseract Installation
-        run: which tesseract
-      
+        run: |
+          which tesseract
+          tesseract --list-langs
+
       - name: Update PATH
         run: echo "export PATH=$PATH:/usr/bin" >> $GITHUB_ENV
-      
+
       - name: Install dependencies and run tests
         run: |
           pip install tox
           tox -- --cov datafog --cov-report xml --cov-report term
-      
+
       - name: Submit to codecov
         uses: codecov/codecov-action@v3
         if: ${{ matrix.python-version == '3.10' }}
-      
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
         env:
