@@ -159,7 +159,7 @@ For local development:
 
 1. Clone the repository.
 2. Navigate to the project directory:
-   ```bash
+   ```
    cd datafog-python
    ```
 3. Create a new virtual environment (using `.venv` is recommended as it is hardcoded in the justfile):
@@ -168,7 +168,7 @@ For local development:
    ```
 4. Activate the virtual environment:
    - On Windows:
-     ```bash
+     ```
      .venv\Scripts\activate
      ```
    - On macOS/Linux:
@@ -180,7 +180,7 @@ For local development:
    pip install -e .
    ```
 6. Set up the project:
-   ```bash
+   ```
    just setup
    ```
 
@@ -189,17 +189,17 @@ Now, you can develop and run the project locally.
 #### Important Actions:
 
 - **Format the code**:
-  ```bash
+  ```
   just format
   ```
   This runs `isort` to sort imports.
 - **Lint the code**:
-  ```bash
+  ```
   just lint
   ```
   This runs `flake8` to check for linting errors.
 - **Generate coverage report**:
-  ```bash
+  ```
   just coverage-html
   ```
   This runs `pytest` and generates a coverage report in the `htmlcov/` directory.

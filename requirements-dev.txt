@@ -2,6 +2,7 @@
 -r requirements.txt
 
 # Development and testing dependencies
+just
 isort
 black
 flake8

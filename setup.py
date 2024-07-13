@@ -62,6 +62,7 @@ setup(
     license="MIT",
     extras_require={
         "dev": [
+            "just",
             "isort",
             "black",
             "blacken-docs",

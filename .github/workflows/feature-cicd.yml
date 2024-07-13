@@ -53,8 +53,6 @@ jobs:
           pip install -U pip
           pip install -e .
           pip install tox just pre-commit
-      - name: Verify just Installation
-        run: just --version
       - name: Run Tests with tox
         run: tox -- --cov datafog --cov-report xml --cov-report term --codeblocks
       - name: Submit to Codecov
