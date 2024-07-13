@@ -23,7 +23,8 @@ setup(
     version=__version__(),
     author="Sid Mohan",
     author_email="sid@datafog.ai",
-    description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
+    description="Scan, redact, and manage PII in your documents before they get uploaded "
+    "to a Retrieval Augmented Generation (RAG) system.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),

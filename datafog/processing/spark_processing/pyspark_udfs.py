@@ -2,7 +2,6 @@ import importlib
 import subprocess
 import sys
 
-import requests
 import spacy
 
 PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
