@@ -35,7 +35,7 @@ DataFog is an open-source DevSecOps platform that lets you scan and redact Perso
 
 DataFog can be installed via pip:
 
-```bash
+```
 pip install datafog
 ```
 
@@ -151,21 +151,76 @@ You'll notice that we use async functions liberally throughout the SDK - given t
 
 DataFog is a community-driven **open-source** platform and we've been fortunate to have a small and growing contributor base. We'd love to hear ideas, feedback, suggestions for improvement - anything on your mind about what you think can be done to make DataFog better! Join our [Discord](https://discord.gg/bzDth394R4) and join our growing community.
 
+---
+
 ### Dev Notes
 
-- Justfile commands:
-  - `just format` to apply formatting.
-  - `just lint` to check formatting and style.
+For local development:
+
+1. Clone the repository.
+2. Navigate to the project directory:
+   ```
+   cd datafog-python
+   ```
+3. Create a new virtual environment (using `.venv` is recommended as it is hardcoded in the justfile):
+   ```
+   python -m venv .venv
+   ```
+4. Activate the virtual environment:
+   - On Windows:
+     ```
+     .venv\Scripts\activate
+     ```
+   - On macOS/Linux:
+     ```
+     source .venv/bin/activate
+     ```
+5. Install the package in editable mode:
+   ```
+   pip install -e .
+   ```
+6. Set up the project:
+   ```
+   just setup
+   ```
+
+Now, you can develop and run the project locally.
+
+#### Important Actions:
+
+- **Format the code**:
+  ```
+  just format
+  ```
+  This runs `isort` to sort imports.
+- **Lint the code**:
+  ```
+  just lint
+  ```
+  This runs `flake8` to check for linting errors.
+- **Generate coverage report**:
+  ```
+  just coverage-html
+  ```
+  This runs `pytest` and generates a coverage report in the `htmlcov/` directory.
+
+We use [pre-commit](https://marketplace.visualstudio.com/items?itemName=elagil.pre-commit-helper) to run checks locally before committing changes. Once installed, you can run:
+
+```
+pre-commit run --all-files
+```
+
+#### Dependencies
+
+For OCR, we use Tesseract, which is incorporated into the build step. You can find the relevant configurations under `.github/workflows/` in the following files:
+
+- `dev-cicd.yml`
+- `feature-cicd.yml`
+- `main-cicd.yml`
 
 ### Testing
 
-To run the datafog unit tests, check out this repository and do
-
-```
-
-tox
-
-```
+- Python 3.10
 
 ## License
 

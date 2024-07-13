@@ -17,7 +17,7 @@ class TextService:
     def batch_annotate_text_sync(self, texts: list):
         """Synchronously annotate a list of text input."""
         results = [self.annotate_text_sync(text) for text in texts]
-        return dict(zip(texts, results))
+        return dict(zip(texts, results, strict=True))
 
     async def annotate_text_async(self, text):
         """Asynchronously annotate a text string."""
@@ -27,4 +27,4 @@ class TextService:
         """Asynchronously annotate a list of text input."""
         tasks = [self.annotate_text_async(txt) for txt in text]
         results = await asyncio.gather(*tasks)
-        return dict(zip(text, results))
+        return dict(zip(texts, results, strict=True))

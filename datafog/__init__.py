@@ -8,7 +8,6 @@ from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
-from .telemetry import Telemetry
 
 __all__ = [
     "DonutProcessor",
@@ -21,5 +20,4 @@ __all__ = [
     "ImageDownloader",
     "PytesseractProcessor",
     "__version__",
-    "Telemetry",
 ]

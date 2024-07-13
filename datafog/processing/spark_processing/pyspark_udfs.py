@@ -2,9 +2,6 @@ import importlib
 import subprocess
 import sys
 
-import requests
-import spacy
-
 PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
 MAXIMAL_STRING_SIZE = 1000000
 
@@ -16,6 +13,8 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
         list[list[str]]: Values as arrays in order defined in the PII_ANNOTATION_LABELS.
     """
     ensure_installed("pyspark")
+    ensure_installed("spacy")
+    import spacy
     from pyspark.sql import SparkSession
     from pyspark.sql.functions import udf
     from pyspark.sql.types import ArrayType, StringType, StructField, StructType
@@ -45,6 +44,8 @@ def broadcast_pii_annotator_udf(
 ):
     """Broadcast PII annotator across Spark cluster and create UDF"""
     ensure_installed("pyspark")
+    ensure_installed("spacy")
+    import spacy
     from pyspark.sql import SparkSession
     from pyspark.sql.functions import udf
     from pyspark.sql.types import ArrayType, StringType, StructField, StructType

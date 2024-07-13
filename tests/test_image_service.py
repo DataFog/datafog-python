@@ -1,14 +1,13 @@
-# Pytest test cases for the image_service.py module
-# The test cases are written to test the image_service.py module
-# The test cases will test the ImageService class
-# The ImageService class is responsible for downloading images and extracting text from the images
-# The ImageService class uses the ImageDownloader, DonutProcessor, and PytesseractProcessor classes
-# The ImageService class has two methods: download_images and ocr_extract
-# The download_images method is responsible for downloading the images from the given URLs
-# The ocr_extract method is responsible for extracting the text from the images
-# The ocr_extract method has two optional parameters: use_donut and use_tesseract
-# The use_donut parameter is used to select the donut processor for the OCR
-# The use_tesseract parameter is used to select the pytesseract processor for the OCR
+# Pytest tests for image_service.py
+# Tests the ImageService class
+# ImageService downloads images and extracts text
+# Uses ImageDownloader, DonutProcessor, PytesseractProcessor
+# ImageService has two methods: download_images, ocr_extract
+# download_images downloads images from URLs
+# ocr_extract extracts text from images
+# ocr_extract has optional params: use_donut, use_tesseract
+# use_donut selects donut processor for OCR
+# use_tesseract selects pytesseract processor for OCR
 
 
 import pytest
