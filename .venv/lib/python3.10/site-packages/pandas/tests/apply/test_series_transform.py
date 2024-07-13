@@ -1,13 +1,7 @@
 import numpy as np
-import pytest
-
-from pandas import (
-    DataFrame,
-    MultiIndex,
-    Series,
-    concat,
-)
 import pandas._testing as tm
+import pytest
+from pandas import DataFrame, MultiIndex, Series, concat
 
 
 @pytest.mark.parametrize(

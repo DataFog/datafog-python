@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 import functools
 import re
+from collections.abc import Sequence
 
 DECODE_DEFAULT_CHARS = ";/?:@&=+$,#"
 DECODE_COMPONENT_CHARS = ""

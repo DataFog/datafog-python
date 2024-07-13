@@ -13,9 +13,21 @@
 """
 
 from pygments.style import Style
-from pygments.token import Keyword, Name, Comment, String, Error, Text, \
-    Number, Operator, Generic, Whitespace, Punctuation, Other, Literal
-
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Literal,
+    Name,
+    Number,
+    Operator,
+    Other,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
 
 __all__ = ['ParaisoDarkStyle']
 

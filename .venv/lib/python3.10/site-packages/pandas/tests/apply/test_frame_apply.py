@@ -1,20 +1,12 @@
-from datetime import datetime
 import warnings
+from datetime import datetime
 
 import numpy as np
-import pytest
-
-from pandas.core.dtypes.dtypes import CategoricalDtype
-
 import pandas as pd
-from pandas import (
-    DataFrame,
-    MultiIndex,
-    Series,
-    Timestamp,
-    date_range,
-)
 import pandas._testing as tm
+import pytest
+from pandas import DataFrame, MultiIndex, Series, Timestamp, date_range
+from pandas.core.dtypes.dtypes import CategoricalDtype
 from pandas.tests.frame.common import zip_frames
 
 

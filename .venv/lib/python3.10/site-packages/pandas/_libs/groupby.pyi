@@ -1,7 +1,6 @@
 from typing import Literal
 
 import numpy as np
-
 from pandas._typing import npt
 
 def group_median_float64(

@@ -1,7 +1,6 @@
 from datetime import tzinfo
 
 import numpy as np
-
 from pandas._typing import npt
 
 def format_array_from_datetime(

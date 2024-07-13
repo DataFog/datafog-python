@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import numpy as np
-
 from pandas._typing import npt
 
 class DateParseError(ValueError): ...

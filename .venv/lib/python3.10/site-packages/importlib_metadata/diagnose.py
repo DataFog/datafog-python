@@ -8,8 +8,8 @@ def inspect(path):
     dists = list(Distribution.discover(path=[path]))
     if not dists:
         return
-    print("Found", len(dists), "packages:", end=' ')
-    print(', '.join(dist.name for dist in dists))
+    print("Found", len(dists), "packages:", end=" ")
+    print(", ".join(dist.name for dist in dists))
 
 
 def run():
@@ -17,5 +17,5 @@ def run():
         inspect(path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

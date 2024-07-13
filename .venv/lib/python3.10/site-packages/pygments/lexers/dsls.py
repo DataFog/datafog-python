@@ -10,10 +10,28 @@
 
 import re
 
-from pygments.lexer import ExtendedRegexLexer, RegexLexer, bygroups, words, \
-    include, default, this, using, combined
-from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
-    Number, Punctuation, Whitespace
+from pygments.lexer import (
+    ExtendedRegexLexer,
+    RegexLexer,
+    bygroups,
+    combined,
+    default,
+    include,
+    this,
+    using,
+    words,
+)
+from pygments.token import (
+    Comment,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
 
 __all__ = ['ProtoBufLexer', 'ZeekLexer', 'PuppetLexer', 'RslLexer',
            'MscgenLexer', 'VGLLexer', 'AlloyLexer', 'PanLexer',

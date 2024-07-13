@@ -10,11 +10,28 @@
 
 import re
 
-from pygments.lexer import RegexLexer, include, bygroups, using, \
-    this, inherit, default, words
+from pygments.lexer import (
+    RegexLexer,
+    bygroups,
+    default,
+    include,
+    inherit,
+    this,
+    using,
+    words,
+)
+from pygments.token import (
+    Comment,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
 from pygments.util import get_bool_opt
-from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
-    Number, Punctuation, Whitespace
 
 __all__ = ['CLexer', 'CppLexer']
 

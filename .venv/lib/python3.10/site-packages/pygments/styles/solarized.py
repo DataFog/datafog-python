@@ -12,9 +12,17 @@
 """
 
 from pygments.style import Style
-from pygments.token import Comment, Error, Generic, Keyword, Name, Number, \
-    Operator, String, Token
-
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    String,
+    Token,
+)
 
 __all__ = ['SolarizedLightStyle', 'SolarizedDarkStyle']
 

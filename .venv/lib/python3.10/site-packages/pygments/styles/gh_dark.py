@@ -10,9 +10,19 @@
 """
 
 from pygments.style import Style
-from pygments.token import Keyword, Name, Comment, Error, Number, Operator, \
-    Generic, Text, Literal, String, Token
-
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Literal,
+    Name,
+    Number,
+    Operator,
+    String,
+    Text,
+    Token,
+)
 
 __all__ = ['GhDarkStyle']
 

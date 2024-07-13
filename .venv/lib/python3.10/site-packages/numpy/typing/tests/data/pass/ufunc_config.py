@@ -2,15 +2,19 @@
 
 import numpy as np
 
+
 def func1(a: str, b: int) -> None: ...
 def func2(a: str, b: int, c: float = ...) -> None: ...
 def func3(a: str, b: int) -> int: ...
 
+
 class Write1:
     def write(self, a: str) -> None: ...
 
+
 class Write2:
     def write(self, a: str, b: int = ...) -> None: ...
+
 
 class Write3:
     def write(self, a: str) -> int: ...

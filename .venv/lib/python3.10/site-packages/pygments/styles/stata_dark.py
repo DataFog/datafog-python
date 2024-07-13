@@ -11,9 +11,18 @@
 """
 
 from pygments.style import Style
-from pygments.token import Token, Keyword, Name, Comment, String, Error, \
-    Number, Operator, Whitespace, Generic
-
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    String,
+    Token,
+    Whitespace,
+)
 
 __all__ = ['StataDarkStyle']
 

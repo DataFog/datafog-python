@@ -10,12 +10,30 @@
 
 import re
 
-from pygments.lexer import Lexer, RegexLexer, include, bygroups, using, \
-    this, combined, default, words
-from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
-    Number, Punctuation, Whitespace
-from pygments.util import shebang_matches
 from pygments import unistring as uni
+from pygments.lexer import (
+    Lexer,
+    RegexLexer,
+    bygroups,
+    combined,
+    default,
+    include,
+    this,
+    using,
+    words,
+)
+from pygments.token import (
+    Comment,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
+from pygments.util import shebang_matches
 
 __all__ = ['JavaLexer', 'ScalaLexer', 'GosuLexer', 'GosuTemplateLexer',
            'GroovyLexer', 'IokeLexer', 'ClojureLexer', 'ClojureScriptLexer',

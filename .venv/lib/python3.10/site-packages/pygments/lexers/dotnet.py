@@ -9,14 +9,32 @@
 """
 import re
 
-from pygments.lexer import RegexLexer, DelegatingLexer, bygroups, include, \
-    using, this, default, words
-from pygments.token import Punctuation, Text, Comment, Operator, Keyword, \
-    Name, String, Number, Literal, Other, Whitespace
-from pygments.util import get_choice_opt
 from pygments import unistring as uni
-
+from pygments.lexer import (
+    DelegatingLexer,
+    RegexLexer,
+    bygroups,
+    default,
+    include,
+    this,
+    using,
+    words,
+)
 from pygments.lexers.html import XmlLexer
+from pygments.token import (
+    Comment,
+    Keyword,
+    Literal,
+    Name,
+    Number,
+    Operator,
+    Other,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
+from pygments.util import get_choice_opt
 
 __all__ = ['CSharpLexer', 'NemerleLexer', 'BooLexer', 'VbNetLexer',
            'CSharpAspxLexer', 'VbNetAspxLexer', 'FSharpLexer', 'XppLexer']

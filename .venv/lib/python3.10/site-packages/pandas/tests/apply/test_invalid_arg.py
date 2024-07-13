@@ -6,20 +6,14 @@
 #     4. invalid result shape/type
 # If your test does not fit into one of these categories, add to this list.
 
-from itertools import chain
 import re
+from itertools import chain
 
 import numpy as np
-import pytest
-
-from pandas.errors import SpecificationError
-
-from pandas import (
-    DataFrame,
-    Series,
-    date_range,
-)
 import pandas._testing as tm
+import pytest
+from pandas import DataFrame, Series, date_range
+from pandas.errors import SpecificationError
 
 
 @pytest.mark.parametrize("result_type", ["foo", 1])

@@ -11,9 +11,20 @@
 """
 
 from pygments.style import Style
-from pygments.token import Keyword, Name, Comment, String, Escape, \
-    Error, Text, Number, Operator, Generic, Punctuation, Literal
-
+from pygments.token import (
+    Comment,
+    Error,
+    Escape,
+    Generic,
+    Keyword,
+    Literal,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Text,
+)
 
 __all__ = ['MaterialStyle']
 

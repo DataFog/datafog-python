@@ -1,20 +1,12 @@
-from itertools import chain
 import operator
+from itertools import chain
 
 import numpy as np
-import pytest
-
-from pandas.core.dtypes.common import is_number
-
-from pandas import (
-    DataFrame,
-    Series,
-)
 import pandas._testing as tm
-from pandas.tests.apply.common import (
-    frame_transform_kernels,
-    series_transform_kernels,
-)
+import pytest
+from pandas import DataFrame, Series
+from pandas.core.dtypes.common import is_number
+from pandas.tests.apply.common import frame_transform_kernels, series_transform_kernels
 
 
 @pytest.mark.parametrize("func", ["sum", "mean", "min", "max", "std"])

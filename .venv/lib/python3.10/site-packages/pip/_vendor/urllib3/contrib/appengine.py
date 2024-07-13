@@ -44,6 +44,7 @@ import io
 import logging
 import warnings
 
+from . import _appengine_environ
 from ..exceptions import (
     HTTPError,
     HTTPWarning,
@@ -57,7 +58,6 @@ from ..request import RequestMethods
 from ..response import HTTPResponse
 from ..util.retry import Retry
 from ..util.timeout import Timeout
-from . import _appengine_environ
 
 try:
     from google.appengine.api import urlfetch

@@ -2,23 +2,16 @@
 # behave identically.
 # Specifically for object dtype
 import datetime
-from decimal import Decimal
 import operator
+from decimal import Decimal
 
 import numpy as np
-import pytest
-
-from pandas._config import using_pyarrow_string_dtype
-
-import pandas.util._test_decorators as td
-
 import pandas as pd
-from pandas import (
-    Series,
-    Timestamp,
-    option_context,
-)
 import pandas._testing as tm
+import pandas.util._test_decorators as td
+import pytest
+from pandas import Series, Timestamp, option_context
+from pandas._config import using_pyarrow_string_dtype
 from pandas.core import ops
 
 # ------------------------------------------------------------------

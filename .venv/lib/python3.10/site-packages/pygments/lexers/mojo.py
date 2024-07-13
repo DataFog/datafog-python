@@ -21,9 +21,8 @@ from pygments.lexer import (
     using,
     words,
 )
-from pygments.token import (
+from pygments.token import (  # Error,
     Comment,
-    # Error,
     Keyword,
     Name,
     Number,

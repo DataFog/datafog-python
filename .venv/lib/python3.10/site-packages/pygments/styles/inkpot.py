@@ -9,9 +9,20 @@
 """
 
 from pygments.style import Style
-from pygments.token import Text, Other, Keyword, Name, Comment, String, \
-    Error, Number, Operator, Generic, Whitespace, Punctuation
-
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Other,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
 
 __all__ = ['InkPotStyle']
 

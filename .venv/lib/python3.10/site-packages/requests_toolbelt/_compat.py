@@ -13,21 +13,17 @@ import sys
 import requests
 
 try:
-    from requests.packages.urllib3 import fields
-    from requests.packages.urllib3 import filepost
-    from requests.packages.urllib3 import poolmanager
+    from requests.packages.urllib3 import fields, filepost, poolmanager
 except ImportError:
-    from urllib3 import fields
-    from urllib3 import filepost
-    from urllib3 import poolmanager
+    from urllib3 import fields, filepost, poolmanager
 
 try:
-    from requests.packages.urllib3.connection import HTTPConnection
     from requests.packages.urllib3 import connection
+    from requests.packages.urllib3.connection import HTTPConnection
 except ImportError:
     try:
-        from urllib3.connection import HTTPConnection
         from urllib3 import connection
+        from urllib3.connection import HTTPConnection
     except ImportError:
         HTTPConnection = None
         connection = None
@@ -44,13 +40,14 @@ else:
 PY3 = sys.version_info > (3, 0)
 
 if PY3:
-    from collections.abc import Mapping, MutableMapping
     import queue
+    from collections.abc import Mapping, MutableMapping
     from urllib.parse import urlencode, urljoin
 else:
     from collections import Mapping, MutableMapping
-    import Queue as queue
     from urllib import urlencode
+
+    import Queue as queue
     from urlparse import urljoin
 
 try:

@@ -1,6 +1,5 @@
-import pytest
-
 import pandas._testing as tm
+import pytest
 
 
 class TestCategoricalWarnings:

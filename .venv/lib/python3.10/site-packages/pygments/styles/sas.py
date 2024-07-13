@@ -11,9 +11,17 @@
 """
 
 from pygments.style import Style
-from pygments.token import Keyword, Name, Comment, String, Error, \
-    Number, Other, Whitespace, Generic
-
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Name,
+    Number,
+    Other,
+    String,
+    Whitespace,
+)
 
 __all__ = ['SasStyle']
 

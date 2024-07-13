@@ -1,10 +1,8 @@
 import numpy as np
-import pytest
-
-from pandas.compat.numpy import np_version_gte1p25
-
 import pandas as pd
 import pandas._testing as tm
+import pytest
+from pandas.compat.numpy import np_version_gte1p25
 
 
 def test_agg_relabel():

@@ -9,8 +9,15 @@
 """
 
 from pygments.lexer import RegexLexer
-from pygments.token import Comment, Operator, Keyword, Name, Literal, \
-    Punctuation, Whitespace
+from pygments.token import (
+    Comment,
+    Keyword,
+    Literal,
+    Name,
+    Operator,
+    Punctuation,
+    Whitespace,
+)
 
 __all__ = ['RitaLexer']
 

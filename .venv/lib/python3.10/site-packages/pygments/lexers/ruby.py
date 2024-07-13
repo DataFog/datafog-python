@@ -10,10 +10,31 @@
 
 import re
 
-from pygments.lexer import Lexer, RegexLexer, ExtendedRegexLexer, include, \
-    bygroups, default, LexerContext, do_insertions, words, line_re
-from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
-    Number, Punctuation, Error, Generic, Whitespace
+from pygments.lexer import (
+    ExtendedRegexLexer,
+    Lexer,
+    LexerContext,
+    RegexLexer,
+    bygroups,
+    default,
+    do_insertions,
+    include,
+    line_re,
+    words,
+)
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
 from pygments.util import shebang_matches
 
 __all__ = ['RubyLexer', 'RubyConsoleLexer', 'FancyLexer']

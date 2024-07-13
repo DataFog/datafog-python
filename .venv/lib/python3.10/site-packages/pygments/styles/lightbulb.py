@@ -23,7 +23,6 @@ from pygments.token import (
     Token,
 )
 
-
 __all__ = ['LightbulbStyle']
 
 

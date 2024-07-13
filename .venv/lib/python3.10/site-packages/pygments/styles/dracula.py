@@ -12,9 +12,21 @@
 """
 
 from pygments.style import Style
-from pygments.token import Keyword, Name, Comment, String, Error, Literal, \
-    Number, Operator, Other, Punctuation, Text, Generic, Whitespace
-
+from pygments.token import (
+    Comment,
+    Error,
+    Generic,
+    Keyword,
+    Literal,
+    Name,
+    Number,
+    Operator,
+    Other,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
 
 __all__ = ['DraculaStyle']
 

@@ -10,10 +10,25 @@
 
 import re
 
-from pygments.lexer import ExtendedRegexLexer, include, bygroups, default, \
-    words, line_re
-from pygments.token import Comment, Operator, Keyword, Name, String, Number, \
-    Punctuation, Error, Whitespace
+from pygments.lexer import (
+    ExtendedRegexLexer,
+    bygroups,
+    default,
+    include,
+    line_re,
+    words,
+)
+from pygments.token import (
+    Comment,
+    Error,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Whitespace,
+)
 
 __all__ = ['CrystalLexer']
 

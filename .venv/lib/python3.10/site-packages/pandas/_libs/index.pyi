@@ -1,8 +1,6 @@
 import numpy as np
-
-from pandas._typing import npt
-
 from pandas import MultiIndex
+from pandas._typing import npt
 from pandas.core.arrays import ExtensionArray
 
 multiindex_nulls_shift: int

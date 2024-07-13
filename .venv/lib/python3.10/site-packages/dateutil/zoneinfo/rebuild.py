@@ -1,8 +1,8 @@
+import json
 import logging
 import os
-import tempfile
 import shutil
-import json
+import tempfile
 from subprocess import check_call, check_output
 from tarfile import TarFile
 
@@ -27,7 +27,7 @@ def rebuild(filename, tag=None, format="gz", zonegroups=[], metadata=None):
             _run_zic(zonedir, filepaths)
 
         # write metadata file
-        with open(os.path.join(zonedir, METADATA_FN), 'w') as f:
+        with open(os.path.join(zonedir, METADATA_FN), "w") as f:
             json.dump(metadata, f, indent=4, sort_keys=True)
         target = os.path.join(moduledir, ZONEFILENAME)
         with TarFile.open(target, "w:%s" % format) as tf:
@@ -72,4 +72,5 @@ def _print_on_nosuchfile(e):
         logging.error(
             "Could not find zic. Perhaps you need to install "
             "libc-bin or some other package that provides it, "
-            "or it's not in your PATH?")
+            "or it's not in your PATH?"
+        )

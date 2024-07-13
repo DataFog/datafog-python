@@ -9,9 +9,16 @@
 """
 
 from pygments.style import Style
-from pygments.token import Keyword, Name, Comment, String, Error, \
-     Number, Operator, Literal
-
+from pygments.token import (
+    Comment,
+    Error,
+    Keyword,
+    Literal,
+    Name,
+    Number,
+    Operator,
+    String,
+)
 
 __all__ = ['XcodeStyle']
 

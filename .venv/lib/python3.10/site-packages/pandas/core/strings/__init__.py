@@ -17,6 +17,7 @@ these are prefixed with `_str_`. So ``Series.str.upper()`` calls
 ``Series.array._str_upper()``. The interface isn't currently public
 to other string extension arrays.
 """
+
 # Pandas current implementation is in ObjectStringArrayMixin. This is designed
 # to work on object-dtype ndarrays.
 #

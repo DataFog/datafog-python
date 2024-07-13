@@ -151,7 +151,6 @@ You'll notice that we use async functions liberally throughout the SDK - given t
 
 DataFog is a community-driven **open-source** platform and we've been fortunate to have a small and growing contributor base. We'd love to hear ideas, feedback, suggestions for improvement - anything on your mind about what you think can be done to make DataFog better! Join our [Discord](https://discord.gg/bzDth394R4) and join our growing community.
 
-
 ---
 
 ### Dev Notes
@@ -160,53 +159,50 @@ For local development:
 
 1. Clone the repository.
 2. Navigate to the project directory:
-    ```bash
-    cd datafog-python
-    ```
+   ```bash
+   cd datafog-python
+   ```
 3. Create a new virtual environment (using `.venv` is recommended as it is hardcoded in the justfile):
-    ```bash
-    python -m venv .venv
-    ```
+   ```bash
+   python -m venv .venv
+   ```
 4. Activate the virtual environment:
-    - On Windows:
-      ```bash
-      .venv\Scripts\activate
-      ```
-    - On macOS/Linux:
-      ```bash
-      source .venv/bin/activate
-      ```
+   - On Windows:
+     ```bash
+     .venv\Scripts\activate
+     ```
+   - On macOS/Linux:
+     ```bash
+     source .venv/bin/activate
+     ```
 5. Install the package in editable mode:
-    ```bash
-    pip install -e .
-    ```
+   ```bash
+   pip install -e .
+   ```
 6. Set up the project:
-    ```bash
-    just setup
-    ```
+   ```bash
+   just setup
+   ```
 
 Now, you can develop and run the project locally.
 
 #### Important Actions:
 
 - **Format the code**:
-    ```bash
-    just format
-    ```
-    This runs `isort` to sort imports.
-  
+  ```bash
+  just format
+  ```
+  This runs `isort` to sort imports.
 - **Lint the code**:
-    ```bash
-    just lint
-    ```
-    This runs `flake8` to check for linting errors.
-  
+  ```bash
+  just lint
+  ```
+  This runs `flake8` to check for linting errors.
 - **Generate coverage report**:
-    ```bash
-    just coverage-html
-    ```
-    This runs `pytest` and generates a coverage report in the `htmlcov/` directory.
-
+  ```bash
+  just coverage-html
+  ```
+  This runs `pytest` and generates a coverage report in the `htmlcov/` directory.
 
 We use [pre-commit](https://marketplace.visualstudio.com/items?itemName=elagil.pre-commit-helper) to run checks locally before committing changes. Once installed, you can run:
 

@@ -9,8 +9,16 @@
 """
 
 from pygments.lexer import RegexLexer
-from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
-    Number, Punctuation
+from pygments.token import (
+    Comment,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Text,
+)
 from pygments.util import get_bool_opt
 
 __all__ = ['SourcePawnLexer', 'PawnLexer']

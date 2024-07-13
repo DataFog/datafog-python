@@ -9,9 +9,16 @@
 """
 
 from pygments.style import Style
-from pygments.token import Token, Comment, Name, Keyword, \
-    Generic, Number, String, Whitespace
-
+from pygments.token import (
+    Comment,
+    Generic,
+    Keyword,
+    Name,
+    Number,
+    String,
+    Token,
+    Whitespace,
+)
 
 __all__ = ['FruityStyle']
 

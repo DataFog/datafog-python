@@ -10,10 +10,27 @@
 
 import re
 
-from pygments.lexer import Lexer, RegexLexer, bygroups, words, do_insertions, \
-    include, default, line_re
-from pygments.token import Comment, Operator, Keyword, Name, String, \
-    Number, Punctuation, Generic, Whitespace
+from pygments.lexer import (
+    Lexer,
+    RegexLexer,
+    bygroups,
+    default,
+    do_insertions,
+    include,
+    line_re,
+    words,
+)
+from pygments.token import (
+    Comment,
+    Generic,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Whitespace,
+)
 
 __all__ = ['ErlangLexer', 'ErlangShellLexer', 'ElixirConsoleLexer',
            'ElixirLexer']

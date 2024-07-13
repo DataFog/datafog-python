@@ -14,11 +14,11 @@ from docutils import writers
 
 class Writer(writers.UnfilteredWriter):
 
-    supported = ('null',)
+    supported = ("null",)
     """Formats this writer supports."""
 
-    config_section = 'null writer'
-    config_section_dependencies = ('writers',)
+    config_section = "null writer"
+    config_section_dependencies = ("writers",)
 
     def translate(self):
         # output = None   # TODO in 0.22

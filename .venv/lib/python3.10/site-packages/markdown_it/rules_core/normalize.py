@@ -1,4 +1,5 @@
 """Normalize input string."""
+
 import re
 
 from .state_core import StateCore

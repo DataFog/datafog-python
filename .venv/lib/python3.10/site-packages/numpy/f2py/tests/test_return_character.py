@@ -1,8 +1,9 @@
-import pytest
-
-from numpy import array
-from . import util
 import platform
+
+import pytest
+from numpy import array
+
+from . import util
 
 IS_S390X = platform.machine() == "s390x"
 

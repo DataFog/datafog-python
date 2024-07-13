@@ -1,5 +1,4 @@
 import numpy as np
-
 from pandas._typing import npt
 
 def inner_join(

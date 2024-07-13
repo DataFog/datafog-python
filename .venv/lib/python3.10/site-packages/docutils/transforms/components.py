@@ -8,11 +8,10 @@ Docutils component-related transforms.
 
 from docutils.transforms import Transform
 
-__docformat__ = 'reStructuredText'
+__docformat__ = "reStructuredText"
 
 
 class Filter(Transform):
-
     """
     Include or exclude elements which depend on a specific Docutils component.
 
@@ -36,6 +35,7 @@ class Filter(Transform):
 
     This transform is no longer used by Docutils, it may be removed in future.
     """
+
     # TODO: clean up or keep this for 3rd party (or possible future) use?
     # (GM 2021-05-18)
 
@@ -43,12 +43,12 @@ class Filter(Transform):
 
     def apply(self):
         pending = self.startnode
-        component_type = pending.details['component']  # 'reader' or 'writer'
-        formats = (pending.details['format']).split(',')
+        component_type = pending.details["component"]  # 'reader' or 'writer'
+        formats = (pending.details["format"]).split(",")
         component = self.document.transformer.components[component_type]
         for format in formats:
             if component.supports(format):
-                pending.replace_self(pending.details['nodes'])
+                pending.replace_self(pending.details["nodes"])
                 break
         else:
             pending.parent.remove(pending)

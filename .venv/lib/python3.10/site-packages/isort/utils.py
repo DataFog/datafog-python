@@ -5,7 +5,9 @@ from typing import Any, Dict, Optional, Tuple
 
 
 class TrieNode:
-    def __init__(self, config_file: str = "", config_data: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(
+        self, config_file: str = "", config_data: Optional[Dict[str, Any]] = None
+    ) -> None:
         if not config_data:
             config_data = {}
 
@@ -19,7 +21,9 @@ class Trie:
     associated with each file
     """
 
-    def __init__(self, config_file: str = "", config_data: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(
+        self, config_file: str = "", config_data: Optional[Dict[str, Any]] = None
+    ) -> None:
         self.root: TrieNode = TrieNode(config_file, config_data)
 
     def insert(self, config_file: str, config_data: Dict[str, Any]) -> None:
@@ -66,7 +70,9 @@ def exists_case_sensitive(path: str) -> bool:
     Python can only import using the case of the real file.
     """
     result = os.path.exists(path)
-    if (sys.platform.startswith("win") or sys.platform == "darwin") and result:  # pragma: no cover
+    if (
+        sys.platform.startswith("win") or sys.platform == "darwin"
+    ) and result:  # pragma: no cover
         directory, basename = os.path.split(path)
         result = basename in os.listdir(directory)
     return result

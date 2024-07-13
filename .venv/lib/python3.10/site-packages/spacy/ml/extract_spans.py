@@ -1,6 +1,7 @@
-from typing import Tuple, Callable
+from typing import Callable, Tuple
+
 from thinc.api import Model, to_numpy
-from thinc.types import Ragged, Ints1d
+from thinc.types import Ints1d, Ragged
 
 from ..util import registry
 

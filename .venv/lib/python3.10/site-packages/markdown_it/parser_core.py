@@ -4,6 +4,7 @@
  * Top-level rules executor. Glues block/inline parsers and does intermediate
  * transformations.
 """
+
 from __future__ import annotations
 
 from typing import Callable

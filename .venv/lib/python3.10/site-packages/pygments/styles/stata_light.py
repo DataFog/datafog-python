@@ -10,9 +10,17 @@
 """
 
 from pygments.style import Style
-from pygments.token import Keyword, Name, Comment, String, Error, \
-    Number, Operator, Whitespace, Text
-
+from pygments.token import (
+    Comment,
+    Error,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    String,
+    Text,
+    Whitespace,
+)
 
 __all__ = ['StataLightStyle']
 

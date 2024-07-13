@@ -1,12 +1,7 @@
 import numpy as np
-import pytest
-
-from pandas import (
-    DataFrame,
-    MultiIndex,
-    Series,
-)
 import pandas._testing as tm
+import pytest
+from pandas import DataFrame, MultiIndex, Series
 from pandas.tests.apply.common import frame_transform_kernels
 from pandas.tests.frame.common import zip_frames
 

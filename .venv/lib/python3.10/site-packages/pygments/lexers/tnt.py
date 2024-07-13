@@ -11,8 +11,16 @@
 import re
 
 from pygments.lexer import Lexer
-from pygments.token import Text, Comment, Operator, Keyword, Name, Number, \
-    Punctuation, Error
+from pygments.token import (
+    Comment,
+    Error,
+    Keyword,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    Text,
+)
 
 __all__ = ['TNTLexer']
 

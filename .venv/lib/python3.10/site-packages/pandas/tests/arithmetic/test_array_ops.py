@@ -1,13 +1,9 @@
 import operator
 
 import numpy as np
-import pytest
-
 import pandas._testing as tm
-from pandas.core.ops.array_ops import (
-    comparison_op,
-    na_logical_op,
-)
+import pytest
+from pandas.core.ops.array_ops import comparison_op, na_logical_op
 
 
 def test_na_logical_op_2d():

@@ -1,6 +1,7 @@
 """
 Templating for ops docstrings
 """
+
 from __future__ import annotations
 
 
