@@ -11,12 +11,13 @@ from .services.text_service import TextService
 logger = logging.getLogger("datafog_logger")
 logger.setLevel(logging.INFO)
 
+
 class DataFog:
     def __init__(
         self,
-        image_service = ImageService(),
-        text_service = TextService(),
-        spark_service = None,
+        image_service=ImageService(),
+        text_service=TextService(),
+        spark_service=None,
         operations: List[OperationType] = [OperationType.ANNOTATE_PII],
     ):
         self.image_service = image_service
@@ -44,7 +45,7 @@ class DataFog:
             )
 
             if OperationType.ANNOTATE_PII in self.operations:
-                annotated_text = await self.text_service.batch_annotate_text_async( 
+                annotated_text = await self.text_service.batch_annotate_text_async(
                     extracted_text
                 )
                 self.logger.info(
@@ -62,7 +63,9 @@ class DataFog:
         try:
             self.logger.info(f"Starting text pipeline with {len(str_list)} texts.")
             if OperationType.ANNOTATE_PII in self.operations:
-                annotated_text = await self.text_service.batch_annotate_text_async(str_list)
+                annotated_text = await self.text_service.batch_annotate_text_async(
+                    str_list
+                )
                 self.logger.info(
                     f"Text annotation completed with {len(annotated_text)} annotations."
                 )
@@ -95,6 +98,7 @@ class DataFog:
         """Add multiple attributes."""
         for key, value in attributes.items():
             pass
+
 
 class TextPIIAnnotator:
     def __init__(self):
