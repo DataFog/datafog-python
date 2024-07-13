@@ -35,7 +35,7 @@ DataFog is an open-source DevSecOps platform that lets you scan and redact Perso
 
 DataFog can be installed via pip:
 
-```bash
+```
 pip install datafog
 ```
 
@@ -163,7 +163,7 @@ For local development:
    cd datafog-python
    ```
 3. Create a new virtual environment (using `.venv` is recommended as it is hardcoded in the justfile):
-   ```bash
+   ```
    python -m venv .venv
    ```
 4. Activate the virtual environment:
@@ -172,11 +172,11 @@ For local development:
      .venv\Scripts\activate
      ```
    - On macOS/Linux:
-     ```bash
+     ```
      source .venv/bin/activate
      ```
 5. Install the package in editable mode:
-   ```bash
+   ```
    pip install -e .
    ```
 6. Set up the project:
@@ -206,7 +206,7 @@ Now, you can develop and run the project locally.
 
 We use [pre-commit](https://marketplace.visualstudio.com/items?itemName=elagil.pre-commit-helper) to run checks locally before committing changes. Once installed, you can run:
 
-```bash
+```
 pre-commit run --all-files
 ```
 
