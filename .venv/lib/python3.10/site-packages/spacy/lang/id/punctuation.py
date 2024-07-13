@@ -1,5 +1,6 @@
-from ..char_classes import ALPHA, _currency, _units, merge_chars, split_chars
-from ..punctuation import TOKENIZER_INFIXES, TOKENIZER_PREFIXES, TOKENIZER_SUFFIXES
+from ..punctuation import TOKENIZER_PREFIXES, TOKENIZER_SUFFIXES, TOKENIZER_INFIXES
+from ..char_classes import ALPHA, merge_chars, split_chars, _currency, _units
+
 
 _units = (
     _units + "s bit Gbps Mbps mbps Kbps kbps ƒ ppi px "

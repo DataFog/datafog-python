@@ -1,6 +1,5 @@
-from ..vocab cimport Vocab
 from .pipe cimport Pipe
-
+from ..vocab cimport Vocab
 
 cdef class TrainablePipe(Pipe):
     cdef public Vocab vocab

@@ -1,5 +1,6 @@
-from ...attrs import LIKE_NUM, NORM
 from ..norm_exceptions import BASE_NORMS
+from ...attrs import NORM, LIKE_NUM
+
 
 # fmt: off
 _stem_suffixes = [

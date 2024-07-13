@@ -2,6 +2,7 @@ import unicodedata
 
 from ...attrs import LIKE_NUM
 
+
 _num_words = [
     "ení",
     "oókàn",

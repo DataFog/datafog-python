@@ -1,5 +1,4 @@
 """Paragraph."""
-
 import logging
 
 from .state_block import StateBlock

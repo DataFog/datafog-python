@@ -1,7 +1,7 @@
-from ...language import BaseDefaults, Language
-from .punctuation import TOKENIZER_INFIXES, TOKENIZER_PREFIXES, TOKENIZER_SUFFIXES
+from .tokenizer_exceptions import TOKENIZER_EXCEPTIONS, TOKEN_MATCH
+from .punctuation import TOKENIZER_PREFIXES, TOKENIZER_SUFFIXES, TOKENIZER_INFIXES
 from .stop_words import STOP_WORDS
-from .tokenizer_exceptions import TOKEN_MATCH, TOKENIZER_EXCEPTIONS
+from ...language import Language, BaseDefaults
 
 
 class HungarianDefaults(BaseDefaults):

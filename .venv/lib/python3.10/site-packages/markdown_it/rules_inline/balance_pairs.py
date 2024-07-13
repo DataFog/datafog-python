@@ -1,5 +1,4 @@
 """Balance paired characters (*, _, etc) in inline tokens."""
-
 from __future__ import annotations
 
 from .state_inline import Delimiter, StateInline

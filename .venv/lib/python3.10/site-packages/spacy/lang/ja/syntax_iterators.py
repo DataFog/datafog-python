@@ -1,7 +1,8 @@
-from typing import Iterator, Set, Tuple, Union
+from typing import Union, Iterator, Tuple, Set
 
-from ...symbols import NOUN, PRON, PROPN, VERB
+from ...symbols import NOUN, PROPN, PRON, VERB
 from ...tokens import Doc, Span
+
 
 # TODO: this can probably be pruned a bit
 # fmt: off

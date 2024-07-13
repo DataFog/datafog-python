@@ -1,7 +1,7 @@
-from ...language import BaseDefaults, Language
+from .stop_words import STOP_WORDS
 from .lex_attrs import LEX_ATTRS
 from .punctuation import TOKENIZER_SUFFIXES
-from .stop_words import STOP_WORDS
+from ...language import Language, BaseDefaults
 
 
 class UrduDefaults(BaseDefaults):

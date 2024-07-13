@@ -2,7 +2,6 @@
 
 At least 3 of these characters on a line * - _
 """
-
 import logging
 
 from ..common.utils import isStrSpace

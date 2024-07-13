@@ -1,5 +1,6 @@
 from ...attrs import LIKE_NUM
 
+
 _num_words = [
     "영",
     "공",

@@ -1,13 +1,12 @@
-from typing import Callable, Optional
-
+from typing import Optional, Callable
 from thinc.api import Model
-
-from ...language import BaseDefaults, Language
-from ...pipeline import Lemmatizer
-from .punctuation import TOKENIZER_INFIXES, TOKENIZER_PREFIXES, TOKENIZER_SUFFIXES
+from .tokenizer_exceptions import TOKENIZER_EXCEPTIONS
+from .punctuation import TOKENIZER_PREFIXES, TOKENIZER_INFIXES
+from .punctuation import TOKENIZER_SUFFIXES
 from .stop_words import STOP_WORDS
 from .syntax_iterators import SYNTAX_ITERATORS
-from .tokenizer_exceptions import TOKENIZER_EXCEPTIONS
+from ...language import Language, BaseDefaults
+from ...pipeline import Lemmatizer
 
 
 class NorwegianDefaults(BaseDefaults):

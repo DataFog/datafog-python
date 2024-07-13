@@ -1,7 +1,8 @@
 import unicodedata
 
-from ...attrs import IS_CURRENCY, LIKE_NUM
 from .punctuation import LIST_CURRENCY
+from ...attrs import IS_CURRENCY, LIKE_NUM
+
 
 _num_words = [
     "nol",

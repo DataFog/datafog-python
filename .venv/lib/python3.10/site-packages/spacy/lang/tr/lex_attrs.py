@@ -1,5 +1,6 @@
 from ...attrs import LIKE_NUM
 
+
 # Thirteen, fifteen etc. are written separate: on üç
 
 _num_words = [

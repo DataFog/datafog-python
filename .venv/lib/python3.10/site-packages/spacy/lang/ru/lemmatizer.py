@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Optional, List, Dict, Tuple, Callable
 
 from thinc.api import Model
 
@@ -7,6 +7,7 @@ from ...pipeline.lemmatizer import lemmatizer_score
 from ...symbols import POS
 from ...tokens import Token
 from ...vocab import Vocab
+
 
 PUNCT_RULES = {"«": '"', "»": '"'}
 

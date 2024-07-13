@@ -1,7 +1,8 @@
 import re
 
-from ..symbols import NORM, ORTH
 from .char_classes import ALPHA_LOWER
+from ..symbols import ORTH, NORM
+
 
 # URL validation regex courtesy of: https://mathiasbynens.be/demo/url-regex
 # and https://gist.github.com/dperini/729294 (Diego Perini, MIT License)

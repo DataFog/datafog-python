@@ -4,7 +4,8 @@ References:
     (countries, occupations, fields of studies and more).
 """
 
-from ...symbols import NORM, ORTH
+from ...symbols import ORTH, NORM
+
 
 _exc = {}
 

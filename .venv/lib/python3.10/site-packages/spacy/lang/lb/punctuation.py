@@ -1,4 +1,4 @@
-from ..char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER, LIST_ELLIPSES, LIST_ICONS
+from ..char_classes import LIST_ELLIPSES, LIST_ICONS, ALPHA, ALPHA_LOWER, ALPHA_UPPER
 
 ELISION = " ' ’ ".strip().replace(" ", "")
 

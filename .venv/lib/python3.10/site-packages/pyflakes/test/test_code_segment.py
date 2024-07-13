@@ -1,12 +1,6 @@
 from pyflakes import messages as m
-from pyflakes.checker import (
-    Argument,
-    Assignment,
-    ClassScope,
-    FunctionDefinition,
-    FunctionScope,
-    ModuleScope,
-)
+from pyflakes.checker import (FunctionScope, ClassScope, ModuleScope,
+                              Argument, FunctionDefinition, Assignment)
 from pyflakes.test.harness import TestCase
 
 

@@ -1,6 +1,6 @@
-from cymem.cymem cimport Pool
 from libcpp.vector cimport vector
-from preshed.maps cimport MapStruct, key_t
+from cymem.cymem cimport Pool
+from preshed.maps cimport key_t, MapStruct
 
 from ..attrs cimport attr_id_t
 from ..structs cimport SpanC

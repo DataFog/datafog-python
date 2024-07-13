@@ -1,13 +1,8 @@
-from ..char_classes import (
-    ALPHA,
-    ALPHA_LOWER,
-    ALPHA_UPPER,
-    CONCAT_QUOTES,
-    HYPHENS,
-    LIST_ELLIPSES,
-    LIST_ICONS,
-)
 from ..punctuation import TOKENIZER_PREFIXES as BASE_TOKENIZER_PREFIXES
+from ..char_classes import LIST_ELLIPSES, LIST_ICONS
+from ..char_classes import ALPHA, HYPHENS, CONCAT_QUOTES
+from ..char_classes import ALPHA_LOWER, ALPHA_UPPER
+
 
 ELISION = "'’"
 

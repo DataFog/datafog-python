@@ -1,5 +1,4 @@
 """Code block (4 spaces padded)."""
-
 import logging
 
 from .state_block import StateBlock

@@ -1,13 +1,15 @@
-from typing import Callable, Optional
+from typing import Optional, Callable
 
 from thinc.api import Model
 
-from ...language import BaseDefaults, Language
-from ..tokenizer_exceptions import BASE_EXCEPTIONS
-from .lemmatizer import PolishLemmatizer
-from .lex_attrs import LEX_ATTRS
-from .punctuation import TOKENIZER_INFIXES, TOKENIZER_PREFIXES, TOKENIZER_SUFFIXES
+from .punctuation import TOKENIZER_PREFIXES, TOKENIZER_INFIXES
+from .punctuation import TOKENIZER_SUFFIXES
 from .stop_words import STOP_WORDS
+from .lex_attrs import LEX_ATTRS
+from .lemmatizer import PolishLemmatizer
+from ..tokenizer_exceptions import BASE_EXCEPTIONS
+from ...language import Language, BaseDefaults
+
 
 TOKENIZER_EXCEPTIONS = {
     exc: val for exc, val in BASE_EXCEPTIONS.items() if not exc.endswith(".")

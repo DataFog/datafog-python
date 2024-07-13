@@ -1,5 +1,6 @@
-from ..char_classes import ALPHA
 from ..punctuation import TOKENIZER_INFIXES
+from ..char_classes import ALPHA
+
 
 ELISION = " ' ’ ".strip().replace(" ", "").replace("\n", "")
 

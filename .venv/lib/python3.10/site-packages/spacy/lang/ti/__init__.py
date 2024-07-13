@@ -1,11 +1,12 @@
-from ...attrs import LANG
-from ...language import BaseDefaults, Language
-from ...util import update_exc
-from ..tokenizer_exceptions import BASE_EXCEPTIONS
+from .stop_words import STOP_WORDS
 from .lex_attrs import LEX_ATTRS
 from .punctuation import TOKENIZER_SUFFIXES
-from .stop_words import STOP_WORDS
+
 from .tokenizer_exceptions import TOKENIZER_EXCEPTIONS
+from ..tokenizer_exceptions import BASE_EXCEPTIONS
+from ...language import Language, BaseDefaults
+from ...attrs import LANG
+from ...util import update_exc
 
 
 class TigrinyaDefaults(BaseDefaults):

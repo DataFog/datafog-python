@@ -6,8 +6,8 @@ setuptools is bootstrapped via import.
 # Note that setuptools gets imported implicitly by the
 # invocation of this script using python -m setuptools.launch
 
-import sys
 import tokenize
+import sys
 
 
 def run():

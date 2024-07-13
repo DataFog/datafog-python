@@ -1,16 +1,8 @@
-from ..char_classes import (
-    ALPHA,
-    ALPHA_LOWER,
-    ALPHA_UPPER,
-    CONCAT_QUOTES,
-    CURRENCY,
-    LIST_ELLIPSES,
-    LIST_PUNCT,
-    LIST_QUOTES,
-    UNITS,
-    merge_chars,
-)
-from ..punctuation import TOKENIZER_INFIXES, TOKENIZER_PREFIXES
+from ..punctuation import TOKENIZER_PREFIXES, TOKENIZER_INFIXES
+from ..char_classes import LIST_PUNCT, LIST_ELLIPSES, LIST_QUOTES, CURRENCY
+from ..char_classes import CONCAT_QUOTES, UNITS, ALPHA, ALPHA_LOWER, ALPHA_UPPER
+from ..char_classes import merge_chars
+
 
 ELISION = "' ’".replace(" ", "")
 HYPHENS = r"- – — ‐ ‑".replace(" ", "")

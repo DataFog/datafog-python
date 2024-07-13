@@ -1,5 +1,4 @@
 """markdown-it default options."""
-
 from ..utils import PresetType
 
 

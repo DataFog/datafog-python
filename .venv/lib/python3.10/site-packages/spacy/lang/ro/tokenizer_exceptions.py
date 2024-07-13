@@ -1,7 +1,8 @@
+from ..tokenizer_exceptions import BASE_EXCEPTIONS
 from ...symbols import ORTH
 from ...util import update_exc
-from ..tokenizer_exceptions import BASE_EXCEPTIONS
 from .punctuation import _make_ro_variants
+
 
 _exc = {}
 

@@ -1,21 +1,14 @@
-import sys
-import warnings
-from pathlib import Path
 from typing import Tuple
-
+from pathlib import Path
+import sys
 import requests
-from wasabi import Printer, msg
+from wasabi import msg, Printer
+import warnings
 
-from .. import about
-from ..util import (
-    get_installed_models,
-    get_minor_version,
-    get_model_meta,
-    get_package_path,
-    get_package_version,
-    is_compatible_version,
-)
 from ._util import app
+from .. import about
+from ..util import get_package_version, get_installed_models, get_minor_version
+from ..util import get_package_path, get_model_meta, is_compatible_version
 
 
 @app.command("validate")

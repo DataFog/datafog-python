@@ -6,7 +6,6 @@ primarily in that it allows HTML and does not enable components:
 - block: table
 - inline: strikethrough
 """
-
 from ..utils import PresetType
 
 

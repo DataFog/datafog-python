@@ -1,4 +1,5 @@
-from ...symbols import NORM, ORTH
+from ...symbols import ORTH, NORM
+
 
 TOKENIZER_EXCEPTIONS = {
     ".ق ": [{ORTH: ".ق "}],

@@ -1,5 +1,5 @@
-import sys
 import unicodedata
+import sys
 from configparser import ConfigParser
 
 from .compat import py39

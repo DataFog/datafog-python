@@ -1,22 +1,15 @@
+from typing import Optional, Dict, Any, Union, List
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-
-import typer
+from wasabi import msg, table
 from thinc.api import Config
 from thinc.config import VARIABLE_RE
-from wasabi import msg, table
+import typer
 
-from .. import util
+from ._util import Arg, Opt, show_validation_error, parse_config_overrides
+from ._util import import_code, debug_cli
 from ..schemas import ConfigSchemaInit, ConfigSchemaTraining
 from ..util import registry
-from ._util import (
-    Arg,
-    Opt,
-    debug_cli,
-    import_code,
-    parse_config_overrides,
-    show_validation_error,
-)
+from .. import util
 
 
 @debug_cli.command(

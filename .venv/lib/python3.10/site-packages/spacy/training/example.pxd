@@ -1,6 +1,5 @@
-from libc.stdint cimport uint64_t
-
 from ..tokens.doc cimport Doc
+from libc.stdint cimport uint64_t
 
 
 cdef class Example:

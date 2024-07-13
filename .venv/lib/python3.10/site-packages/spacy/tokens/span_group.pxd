@@ -1,7 +1,5 @@
 from libcpp.vector cimport vector
-
 from ..structs cimport SpanC
-
 
 cdef class SpanGroup:
     cdef public object _doc_ref

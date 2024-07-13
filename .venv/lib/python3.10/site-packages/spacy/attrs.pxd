@@ -1,7 +1,6 @@
 # Reserve 64 values for flag features
 from . cimport symbols
 
-
 cdef enum attr_id_t:
     NULL_ATTR
     IS_ALPHA

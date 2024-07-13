@@ -1,9 +1,8 @@
-from typing import Any, Dict, List, Tuple, Union
-
-from .. import Vocab
+from typing import Dict, Any, Union, List, Tuple
 from .doc import Doc
 from .span import Span
 from .token import Token
+from .. import Vocab
 
 class Retokenizer:
     def __init__(self, doc: Doc) -> None: ...

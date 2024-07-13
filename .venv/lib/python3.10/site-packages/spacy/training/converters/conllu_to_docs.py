@@ -1,11 +1,10 @@
 import re
 
-from wasabi import Printer
-
-from ...tokens import Doc, Span, Token
-from ...training import biluo_tags_to_spans, iob_to_biluo
-from ...vocab import Vocab
 from .conll_ner_to_docs import n_sents_info
+from ...training import iob_to_biluo, biluo_tags_to_spans
+from ...tokens import Doc, Token, Span
+from ...vocab import Vocab
+from wasabi import Printer
 
 
 def conllu_to_docs(

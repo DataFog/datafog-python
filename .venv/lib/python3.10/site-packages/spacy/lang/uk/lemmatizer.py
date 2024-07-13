@@ -1,10 +1,10 @@
-from typing import Callable, Optional
+from typing import Optional, Callable
 
 from thinc.api import Model
 
+from ..ru.lemmatizer import RussianLemmatizer
 from ...pipeline.lemmatizer import lemmatizer_score
 from ...vocab import Vocab
-from ..ru.lemmatizer import RussianLemmatizer
 
 
 class UkrainianLemmatizer(RussianLemmatizer):

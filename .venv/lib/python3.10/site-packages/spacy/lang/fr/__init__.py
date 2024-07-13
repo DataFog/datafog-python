@@ -1,14 +1,15 @@
-from typing import Callable, Optional
+from typing import Optional, Callable
 
 from thinc.api import Model
 
-from ...language import BaseDefaults, Language
-from .lemmatizer import FrenchLemmatizer
-from .lex_attrs import LEX_ATTRS
-from .punctuation import TOKENIZER_INFIXES, TOKENIZER_PREFIXES, TOKENIZER_SUFFIXES
+from .tokenizer_exceptions import TOKENIZER_EXCEPTIONS, TOKEN_MATCH
+from .punctuation import TOKENIZER_PREFIXES, TOKENIZER_INFIXES
+from .punctuation import TOKENIZER_SUFFIXES
 from .stop_words import STOP_WORDS
+from .lex_attrs import LEX_ATTRS
 from .syntax_iterators import SYNTAX_ITERATORS
-from .tokenizer_exceptions import TOKEN_MATCH, TOKENIZER_EXCEPTIONS
+from .lemmatizer import FrenchLemmatizer
+from ...language import Language, BaseDefaults
 
 
 class FrenchDefaults(BaseDefaults):

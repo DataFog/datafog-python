@@ -1,8 +1,7 @@
 from typing import Iterator, Tuple, Union
-
-from ...errors import Errors
-from ...symbols import NOUN, PRON, PROPN
 from ...tokens import Doc, Span
+from ...symbols import NOUN, PROPN, PRON
+from ...errors import Errors
 
 
 def noun_chunks(doclike: Union[Doc, Span]) -> Iterator[Tuple[int, int, int]]:

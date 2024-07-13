@@ -1,8 +1,9 @@
 from cymem.cymem cimport Pool
 
-from ...structs cimport SpanC, TokenC
-from ...tokens.doc cimport Doc
+from ...structs cimport TokenC, SpanC
 from ...typedefs cimport attr_t
+from ...tokens.doc cimport Doc
+
 from ._state cimport StateC
 
 
