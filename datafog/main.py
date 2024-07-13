@@ -1,6 +1,6 @@
 import json
 import logging
-from logging import INFO
+
 from typing import List
 
 from .config import OperationType
@@ -10,7 +10,6 @@ from .services.spark_service import SparkService
 from .services.text_service import TextService
 logger = logging.getLogger("datafog_logger")
 logger.setLevel(INFO)
-
 
 class DataFog:
     def __init__(
@@ -49,7 +48,7 @@ class DataFog:
                     extracted_text
                 )
                 self.logger.info(
-                    f"Text annotation completed with {len(annotated_text)} annotations."
+                    f"Text annotation completed with {len(annotated_text)} annotations." 
                 )
                 return annotated_text
 
