@@ -14,6 +14,5 @@ pytesseract
 asyncio
 aiohttp
 pytest-asyncio
-en_spacy_pii_fast==0.0.0
-python-dotenv
+https://huggingface.co/beki/en_spacy_pii_fast/resolve/main/en_spacy_pii_fast-any-py3-none-any.whl
 numpy>=1.21.0,<2.0.0

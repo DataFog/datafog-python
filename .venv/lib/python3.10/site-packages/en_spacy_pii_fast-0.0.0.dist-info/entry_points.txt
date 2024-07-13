@@ -1,0 +1,2 @@
+[spacy_models]
+en_spacy_pii_fast = en_spacy_pii_fast
