@@ -15,4 +15,4 @@ class TextService:
         """Asynchronously annotate a batch of texts."""
         tasks = [self.annotate_text(text) for text in texts]
         results = await asyncio.gather(*tasks)
-        return dict(zip(texts, results))
+        return dict(zip(texts, results, strict=True))

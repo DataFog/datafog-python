@@ -1,0 +1,2 @@
+[console_scripts]
+blacken-docs = blacken_docs:main

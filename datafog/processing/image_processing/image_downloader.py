@@ -3,7 +3,6 @@ from io import BytesIO
 from typing import List
 
 import aiohttp
-import requests
 from PIL import Image
 
 

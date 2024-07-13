@@ -1,0 +1,13 @@
+# Include the base requirements
+-r requirements.txt
+
+# Development and testing dependencies
+just
+isort
+black
+flake8
+tox
+pytest
+pytest-cov
+mypy
+autoflake

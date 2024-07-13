@@ -4,10 +4,8 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as f:
     long_description = f.read()
 
-
-def __version__():
-    return "3.2.0"
-
+# Use a single source of truth for the version
+__version__ = "3.2.2"
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -17,10 +15,9 @@ project_urls = {
     "GitHub": "https://github.com/datafog/datafog-python",
 }
 
-
 setup(
     name="datafog",
-    version=__version__(),
+    version=__version__,
     author="Sid Mohan",
     author_email="sid@datafog.ai",
     description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
@@ -31,17 +28,18 @@ setup(
         "pandas",
         "Requests==2.31.0",
         "spacy==3.4.4",
-        "en_spacy_pii_fast==0.0.0",
-        # "transformers==4.40.1",
-        # "torch==2.2.2",
-        "pyspark==3.4.1",
-        "pydantic==1.10.8",
+        "en_spacy_pii_fast @ https://huggingface.co/beki/en_spacy_pii_fast/resolve/main/en_spacy_pii_fast-any-py3-none-any.whl",
+        "pydantic==1.10.15",
         "Pillow",
         "sentencepiece",
         "protobuf",
         "pytesseract",
         "aiohttp",
         "pytest-asyncio",
+        "numpy==1.24.1",
+        "fastapi",
+        "asyncio",
+        "setuptools==70.0.0",
     ],
     python_requires=">=3.10",
     classifiers=[
@@ -62,4 +60,19 @@ setup(
     url="https://datafog.ai",
     project_urls=project_urls,
     license="MIT",
+    extras_require={
+        "dev": [
+            "just",
+            "isort",
+            "black",
+            "blacken-docs",
+            "flake8",
+            "tox",
+            "pytest",
+            "pytest-codeblocks",
+            "pytest-cov",
+            "build",
+            "twine",
+        ],
+    },
 )
