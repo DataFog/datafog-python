@@ -7,10 +7,7 @@ import numpy as np
 FILE = StringIO()
 AR = np.arange(10, dtype=np.float64)
 
-
-def func(a: int) -> bool:
-    return True
-
+def func(a: int) -> bool: ...
 
 np.deprecate(func)
 np.deprecate()

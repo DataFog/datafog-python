@@ -36,7 +36,7 @@ setup(
         "pytesseract",
         "aiohttp",
         "pytest-asyncio",
-        "numpy>=1.21.0,<2.0.0",
+        "numpy==1.24.1",
         "fastapi",
         "asyncio",
         "setuptools==70.0.0",

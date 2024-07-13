@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Dict, List
 
-import spacy
 from pydantic import BaseModel
 
 PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
@@ -15,6 +14,8 @@ class SpacyPIIAnnotator(BaseModel):
     def create(cls) -> "SpacyPIIAnnotator":
         try:
             # Try loading as a spaCy model first
+            import spacy
+
             nlp = spacy.load("en_spacy_pii_fast")
         except OSError:
             # If that fails, try importing as a module

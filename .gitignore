@@ -26,3 +26,5 @@ datafog-python/datafog/processing/__pycache__/
 datafog-python/datafog/__pycache__/
 .env
 coverage.xml
+htmlcov/
+.venv/

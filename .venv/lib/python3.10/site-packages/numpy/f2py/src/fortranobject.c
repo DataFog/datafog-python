@@ -726,8 +726,7 @@ static int check_and_fix_dimensions(const PyArrayObject* arr,
 static int
 find_first_negative_dimension(const int rank, const npy_intp *dims)
 {
-    int i;
-    for (i = 0; i < rank; ++i) {
+    for (int i = 0; i < rank; ++i) {
         if (dims[i] < 0) {
             return i;
         }

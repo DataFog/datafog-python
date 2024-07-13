@@ -19,7 +19,6 @@ __all__ = ['FCompiler', 'new_fcompiler', 'show_fcompilers',
 import os
 import sys
 import re
-from pathlib import Path
 
 from distutils.sysconfig import get_python_lib
 from distutils.fancy_getopt import FancyGetopt
@@ -37,10 +36,6 @@ from numpy.distutils import _shell_utils
 from .environment import EnvironmentConfig
 
 __metaclass__ = type
-
-
-FORTRAN_COMMON_FIXED_EXTENSIONS = ['.for', '.ftn', '.f77', '.f']
-
 
 class CompilerNotFound(Exception):
     pass
@@ -576,8 +571,7 @@ class FCompiler(CCompiler):
     def _compile(self, obj, src, ext, cc_args, extra_postargs, pp_opts):
         """Compile 'src' to product 'obj'."""
         src_flags = {}
-        if Path(src).suffix.lower() in FORTRAN_COMMON_FIXED_EXTENSIONS \
-           and not has_f90_header(src):
+        if is_f_file(src) and not has_f90_header(src):
             flavor = ':f77'
             compiler = self.compiler_f77
             src_flags = get_f77flags(src)
@@ -976,6 +970,7 @@ def dummy_fortran_file():
     return name[:-2]
 
 
+is_f_file = re.compile(r'.*\.(for|ftn|f77|f)\Z', re.I).match
 _has_f_header = re.compile(r'-\*-\s*fortran\s*-\*-', re.I).search
 _has_f90_header = re.compile(r'-\*-\s*f90\s*-\*-', re.I).search
 _has_fix_header = re.compile(r'-\*-\s*fix\s*-\*-', re.I).search
