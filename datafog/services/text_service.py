@@ -27,4 +27,4 @@ class TextService:
         """Asynchronously annotate a list of text input."""
         tasks = [self.annotate_text_async(txt) for txt in text]
         results = await asyncio.gather(*tasks)
-        return dict(zip(texts, results, strict=True))
+        return dict(zip(text, results, strict=True))

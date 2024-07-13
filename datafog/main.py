@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import List
 
@@ -91,4 +92,24 @@ class DataFog:
     def _add_attributes(self, attributes: dict):
         """Add multiple attributes."""
         for key, value in attributes.items():
+            pass
+
+class TextPIIAnnotator:
+    def __init__(self):
+        self.text_annotator = SpacyPIIAnnotator.create()
+        self.spark_processor: SparkService = None
+
+    def run(self, text, output_path=None):
+        try:
+            annotated_text = self.text_annotator.annotate(text)
+
+            # Optionally, output the results to a JSON file
+            if output_path:
+                with open(output_path, "w") as f:
+                    json.dump(annotated_text, f)
+
+            return annotated_text
+
+        finally:
+            # Ensure Spark resources are released
             pass

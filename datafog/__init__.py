@@ -1,6 +1,6 @@
 from .__about__ import __version__
 from .config import OperationType
-from .main import DataFog
+from .main import DataFog, TextPIIAnnotator
 from .processing.image_processing.donut_processor import DonutProcessor
 from .processing.image_processing.image_downloader import ImageDownloader
 from .processing.image_processing.pytesseract_processor import PytesseractProcessor
@@ -15,6 +15,7 @@ __all__ = [
     "ImageService",
     "OperationType",
     "SparkService",
+    "TextPIIAnnotator",
     "TextService",
     "SpacyPIIAnnotator",
     "ImageDownloader",
