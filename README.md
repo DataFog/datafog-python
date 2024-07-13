@@ -225,7 +225,6 @@ For OCR, we use Tesseract, which is incorporated into the build step. You can fi
 ### Testing
 
 - Python 3.10
-- Python 3.11
 
 ## License
 
