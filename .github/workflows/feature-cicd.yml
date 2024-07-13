@@ -1,4 +1,4 @@
-name: feature-cicd-tests
+name: feature-cicd-setup-and-test
 
 on:
   push:
@@ -27,6 +27,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/checkout@v3
+
+      - name: Install Tesseract OCR
+        run: |
+          sudo apt-get update && sudo apt-get install -y tesseract
+
+      - name: Verify Tesseract Installation
+        run: which tesseract
+        
+      - name: Update PATH
+        run: echo "export PATH=$PATH:/usr/bin" >> $GITHUB_ENV
+        
       - name: Test with tox
         run: |
           pip install tox
