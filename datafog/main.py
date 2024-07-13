@@ -39,7 +39,7 @@ class DataFog:
             extracted_text = await self.image_service.ocr_extract(image_urls)
             self.logger.info(f"OCR extraction completed for {len(image_urls)} images.")
             self.logger.debug(
-                 f"Total length of extracted text: {sum(len(text) for text in extracted_text)}"
+                f"Total length of extracted text: {sum(len(text) for text in extracted_text)}"
             )
 
             if OperationType.ANNOTATE_PII in self.operations:
