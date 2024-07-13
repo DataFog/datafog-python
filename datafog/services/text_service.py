@@ -1,7 +1,6 @@
 import asyncio
 
-from datafog.processing.text_processing.spacy_pii_annotator import \
-    SpacyPIIAnnotator
+from datafog.processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 
 
 class TextService:
