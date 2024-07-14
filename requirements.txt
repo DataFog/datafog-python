@@ -36,7 +36,7 @@ cymem==2.0.8
     #   preshed
     #   spacy
     #   thinc
-en-spacy-pii-fast @ https://huggingface.co/beki/en_spacy_pii_fast/resolve/main/en_spacy_pii_fast-any-py3-none-any.whl
+en-spacy-pii-fast
     # via datafog (setup.py)
 exceptiongroup==1.2.2
     # via
