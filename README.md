@@ -53,7 +53,7 @@ pip install datafog
 
 ### Usage
 
-The [Getting Started notebook](/datafog-python/examples/getting_started.ipynb) features a standalone Colab notebook.
+The [Getting Started notebook](/examples/getting_started.ipynb) features a standalone Colab notebook.
 
 #### Text PII Annotation
 
