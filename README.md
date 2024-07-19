@@ -47,7 +47,7 @@ ocr_client = DataFog(operations="extract_text")
 
 Here's an example of how to annotate PII in a text document:
 
-```python
+```
 import requests
 
 # Fetch sample medical record
@@ -64,7 +64,7 @@ print(annotations)
 
 For OCR capabilities, you can use the following:
 
-```python
+```
 import asyncio
 import nest_asyncio
 
