@@ -9,9 +9,7 @@ class TextService:
 
     def annotate_text_sync(self, text):
         """Synchronously Annotate a text string."""
-        print(f"Starting on {text.split()[0]}")
         res = self.annotator.annotate(text)
-        print(f"Done processing {text.split()[0]}")
         return res
 
     def batch_annotate_text_sync(self, texts: list):
