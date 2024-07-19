@@ -3,3 +3,4 @@ ignore = E203, E266, E501, W503, B006, B007, B008, F401, C416, B950, B904
 max-line-length = 88
 max-complexity = 18
 select = B,C,E,F,W,T4,B9
+exclude = venv, .venv, tests/.datafog_env, examples/venv
