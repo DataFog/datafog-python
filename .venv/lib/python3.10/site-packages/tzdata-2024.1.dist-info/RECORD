@@ -3,6 +3,7 @@ tzdata-2024.1.dist-info/LICENSE,sha256=M-jlAC01EtP8wigrmV5rrZ0zR4G5xawxhD9ASQDh8
 tzdata-2024.1.dist-info/LICENSE_APACHE,sha256=xx0jnfkXJvxRnG63LTGOxlggYnIysveWIZ6H3PNdCrQ,11357
 tzdata-2024.1.dist-info/METADATA,sha256=opWqMTU2QGRjhy337uxoIBXNr84QcEx8I9-iisPqxmA,1393
 tzdata-2024.1.dist-info/RECORD,,
+tzdata-2024.1.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
 tzdata-2024.1.dist-info/WHEEL,sha256=-G_t0oGuE7UD0DrSpVZnq1hHMBV9DD2XkS5v7XpmTnk,110
 tzdata-2024.1.dist-info/top_level.txt,sha256=MO6QqC0xRrN67Gh9xU_nMmadwBVlYzPNkq_h4gYuzaQ,7
 tzdata/__init__.py,sha256=iofGPw33aJlVNgOXQP4kzxiXOEj8im69E8cgZZS874Q,252

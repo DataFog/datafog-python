@@ -1,4 +1,12 @@
-# datafog contributing guidelines
+# Contributing guidelines
+
+# Contributors
+
+- sroy9675
+- pselvana
+- sidmohan0
+
+for their help
 
 The datafog community appreciates your contributions via issues and
 pull requests. Note that the [code of conduct](CODE_OF_CONDUCT.md)
