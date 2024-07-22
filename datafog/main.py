@@ -1,18 +1,15 @@
-import asyncio
-import importlib
 import json
-import subprocess
-import sys
+import logging
 from typing import List
 
-import aiohttp
-
 from .config import OperationType
-from .processing.image_processing.donut_processor import DonutProcessor
 from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService
 from .services.text_service import TextService
+
+logger = logging.getLogger("datafog_logger")
+logger.setLevel(logging.INFO)
 
 
 class DataFog:
@@ -27,51 +24,79 @@ class DataFog:
         self.text_service = text_service
         self.spark_service: SparkService = spark_service
         self.operations: List[OperationType] = operations
+        self.logger = logging.getLogger(__name__)
+        self.logger.info(
+            "Initializing DataFog class with the following services and operations:"
+        )
+        self.logger.info(f"Image Service: {type(image_service)}")
+        self.logger.info(f"Text Service: {type(text_service)}")
+        self.logger.info(
+            f"Spark Service: {type(spark_service) if spark_service else 'None'}"
+        )
+        self.logger.info(f"Operations: {operations}")
 
     async def run_ocr_pipeline(self, image_urls: List[str]):
-        """Run the OCR pipeline asynchronously."""
-        extracted_text = await self.image_service.ocr_extract(image_urls)
-        if OperationType.ANNOTATE_PII in self.operations:
-            annotated_text = await self.text_service.batch_annotate_texts(
-                extracted_text
-            )
-            return annotated_text
-        return extracted_text
-
-    async def run_text_pipeline(self, texts: List[str]):
-        """Run the text pipeline asynchronously."""
-        if OperationType.ANNOTATE_PII in self.operations:
-            annotated_text = await self.text_service.batch_annotate_texts(texts)
-            return annotated_text
-        return texts
-
-
-class OCRPIIAnnotator:
-    def __init__(self):
-        self.image_service = ImageService(use_donut=True, use_tesseract=False)
-        self.text_annotator = SpacyPIIAnnotator.create()
-        self.spark_service: SparkService = None
-
-    async def run(self, image_urls: List[str], output_path=None):
+        """Run the OCR pipeline asynchronously on a list of images provided via url."""
         try:
-            # Download and process the image to extract text
-            # downloaded_images = await self.image_service.download_images(image_urls)
-            # extracted_texts = await self.image_service.ocr_extract(downloaded_images)
+            extracted_text = await self.image_service.ocr_extract(image_urls)
+            self.logger.info(f"OCR extraction completed for {len(image_urls)} images.")
+            self.logger.debug(
+                f"Total length of extracted text: {sum(len(text) for text in extracted_text)}"
+            )
 
-            # # Annotate the extracted text for PII
-            # annotated_texts = [self.text_annotator.annotate(text) for text in extracted_texts]
+            if OperationType.ANNOTATE_PII in self.operations:
+                annotated_text = await self.text_service.batch_annotate_text_async(
+                    extracted_text
+                )
+                self.logger.info(
+                    f"Text annotation completed with {len(annotated_text)} annotations."
+                )
+                return annotated_text
 
-            # # Optionally, output the results to a JSON file
-            # if output_path:
-            #     with open(output_path, "w") as f:
-            #         json.dump(annotated_texts, f)
+            return extracted_text
+        except Exception as e:
+            self.logger.error(f"Error in run_ocr_pipeline: {str(e)}")
+            raise
 
-            # return annotated_texts
-            pass
+    async def run_text_pipeline(self, str_list: List[str]):
+        """Run the text pipeline asynchronously on a list of input text."""
+        try:
+            self.logger.info(f"Starting text pipeline with {len(str_list)} texts.")
+            if OperationType.ANNOTATE_PII in self.operations:
+                annotated_text = await self.text_service.batch_annotate_text_async(
+                    str_list
+                )
+                self.logger.info(
+                    f"Text annotation completed with {len(annotated_text)} annotations."
+                )
+                return annotated_text
 
-        finally:
-            # Ensure Spark resources are released
-            # self.spark_processor.spark.stop()
+            self.logger.info("No annotation operation found; returning original texts.")
+            return str_list
+        except Exception as e:
+            self.logger.error(f"Error in run_text_pipeline: {str(e)}")
+            raise
+
+    def run_text_pipeline_sync(self, str_list: List[str]):
+        """Run the text pipeline synchronously on a list of input text."""
+        try:
+            self.logger.info(f"Starting text pipeline with {len(str_list)} texts.")
+            if OperationType.ANNOTATE_PII in self.operations:
+                annotated_text = self.text_service.batch_annotate_text_sync(str_list)
+                self.logger.info(
+                    f"Text annotation completed with {len(annotated_text)} annotations."
+                )
+                return annotated_text
+
+            self.logger.info("No annotation operation found; returning original texts.")
+            return str_list
+        except Exception as e:
+            self.logger.error(f"Error in run_text_pipeline: {str(e)}")
+            raise
+
+    def _add_attributes(self, attributes: dict):
+        """Add multiple attributes."""
+        for key, value in attributes.items():
             pass
 
 
