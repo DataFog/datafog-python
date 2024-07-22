@@ -5,6 +5,7 @@
 just
 isort
 black
+blacken-docs
 flake8
 tox
 pytest

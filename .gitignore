@@ -30,3 +30,5 @@ htmlcov/
 .venv/
 node_modules/
 .DS_Store
+.venv
+examples/venv/

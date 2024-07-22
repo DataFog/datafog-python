@@ -19,17 +19,7 @@
 
 ## Overview
 
-### What is DataFog?
-
 DataFog is an open-source DevSecOps platform that lets you scan and redact Personally Identifiable Information (PII) out of your Generative AI applications.
-
-### Core Problem
-
-![image](https://github.com/DataFog/datafog-python/assets/61345237/57fba4e5-21cc-458f-ac6a-6fbbb70a8de1)
-
-### How it works
-
-![image](https://github.com/DataFog/datafog-python/assets/61345237/91f4634a-8a9f-4621-81bc-09930feda78a)
 
 ## Installation
 
@@ -41,117 +31,66 @@ pip install datafog
 
 ## Getting Started
 
-The DataFog library provides functionality for text and image processing, including PII (Personally Identifiable Information) annotation and OCR (Optical Character Recognition) capabilities.
+To use DataFog, you'll need to create a DataFog client with the desired operations. Here's a basic setup:
 
-### Installation
+```python
+from datafog import DataFog
 
-To install the DataFog library, use the following command:
+# For text annotation
+client = DataFog(operations="annotate_pii")
 
-```
-pip install datafog
-```
-
-### Usage
-
-The [Getting Started notebook](/examples/getting_started.ipynb) features a standalone Colab notebook.
-
-#### Text PII Annotation
-
-To annotate PII in a given text, lets start with a set of clinical notes:
-
-```
-!git clone https://gist.github.com/b43b72693226422bac5f083c941ecfdb.git
-# Define the directory path
-folder_path = 'clinical_notes/'
-
-# List all files in the directory
-file_list = os.listdir(folder_path)
-text_files = sorted([file for file in file_list if file.endswith('.txt')])
-
-with open(os.path.join(folder_path, text_files[0]), 'r') as file:
-    clinical_note = file.read()
-
-display(Markdown(clinical_note))
+# For OCR (Optical Character Recognition)
+ocr_client = DataFog(operations="extract_text")
 ```
 
-which looks like this:
+### Text PII Annotation
+
+Here's an example of how to annotate PII in a text document:
 
 ```
+import requests
 
-**Date:** April 10, 2024
+# Fetch sample medical record
+doc_url = "https://gist.githubusercontent.com/sidmohan0/b43b72693226422bac5f083c941ecfdb/raw/b819affb51796204d59987893f89dee18428ed5d/note1.txt"
+response = requests.get(doc_url)
+text_lines = [line for line in response.text.splitlines() if line.strip()]
 
-**Patient:** Emily Johnson, 35 years old
-
-**MRN:** 00987654
-
-**Chief Complaint:** "I've been experiencing severe back pain and numbness in my legs."
-
-**History of Present Illness:** The patient is a 35-year-old who presents with a 2-month history of worsening back pain, numbness in both legs, and occasional tingling sensations. The patient reports working as a freelance writer and has been experiencing increased stress due to tight deadlines and financial struggles.
-
-**Past Medical History:** Hypothyroidism
-
-**Social History:**
-The patient shares a small apartment with two roommates and relies on public transportation. They mention feeling overwhelmed with work and personal responsibilities, often sacrificing sleep to meet deadlines. The patient expresses concern over the high cost of healthcare and the need for affordable medication options.
-
-**Review of Systems:** Denies fever, chest pain, or shortness of breath. Reports occasional headaches.
-
-**Physical Examination:**
-- General: Appears tired but is alert and oriented.
-- Vitals: BP 128/80, HR 72, Temp 98.6°F, Resp 14/min
-
-**Assessment/Plan:**
-- Continue to monitor blood pressure and thyroid function.
-- Discuss affordable medication options with a pharmacist.
-- Refer to a social worker to address housing concerns and access to healthcare services.
-- Encourage the patient to engage with community support groups for social support.
-- Schedule a follow-up appointment in 4 weeks or sooner if symptoms worsen.
-
-**Comments:** The patient's health concerns are compounded by socioeconomic factors, including employment status, housing stability, and access to healthcare. Addressing these social determinants of health is crucial for improving the patient's overall well-being.
-
+# Run annotation
+annotations = client.run_text_pipeline_sync(str_list=text_lines)
+print(annotations)
 ```
 
-we can then set up our pipeline to accept these files
+### OCR PII Annotation
+
+For OCR capabilities, you can use the following:
 
 ```
-async def run_text_pipeline_demo():
-  results = await datafog.run_text_pipeline(texts)
-  print("Text Pipeline Results:", results)
-  return results
+import asyncio
+import nest_asyncio
 
+nest_asyncio.apply()
 
-texts = [clinical_note]
-loop = asyncio.get_event_loop()
-results = loop.run_until_complete(run_text_pipeline_demo())
-```
-
-Note: The DataFog library uses asynchronous programming, so make sure to use the `async`/`await` syntax when calling the appropriate methods.
-
-#### OCR PII Annotation
-
-Let's use a image (which could easily be a converted or scanned PDF)
-
-![Executive Email](https://pbs.twimg.com/media/GM3-wpeWkAAP-cX.jpg)
-
-```
-datafog = DataFog(operations='extract_text')
-url_list = ['https://pbs.twimg.com/media/GM3-wpeWkAAP-cX.jpg']
 
 async def run_ocr_pipeline_demo():
-  results = await datafog.run_ocr_pipeline(url_list)
-  print("OCR Pipeline Results:", results)
+    image_url = "https://s3.amazonaws.com/thumbnails.venngage.com/template/dc377004-1c2d-49f2-8ddf-d63f11c8d9c2.png"
+    results = await ocr_client.run_ocr_pipeline(image_urls=[image_url])
+    print("OCR Pipeline Results:", results)
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(run_ocr_pipeline_demo())
-
 ```
 
-You'll notice that we use async functions liberally throughout the SDK - given the nature of the functions we're providing and the extension of DataFog into API/other formats, this allows the functions to be more easily adapted for those uses.
+Note: The DataFog library uses asynchronous programming for OCR, so make sure to use the `async`/`await` syntax when calling the appropriate methods.
 
-## Contributing
+## Examples
 
-DataFog is a community-driven **open-source** platform and we've been fortunate to have a small and growing contributor base. We'd love to hear ideas, feedback, suggestions for improvement - anything on your mind about what you think can be done to make DataFog better! Join our [Discord](https://discord.gg/bzDth394R4) and join our growing community.
+For more detailed examples, check out our Jupyter notebooks in the `examples/` directory:
 
----
+- `text_annotation_example.ipynb`: Demonstrates text PII annotation
+- `image_processing.ipynb`: Shows OCR capabilities and text extraction from images
+
+These notebooks provide step-by-step guides on how to use DataFog for various tasks.
 
 ### Dev Notes
 
