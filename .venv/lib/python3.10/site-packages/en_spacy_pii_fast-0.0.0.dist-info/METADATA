@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: en-spacy-pii-fast
+Version: 0.0.0
+Home-page: 
+Author: 
+Author-email: 
+Requires-Dist: spacy <3.5.0,>=3.4.1
+
+# en_spacy_pii_fast

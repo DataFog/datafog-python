@@ -37,7 +37,7 @@ class DonutProcessor:
             )
 
     async def parse_image(self, image: Image) -> str:
-        """Process the image using DonutProcessor and VisionEncoderDecoderModel and extract text."""
+        """Process w/ DonutProcessor and VisionEncoderDecoderModel"""
         task_prompt = "<s_cord-v2>"
         decoder_input_ids = self.processor.tokenizer(
             task_prompt, add_special_tokens=False, return_tensors="pt"

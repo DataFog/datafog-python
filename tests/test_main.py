@@ -1,19 +1,8 @@
-import asyncio
 import json
-from typing import List
 
-import aiohttp
 import pytest
 
-from datafog import (
-    DataFog,
-    ImageService,
-    OCRPIIAnnotator,
-    OperationType,
-    SparkService,
-    TextPIIAnnotator,
-    TextService,
-)
+from datafog import DataFog, TextPIIAnnotator
 
 
 def search_nested_dict(d, target):
@@ -45,6 +34,21 @@ def test_textpii_annotator():
 #     ocr_annotator = OCRPIIAnnotator()
 #     annotated_text = await ocr_annotator.run([image_url])
 #     assert "Satya Nadella" in annotated_text[0].get("PER", []), "PII not annotated correctly."
+
+
+def test_datafog_text_annotation_sync():
+    """Test DataFog class for synchronous text annotation."""
+    text = ["Joe Biden is the President of the United States."]
+    datafog = DataFog()
+    annotated_text = datafog.run_text_pipeline_sync(text)
+
+    assert annotated_text  # Ensure that some results are returned.
+    assert search_nested_dict(
+        annotated_text, "Joe Biden"
+    ), "Joe Biden not found in annotated results."
+    assert search_nested_dict(
+        annotated_text, "the United States"
+    ), "United States not found in annotated results."
 
 
 @pytest.mark.asyncio

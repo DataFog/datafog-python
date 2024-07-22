@@ -1,0 +1,45 @@
+name: PyPI Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., 1.2.3)"
+        required: true
+      confirm_tests:
+        description: "Confirm all tests have passed"
+        type: boolean
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm_tests == 'true'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+      - name: Build package
+        run: python -m build
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.pypi }}
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag v${{ github.event.inputs.version }}
+          git push origin v${{ github.event.inputs.version }}
+          gh release create v${{ github.event.inputs.version }} --generate-notes
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*

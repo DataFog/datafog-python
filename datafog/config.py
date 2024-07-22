@@ -1,7 +1,5 @@
 from enum import Enum
 
-from pydantic import BaseModel
-
 
 class OperationType(str, Enum):
     ANNOTATE_PII = "annotate_pii"

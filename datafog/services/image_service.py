@@ -1,8 +1,6 @@
 import asyncio
-import logging
 from typing import List
 
-import aiohttp
 from PIL import Image
 
 from datafog.processing.image_processing.donut_processor import DonutProcessor
