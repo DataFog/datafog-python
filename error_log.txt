@@ -1,0 +1,58 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.10.1, pytest-8.2.2, pluggy-1.5.0
+rootdir: /Users/sidmohan/Desktop/datafog_local/datafog-python/datafog-python
+plugins: cov-5.0.0, asyncio-0.23.7, anyio-4.4.0
+asyncio: mode=strict
+collected 12 items
+
+tests/test_text_service.py .F..........                                  [100%]
+
+=================================== FAILURES ===================================
+_______________________________ test_chunk_text ________________________________
+
+text_service = <datafog.services.text_service.TextService object at 0x16fa68a60>
+
+    def test_chunk_text(text_service):
+        text = "This is a test sentence for chunking."
+        chunks = text_service._chunk_text(text)
+        assert len(chunks) == 4
+>       assert chunks == ["This is a", "test", "sentence f", "or chunki"]
+E       AssertionError: assert ['This is a '...h', 'unking.'] == ['This is a',..., 'or chunki']
+E         
+E         At index 0 diff: 'This is a ' != 'This is a'
+E         Use -v to get more diff
+
+tests/test_text_service.py:23: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.10/site-packages/spacy/cli/info.py:3
+  /Users/sidmohan/Desktop/datafog_local/datafog-python/datafog-python/.venv/lib/python3.10/site-packages/spacy/cli/info.py:3: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform darwin, python 3.10.1-final-0 ----------
+Name                                                           Stmts   Miss  Cover
+----------------------------------------------------------------------------------
+datafog/__about__.py                                               1      0   100%
+datafog/__init__.py                                               11      0   100%
+datafog/config.py                                                  6      0   100%
+datafog/main.py                                                   74     55    26%
+datafog/processing/__init__.py                                     0      0   100%
+datafog/processing/image_processing/__init__.py                    0      0   100%
+datafog/processing/image_processing/donut_processor.py            44     29    34%
+datafog/processing/image_processing/image_downloader.py           17      7    59%
+datafog/processing/image_processing/pytesseract_processor.py       8      1    88%
+datafog/processing/spark_processing/__init__.py                    3      3     0%
+datafog/processing/spark_processing/pyspark_udfs.py               39     39     0%
+datafog/processing/text_processing/__init__.py                     1      0   100%
+datafog/processing/text_processing/spacy_pii_annotator.py         36     20    44%
+datafog/services/__init__.py                                       3      0   100%
+datafog/services/image_service.py                                 26     11    58%
+datafog/services/spark_service.py                                 26     16    38%
+datafog/services/text_service.py                                  43      1    98%
+----------------------------------------------------------------------------------
+TOTAL                                                            338    182    46%
+
+=========================== short test summary info ============================
+FAILED tests/test_text_service.py::test_chunk_text - AssertionError: assert [...
+=================== 1 failed, 11 passed, 1 warning in 2.06s ====================
