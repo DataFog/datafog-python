@@ -4,8 +4,24 @@ from typing import Any, Dict, List
 from pydantic import BaseModel
 
 PII_ANNOTATION_LABELS = [
-    "CARDINAL", "DATE", "EVENT", "FAC", "GPE", "LANGUAGE", "LAW", "LOC", "MONEY",
-    "NORP", "ORDINAL", "ORG", "PERCENT", "PERSON", "PRODUCT", "QUANTITY", "TIME", "WORK_OF_ART"
+    "CARDINAL",
+    "DATE",
+    "EVENT",
+    "FAC",
+    "GPE",
+    "LANGUAGE",
+    "LAW",
+    "LOC",
+    "MONEY",
+    "NORP",
+    "ORDINAL",
+    "ORG",
+    "PERCENT",
+    "PERSON",
+    "PRODUCT",
+    "QUANTITY",
+    "TIME",
+    "WORK_OF_ART",
 ]
 MAXIMAL_STRING_SIZE = 1000000
 
@@ -21,7 +37,10 @@ class SpacyPIIAnnotator(BaseModel):
             nlp = spacy.load("en_core_web_lg")
         except OSError:
             import subprocess
-            subprocess.run(["python", "-m", "spacy", "download", "en_core_web_lg"], check=True)
+
+            subprocess.run(
+                ["python", "-m", "spacy", "download", "en_core_web_lg"], check=True
+            )
             nlp = spacy.load("en_core_web_lg")
 
         return cls(nlp=nlp)
