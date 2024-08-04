@@ -7,8 +7,10 @@ isort
 black
 blacken-docs
 flake8
+prettier
 tox
 pytest
 pytest-cov
 mypy
 autoflake
+pre-commit
