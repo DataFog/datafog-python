@@ -3,7 +3,10 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
-PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
+PII_ANNOTATION_LABELS = [
+    "CARDINAL", "DATE", "EVENT", "FAC", "GPE", "LANGUAGE", "LAW", "LOC", "MONEY",
+    "NORP", "ORDINAL", "ORG", "PERCENT", "PERSON", "PRODUCT", "QUANTITY", "TIME", "WORK_OF_ART"
+]
 MAXIMAL_STRING_SIZE = 1000000
 
 
@@ -12,21 +15,15 @@ class SpacyPIIAnnotator(BaseModel):
 
     @classmethod
     def create(cls) -> "SpacyPIIAnnotator":
+        import spacy
+
         try:
-            # Try loading as a spaCy model first
-            import spacy
-
-            nlp = spacy.load("en_spacy_pii_fast")
+            nlp = spacy.load("en_core_web_lg")
         except OSError:
-            # If that fails, try importing as a module
-            try:
-                import en_spacy_pii_fast
+            import subprocess
+            subprocess.run(["python", "-m", "spacy", "download", "en_core_web_lg"], check=True)
+            nlp = spacy.load("en_core_web_lg")
 
-                nlp = en_spacy_pii_fast.load()
-            except ImportError:
-                raise ImportError(
-                    "Failed to load en_spacy_pii_fast. Make sure it's installed correctly."
-                )
         return cls(nlp=nlp)
 
     def annotate(self, text: str) -> Dict[str, List[str]]:

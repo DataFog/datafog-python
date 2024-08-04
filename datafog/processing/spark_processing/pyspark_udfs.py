@@ -7,7 +7,7 @@ MAXIMAL_STRING_SIZE = 1000000
 
 
 def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
-    """Extract features using en_spacy_pii_fast model.
+    """Extract features using en_core_web_lg model.
 
     Returns:
         list[list[str]]: Values as arrays in order defined in the PII_ANNOTATION_LABELS.
@@ -40,7 +40,7 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
 
 
 def broadcast_pii_annotator_udf(
-    spark_session=None, spacy_model: str = "en_spacy_pii_fast"
+    spark_session=None, spacy_model: str = "en_core_web_lg"
 ):
     """Broadcast PII annotator across Spark cluster and create UDF"""
     ensure_installed("pyspark")
