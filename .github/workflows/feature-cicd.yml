@@ -51,8 +51,11 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -U pip
-          pip install -e .
-          pip install tox just pre-commit
+          pip install --no-cache-dir -e .
+          pip install --no-cache-dir tox just pre-commit
+      - name: Free up disk space
+        run: |
+          sudo apt-get clean
       - name: Run Tests with tox
         run: tox -- --cov datafog --cov-report xml --cov-report term --codeblocks
       - name: Submit to Codecov
