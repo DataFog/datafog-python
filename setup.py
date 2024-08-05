@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 # Use a single source of truth for the version
-__version__ = "3.3.1b3"
+__version__ = "3.4.0b1"
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -43,6 +43,7 @@ setup(
     python_requires=">=3.10,<3.13",
     classifiers=[
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
