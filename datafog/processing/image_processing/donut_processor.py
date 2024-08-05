@@ -7,13 +7,13 @@ from io import BytesIO
 
 import requests
 from PIL import Image
+import numpy as np
 
 from .image_downloader import ImageDownloader
 
 
 class DonutProcessor:
     def __init__(self, model_path="naver-clova-ix/donut-base-finetuned-cord-v2"):
-
         self.ensure_installed("torch")
         self.ensure_installed("transformers")
 
@@ -36,13 +36,31 @@ class DonutProcessor:
                 [sys.executable, "-m", "pip", "install", package_name]
             )
 
-    async def parse_image(self, image: Image) -> str:
+    def preprocess_image(self, image: Image.Image) -> np.ndarray:
+        # Convert to RGB if the image is not already in RGB mode
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Convert to numpy array
+        image_np = np.array(image)
+        
+        # Ensure the image is 3D (height, width, channels)
+        if image_np.ndim == 2:
+            image_np = np.expand_dims(image_np, axis=-1)
+            image_np = np.repeat(image_np, 3, axis=-1)
+        
+        return image_np
+
+    async def parse_image(self, image: Image.Image) -> str:
         """Process w/ DonutProcessor and VisionEncoderDecoderModel"""
+        # Preprocess the image
+        image_np = self.preprocess_image(image)
+        
         task_prompt = "<s_cord-v2>"
         decoder_input_ids = self.processor.tokenizer(
             task_prompt, add_special_tokens=False, return_tensors="pt"
         ).input_ids
-        pixel_values = self.processor(image, return_tensors="pt").pixel_values
+        pixel_values = self.processor(images=image_np, return_tensors="pt").pixel_values
 
         outputs = self.model.generate(
             pixel_values.to(self.device),
@@ -71,7 +89,7 @@ class DonutProcessor:
         image = self.downloader.download_image(url)
         return self.parse_image(image)
 
-    def download_image(self, url: str) -> Image:
+    def download_image(self, url: str) -> Image.Image:
         """Download an image from URL."""
         response = requests.get(url)
         image = Image.open(BytesIO(response.content))
