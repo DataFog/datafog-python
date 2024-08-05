@@ -84,6 +84,7 @@ loop.run_until_complete(run_ocr_pipeline_demo())
 Note: The DataFog library uses asynchronous programming for OCR, so make sure to use the `async`/`await` syntax when calling the appropriate methods.
 
 ## Examples
+TODO: Update README.  switch installation method to install requirements-dev.txt and then -e 
 
 For more detailed examples, check out our Jupyter notebooks in the `examples/` directory:
 
