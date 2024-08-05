@@ -5,9 +5,9 @@ import subprocess
 import sys
 from io import BytesIO
 
+import numpy as np
 import requests
 from PIL import Image
-import numpy as np
 
 from .image_downloader import ImageDownloader
 
@@ -38,24 +38,24 @@ class DonutProcessor:
 
     def preprocess_image(self, image: Image.Image) -> np.ndarray:
         # Convert to RGB if the image is not already in RGB mode
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-        
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
         # Convert to numpy array
         image_np = np.array(image)
-        
+
         # Ensure the image is 3D (height, width, channels)
         if image_np.ndim == 2:
             image_np = np.expand_dims(image_np, axis=-1)
             image_np = np.repeat(image_np, 3, axis=-1)
-        
+
         return image_np
 
     async def parse_image(self, image: Image.Image) -> str:
         """Process w/ DonutProcessor and VisionEncoderDecoderModel"""
         # Preprocess the image
         image_np = self.preprocess_image(image)
-        
+
         task_prompt = "<s_cord-v2>"
         decoder_input_ids = self.processor.tokenizer(
             task_prompt, add_special_tokens=False, return_tensors="pt"

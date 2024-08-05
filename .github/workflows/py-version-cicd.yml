@@ -1,15 +1,15 @@
 name: py-version-cicd
 
 on:
-    workflow_dispatch:
-        inputs:
-          version:
-            description: "Python version to lint build"
-            required: true
-          confirm_tests:
-            description: "Confirm all tests have passed"
-            type: boolean
-            required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Python version to lint build"
+        required: true
+      confirm_tests:
+        description: "Confirm all tests have passed"
+        type: boolean
+        required: true
 
 jobs:
   lint:
