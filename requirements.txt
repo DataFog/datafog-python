@@ -1,5 +1,5 @@
 pandas
-Requests
+requests==2.32.3
 spacy==3.7.5
 pydantic>=2.8.2,<3.0.0
 Pillow

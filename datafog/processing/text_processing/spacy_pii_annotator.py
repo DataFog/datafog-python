@@ -39,7 +39,16 @@ class SpacyPIIAnnotator(BaseModel):
             import subprocess
 
             subprocess.run(
-                ["python", "-m", "spacy", "download", "en_core_web_lg"], check=True
+                [
+                    "python",
+                    "-m",
+                    "pip",
+                    "install",
+                    "--no-deps",
+                    "--no-cache-dir",
+                    "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl",
+                ],
+                check=True,
             )
             nlp = spacy.load("en_core_web_lg")
 

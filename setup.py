@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 # Use a single source of truth for the version
-__version__ = "3.4.0b1"
+__version__ = "3.4.0"
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -26,7 +26,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "pandas",
-        "Requests",
+        "requests==2.32.3",
         "spacy==3.7.5",
         "pydantic",
         "Pillow",

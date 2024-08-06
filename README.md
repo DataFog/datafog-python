@@ -85,8 +85,6 @@ Note: The DataFog library uses asynchronous programming for OCR, so make sure to
 
 ## Examples
 
-TODO: Update README. switch installation method to install requirements-dev.txt and then -e
-
 For more detailed examples, check out our Jupyter notebooks in the `examples/` directory:
 
 - `text_annotation_example.ipynb`: Demonstrates text PII annotation
@@ -118,7 +116,7 @@ For local development:
      ```
 5. Install the package in editable mode:
    ```
-   pip install -e .
+   pip install -r requirements-dev.txt
    ```
 6. Set up the project:
    ```

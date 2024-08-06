@@ -23,12 +23,6 @@ urls = [
 ]
 
 
-# @pytest.mark.asyncio
-# async def test_download_images():
-#     image_service1 = ImageService()
-#     images = await image_service1.download_images(urls)
-#     assert len(images) == 2
-#     assert all(isinstance(image, Image.Image) for image in images)
 @pytest.mark.asyncio
 async def test_download_images():
     image_service = ImageService()

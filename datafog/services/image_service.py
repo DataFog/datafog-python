@@ -8,8 +8,6 @@ import certifi
 from PIL import Image
 
 from datafog.processing.image_processing.donut_processor import DonutProcessor
-
-# from datafog.processing.image_processing.image_downloader import ImageDownloader
 from datafog.processing.image_processing.pytesseract_processor import (
     PytesseractProcessor,
 )
@@ -40,13 +38,6 @@ class ImageService:
         self.tesseract_processor = (
             PytesseractProcessor() if self.use_tesseract else None
         )
-
-    # async def download_images(self, urls: List[str]) -> List[Image.Image]:
-    #     async def download_image(url: str) -> Image.Image:
-    #         return await self.downloader.download_image(url)
-
-    #     tasks = [asyncio.create_task(download_image(url)) for url in urls]
-    #     return await asyncio.gather(*tasks)
 
     async def download_images(self, urls: List[str]) -> List[Image.Image]:
         async def download_image(url: str) -> Image.Image:
