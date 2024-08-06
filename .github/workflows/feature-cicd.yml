@@ -31,6 +31,20 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+          # all of these default to true, but feel free to set to
+          # "false" if necessary for your workflow
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -57,7 +71,7 @@ jobs:
         run: |
           sudo apt-get clean
       - name: Run Tests with tox
-        run: tox -- --cov datafog --cov-report xml --cov-report term --codeblocks
+        run: tox -- --cov datafog --cov-report xml --cov-report term -v -s --cov-report=term-missing
       - name: Submit to Codecov
         uses: codecov/codecov-action@v3
         with:
