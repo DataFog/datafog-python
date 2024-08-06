@@ -10,6 +10,8 @@
 # use_tesseract selects pytesseract processor for OCR
 
 
+import asyncio
+
 import pytest
 from PIL import Image
 
@@ -23,10 +25,13 @@ urls = [
 
 @pytest.mark.asyncio
 async def test_download_images():
-    image_service1 = ImageService()
-    images = await image_service1.download_images(urls)
-    assert len(images) == 2
-    assert all(isinstance(image, Image.Image) for image in images)
+    image_service = ImageService()
+    try:
+        images = await image_service.download_images(urls)
+        assert len(images) == 2
+        assert all(isinstance(image, Image.Image) for image in images)
+    finally:
+        await asyncio.sleep(0)  # Allow pending callbacks to run
 
 
 @pytest.mark.asyncio

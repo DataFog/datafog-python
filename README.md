@@ -116,7 +116,7 @@ For local development:
      ```
 5. Install the package in editable mode:
    ```
-   pip install -e .
+   pip install -r requirements-dev.txt
    ```
 6. Set up the project:
    ```

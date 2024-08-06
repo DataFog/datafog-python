@@ -1,13 +1,32 @@
 import asyncio
+import io
+import ssl
 from typing import List
 
+import aiohttp
+import certifi
 from PIL import Image
 
 from datafog.processing.image_processing.donut_processor import DonutProcessor
-from datafog.processing.image_processing.image_downloader import ImageDownloader
 from datafog.processing.image_processing.pytesseract_processor import (
     PytesseractProcessor,
 )
+
+
+class ImageDownloader:
+    async def download_image(self, url: str) -> Image.Image:
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(ssl=ssl_context)
+        ) as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    image_data = await response.read()
+                    return Image.open(io.BytesIO(image_data))
+                else:
+                    raise Exception(
+                        f"Failed to download image. Status code: {response.status}"
+                    )
 
 
 class ImageService:
@@ -21,7 +40,11 @@ class ImageService:
         )
 
     async def download_images(self, urls: List[str]) -> List[Image.Image]:
-        return await self.downloader.download_images(urls)
+        async def download_image(url: str) -> Image.Image:
+            return await self.downloader.download_image(url)
+
+        tasks = [asyncio.create_task(download_image(url)) for url in urls]
+        return await asyncio.gather(*tasks, return_exceptions=True)
 
     async def ocr_extract(
         self,
