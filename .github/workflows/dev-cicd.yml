@@ -62,3 +62,7 @@ jobs:
           files: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
+      - name: Clean up pip cache
+        run: |
+          pip cache purge
+          rm -rf ~/.cache/pip
