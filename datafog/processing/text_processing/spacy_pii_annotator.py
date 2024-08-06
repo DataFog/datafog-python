@@ -37,10 +37,12 @@ class SpacyPIIAnnotator(BaseModel):
             nlp = spacy.load("en_core_web_lg")
         except OSError:
             import subprocess
+            import sys
 
+            interpreter_location = sys.executable
             subprocess.run(
                 [
-                    "python",
+                    interpreter_location,
                     "-m",
                     "pip",
                     "install",
