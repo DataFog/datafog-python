@@ -1,5 +1,6 @@
-from setuptools import find_packages, setup
 import os
+
+from setuptools import find_packages, setup
 
 # Read README for the long description
 with open("README.md", "r") as f:
@@ -8,9 +9,9 @@ with open("README.md", "r") as f:
 # Use a single source of truth for the version - read from datafog/__about__.py
 about = {}
 here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'datafog', '__about__.py'), 'r') as f:
+with open(os.path.join(here, "datafog", "__about__.py"), "r") as f:
     exec(f.read(), about)
-__version__ = about['__version__']
+__version__ = about["__version__"]
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -32,18 +33,18 @@ setup(
     install_requires=[
         "pandas",
         "requests==2.32.3",
-        "spacy==3.7.5", 
+        "spacy==3.7.5",
         "pydantic",
         "aiohttp",
         "pytest-asyncio",
         "numpy",
         "fastapi",
         "asyncio",
-        "setuptools", 
+        "setuptools",
         "pydantic-settings==2.3.4",
         "typer==0.12.3",
-        "sphinx", 
-        "cryptography", 
+        "sphinx",
+        "cryptography",
     ],
     python_requires=">=3.10,<3.13",
     entry_points={
@@ -83,20 +84,20 @@ setup(
             "pytest-cov",
             "build",
             "twine",
-            "ipykernel", 
+            "ipykernel",
         ],
         "spark": [
-            "pyspark>=3.0.0", 
+            "pyspark>=3.0.0",
         ],
         "ocr": [
             "pytesseract>=0.3.10",
-            "Pillow>=9.0.0", 
+            "Pillow>=9.0.0",
         ],
         "donut": [
-            "torch>=1.8.0", 
-            "transformers[torch]>=4.10.0", 
-            "sentencepiece", 
-            "protobuf", 
+            "torch>=1.8.0",
+            "transformers[torch]>=4.10.0",
+            "sentencepiece",
+            "protobuf",
         ],
         "all": [
             "pyspark>=3.0.0",
@@ -106,6 +107,6 @@ setup(
             "transformers[torch]>=4.10.0",
             "sentencepiece",
             "protobuf",
-        ]
+        ],
     },
 )

@@ -5,16 +5,16 @@ Provides a wrapper around PySpark functionality, including session creation,
 JSON reading, and package management.
 """
 
-import sys
 import importlib
-import subprocess
-import logging
 import json
+import logging
+import subprocess
+import sys
 from typing import Any, List, Optional
 
 # Attempt to import pyspark and provide a helpful error message if missing
 try:
-    from pyspark.sql import SparkSession, DataFrame
+    from pyspark.sql import DataFrame, SparkSession
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
         "pyspark is not installed. Please install it to use Spark features: pip install datafog[spark]"

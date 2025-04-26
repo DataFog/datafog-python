@@ -27,7 +27,8 @@ except ModuleNotFoundError:
         "torch is not installed. Please install it to use Donut features: pip install 'datafog[donut]'"
     )
 try:
-    from transformers import DonutProcessor as TransformersDonutProcessor, VisionEncoderDecoderModel
+    from transformers import DonutProcessor as TransformersDonutProcessor
+    from transformers import VisionEncoderDecoderModel
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
         "transformers is not installed. Please install it to use Donut features: pip install 'datafog[donut]'"
