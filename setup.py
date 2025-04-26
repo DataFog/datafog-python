@@ -1,11 +1,16 @@
 from setuptools import find_packages, setup
+import os
 
 # Read README for the long description
 with open("README.md", "r") as f:
     long_description = f.read()
 
-# Use a single source of truth for the version
-__version__ = "4.0.0"
+# Use a single source of truth for the version - read from datafog/__about__.py
+about = {}
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, 'datafog', '__about__.py'), 'r') as f:
+    exec(f.read(), about)
+__version__ = about['__version__']
 
 project_urls = {
     "Homepage": "https://datafog.ai",
