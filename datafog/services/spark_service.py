@@ -5,11 +5,23 @@ Provides a wrapper around PySpark functionality, including session creation,
 JSON reading, and package management.
 """
 
-import importlib
-import json
-import subprocess
 import sys
-from typing import Any, List
+import importlib
+import subprocess
+import logging
+import json
+from typing import Any, List, Optional
+
+# Attempt to import pyspark and provide a helpful error message if missing
+try:
+    from pyspark.sql import SparkSession, DataFrame
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "pyspark is not installed. Please install it to use Spark features: pip install datafog[spark]"
+    )
+
+from pyspark.sql.functions import udf
+from pyspark.sql.types import ArrayType, StringType
 
 
 class SparkService:
@@ -20,30 +32,21 @@ class SparkService:
     data reading and package installation.
     """
 
-    def __init__(self):
-        self.spark = self.create_spark_session()
-        self.ensure_installed("pyspark")
+    def __init__(self, spark_session: Optional[SparkSession] = None):
+        if spark_session:
+            self.spark = spark_session
+        else:
+            self.spark = self.create_spark_session()
 
-        from pyspark.sql import DataFrame, SparkSession
-        from pyspark.sql.functions import udf
-        from pyspark.sql.types import ArrayType, StringType
-
-        self.SparkSession = SparkSession
         self.DataFrame = DataFrame
         self.udf = udf
         self.ArrayType = ArrayType
         self.StringType = StringType
 
+        logging.info("SparkService initialized.")
+
     def create_spark_session(self):
-        return self.SparkSession.builder.appName("datafog").getOrCreate()
+        return SparkSession.builder.appName("datafog").getOrCreate()
 
     def read_json(self, path: str) -> List[dict]:
         return self.spark.read.json(path).collect()
-
-    def ensure_installed(self, package_name):
-        try:
-            importlib.import_module(package_name)
-        except ImportError:
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", package_name]
-            )
