@@ -97,15 +97,17 @@ class SpacyAnnotator:
             batch_size = int(batch_size_str) if batch_size_str else default_batch_size
             if batch_size <= 0:
                 logger.warning(
-                    f"Invalid DATAFOG_SPACY_BATCH_SIZE '{batch_size_str}'. "
+                    f"Invalid DATAFOG_SPACY_BATCH_SIZE {batch_size_str!r}. "
                     f"Must be a positive integer. Using default: {default_batch_size}"
                 )
                 batch_size = default_batch_size
         except (ValueError, TypeError):
             # Handle cases where env var is set but not a valid integer
-            batch_size_str = os.getenv("DATAFOG_SPACY_BATCH_SIZE") # Get it again for logging
+            batch_size_str = os.getenv(
+                "DATAFOG_SPACY_BATCH_SIZE"
+            )  # Get it again for logging
             logger.warning(
-                f"Invalid DATAFOG_SPACY_BATCH_SIZE '{batch_size_str}'. "
+                f"Invalid DATAFOG_SPACY_BATCH_SIZE {batch_size_str!r}. "
                 f"Must be an integer. Using default: {default_batch_size}"
             )
             batch_size = default_batch_size

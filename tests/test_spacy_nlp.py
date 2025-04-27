@@ -203,3 +203,90 @@ def test_get_spacy_model_triggers_download(
     mock_spacy_load.assert_called_once_with(model_name)
     assert nlp_obj is mock_nlp
     assert model_name in _SPACY_MODEL_CACHE
+
+
+# Test batch size configuration
+
+
+@patch("datafog.models.spacy_nlp.os.getenv")
+@patch("datafog.models.spacy_nlp._get_spacy_model")
+def test_annotate_text_uses_default_batch_size(mock_get_model, mock_getenv):
+    """Verify nlp.pipe is called with default batch_size=50 when env var is not set."""
+    # Mock os.getenv to return None (env var not set)
+    mock_getenv.return_value = None
+
+    # Setup mock spaCy model and its pipe method
+    mock_nlp = MagicMock()
+    mock_nlp.pipe.return_value = []  # pipe returns an iterable
+    mock_get_model.return_value = mock_nlp
+
+    # Instantiate annotator and call the method
+    annotator = SpacyAnnotator()
+    annotator.annotate_text(["text1", "text2"])
+
+    # Assert _get_spacy_model was called
+    mock_get_model.assert_called_once_with(annotator.model_name)
+
+    # Assert nlp.pipe was called with default batch_size=50
+    mock_nlp.pipe.assert_called_once()
+    args, kwargs = mock_nlp.pipe.call_args
+    assert kwargs.get("batch_size") == 50
+    assert kwargs.get("n_process") == -1
+
+
+@patch("datafog.models.spacy_nlp.os.getenv")
+@patch("datafog.models.spacy_nlp._get_spacy_model")
+def test_annotate_text_uses_env_var_batch_size(mock_get_model, mock_getenv):
+    """Verify nlp.pipe is called with batch_size from env var."""
+    # Mock os.getenv to return a specific batch size
+    mock_getenv.return_value = "10"
+
+    # Setup mock spaCy model and its pipe method
+    mock_nlp = MagicMock()
+    mock_nlp.pipe.return_value = []
+    mock_get_model.return_value = mock_nlp
+
+    # Instantiate annotator and call the method
+    annotator = SpacyAnnotator()
+    annotator.annotate_text(["text1", "text2"])
+
+    # Assert _get_spacy_model was called
+    mock_get_model.assert_called_once_with(annotator.model_name)
+
+    # Assert nlp.pipe was called with batch_size=10
+    mock_nlp.pipe.assert_called_once()
+    args, kwargs = mock_nlp.pipe.call_args
+    assert kwargs.get("batch_size") == 10
+    assert kwargs.get("n_process") == -1
+
+
+@pytest.mark.parametrize("invalid_value", ["abc", "-5", "0", " "])
+@patch("datafog.models.spacy_nlp.os.getenv")
+@patch("datafog.models.spacy_nlp._get_spacy_model")
+def test_annotate_text_uses_default_on_invalid_env_var(
+    mock_get_model, mock_getenv, invalid_value
+):
+    """Verify nlp.pipe uses default batch_size=50 when env var is invalid."""
+    # Mock os.getenv to return an invalid value
+    mock_getenv.return_value = invalid_value
+
+    # Setup mock spaCy model and its pipe method
+    mock_nlp = MagicMock()
+    mock_nlp.pipe.return_value = []
+    mock_get_model.return_value = mock_nlp
+
+    # Instantiate annotator and call the method
+    annotator = SpacyAnnotator()
+    annotator.annotate_text(["text1", "text2"])
+
+    # Assert _get_spacy_model was called
+    mock_get_model.assert_called_once_with(annotator.model_name)
+
+    # Assert nlp.pipe was called with default batch_size=50
+    mock_nlp.pipe.assert_called_once()
+    args, kwargs = mock_nlp.pipe.call_args
+    assert kwargs.get("batch_size") == 50
+    assert kwargs.get("n_process") == -1
+
+
+# Existing download/list tests remain unchanged...
