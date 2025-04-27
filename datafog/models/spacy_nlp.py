@@ -6,6 +6,7 @@ text annotation, entity recognition, and related NLP tasks.
 """
 
 import logging
+import os
 import threading
 from typing import List, Optional
 from uuid import uuid4
@@ -85,20 +86,40 @@ class SpacyAnnotator:
                                          input text.
         """
         # Ensure the model is loaded
-        if not self.nlp:
-            self.load_model()
+        self.load_model()
 
-        all_results: List[List[AnnotationResult]] = (
-            []
-        )  # Initialize list for all results
+        results = []
 
-        # Process texts in batches using nlp.pipe with specified batch_size and n_process
-        docs = self.nlp.pipe(texts, batch_size=50, n_process=-1)
+        # Get batch size from environment variable or use default
+        default_batch_size = 50
+        try:
+            batch_size_str = os.getenv("DATAFOG_SPACY_BATCH_SIZE")
+            batch_size = int(batch_size_str) if batch_size_str else default_batch_size
+            if batch_size <= 0:
+                logger.warning(
+                    f"Invalid DATAFOG_SPACY_BATCH_SIZE '{batch_size_str}'. "
+                    f"Must be a positive integer. Using default: {default_batch_size}"
+                )
+                batch_size = default_batch_size
+        except (ValueError, TypeError):
+            # Handle cases where env var is set but not a valid integer
+            batch_size_str = os.getenv("DATAFOG_SPACY_BATCH_SIZE") # Get it again for logging
+            logger.warning(
+                f"Invalid DATAFOG_SPACY_BATCH_SIZE '{batch_size_str}'. "
+                f"Must be an integer. Using default: {default_batch_size}"
+            )
+            batch_size = default_batch_size
 
-        # Use track for progress over the batch
-        for doc in track(
-            docs, description="Processing batch of texts", total=len(texts)
-        ):
+        logger.info(f"Using spaCy batch size: {batch_size}")
+
+        # Process texts in batches using nlp.pipe
+        docs = self.nlp.pipe(texts, batch_size=batch_size, n_process=-1)
+
+        # Wrap with track for progress bar
+        processed_docs = track(docs, description="Annotating text...", total=len(texts))
+
+        # Process each doc
+        for doc in processed_docs:
             doc_results: List[AnnotationResult] = (
                 []
             )  # Initialize list for current doc's results
@@ -111,9 +132,9 @@ class SpacyAnnotator:
                     recognition_metadata=None,  # Consider adding metadata if needed
                 )
                 doc_results.append(result)
-            all_results.append(doc_results)  # Add results for this doc to the main list
+            results.append(doc_results)  # Add results for this doc to the main list
 
-        return all_results
+        return results
 
     def show_model_path(self) -> str:
         # This check now correctly uses the updated load_model -> _get_spacy_model
