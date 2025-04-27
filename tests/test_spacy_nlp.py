@@ -24,79 +24,107 @@ def clear_spacy_cache_before_test():
 @patch("datafog.models.spacy_nlp.spacy.load")
 def test_annotate_text_basic(mock_spacy_load):
     """
-    Test that annotate_text correctly processes text and returns AnnotationResult objects.
+    Test that annotate_text correctly processes a batch of texts using nlp.pipe
+    and returns a list of lists of AnnotationResult objects.
     """
-    # Arrange: Mock the spaCy NLP object and its return value
+    # Arrange: Mock the spaCy NLP object and its pipe method
     mock_nlp = MagicMock()
-    mock_doc = MagicMock()
+    mock_doc1 = MagicMock()
+    mock_doc2 = MagicMock()
 
-    # Simulate entities found by spaCy
-    mock_ent1 = MagicMock()
-    mock_ent1.start_char = 0
-    mock_ent1.end_char = 4
-    mock_ent1.label_ = "PERSON"
+    # Simulate entities for the first text
+    mock_ent1_doc1 = MagicMock(start_char=0, end_char=4, label_="PERSON")
+    mock_ent2_doc1 = MagicMock(start_char=11, end_char=17, label_="LOCATION")
+    mock_doc1.ents = [mock_ent1_doc1, mock_ent2_doc1]
 
-    mock_ent2 = MagicMock()
-    mock_ent2.start_char = 11
-    mock_ent2.end_char = 17
-    mock_ent2.label_ = "LOCATION"  # Use valid EntityTypes member
+    # Simulate entities for the second text
+    mock_ent1_doc2 = MagicMock(start_char=0, end_char=5, label_="PERSON")
+    mock_ent2_doc2 = MagicMock(start_char=16, end_char=22, label_="ORG")
+    mock_doc2.ents = [mock_ent1_doc2, mock_ent2_doc2]
 
-    mock_doc.ents = [mock_ent1, mock_ent2]
-    mock_nlp.return_value = mock_doc  # nlp(text) returns the mock_doc
+    # Mock the return value of nlp.pipe to be an iterator of our mock docs
+    mock_nlp.pipe.return_value = iter([mock_doc1, mock_doc2])
     mock_spacy_load.return_value = mock_nlp  # spacy.load() returns the mock_nlp
 
-    # Instantiate the annotator (doesn't load model immediately)
+    # Instantiate the annotator
     annotator = SpacyAnnotator()
 
-    # Act: Call the method under test
-    test_text = "John lives in London."
-    results = annotator.annotate_text(test_text)
+    # Act: Call the method under test with a list of texts
+    test_texts = ["John lives in London.", "Alice works at Google."]
+    results = annotator.annotate_text(test_texts)
 
     # Assert:
     # Check that spacy.load was called (implicitly tests load_model)
     mock_spacy_load.assert_called_once_with(annotator.model_name)
-    # Check that the nlp object was called with the text
-    mock_nlp.assert_called_once()
-    # Check the number of results
-    assert len(results) == 2
+    # Check that nlp.pipe was called with the texts and default args
+    mock_nlp.pipe.assert_called_once_with(test_texts, batch_size=50, n_process=-1)
 
-    # Check the details of the first result
-    assert isinstance(results[0], AnnotationResult)
-    assert results[0].start == 0
-    assert results[0].end == 4
-    assert results[0].entity_type == "PERSON"
-    assert isinstance(results[0].score, float)
+    # Check the structure of the results (list of lists)
+    assert isinstance(results, list)
+    assert len(results) == 2  # One list of results for each input text
+    assert isinstance(results[0], list)
+    assert isinstance(results[1], list)
 
-    # Check the details of the second result
-    assert isinstance(results[1], AnnotationResult)
-    assert results[1].start == 11
-    assert results[1].end == 17
-    assert results[1].entity_type == "LOCATION"  # Assert for LOCATION
-    assert isinstance(results[1].score, float)
+    # --- Check results for the first text --- #
+    assert len(results[0]) == 2
+    # First entity
+    assert isinstance(results[0][0], AnnotationResult)
+    assert results[0][0].start == 0
+    assert results[0][0].end == 4
+    assert results[0][0].entity_type == "PERSON"
+    assert isinstance(results[0][0].score, float)
+    # Second entity
+    assert isinstance(results[0][1], AnnotationResult)
+    assert results[0][1].start == 11
+    assert results[0][1].end == 17
+    assert results[0][1].entity_type == "LOCATION"
+    assert isinstance(results[0][1].score, float)
+
+    # --- Check results for the second text --- #
+    assert len(results[1]) == 2
+    # First entity
+    assert isinstance(results[1][0], AnnotationResult)
+    assert results[1][0].start == 0
+    assert results[1][0].end == 5
+    assert results[1][0].entity_type == "PERSON"
+    assert isinstance(results[1][0].score, float)
+    # Second entity
+    assert isinstance(results[1][1], AnnotationResult)
+    assert results[1][1].start == 16
+    assert results[1][1].end == 22
+    # Expect UNKNOWN because 'ORG' is not in EntityTypes enum (validator replaces it)
+    assert results[1][1].entity_type == "UNKNOWN"
+    assert isinstance(results[1][1].score, float)
 
 
 # Example of testing other branches (e.g., model already loaded)
 @patch("datafog.models.spacy_nlp.spacy.load")
 def test_annotate_text_model_already_loaded(mock_spacy_load):
     """
-    Test that annotate_text doesn't reload the model if already loaded.
+    Test that annotate_text doesn't reload the model if already loaded
+    and still calls nlp.pipe correctly.
     """
     # Arrange
     mock_nlp = MagicMock()
     mock_doc = MagicMock()
     mock_doc.ents = []  # No entities for simplicity
-    mock_nlp.return_value = mock_doc
-    mock_spacy_load.return_value = mock_nlp
+    mock_nlp.pipe.return_value = iter([mock_doc])  # nlp.pipe returns iterator
+    mock_spacy_load.return_value = mock_nlp  # This shouldn't be called if pre-set
 
     annotator = SpacyAnnotator()
     annotator.nlp = mock_nlp  # Pre-set the nlp attribute
 
     # Act
-    annotator.annotate_text("Some text.")
+    test_texts = ["Some text."]
+    results = annotator.annotate_text(test_texts)
 
     # Assert
     mock_spacy_load.assert_not_called()  # Should not be called again
-    mock_nlp.assert_called_once_with("Some text.")
+    mock_nlp.pipe.assert_called_once_with(test_texts, batch_size=50, n_process=-1)
+    assert isinstance(results, list)
+    assert len(results) == 1
+    assert isinstance(results[0], list)
+    assert len(results[0]) == 0  # No entities expected
 
 
 # --- Tests for _get_spacy_model Caching --- #

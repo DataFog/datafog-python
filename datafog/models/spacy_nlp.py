@@ -70,33 +70,50 @@ class SpacyAnnotator:
             # Use the cached loader function
             self.nlp = _get_spacy_model(self.model_name)
 
-    def annotate_text(self, text: str, language: str = "en") -> List[AnnotationResult]:
-        # This check now correctly uses the updated load_model -> _get_spacy_model
+    def annotate_text(
+        self, texts: List[str], language: str = "en"
+    ) -> List[List[AnnotationResult]]:
+        """Annotates a batch of texts using spaCy NLP pipeline.
+
+        Args:
+            texts (List[str]): A list of texts to annotate.
+            language (str): The language of the text (currently unused).
+
+        Returns:
+            List[List[AnnotationResult]]: A list where each inner list contains
+                                         AnnotationResult objects for the corresponding
+                                         input text.
+        """
+        # Ensure the model is loaded
         if not self.nlp:
             self.load_model()
 
-        annotator_request = AnnotatorRequest(
-            text=text,
-            language=language,
-            correlation_id=str(uuid4()),
-            score_threshold=0.5,
-            entities=None,
-            return_decision_process=False,
-            ad_hoc_recognizers=None,
-            context=None,
-        )
-        doc = self.nlp(annotator_request.text)
-        results = []
-        for ent in track(doc.ents, description="Processing entities"):
-            result = AnnotationResult(
-                start=ent.start_char,
-                end=ent.end_char,
-                score=0.8,  # Placeholder score
-                entity_type=ent.label_,
-                recognition_metadata=None,
-            )
-            results.append(result)
-        return results
+        all_results: List[List[AnnotationResult]] = (
+            []
+        )  # Initialize list for all results
+
+        # Process texts in batches using nlp.pipe with specified batch_size and n_process
+        docs = self.nlp.pipe(texts, batch_size=50, n_process=-1)
+
+        # Use track for progress over the batch
+        for doc in track(
+            docs, description="Processing batch of texts", total=len(texts)
+        ):
+            doc_results: List[AnnotationResult] = (
+                []
+            )  # Initialize list for current doc's results
+            for ent in doc.ents:
+                result = AnnotationResult(
+                    start=ent.start_char,
+                    end=ent.end_char,
+                    score=0.8,  # Placeholder score - Consider using actual scores if available
+                    entity_type=ent.label_,
+                    recognition_metadata=None,  # Consider adding metadata if needed
+                )
+                doc_results.append(result)
+            all_results.append(doc_results)  # Add results for this doc to the main list
+
+        return all_results
 
     def show_model_path(self) -> str:
         # This check now correctly uses the updated load_model -> _get_spacy_model
