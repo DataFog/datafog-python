@@ -2,9 +2,9 @@
 
 ### **v4.1.0 — Baseline stability**
 
-* **MUST** read `__version__` from `datafog/__about__.py` and import it in `setup.py`; delete the duplicate there.  
-* **MUST** remove every `ensure_installed()` runtime `pip install`; fail fast instead.  
-* **MUST** document OCR/Donut extras in `setup.py[extras]`.
+- **MUST** read `__version__` from `datafog/__about__.py` and import it in `setup.py`; delete the duplicate there.  
+- **MUST** remove every `ensure_installed()` runtime `pip install`; fail fast instead.  
+- **MUST** document OCR/Donut extras in `setup.py[extras]`.
 
 ---
 
@@ -72,6 +72,4 @@
 - **MUST** cache spaCy model artefacts in GitHub Actions with `actions/cache`, keyed by `model-hash`.
 - **SHOULD** update docs and `README.md` badges for new extras and WASM support.
 
----
 
-Use this ladder as-is, bumping **only the minor version** each time, so v4.0.x callers never break.
