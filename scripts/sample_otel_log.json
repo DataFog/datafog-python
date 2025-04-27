@@ -1,0 +1,32 @@
+{
+  "Timestamp": "2025-04-27T19:50:38.123456789Z",
+  "ObservedTimestamp": "2025-04-27T19:50:38.987654321Z",
+  "TraceId": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+  "SpanId": "1a2b3c4d5e6f7a8b",
+  "SeverityText": "ERROR",
+  "SeverityNumber": 17,
+  "Body": "User login failed for user jane.doe@example.com. Error processing payment for order #12345 associated with account JD98765. IP address: 192.168.1.101. Session ID: sess_abc123.",
+  "Attributes": {
+    "http.method": "POST",
+    "http.url": "https://api.example.com/v1/login",
+    "http.status_code": 401,
+    "user.id": "jane.doe@example.com",
+    "user.name": "Jane Doe",
+    "customer.id": "JD98765",
+    "error.message": "Invalid credentials provided by user from 192.168.1.101",
+    "payment.details.card_last4": "4242",
+    "session.id": "sess_abc123",
+    "thread.id": 12,
+    "thread.name": "worker-3"
+  },
+  "Resource": {
+    "service.name": "auth-service",
+    "service.version": "1.2.5",
+    "service.instance.id": "auth-service-7bdf9f5cf-xyz12",
+    "deployment.environment": "production",
+    "host.name": "prod-auth-server-01",
+    "cloud.provider": "aws",
+    "cloud.region": "us-west-2",
+    "cloud.account.id": "123456789012"
+  }
+}
