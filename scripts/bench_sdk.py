@@ -1,7 +1,7 @@
-import timeit
+import json
 import os
 import sys
-import json
+import timeit
 from typing import Any, List
 
 # Ensure the project root is in the Python path
@@ -9,8 +9,8 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 try:
-    from datafog.models.spacy_nlp import SpacyAnnotator
     from datafog.models.anonymizer import Anonymizer, AnonymizerType
+    from datafog.models.spacy_nlp import SpacyAnnotator
 except ImportError:
     print("Error: Could not import SpacyAnnotator or Anonymizer.")
     print("Make sure datafog-python is installed in your environment.")
@@ -22,6 +22,7 @@ NUM_RUNS = 1  # Run the full file processing once per timeit loop
 NUM_LOOPS = 10  # Number of times to repeat the timeit measurement
 JSON_FILE_PATH = os.path.join(project_root, "scripts", "sample_otel_log.json")
 
+
 # --- Helper Function to Extract Strings ---
 def extract_strings_from_json(data: Any) -> List[str]:
     """Recursively extract all string values from a JSON object/list."""
@@ -29,7 +30,7 @@ def extract_strings_from_json(data: Any) -> List[str]:
     if isinstance(data, dict):
         for key, value in data.items():
             if isinstance(key, str):
-                 strings.append(key)
+                strings.append(key)
             strings.extend(extract_strings_from_json(value))
     elif isinstance(data, list):
         for item in data:
@@ -38,8 +39,11 @@ def extract_strings_from_json(data: Any) -> List[str]:
         strings.append(data)
     return strings
 
+
 print(f"Starting SDK Benchmark for {os.path.basename(JSON_FILE_PATH)}...")
-print(f"Timing {NUM_RUNS} full file processing execution(s) per loop, repeated {NUM_LOOPS} times.")
+print(
+    f"Timing {NUM_RUNS} full file processing execution(s) per loop, repeated {NUM_LOOPS} times."
+)
 print("---")
 
 # --- Setup Code for timeit ---
@@ -60,7 +64,7 @@ anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REDACT)
 
 # --- Get Sample Data ---
 try:
-    with open(JSON_FILE_PATH, 'r', encoding='utf-8') as f:
+    with open(JSON_FILE_PATH, "r", encoding="utf-8") as f:
         json_data = json.load(f)
     sample_texts = extract_strings_from_json(json_data)
     if not sample_texts:
@@ -95,7 +99,7 @@ try:
         stmt=stmt_to_time,
         setup=setup_code,
         number=NUM_RUNS,  # Number of executions per timing loop
-        repeat=NUM_LOOPS  # Number of timing loops
+        repeat=NUM_LOOPS,  # Number of timing loops
     )
 
     # Calculate average time per execution across all loops
@@ -104,7 +108,9 @@ try:
 
     print("---")
     print(f"Fastest loop time ({NUM_RUNS} runs): {min_time_per_loop:.6f} seconds")
-    print(f"Average time per single full file processing (in fastest loop): {avg_time_per_run:.6f} seconds")
+    print(
+        f"Average time per single full file processing (in fastest loop): {avg_time_per_run:.6f} seconds"
+    )
     print("==================================")
 
 except Exception as e:

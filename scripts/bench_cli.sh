@@ -5,7 +5,7 @@
 NUM_LOOPS=5
 # SAMPLE_TEXT="Redact my name, John Doe, and my organization, Acme Inc."
 JSON_FILE="scripts/sample_otel_log.json" # Added
-VENV_PATH="./venv_bench_4.0.0" # Assuming venv is in the project root
+VENV_PATH="./venv_4.0.1" # Assuming venv is in the project root
 TIME_CMD="/usr/bin/time" # Use full path for `time` to avoid shell built-in
 
 # Get project root directory (assuming the script is run from the project root)

@@ -21,12 +21,13 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
     Returns:
         list[list[str]]: Values as arrays in order defined in the PII_ANNOTATION_LABELS.
     """
-    ensure_installed("pyspark")
-    ensure_installed("spacy")
+    # ensure_installed("pyspark")
+    # ensure_installed("spacy")
     import spacy
-    from pyspark.sql import SparkSession
-    from pyspark.sql.functions import udf
-    from pyspark.sql.types import ArrayType, StringType, StructField, StructType
+
+    # from pyspark.sql import SparkSession
+    # from pyspark.sql.functions import udf
+    # from pyspark.sql.types import ArrayType, StringType, StructField, StructType
 
     if text:
         if len(text) > MAXIMAL_STRING_SIZE:
@@ -52,22 +53,25 @@ def broadcast_pii_annotator_udf(
     spark_session=None, spacy_model: str = "en_core_web_lg"
 ):
     """Broadcast PII annotator across Spark cluster and create UDF"""
-    ensure_installed("pyspark")
-    ensure_installed("spacy")
+    # ensure_installed("pyspark")
+    # ensure_installed("spacy")
     import spacy
-    from pyspark.sql import SparkSession
-    from pyspark.sql.functions import udf
-    from pyspark.sql.types import ArrayType, StringType, StructField, StructType
+
+    # from pyspark.sql import SparkSession
+    # from pyspark.sql.functions import udf
+    # from pyspark.sql.types import ArrayType, StringType, StructField, StructType
 
     if not spark_session:
-        spark_session = SparkSession.builder.getOrCreate()
-    broadcasted_nlp = spark_session.sparkContext.broadcast(spacy.load(spacy_model))
+        # spark_session = SparkSession.builder.getOrCreate()
+        pass  # Placeholder if SparkSession is commented out
 
-    pii_annotation_udf = udf(
-        lambda text: pii_annotator(text, broadcasted_nlp),
-        ArrayType(ArrayType(StringType())),
-    )
-    return pii_annotation_udf
+    # broadcasted_nlp = spark_session.sparkContext.broadcast(spacy.load(spacy_model))
+
+    # pii_annotation_udf = udf(
+    #     lambda text: pii_annotator(text, broadcasted_nlp),
+    #     ArrayType(ArrayType(StringType())),
+    # )
+    return None  # Return None since the UDF creation is commented out
 
 
 def ensure_installed(self, package_name):
