@@ -1,11 +1,17 @@
+import os
+
 from setuptools import find_packages, setup
 
 # Read README for the long description
 with open("README.md", "r") as f:
     long_description = f.read()
 
-# Use a single source of truth for the version
-__version__ = "4.0.0"
+# Use a single source of truth for the version - read from datafog/__about__.py
+about = {}
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, "datafog", "__about__.py"), "r") as f:
+    exec(f.read(), about)
+__version__ = about["__version__"]
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -29,10 +35,6 @@ setup(
         "requests==2.32.3",
         "spacy==3.7.5",
         "pydantic",
-        "Pillow",
-        "sentencepiece",
-        "protobuf",
-        "pytesseract",
         "aiohttp",
         "pytest-asyncio",
         "numpy",
@@ -82,6 +84,29 @@ setup(
             "pytest-cov",
             "build",
             "twine",
+            "ipykernel",
+        ],
+        "spark": [
+            "pyspark>=3.0.0",
+        ],
+        "ocr": [
+            "pytesseract>=0.3.10",
+            "Pillow>=9.0.0",
+        ],
+        "donut": [
+            "torch>=1.8.0",
+            "transformers[torch]>=4.10.0",
+            "sentencepiece",
+            "protobuf",
+        ],
+        "all": [
+            "pyspark>=3.0.0",
+            "pytesseract>=0.3.10",
+            "Pillow>=9.0.0",
+            "torch>=1.8.0",
+            "transformers[torch]>=4.10.0",
+            "sentencepiece",
+            "protobuf",
         ],
     },
 )
