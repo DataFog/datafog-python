@@ -209,6 +209,7 @@ client = DataFog()
 ```
 
 DataFog now includes several performance enhancements:
+
 - **SpaCy Model Caching:** Loaded spaCy models are cached in memory to speed up subsequent processing requests.
 - **Efficient Batch Processing:** The text processing pipeline utilizes spaCy's `nlp.pipe()` internally, processing documents in batches (default batch size is 50, configurable via `DATAFOG_SPACY_BATCH_SIZE` environment variable) and leveraging multiple processes (`n_process=-1`) for improved throughput.
 - **Asynchronous Execution:** When using asynchronous methods (`run_text_pipeline`, `run_ocr_pipeline`), potentially blocking operations like spaCy processing and Tesseract OCR are executed in separate threads to avoid blocking the main event loop.
@@ -327,9 +328,9 @@ You can choose from SHA256 (default), SHA3-256, and MD5 hashing algorithms by sp
 
 ### Environment Variables
 
-- **`DATAFOG_SPACY_BATCH_SIZE`**: Controls the batch size used internally by spaCy's `nlp.pipe()` when processing text documents. Larger batch sizes can improve throughput on systems with sufficient memory but may increase memory usage. 
-    - **Default:** `50`
-    - **Usage:** Set this environment variable to a positive integer (e.g., `export DATAFOG_SPACY_BATCH_SIZE=100`) to override the default.
+- **`DATAFOG_SPACY_BATCH_SIZE`**: Controls the batch size used internally by spaCy's `nlp.pipe()` when processing text documents. Larger batch sizes can improve throughput on systems with sufficient memory but may increase memory usage.
+  - **Default:** `50`
+  - **Usage:** Set this environment variable to a positive integer (e.g., `export DATAFOG_SPACY_BATCH_SIZE=100`) to override the default.
 
 ## Examples
 

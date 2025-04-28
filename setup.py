@@ -1,7 +1,5 @@
 import os
 
-import os
-
 from setuptools import find_packages, setup
 
 # Read README for the long description

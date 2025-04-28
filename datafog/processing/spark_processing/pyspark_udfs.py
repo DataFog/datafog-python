@@ -55,7 +55,7 @@ PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
 MAXIMAL_STRING_SIZE = 1000000
 
 
-def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
+def pii_annotator_udf(text: str, broadcasted_nlp) -> list[list[str]]:
     """Extract features using en_core_web_lg model.
 
     Returns:
@@ -108,7 +108,7 @@ def broadcast_pii_annotator_udf(
     # broadcasted_nlp = spark_session.sparkContext.broadcast(spacy.load(spacy_model))
 
     # pii_annotation_udf = udf(
-    #     lambda text: pii_annotator(text, broadcasted_nlp),
+    #     lambda text: pii_annotator_udf(text, broadcasted_nlp),
     #     ArrayType(ArrayType(StringType())),
     # )
     return None  # Return None since the UDF creation is commented out

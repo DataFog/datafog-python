@@ -71,5 +71,3 @@
 - **MUST** auto-load WASM build on `wasmtime` when `import datafog.wasm` succeeds.
 - **MUST** cache spaCy model artefacts in GitHub Actions with `actions/cache`, keyed by `model-hash`.
 - **SHOULD** update docs and `README.md` badges for new extras and WASM support.
-
-
