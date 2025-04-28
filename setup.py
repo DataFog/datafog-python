@@ -95,9 +95,6 @@ setup(
             "twine",
             "ipykernel",
         ],
-        "spark": [
-            "pyspark>=3.0.0",
-        ],
         "ocr": [
             "pytesseract>=0.3.10",
             "Pillow>=9.0.0",
@@ -109,7 +106,6 @@ setup(
             "protobuf",
         ],
         "all": [
-            "pyspark>=3.0.0",
             "pytesseract>=0.3.10",
             "Pillow>=9.0.0",
             "torch>=1.8.0",

@@ -17,7 +17,6 @@ from .config import OperationType
 from .models.anonymizer import Anonymizer, AnonymizerType, HashType
 from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
-from .services.spark_service import SparkService
 from .services.text_service import TextService
 
 logger = logging.getLogger("datafog_logger")
@@ -33,7 +32,6 @@ class DataFog:
     Attributes:
         image_service: Service for image processing and OCR.
         text_service: Service for text processing and annotation.
-        spark_service: Optional Spark service for distributed processing.
         operations: List of operations to perform.
         anonymizer: Anonymizer for PII redaction, replacement, or hashing.
     """
@@ -42,14 +40,12 @@ class DataFog:
         self,
         image_service=None,
         text_service=None,
-        spark_service=None,
         operations: List[OperationType] = [OperationType.SCAN],
         hash_type: HashType = HashType.SHA256,
         anonymizer_type: AnonymizerType = AnonymizerType.REPLACE,
     ):
         self.image_service = image_service or ImageService()
         self.text_service = text_service or TextService()
-        self.spark_service: SparkService = spark_service
         self.operations: List[OperationType] = operations
         self.anonymizer = Anonymizer(
             hash_type=hash_type, anonymizer_type=anonymizer_type
@@ -60,9 +56,6 @@ class DataFog:
         )
         self.logger.info(f"Image Service: {type(self.image_service)}")
         self.logger.info(f"Text Service: {type(self.text_service)}")
-        self.logger.info(
-            f"Spark Service: {type(self.spark_service) if self.spark_service else 'None'}"
-        )
         self.logger.info(f"Operations: {operations}")
         self.logger.info(f"Hash Type: {hash_type}")
         self.logger.info(f"Anonymizer Type: {anonymizer_type}")
@@ -232,12 +225,10 @@ class TextPIIAnnotator:
 
     Attributes:
         text_annotator: SpacyPIIAnnotator instance for text annotation.
-        spark_processor: Optional SparkService for distributed processing.
     """
 
     def __init__(self):
         self.text_annotator = SpacyPIIAnnotator.create()
-        self.spark_processor: SparkService = None
 
     def run(self, text, output_path=None):
         try:
@@ -249,8 +240,6 @@ class TextPIIAnnotator:
                     json.dump(annotated_text, f)
 
             return annotated_text
-
-        finally:
-            # Ensure Spark resources are released
-            if self.spark_processor:
-                self.spark_processor.stop()
+        except Exception as e:
+            logging.error(f"Error in run: {str(e)}")
+            raise

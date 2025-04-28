@@ -27,24 +27,18 @@ pip install datafog
 
 ### Optional Features (Extras)
 
-DataFog uses `extras` to manage dependencies for optional features like specific OCR engines or Apache Spark integration. You can install these as needed:
+DataFog uses `extras` to manage dependencies for optional features like specific OCR engines. You can install these as needed:
 
-- **OCR (Tesseract):** For image scanning using Tesseract. Requires Tesseract OCR engine to be installed on your system separately.
-  ```bash
-  pip install "datafog[ocr]"
-  ```
-- **OCR (Donut):** For image scanning using the Donut document understanding model.
-  ```bash
-  pip install "datafog[donut]"
-  ```
-- **Spark:** For processing data using PySpark.
-  ```bash
-  pip install "datafog[spark]"
-  ```
-- **All:** To install all optional features at once.
-  ```bash
-  pip install "datafog[all]"
-  ```
+```bash
+# Install with OCR
+pip install "datafog[ocr]"
+
+# Install with Donut for structured document extraction
+pip install "datafog[donut]"
+
+# Install with ALL optional dependencies
+pip install "datafog[all]"
+```
 
 # CLI
 

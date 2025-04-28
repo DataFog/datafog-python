@@ -15,5 +15,4 @@ Class Definitions
    generated/datafog.models.spacy_nlp.SpacyAnnotator
    generated/datafog.services.image_service.ImageDownloader
    generated/datafog.services.image_service.ImageService
-   generated/datafog.services.spark_service.SparkService
    generated/datafog.services.text_service.TextService

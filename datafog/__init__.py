@@ -21,7 +21,6 @@ from .processing.image_processing.image_downloader import ImageDownloader
 from .processing.image_processing.pytesseract_processor import PytesseractProcessor
 from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
-from .services.spark_service import SparkService
 from .services.text_service import TextService
 
 __all__ = [
@@ -29,7 +28,6 @@ __all__ = [
     "DataFog",
     "ImageService",
     "OperationType",
-    "SparkService",
     "TextPIIAnnotator",
     "TextService",
     "SpacyPIIAnnotator",

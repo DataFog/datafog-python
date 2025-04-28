@@ -88,7 +88,6 @@ def test_datafog_init():
     datafog = DataFog()
     assert isinstance(datafog.image_service, ImageService)
     assert isinstance(datafog.text_service, TextService)
-    assert datafog.spark_service is None
     assert datafog.operations == [OperationType.SCAN]
 
     custom_image_service = ImageService()

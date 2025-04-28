@@ -32,8 +32,6 @@ Services
 Core services:
 * ImageService
     Image handling and OCR
-* SparkService
-    PySpark wrapper
 * TextService
     PII annotation
 
@@ -85,13 +83,6 @@ Processors
 .. automodule:: datafog.processing.text_processing.spacy_pii_annotator
    :members:
 
-.. note::
-   Spark UDFs for distributed processing are currently experimental and have been commented out in the codebase.
-
-# .. automodule:: datafog.processing.spark_processing.pyspark_udfs
-#    :members:
-#    :undoc-members:
-
 
 Services
 -------------------------
@@ -105,15 +96,6 @@ Services
    ImageDownloader
    ImageService
 
-.. automodule:: datafog.services.spark_service
-   :members:
-
-.. autosummary::
-   :toctree: generated/
-   :template: class.rst
-   SparkService
-
-
 .. automodule:: datafog.services.text_service
    :members:
 
@@ -121,3 +103,7 @@ Services
    :toctree: generated/
    :template: class.rst
    TextService
+
+Refer to the TextService section for information on PII annotation.
+
+Refer to the ImageService section for information on image processing and OCR.
