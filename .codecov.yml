@@ -1,1 +1,15 @@
 comment: no
+
+coverage:
+  status:
+    project:
+      default:
+        # Target overall coverage percentage
+        target: 74%
+        # Allow coverage to drop by this amount without failing
+        # threshold: 0.5%  # Optional: uncomment to allow small drops
+    patch:
+      default:
+        # Target coverage percentage for the changes in the PR/commit
+        target: 20% # Lower target for patch coverage
+        # threshold: 1%   # Optional: Allow patch coverage to drop

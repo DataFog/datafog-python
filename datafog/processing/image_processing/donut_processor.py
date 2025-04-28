@@ -19,6 +19,21 @@ from PIL import Image
 
 from .image_downloader import ImageDownloader
 
+# Attempt imports and provide helpful error messages
+try:
+    import torch
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "torch is not installed. Please install it to use Donut features: pip install 'datafog[donut]'"
+    )
+try:
+    from transformers import DonutProcessor as TransformersDonutProcessor
+    from transformers import VisionEncoderDecoderModel
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "transformers is not installed. Please install it to use Donut features: pip install 'datafog[donut]'"
+    )
+
 
 class DonutProcessor:
     """
@@ -30,27 +45,12 @@ class DonutProcessor:
     """
 
     def __init__(self, model_path="naver-clova-ix/donut-base-finetuned-cord-v2"):
-        self.ensure_installed("torch")
-        self.ensure_installed("transformers")
-
-        import torch
-        from transformers import DonutProcessor as TransformersDonutProcessor
-        from transformers import VisionEncoderDecoderModel
-
         self.processor = TransformersDonutProcessor.from_pretrained(model_path)
         self.model = VisionEncoderDecoderModel.from_pretrained(model_path)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(self.device)
         self.model.eval()
         self.downloader = ImageDownloader()
-
-    def ensure_installed(self, package_name):
-        try:
-            importlib.import_module(package_name)
-        except ImportError:
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", package_name]
-            )
 
     def preprocess_image(self, image: Image.Image) -> np.ndarray:
         # Convert to RGB if the image is not already in RGB mode

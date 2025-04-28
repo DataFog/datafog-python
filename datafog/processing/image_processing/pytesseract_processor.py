@@ -5,6 +5,7 @@ This module contains a PytesseractProcessor class for extracting text from image
 using the Pytesseract OCR engine.
 """
 
+import asyncio
 import logging
 
 import pytesseract
@@ -21,7 +22,8 @@ class PytesseractProcessor:
 
     async def extract_text_from_image(self, image: Image.Image) -> str:
         try:
-            return pytesseract.image_to_string(image)
+            # Run the blocking function in a separate thread
+            return await asyncio.to_thread(pytesseract.image_to_string, image)
         except Exception as e:
             logging.error(f"Pytesseract error: {str(e)}")
             raise
