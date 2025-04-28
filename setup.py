@@ -1,11 +1,16 @@
+import os
+
 from setuptools import find_packages, setup
 
 # Read README for the long description
 with open("README.md", "r") as f:
     long_description = f.read()
 
-# Use a single source of truth for the version
-__version__ = "4.0.1"
+# Get version from __about__.py
+about = {}
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, "datafog", "__about__.py"), "r") as f:
+    exec(f.read(), about)
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -17,7 +22,7 @@ project_urls = {
 
 setup(
     name="datafog",
-    version=__version__,
+    version=about["__version__"],
     author="Sid Mohan",
     author_email="sid@datafog.ai",
     description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
@@ -25,24 +30,30 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(),
     install_requires=[
+        # Core dependencies
         "pandas",
         "requests==2.32.3",
-        "spacy==3.7.5",
         "pydantic",
-        "Pillow",
-        "sentencepiece",
+        "Pillow",  # Image processing
         "protobuf",
-        "pytesseract",
         "aiohttp",
-        "pytest-asyncio",
         "numpy",
         "fastapi",
         "asyncio",
         "setuptools",
         "pydantic-settings==2.3.4",
         "typer==0.12.3",
-        "sphinx",
+        "sphinx",  # Documentation
         "cryptography",
+        # Spacy dependencies
+        "spacy==3.7.5",
+        # Tesseract dependencies
+        "pytesseract",
+        # Donut dependencies (requires transformers, torch)
+        "sentencepiece",
+        "torch",  # Add torch for Donut model support
+        # Development/Testing dependencies (moved to extras_require ideally)
+        "pytest-asyncio",
     ],
     python_requires=">=3.10,<3.13",
     entry_points={

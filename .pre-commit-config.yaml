@@ -25,4 +25,5 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
+        types: [markdown]  # Specify file types for prettier
         exclude: .venv

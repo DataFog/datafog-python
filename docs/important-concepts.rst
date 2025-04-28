@@ -85,6 +85,9 @@ Processors
 .. automodule:: datafog.processing.text_processing.spacy_pii_annotator
    :members:
 
+.. note::
+   Spark UDFs for distributed processing are currently experimental and have been commented out in the codebase.
+
 # .. automodule:: datafog.processing.spark_processing.pyspark_udfs
 #    :members:
 #    :undoc-members:
