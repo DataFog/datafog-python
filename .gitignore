@@ -37,3 +37,4 @@ docs/*
 !docs/*.rst
 !docs/conf.py
 scratch.py
+.coverage*
