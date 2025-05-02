@@ -190,6 +190,29 @@ client = DataFog(operations="scan")
 ocr_client = DataFog(operations="extract")
 ```
 
+## Engine Selection
+
+DataFog now supports multiple annotation engines through the `TextService` class. You can choose between different engines for PII detection:
+
+```python
+from datafog.services.text_service import TextService
+
+# Use regex engine only (fastest, pattern-based detection)
+regex_service = TextService(engine="regex")
+
+# Use spaCy engine only (more comprehensive NLP-based detection)
+spacy_service = TextService(engine="spacy")
+
+# Use auto mode (default) - tries regex first, falls back to spaCy if no entities found
+auto_service = TextService()  # engine="auto" is the default
+```
+
+Each engine has different strengths:
+
+- **regex**: Fast pattern matching, good for structured data like emails, phone numbers, credit cards, etc.
+- **spacy**: NLP-based entity recognition, better for detecting names, organizations, locations, etc.
+- **auto**: Best of both worlds - uses regex for speed, falls back to spaCy for comprehensive detection
+
 ## Text PII Annotation
 
 Here's an example of how to annotate PII in a text document:
