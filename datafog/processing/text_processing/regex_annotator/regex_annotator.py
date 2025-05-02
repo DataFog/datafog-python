@@ -34,45 +34,123 @@ class RegexAnnotator:
         # Compile all patterns once at initialization
         self.patterns: Dict[str, Pattern] = {
             # Email pattern - RFC 5322 subset
+            # Intentionally permissive to favor false positives over false negatives
             # Allows for multiple dots, special characters in local part, and subdomains
-            # The pattern is intentionally permissive to favor false positives over false negatives
+            # Note: This is broader than the spec to catch more potential emails
             "EMAIL": re.compile(
-                r"[\w!#$%&\'*+\-/=?^_`{|}~.]+@[\w\-.]+\.[\w\-.]+",
-                re.IGNORECASE | re.MULTILINE,
+                r"""
+                [\w!#$%&'*+\-/=?^_`{|}~.]+  # Local part with special chars allowed
+                @                            # @ symbol
+                [\w\-.]+                     # Domain name with possible dots
+                \.[\w\-.]+                   # TLD with at least one dot
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
-            # Phone pattern - NANP (North American Numbering Plan) format
-            # Accepts formats like: 555-555-5555, (555) 555-5555, +1 555 555 5555, 1-555-555-5555
+            # Phone pattern - North American Numbering Plan (NANP) format
+            # Accepts formats: 555-555-5555, (555) 555-5555, +1 555 555 5555, 1-555-555-5555
+            # Note: Allows for various separators (dash, dot, space) and optional country code
             "PHONE": re.compile(
-                r"(?:(?:\+|)1[-\.\s]?)?\(?\d{3}\)?[-\.\s]?\d{3}[-\.\s]?\d{4}",
-                re.IGNORECASE | re.MULTILINE,
+                r"""
+                (?:(?:\+|)1[-\.\s]?)?      # Optional country code (+1 or 1)
+                \(?\d{3}\)?                # Area code, optionally in parentheses
+                [-\.\s]?                   # Optional separator after area code
+                \d{3}                      # Exchange code
+                [-\.\s]?                   # Optional separator after exchange code
+                \d{4}                      # Subscriber number
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # SSN pattern - U.S. Social Security Number
             # Format: XXX-XX-XXXX where XXX != 000, 666
+            # Note: Uses negative lookahead to reject invalid prefixes
             "SSN": re.compile(
-                r"\b(?!000|666)\d{3}-\d{2}-\d{4}\b", re.IGNORECASE | re.MULTILINE
+                r"""
+                \b                          # Word boundary
+                (?!000|666)                # Reject 000 and 666 prefixes
+                \d{3}                      # First 3 digits
+                -                          # Hyphen separator
+                \d{2}                      # Middle 2 digits
+                -                          # Hyphen separator
+                \d{4}                      # Last 4 digits
+                \b                          # Word boundary
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # Credit card pattern - Visa, Mastercard, and American Express
             # Visa: 16 digits, starts with 4
             # Mastercard: 16 digits, starts with 51-55
-            # American Express: 15 digits, starts with 34 or 37
+            # American Express: 15 digits, starts with 34 or 37 (EXACTLY 15 digits)
+            # Note: Handles both continuous digit formats and formats with separators
             "CREDIT_CARD": re.compile(
-                r"\b(?:4\d{12}(?:\d{3})?|5[1-5]\d{14}|3[47]\d{13}|(?:(?:4\d{3}|5[1-5]\d{2}|3[47]\d{2})[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4})|(?:3[47]\d{2}[-\s]?\d{6}[-\s]?\d{5}))\b",
-                re.IGNORECASE | re.MULTILINE,
+                r"""
+                \b
+                (?:
+                    4\d{12}(?:\d{3})?                      # Visa (16 digits, starts with 4)
+                    |
+                    5[1-5]\d{14}                           # Mastercard (16 digits, starts with 51-55)
+                    |
+                    3[47]\d{13}$                           # Amex (EXACTLY 15 digits, starts with 34 or 37)
+                    |
+                    (?:                                     # Formatted versions with separators
+                        (?:4\d{3}|5[1-5]\d{2}|3[47]\d{2})  # Card prefix
+                        [-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}  # Rest of card with separators
+                    )
+                    |
+                    (?:3[47]\d{2}[-\s]?\d{6}[-\s]?\d{5})  # Amex with separators
+                )
+                \b
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # IP Address pattern - IPv4 and IPv6
             # IPv4: 4 octets of numbers 0-255 separated by dots
             # IPv6: 8 groups of 1-4 hex digits separated by colons, with possible compression
+            # Note: Validates IPv4 octets to be in valid range (0-255)
             "IP_ADDRESS": re.compile(
-                r"(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b|\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\b|\b(?:[A-Fa-f0-9]{1,4}:){0,6}(?::[A-Fa-f0-9]{1,4}){1,6}\b|\b(?:[A-Fa-f0-9]{1,4}:){1,7}:\b)",
-                re.IGNORECASE | re.MULTILINE,
+                r"""
+                (?:
+                    # IPv4 address pattern
+                    \b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b
+                    |
+                    # Simple IPv6 pattern that matches all valid formats including compressed ones
+                    \b(?:[0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}\b
+                )
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # Date of Birth pattern - supports MM/DD/YYYY, M/D/YYYY, MM-DD-YYYY, and YYYY-MM-DD formats
-            # Validates that month is 01-12 and day is 01-31 for MM/DD/YYYY format
+            # Note: Validates that month is 01-12 and day is 01-31
             "DOB": re.compile(
-                r"\b(?:(?:0?[1-9]|1[0-2])[/-](?:0?[1-9]|[12][0-9]|3[01])[/-](?:\d{2}|\d{4})|(?:\d{4})-(?:0?[1-9]|1[0-2])-(?:0?[1-9]|[12][0-9]|3[01]))\b",
-                re.IGNORECASE | re.MULTILINE,
+                r"""
+                \b
+                (?:
+                    (?:0?[1-9]|1[0-2])                     # Month: 1-12
+                    [/-]                                    # Separator (/ or -)
+                    (?:0?[1-9]|[12][0-9]|3[01])            # Day: 1-31
+                    [/-]                                    # Separator (/ or -)
+                    (?:\d{2}|\d{4})                        # Year: 2 or 4 digits
+                    |
+                    (?:\d{4})                              # Year: 4 digits (ISO format)
+                    -                                       # Separator (-)
+                    (?:0?[1-9]|1[0-2])                     # Month: 1-12
+                    -                                       # Separator (-)
+                    (?:0?[1-9]|[12][0-9]|3[01])            # Day: 1-31
+                )
+                \b
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
-            "ZIP": re.compile(r"\b\d{5}(?:-\d{4})?\b", re.IGNORECASE | re.MULTILINE),
+            # ZIP code pattern - US ZIP / ZIP+4
+            # Note: Supports both 5-digit ZIP and ZIP+4 format
+            "ZIP": re.compile(
+                r"""
+                \b
+                \d{5}                      # 5-digit ZIP code
+                (?:-\d{4})?                # Optional +4 extension
+                \b
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
         }
 
     @classmethod
@@ -129,7 +207,7 @@ class RegexAnnotator:
                     end=match.end(),
                     text=match.group(),
                 )
-                spans_by_label.setdefault(label, []).append(span)
+                spans_by_label[label].append(span)
                 all_spans.append(span)
 
         regex_result = {
