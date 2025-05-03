@@ -50,7 +50,9 @@ class TextService:
             for i in range(0, len(text), self.text_chunk_length)
         ]
 
-    def _combine_annotations(self, annotations: List[Dict[str, List[str]]]) -> Dict[str, List[str]]:
+    def _combine_annotations(
+        self, annotations: List[Dict[str, List[str]]]
+    ) -> Dict[str, List[str]]:
         """Combine annotations from multiple chunks."""
         combined: Dict[str, List[str]] = {}
         for annotation in annotations:
@@ -103,7 +105,7 @@ class TextService:
                 _, annotation_result = self.regex_annotator.annotate_with_spans(text)
                 if annotation_result.spans:
                     return annotation_result.spans
-                
+
                 # If regex found nothing, fall back to spaCy
                 spacy_dict = self.spacy_annotator.annotate(text)
                 auto_spans: List[Span] = []
@@ -167,7 +169,7 @@ class TextService:
                 chunk_spans = self._annotate_with_engine(chunk, structured=True)
                 if not isinstance(chunk_spans, list):
                     continue  # Skip if not a list of spans
-                
+
                 # Adjust span positions based on chunk offset in the original text
                 for span in chunk_spans:
                     if not isinstance(span, Span):
@@ -211,7 +213,7 @@ class TextService:
         results = [
             self.annotate_text_sync(text, structured=structured) for text in texts
         ]
-        return dict(zip(texts, results))
+        return dict(zip(texts, results, strict=True))
 
     async def annotate_text_async(
         self, text: str, structured: bool = False
@@ -265,7 +267,9 @@ class TextService:
                 asyncio.to_thread(self._annotate_with_engine, chunk) for chunk in chunks
             ]
             results = await asyncio.gather(*tasks)
-            annotations: List[Dict[str, List[str]]] = [r for r in results if isinstance(r, dict)]
+            annotations: List[Dict[str, List[str]]] = [
+                r for r in results if isinstance(r, dict)
+            ]
             return self._combine_annotations(annotations)
 
     async def batch_annotate_text_async(
@@ -285,4 +289,4 @@ class TextService:
             self.annotate_text_async(text, structured=structured) for text in texts
         ]
         results = await asyncio.gather(*tasks)
-        return dict(zip(texts, results))
+        return dict(zip(texts, results, strict=True))

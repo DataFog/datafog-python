@@ -5,6 +5,7 @@
 ---
 
 ### 📂 0. **Preconditions**
+
 - [ ] Story 1.4 (Performance Guardrail) is complete and merged
 - [ ] All existing tests pass
 - [ ] CI pipeline is configured and working
@@ -14,12 +15,14 @@
 ### 🧹 1. **Code Cleanup**
 
 #### Tasks:
+
 - [ ] Fix all mypy errors to ensure type hints are complete
 - [ ] Address any Pydantic deprecation warnings
 - [ ] Ensure all code follows project style guidelines
 - [ ] Remove any unused imports or dead code
 
 #### Example mypy command:
+
 ```bash
 mypy datafog/ --ignore-missing-imports
 ```
@@ -29,15 +32,17 @@ mypy datafog/ --ignore-missing-imports
 ### 🔍 2. **Add Wheel-Size Gate to CI**
 
 #### Tasks:
+
 - [ ] Create a script to check wheel size
 - [ ] Add CI step to build wheel and verify size is < 8 MB
 - [ ] Configure CI to fail if wheel size exceeds limit
 
 #### Example CI Configuration:
+
 ```yaml
 - name: Build wheel
   run: python -m build --wheel
-  
+
 - name: Check wheel size
   run: |
     WHEEL_PATH=$(find dist -name "*.whl")
@@ -55,12 +60,14 @@ mypy datafog/ --ignore-missing-imports
 ### 📝 3. **Documentation Improvements**
 
 #### Tasks:
+
 - [ ] Add "When do I need spaCy?" guidance to README
 - [ ] Update documentation to reflect all recent changes
 - [ ] Create CHANGELOG.md for version 4.1.0
 - [ ] Review and update any outdated documentation
 
 #### Example "When do I need spaCy?" Guidance:
+
 ```markdown
 ### When do I need spaCy?
 
