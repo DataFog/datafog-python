@@ -26,6 +26,9 @@ from .image_downloader import ImageDownloader
 # More robust test environment detection
 IN_TEST_ENV = "PYTEST_CURRENT_TEST" in os.environ or "TOX_ENV_NAME" in os.environ
 
+# Check if the PYTEST_DONUT flag is set to enable OCR testing
+DONUT_TESTING_ENABLED = os.environ.get("PYTEST_DONUT", "").lower() == "yes"
+
 
 class DonutProcessor:
     """
@@ -68,10 +71,19 @@ class DonutProcessor:
         """Extract text from an image using the Donut model"""
         logging.info("DonutProcessor.extract_text_from_image called")
 
-        # If we're in a test environment, return a mock response to avoid loading torch/transformers
-        if IN_TEST_ENV:
-            logging.info("Running in test environment, returning mock OCR result")
-            return json.dumps({"text": "Mock OCR text for testing"})
+        # If we're in a test environment and PYTEST_DONUT is not enabled, return a mock response
+        if IN_TEST_ENV and not DONUT_TESTING_ENABLED:
+            logging.info(
+                "Running in test environment without PYTEST_DONUT=yes, returning mock OCR result"
+            )
+            mock_result = {"text": "Mock OCR text for testing"}
+            return json.dumps(mock_result)
+
+        # If PYTEST_DONUT is enabled, log that we're running real OCR in test mode
+        if IN_TEST_ENV and DONUT_TESTING_ENABLED:
+            logging.info(
+                "PYTEST_DONUT=yes is set, running actual OCR in test environment"
+            )
 
         # Only import torch and transformers when actually needed and not in test environment
         try:
