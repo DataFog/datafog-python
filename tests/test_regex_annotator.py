@@ -322,7 +322,7 @@ def test_annotate_with_spans_empty_text():
     """Test that annotate_with_spans handles empty text correctly."""
     annotator = RegexAnnotator()
     result_dict, annotation_result = annotator.annotate_with_spans("")
-    
+
     # Verify empty result for empty input
     assert result_dict == {label: [] for label in annotator.LABELS}
     assert annotation_result.text == ""
