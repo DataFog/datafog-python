@@ -318,6 +318,17 @@ def test_zip_regex(zip_code: str, should_match: bool):
         ), f"Incorrectly detected invalid ZIP: {zip_code}"
 
 
+def test_annotate_with_spans_empty_text():
+    """Test that annotate_with_spans handles empty text correctly."""
+    annotator = RegexAnnotator()
+    result_dict, annotation_result = annotator.annotate_with_spans("")
+    
+    # Verify empty result for empty input
+    assert result_dict == {label: [] for label in annotator.LABELS}
+    assert annotation_result.text == ""
+    assert len(annotation_result.spans) == 0
+
+
 def test_annotation_result_format():
     """Test the structured AnnotationResult format."""
     annotator = RegexAnnotator()

@@ -19,6 +19,17 @@ def mock_regex_annotator():
         "EMAIL": ["john@example.com"],
         "PHONE": ["555-555-5555"],
     }
+    
+    # Add mock for annotate_with_spans method
+    from datafog.processing.text_processing.regex_annotator import AnnotationResult, Span
+    spans = [
+        Span(label="EMAIL", start=0, end=15, text="john@example.com"),
+        Span(label="PHONE", start=20, end=32, text="555-555-5555")
+    ]
+    mock.annotate_with_spans.return_value = (
+        {"EMAIL": ["john@example.com"], "PHONE": ["555-555-5555"]},
+        AnnotationResult(text="test", spans=spans)
+    )
     return mock
 
 
@@ -242,3 +253,92 @@ def test_auto_engine_with_fallback(
     assert mock_annotator.annotate.called
 
     assert result == {"PER": ["John Doe"], "ORG": ["Acme Inc"]}
+
+
+def test_structured_output_regex_engine(text_service_with_engine, mock_regex_annotator):
+    """Test structured output mode with regex engine."""
+    service = text_service_with_engine(engine="regex")
+    # Override chunk length to avoid multiple calls
+    service.text_chunk_length = 1000
+    result = service.annotate_text_sync("john@example.com", structured=True)
+    
+    # Should call regex annotator's annotate_with_spans method
+    assert mock_regex_annotator.annotate_with_spans.called
+    
+    # Verify the result is a list of Span objects
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0].label == "EMAIL"
+    assert result[0].text == "john@example.com"
+    assert result[1].label == "PHONE"
+    assert result[1].text == "555-555-5555"
+
+
+def test_structured_output_spacy_engine(text_service_with_engine, mock_annotator):
+    """Test structured output mode with spaCy engine."""
+    service = text_service_with_engine(engine="spacy")
+    # Override chunk length to avoid multiple calls
+    service.text_chunk_length = 1000
+    
+    # Set up mock to return entities that can be found in the test text
+    test_text = "John Doe works at Acme Inc"
+    mock_annotator.annotate.return_value = {
+        "PER": ["John Doe"],
+        "ORG": ["Acme Inc"]
+    }
+    
+    result = service.annotate_text_sync(test_text, structured=True)
+    
+    # Should call spaCy annotator
+    assert mock_annotator.annotate.called
+    
+    # Verify the result is a list of Span objects
+    assert isinstance(result, list)
+    assert len(result) == 2
+    
+    # Check that spans were created correctly
+    per_spans = [span for span in result if span.label == "PER"]
+    org_spans = [span for span in result if span.label == "ORG"]
+    
+    assert len(per_spans) == 1
+    assert per_spans[0].text == "John Doe"
+    assert per_spans[0].start == test_text.find("John Doe")
+    assert per_spans[0].end == test_text.find("John Doe") + len("John Doe")
+    
+    assert len(org_spans) == 1
+    assert org_spans[0].text == "Acme Inc"
+    assert org_spans[0].start == test_text.find("Acme Inc")
+    assert org_spans[0].end == test_text.find("Acme Inc") + len("Acme Inc")
+
+
+def test_structured_output_auto_engine(
+    text_service_with_engine, mock_regex_annotator, mock_annotator
+):
+    """Test structured output mode with auto engine."""
+    # Configure regex annotator to return empty spans
+    from datafog.processing.text_processing.regex_annotator import AnnotationResult
+    mock_regex_annotator.annotate_with_spans.return_value = (
+        {"EMAIL": [], "PHONE": []},
+        AnnotationResult(text="test", spans=[])
+    )
+    
+    service = text_service_with_engine(engine="auto")
+    # Override chunk length to avoid multiple calls
+    service.text_chunk_length = 1000
+    
+    # Set up mock to return entities that can be found in the test text
+    test_text = "John Doe works at Acme Inc"
+    mock_annotator.annotate.return_value = {
+        "PER": ["John Doe"],
+        "ORG": ["Acme Inc"]
+    }
+    
+    result = service.annotate_text_sync(test_text, structured=True)
+    
+    # Should call both annotators
+    assert mock_regex_annotator.annotate_with_spans.called
+    assert mock_annotator.annotate.called
+    
+    # Verify the result is a list of Span objects
+    assert isinstance(result, list)
+    assert len(result) == 2
