@@ -4,6 +4,18 @@
 - [x] Smoke test the CLI with a tmp file.
 - [x] OCR path behind `PYTEST_DONUT=yes` flag.
 
+**Status: COMPLETED**
+
+## Summary
+
+This story focused on implementing robust integration tests for the DataFog project. We successfully:
+
+1. Added integration test markers and configurations to run Spark in local mode
+2. Created smoke tests for the CLI using temporary files to verify functionality
+3. Implemented conditional OCR testing with the PYTEST_DONUT flag to control when real OCR is used
+
+All tests can now be run with `pytest -m "integration"` and the OCR tests can be run with real OCR functionality by setting `PYTEST_DONUT=yes`.
+
 ## Implementation Notes
 
 ### Spark Integration Tests
