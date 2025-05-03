@@ -365,6 +365,22 @@ Benchmark tests show that the regex engine is significantly faster than spaCy fo
 - **SpaCy Engine**: Use when you need to detect a wider range of named entities beyond structured PII
 - **Auto Engine**: Recommended for most use cases as it combines the speed of regex with the capability to fall back to spaCy when needed
 
+### When do I need spaCy?
+
+While the regex engine is significantly faster (123x faster in our benchmarks), there are specific scenarios where you might want to use spaCy:
+
+1. **Complex entity recognition**: When you need to identify entities not covered by regex patterns, such as organization names, locations, or product names that don't follow predictable formats.
+
+2. **Context-aware detection**: When the meaning of text depends on surrounding context that regex cannot easily capture, such as distinguishing between a person's name and a company with the same name based on context.
+
+3. **Multi-language support**: When processing text in languages other than English where regex patterns might be insufficient or need significant customization.
+
+4. **Research and exploration**: When experimenting with NLP capabilities and need the full power of a dedicated NLP library with features like part-of-speech tagging, dependency parsing, etc.
+
+5. **Unknown entity types**: When you don't know in advance what types of entities might be present in your text and need a more general-purpose entity recognition approach.
+
+For high-performance production systems processing large volumes of text with known entity types (emails, phone numbers, credit cards, etc.), the regex engine is strongly recommended due to its significant speed advantage.
+
 ### Running Benchmarks Locally
 
 You can run the performance benchmarks locally using pytest-benchmark:
