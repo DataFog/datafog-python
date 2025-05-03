@@ -17,6 +17,7 @@ def real_text_service():
     return TextService(text_chunk_length=1000)  # Larger chunk to avoid multiple calls
 
 
+@pytest.mark.integration
 def test_engine_regex_detects_simple_entities():
     """Test that regex engine correctly detects simple entities like emails and phones."""
     # Sample text with patterns that regex should easily detect
@@ -36,6 +37,7 @@ def test_engine_regex_detects_simple_entities():
     assert "123-45-6789" in result.get("SSN", [])
 
 
+@pytest.mark.integration
 def test_engine_auto_fallbacks_to_spacy():
     """Test that auto mode works correctly with entity detection."""
     # We need to test the auto mode in a more controlled way
@@ -64,6 +66,7 @@ def test_engine_auto_fallbacks_to_spacy():
     assert any("john.smith@example.com" in email for email in auto_result["EMAIL"])
 
 
+@pytest.mark.integration
 def test_engine_spacy_only():
     """Test that spaCy engine is always used regardless of regex potential hits."""
     # Sample text with both regex-detectable and spaCy-detectable entities
@@ -89,6 +92,7 @@ def test_engine_spacy_only():
     assert "EMAIL" not in spacy_result or not spacy_result["EMAIL"]
 
 
+@pytest.mark.integration
 def test_structured_annotation_output():
     """Test that structured=True returns list of Span objects."""
     text = "John Smith's email is john.smith@example.com"
@@ -131,6 +135,7 @@ def test_structured_annotation_output():
     # which we've already verified above
 
 
+@pytest.mark.integration
 def test_debug_entity_types():
     """Debug test to print the actual entity types returned by spaCy."""
     # Sample text with named entities
