@@ -38,3 +38,4 @@ docs/*
 !docs/conf.py
 scratch.py
 .coverage*
+.benchmarks

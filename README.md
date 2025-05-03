@@ -323,6 +323,56 @@ Output:
 
 You can choose from SHA256 (default), SHA3-256, and MD5 hashing algorithms by specifying the `hash_type` parameter
 
+## Performance
+
+DataFog provides multiple annotation engines with different performance characteristics:
+
+### Engine Selection
+
+The `TextService` class supports three engine modes:
+
+```python
+# Use regex engine only (fastest, pattern-based detection)
+regex_service = TextService(engine="regex")
+
+# Use spaCy engine only (more comprehensive NLP-based detection)
+spacy_service = TextService(engine="spacy")
+
+# Use auto mode (default) - tries regex first, falls back to spaCy if no entities found
+auto_service = TextService()  # engine="auto" is the default
+```
+
+### Performance Comparison
+
+Benchmark tests show that the regex engine is significantly faster than spaCy for PII detection:
+
+| Engine | Processing Time (10KB text) | Entities Detected |
+|--------|------------------------------|-------------------|
+| Regex  | ~0.004 seconds              | EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP |
+| SpaCy  | ~0.48 seconds               | PERSON, ORG, GPE, CARDINAL, FAC |
+| Auto   | ~0.004 seconds              | Same as regex when patterns are found |
+
+**Key findings:**
+- The regex engine is approximately **123x faster** than spaCy for processing the same text
+- The auto engine provides the best balance between speed and comprehensiveness
+  - Uses fast regex patterns first
+  - Falls back to spaCy only when no regex patterns are matched
+
+### When to Use Each Engine
+
+- **Regex Engine**: Use when processing large volumes of text or when performance is critical
+- **SpaCy Engine**: Use when you need to detect a wider range of named entities beyond structured PII
+- **Auto Engine**: Recommended for most use cases as it combines the speed of regex with the capability to fall back to spaCy when needed
+
+### Running Benchmarks Locally
+
+You can run the performance benchmarks locally using pytest-benchmark:
+
+```bash
+pip install pytest-benchmark
+pytest tests/benchmark_text_service.py -v
+```
+
 ## Examples
 
 For more detailed examples, check out our Jupyter notebooks in the `examples/` directory:
