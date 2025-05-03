@@ -1,7 +1,7 @@
 **Story 1.7: Integration tests (no mocks)**
 
 - [x] Run pytest with `-m "integration"` to run Spark in local mode.
-- [ ] Smoke test the CLI with a tmp file.
+- [x] Smoke test the CLI with a tmp file.
 - [ ] OCR path behind `PYTEST_DONUT=yes` flag.
 
 ## Implementation Notes
@@ -25,3 +25,16 @@ Or directly with pytest:
 ```bash
 pytest -m "integration"
 ```
+
+### CLI Smoke Tests
+
+1. Created test_cli_smoke.py with integration tests for the CLI commands
+2. Implemented tests that use temporary files to test CLI functionality
+3. Added tests for key CLI commands: health, show-config, scan-text, redact-text, replace-text, and list-entities
+4. Used the typer.testing.CliRunner to invoke CLI commands programmatically
+5. Applied the integration marker to all CLI smoke tests
+
+The CLI smoke tests verify that:
+- Basic CLI commands execute successfully
+- Text processing commands correctly handle PII in text files
+- Configuration and entity listing commands return expected information
