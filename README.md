@@ -190,6 +190,29 @@ client = DataFog(operations="scan")
 ocr_client = DataFog(operations="extract")
 ```
 
+## Engine Selection
+
+DataFog now supports multiple annotation engines through the `TextService` class. You can choose between different engines for PII detection:
+
+```python
+from datafog.services.text_service import TextService
+
+# Use regex engine only (fastest, pattern-based detection)
+regex_service = TextService(engine="regex")
+
+# Use spaCy engine only (more comprehensive NLP-based detection)
+spacy_service = TextService(engine="spacy")
+
+# Use auto mode (default) - tries regex first, falls back to spaCy if no entities found
+auto_service = TextService()  # engine="auto" is the default
+```
+
+Each engine has different strengths:
+
+- **regex**: Fast pattern matching, good for structured data like emails, phone numbers, credit cards, etc.
+- **spacy**: NLP-based entity recognition, better for detecting names, organizations, locations, etc.
+- **auto**: Best of both worlds - uses regex for speed, falls back to spaCy for comprehensive detection
+
 ## Text PII Annotation
 
 Here's an example of how to annotate PII in a text document:
@@ -299,6 +322,73 @@ Output:
 ```
 
 You can choose from SHA256 (default), SHA3-256, and MD5 hashing algorithms by specifying the `hash_type` parameter
+
+## Performance
+
+DataFog provides multiple annotation engines with different performance characteristics:
+
+### Engine Selection
+
+The `TextService` class supports three engine modes:
+
+```python
+# Use regex engine only (fastest, pattern-based detection)
+regex_service = TextService(engine="regex")
+
+# Use spaCy engine only (more comprehensive NLP-based detection)
+spacy_service = TextService(engine="spacy")
+
+# Use auto mode (default) - tries regex first, falls back to spaCy if no entities found
+auto_service = TextService()  # engine="auto" is the default
+```
+
+### Performance Comparison
+
+Benchmark tests show that the regex engine is significantly faster than spaCy for PII detection:
+
+| Engine | Processing Time (10KB text) | Entities Detected                                    |
+| ------ | --------------------------- | ---------------------------------------------------- |
+| Regex  | ~0.004 seconds              | EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP |
+| SpaCy  | ~0.48 seconds               | PERSON, ORG, GPE, CARDINAL, FAC                      |
+| Auto   | ~0.004 seconds              | Same as regex when patterns are found                |
+
+**Key findings:**
+
+- The regex engine is approximately **123x faster** than spaCy for processing the same text
+- The auto engine provides the best balance between speed and comprehensiveness
+  - Uses fast regex patterns first
+  - Falls back to spaCy only when no regex patterns are matched
+
+### When to Use Each Engine
+
+- **Regex Engine**: Use when processing large volumes of text or when performance is critical
+- **SpaCy Engine**: Use when you need to detect a wider range of named entities beyond structured PII
+- **Auto Engine**: Recommended for most use cases as it combines the speed of regex with the capability to fall back to spaCy when needed
+
+### When do I need spaCy?
+
+While the regex engine is significantly faster (123x faster in our benchmarks), there are specific scenarios where you might want to use spaCy:
+
+1. **Complex entity recognition**: When you need to identify entities not covered by regex patterns, such as organization names, locations, or product names that don't follow predictable formats.
+
+2. **Context-aware detection**: When the meaning of text depends on surrounding context that regex cannot easily capture, such as distinguishing between a person's name and a company with the same name based on context.
+
+3. **Multi-language support**: When processing text in languages other than English where regex patterns might be insufficient or need significant customization.
+
+4. **Research and exploration**: When experimenting with NLP capabilities and need the full power of a dedicated NLP library with features like part-of-speech tagging, dependency parsing, etc.
+
+5. **Unknown entity types**: When you don't know in advance what types of entities might be present in your text and need a more general-purpose entity recognition approach.
+
+For high-performance production systems processing large volumes of text with known entity types (emails, phone numbers, credit cards, etc.), the regex engine is strongly recommended due to its significant speed advantage.
+
+### Running Benchmarks Locally
+
+You can run the performance benchmarks locally using pytest-benchmark:
+
+```bash
+pip install pytest-benchmark
+pytest tests/benchmark_text_service.py -v
+```
 
 ## Examples
 
