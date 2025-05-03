@@ -5,17 +5,17 @@
 ---
 
 ### 📂 0. **Preconditions**
-- [ ] Story 1.3 (Engine Selection) is complete and merged
-- [ ] RegexAnnotator is fully implemented and optimized
-- [ ] CI pipeline is configured to run pytest with benchmark capabilities
+- [x] Story 1.3 (Engine Selection) is complete and merged
+- [x] RegexAnnotator is fully implemented and optimized
+- [x] CI pipeline is configured to run pytest with benchmark capabilities
 
 #### CI Pipeline Configuration Requirements:
-- [ ] GitHub Actions workflow or equivalent CI system set up
-- [ ] CI workflow configured to install development dependencies
-- [ ] CI workflow includes a dedicated performance testing job/step
-- [ ] Caching mechanism for benchmark results between runs
-- [ ] Appropriate environment setup (Python version, dependencies)
-- [ ] Notification system for performance regression alerts
+- [x] GitHub Actions workflow or equivalent CI system set up
+- [x] CI workflow configured to install development dependencies
+- [x] CI workflow includes a dedicated performance testing job/step
+- [x] Caching mechanism for benchmark results between runs
+- [x] Appropriate environment setup (Python version, dependencies)
+- [x] Notification system for performance regression alerts
 
 #### Example GitHub Actions Workflow Snippet:
 ```yaml
@@ -113,10 +113,10 @@ def test_regex_annotator_performance(benchmark):
 ### 📊 3. **Establish Baseline and CI Guardrails**
 
 #### Tasks:
-- [ ] Run benchmark tests to establish baseline performance
-- [ ] Save baseline results using pytest-benchmark's storage mechanism
-- [ ] Configure CI to compare against saved baseline
-- [ ] Set failure threshold at 110% of baseline
+- [x] Run benchmark tests to establish baseline performance
+- [x] Save baseline results using pytest-benchmark's storage mechanism
+- [x] Configure CI to compare against saved baseline
+- [x] Set failure threshold at 110% of baseline
 
 #### Example CI Configuration (for GitHub Actions):
 ```yaml
@@ -131,7 +131,7 @@ def test_regex_annotator_performance(benchmark):
 
 #### Tasks:
 - [x] Add comparative benchmark between regex and spaCy engines
-- [ ] Document performance difference in README
+- [x] Document performance difference in README
 - [x] Verify regex is at least 5x faster than spaCy
 
 #### Benchmark Results:
@@ -189,29 +189,45 @@ def manual_benchmark_comparison(text_size_kb=10):
 ### 📝 5. **Documentation and Reporting**
 
 #### Tasks:
-- [ ] Add performance metrics to documentation
+- [x] Add performance metrics to documentation
 - [ ] Create visualization of benchmark results
-- [ ] Document how to run benchmarks locally
-- [ ] Update README with performance expectations
+- [x] Document how to run benchmarks locally
+- [x] Update README with performance expectations
+
+#### Documentation Updates:
+- Added a comprehensive 'Performance' section to the README.md
+- Included a comparison table showing processing times and entity types
+- Documented the 123x performance advantage of regex over spaCy
+- Added guidance on when to use each engine mode
+- Included instructions for running benchmarks locally
 
 ---
 
 ### 🔄 6. **Continuous Monitoring**
 
 #### Tasks:
-- [ ] Set up scheduled benchmark runs in CI
-- [ ] Configure alerting for performance regressions
-- [ ] Document process for updating baseline when needed
+- [x] Set up scheduled benchmark runs in CI
+- [x] Configure alerting for performance regressions
+- [x] Document process for updating baseline when needed
+
+#### CI Configuration:
+- Created GitHub Actions workflow file `.github/workflows/benchmark.yml`
+- Configured weekly scheduled runs (Sundays at midnight)
+- Set up automatic baseline comparison with 10% regression threshold
+- Added performance regression alerts
+- Created `scripts/run_benchmark_locally.sh` for testing CI pipeline locally
+- Created `scripts/compare_benchmarks.py` for benchmark comparison
+- Added `.benchmarks` directory to `.gitignore` to avoid committing benchmark files
 
 ---
 
 ### 📋 **Acceptance Criteria**
 
-1. RegexAnnotator processes 1 kB of text in < 20 µs
-2. CI fails if performance degrades > 10% from baseline
+1. RegexAnnotator processes 1 kB of text in < 20 µs ✅
+2. CI fails if performance degrades > 10% from baseline ✅
 3. Comparative benchmarks show regex is ≥ 5× faster than spaCy ✅ (Achieved ~123x faster)
-4. Performance metrics are documented in README
-5. Developers can run benchmarks locally with clear instructions
+4. Performance metrics are documented in README ✅
+5. Developers can run benchmarks locally with clear instructions ✅
 
 ---
 

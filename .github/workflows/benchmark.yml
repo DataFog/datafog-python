@@ -1,0 +1,82 @@
+name: Performance Benchmarks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  # Schedule benchmarks to run weekly
+  schedule:
+    - cron: '0 0 * * 0'  # Run at midnight on Sundays
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for proper comparison
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r requirements-dev.txt
+        pip install pytest-benchmark
+        
+    - name: Restore benchmark data
+      uses: actions/cache@v3
+      with:
+        path: .benchmarks
+        key: benchmark-${{ runner.os }}-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          benchmark-${{ runner.os }}-
+        
+    - name: Run benchmarks and save baseline
+      run: |
+        # Run benchmarks and save results
+        pytest tests/benchmark_text_service.py -v --benchmark-autosave
+        
+    - name: Check for performance regression
+      run: |
+        # Compare against the previous benchmark if available
+        # Fail if performance degrades by more than 10%
+        if [ -d ".benchmarks" ]; then
+          BASELINE=$(ls -t .benchmarks/Linux-CPython-3.10-64bit | head -n 2 | tail -n 1)
+          CURRENT=$(ls -t .benchmarks/Linux-CPython-3.10-64bit | head -n 1)
+          if [ -n "$BASELINE" ] && [ "$BASELINE" != "$CURRENT" ]; then
+            # Set full paths to the benchmark files
+            BASELINE_FILE="$benchmark_dir/$BASELINE"
+            CURRENT_FILE="$benchmark_dir/$CURRENT"
+            
+            echo "Comparing current run ($CURRENT) against baseline ($BASELINE)"
+            # First just show the comparison
+            pytest tests/benchmark_text_service.py --benchmark-compare
+            
+            # Then check for significant regressions
+            echo "Checking for performance regressions (>10% slower)..."
+            # Use our Python script for benchmark comparison
+            python scripts/compare_benchmarks.py "$BASELINE_FILE" "$CURRENT_FILE"
+          else
+            echo "No previous benchmark found for comparison or only one benchmark exists"
+          fi
+        else
+          echo "No benchmarks directory found"
+        fi
+        
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: .benchmarks/
+        
+    - name: Alert on regression
+      if: failure()
+      run: |
+        echo "::warning::Performance regression detected! Check benchmark results."
