@@ -30,9 +30,9 @@ def temp_text_file():
         f.write("My name is John Doe and my email is john.doe@example.com.\n")
         f.write("My phone number is (555) 123-4567 and my SSN is 123-45-6789.\n")
         temp_file = f.name
-    
+
     yield temp_file
-    
+
     # Clean up the temporary file after the test
     if os.path.exists(temp_file):
         os.remove(temp_file)
@@ -62,24 +62,28 @@ def test_scan_text_with_file_content(runner, temp_text_file):
     # Read the content of the temporary file
     with open(temp_text_file, "r") as f:
         text_content = f.read().strip()
-    
+
     # Run the scan-text command with the file content
     result = runner.invoke(app, ["scan-text", text_content])
-    
+
     # Verify the command executed successfully
     assert result.exit_code == 0
-    
+
     # Check that the output contains expected PII types
-    assert "PERSON" in result.stdout or "EMAIL" in result.stdout or "PHONE" in result.stdout
+    assert (
+        "PERSON" in result.stdout
+        or "EMAIL" in result.stdout
+        or "PHONE" in result.stdout
+    )
 
 
 @pytest.mark.integration
 def test_redact_text_command(runner):
     """Test the redact-text command."""
     test_text = "My name is John Doe and my email is john.doe@example.com."
-    
+
     result = runner.invoke(app, ["redact-text", test_text])
-    
+
     assert result.exit_code == 0
     # Check that PII has been redacted (replaced with [REDACTED])
     assert "[REDACTED]" in result.stdout
@@ -93,9 +97,9 @@ def test_redact_text_command(runner):
 def test_replace_text_command(runner):
     """Test the replace-text command."""
     test_text = "My name is John Doe and my email is john.doe@example.com."
-    
+
     result = runner.invoke(app, ["replace-text", test_text])
-    
+
     assert result.exit_code == 0
     # The person name should be replaced with a pseudonym
     assert "John Doe" not in result.stdout
@@ -109,7 +113,7 @@ def test_replace_text_command(runner):
 def test_list_entities_command(runner):
     """Test the list-entities command."""
     result = runner.invoke(app, ["list-entities"])
-    
+
     assert result.exit_code == 0
     # Should list some common entity types
     assert "PERSON" in result.stdout

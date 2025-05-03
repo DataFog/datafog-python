@@ -35,6 +35,7 @@ pytest -m "integration"
 5. Applied the integration marker to all CLI smoke tests
 
 The CLI smoke tests verify that:
+
 - Basic CLI commands execute successfully
 - Text processing commands correctly handle PII in text files
 - Configuration and entity listing commands return expected information
