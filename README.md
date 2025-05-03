@@ -346,13 +346,14 @@ auto_service = TextService()  # engine="auto" is the default
 
 Benchmark tests show that the regex engine is significantly faster than spaCy for PII detection:
 
-| Engine | Processing Time (10KB text) | Entities Detected |
-|--------|------------------------------|-------------------|
+| Engine | Processing Time (10KB text) | Entities Detected                                    |
+| ------ | --------------------------- | ---------------------------------------------------- |
 | Regex  | ~0.004 seconds              | EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP |
-| SpaCy  | ~0.48 seconds               | PERSON, ORG, GPE, CARDINAL, FAC |
-| Auto   | ~0.004 seconds              | Same as regex when patterns are found |
+| SpaCy  | ~0.48 seconds               | PERSON, ORG, GPE, CARDINAL, FAC                      |
+| Auto   | ~0.004 seconds              | Same as regex when patterns are found                |
 
 **Key findings:**
+
 - The regex engine is approximately **123x faster** than spaCy for processing the same text
 - The auto engine provides the best balance between speed and comprehensiveness
   - Uses fast regex patterns first
