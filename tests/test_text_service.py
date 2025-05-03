@@ -261,21 +261,42 @@ def test_auto_engine_with_fallback(
 
 def test_structured_output_regex_engine(text_service_with_engine, mock_regex_annotator):
     """Test structured output mode with regex engine."""
+    # Set up the mock to return spans that match the input text
+    from datafog.processing.text_processing.regex_annotator import (
+        AnnotationResult,
+        Span,
+    )
+    
+    # Create spans that will be returned by the mock
+    test_text = "john@example.com"
+    spans = [
+        # Make sure the end position matches the actual length of the text
+        Span(label="EMAIL", start=0, end=len(test_text), text=test_text),
+    ]
+    
+    # Update the mock to return spans that match the input text
+    mock_regex_annotator.annotate_with_spans.return_value = (
+        {"EMAIL": [test_text]},
+        AnnotationResult(text=test_text, spans=spans),
+    )
+    
     service = text_service_with_engine(engine="regex")
     # Override chunk length to avoid multiple calls
     service.text_chunk_length = 1000
-    result = service.annotate_text_sync("john@example.com", structured=True)
+    result = service.annotate_text_sync(test_text, structured=True)
 
     # Should call regex annotator's annotate_with_spans method
     assert mock_regex_annotator.annotate_with_spans.called
 
     # Verify the result is a list of Span objects
     assert isinstance(result, list)
-    assert len(result) == 2
+    assert len(result) == 1  # Only one span should be returned (EMAIL)
+    
+    # Verify the span has the correct properties
     assert result[0].label == "EMAIL"
-    assert result[0].text == "john@example.com"
-    assert result[1].label == "PHONE"
-    assert result[1].text == "555-555-5555"
+    assert result[0].text == test_text
+    assert result[0].start == 0
+    assert result[0].end == len(test_text)
 
 
 def test_structured_output_spacy_engine(text_service_with_engine, mock_annotator):
