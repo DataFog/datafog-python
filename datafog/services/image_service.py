@@ -17,6 +17,9 @@ import aiohttp
 import certifi
 from PIL import Image
 
+# Check if the PYTEST_DONUT flag is set to enable OCR testing
+DONUT_TESTING_ENABLED = os.environ.get("PYTEST_DONUT", "").lower() == "yes"
+
 from datafog.processing.image_processing.donut_processor import DonutProcessor
 from datafog.processing.image_processing.pytesseract_processor import (
     PytesseractProcessor,
@@ -51,6 +54,20 @@ class ImageService:
 
     def __init__(self, use_donut: bool = False, use_tesseract: bool = True):
         self.downloader = ImageDownloader()
+
+        # Check if we're in a test environment
+        in_test_env = "PYTEST_CURRENT_TEST" in os.environ or "TOX_ENV_NAME" in os.environ
+
+        # Log the initial OCR processor selection
+        logging.info(f"Initial OCR processor selection: use_donut={use_donut}, use_tesseract={use_tesseract}")
+        
+        # In test environment without PYTEST_DONUT=yes, we should still allow Donut for testing
+        # but the DonutProcessor will return mock results
+        if in_test_env:
+            if DONUT_TESTING_ENABLED:
+                logging.info("PYTEST_DONUT=yes is set, enabling real Donut OCR in test environment")
+            else:
+                logging.info("Test environment detected without PYTEST_DONUT=yes, Donut will use mock results")
 
         if use_donut and use_tesseract:
             raise ValueError(

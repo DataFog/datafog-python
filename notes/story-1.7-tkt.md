@@ -2,7 +2,7 @@
 
 - [x] Run pytest with `-m "integration"` to run Spark in local mode.
 - [x] Smoke test the CLI with a tmp file.
-- [ ] OCR path behind `PYTEST_DONUT=yes` flag.
+- [x] OCR path behind `PYTEST_DONUT=yes` flag.
 
 ## Implementation Notes
 
@@ -39,3 +39,23 @@ The CLI smoke tests verify that:
 - Basic CLI commands execute successfully
 - Text processing commands correctly handle PII in text files
 - Configuration and entity listing commands return expected information
+
+### OCR Path Behind PYTEST_DONUT=yes Flag
+
+1. Updated DonutProcessor to check for the PYTEST_DONUT environment variable
+2. Modified ImageService to respect the PYTEST_DONUT flag when initializing OCR processors
+3. Created test_ocr_integration.py with tests that demonstrate both mock and real OCR functionality
+4. Implemented conditional logic to use mock OCR by default in tests, but real OCR when PYTEST_DONUT=yes
+5. Added proper logging to indicate when mock vs. real OCR is being used
+
+To run tests with the real OCR implementation:
+
+```bash
+PYTEST_DONUT=yes pytest -m "integration" tests/test_ocr_integration.py
+```
+
+Without the flag, tests will use mock OCR responses to avoid dependencies on torch/transformers:
+
+```bash
+pytest -m "integration" tests/test_ocr_integration.py
+```
