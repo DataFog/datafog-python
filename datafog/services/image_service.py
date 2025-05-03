@@ -63,6 +63,8 @@ class ImageService:
         self.use_donut = use_donut
         self.use_tesseract = use_tesseract
 
+        # Only create the processors if they're going to be used
+        # This ensures torch/transformers are only imported when needed
         self.donut_processor = DonutProcessor() if self.use_donut else None
         self.tesseract_processor = (
             PytesseractProcessor() if self.use_tesseract else None

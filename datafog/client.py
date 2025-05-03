@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from rich import print
 from rich.progress import track
 
-from .config import get_config
+from .config import OperationType, get_config
 from .main import DataFog
 from .models.anonymizer import Anonymizer, AnonymizerType, HashType
 from .models.spacy_nlp import SpacyAnnotator
@@ -47,7 +47,9 @@ def scan_image(
         raise typer.Exit(code=1)
 
     logging.basicConfig(level=logging.INFO)
-    ocr_client = DataFog(operations=operations)
+    # Convert comma-separated string operations to a list of OperationType objects
+    operation_list = [OperationType(op.strip()) for op in operations.split(",")]
+    ocr_client = DataFog(operations=operation_list)
     try:
         results = asyncio.run(ocr_client.run_ocr_pipeline(image_urls=image_urls))
         typer.echo(f"OCR Pipeline Results: {results}")
@@ -80,7 +82,9 @@ def scan_text(
         raise typer.Exit(code=1)
 
     logging.basicConfig(level=logging.INFO)
-    text_client = DataFog(operations=operations)
+    # Convert comma-separated string operations to a list of OperationType objects
+    operation_list = [OperationType(op.strip()) for op in operations.split(",")]
+    text_client = DataFog(operations=operation_list)
     try:
         results = asyncio.run(text_client.run_text_pipeline(str_list=str_list))
         typer.echo(f"Text Pipeline Results: {results}")

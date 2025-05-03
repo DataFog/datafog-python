@@ -70,7 +70,7 @@ def broadcast_pii_annotator_udf(
     return pii_annotation_udf
 
 
-def ensure_installed(self, package_name):
+def ensure_installed(package_name):
     try:
         importlib.import_module(package_name)
     except ImportError:

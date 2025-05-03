@@ -21,18 +21,21 @@ class SparkService:
     """
 
     def __init__(self):
-        self.spark = self.create_spark_session()
-        self.ensure_installed("pyspark")
-
+        # First import necessary modules
         from pyspark.sql import DataFrame, SparkSession
         from pyspark.sql.functions import udf
         from pyspark.sql.types import ArrayType, StringType
 
+        # Assign fields
         self.SparkSession = SparkSession
         self.DataFrame = DataFrame
         self.udf = udf
         self.ArrayType = ArrayType
         self.StringType = StringType
+
+        # Now create spark session and ensure pyspark is installed
+        self.ensure_installed("pyspark")
+        self.spark = self.create_spark_session()
 
     def create_spark_session(self):
         return self.SparkSession.builder.appName("datafog").getOrCreate()
