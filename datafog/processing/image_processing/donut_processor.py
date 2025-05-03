@@ -73,13 +73,17 @@ class DonutProcessor:
 
         # If we're in a test environment and PYTEST_DONUT is not enabled, return a mock response
         if IN_TEST_ENV and not DONUT_TESTING_ENABLED:
-            logging.info("Running in test environment without PYTEST_DONUT=yes, returning mock OCR result")
+            logging.info(
+                "Running in test environment without PYTEST_DONUT=yes, returning mock OCR result"
+            )
             mock_result = {"text": "Mock OCR text for testing"}
             return json.dumps(mock_result)
-        
+
         # If PYTEST_DONUT is enabled, log that we're running real OCR in test mode
         if IN_TEST_ENV and DONUT_TESTING_ENABLED:
-            logging.info("PYTEST_DONUT=yes is set, running actual OCR in test environment")
+            logging.info(
+                "PYTEST_DONUT=yes is set, running actual OCR in test environment"
+            )
 
         # Only import torch and transformers when actually needed and not in test environment
         try:
