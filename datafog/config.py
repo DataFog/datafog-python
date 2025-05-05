@@ -9,7 +9,6 @@ import os
 from enum import Enum
 from typing import Optional
 
-from pydantic import HttpUrl
 from pydantic_settings import BaseSettings
 
 
@@ -30,8 +29,8 @@ class DataFogConfig(BaseSettings):
     api_key: str = os.environ.get("DATAFOG_API_KEY", "")
 
     # Base URLs for different services
-    annotator_base_url: HttpUrl = "http://localhost:8000"
-    anonymizer_base_url: HttpUrl = "http://localhost:8000"
+    annotator_base_url: str = "http://localhost:8000"
+    anonymizer_base_url: str = "http://localhost:8000"
 
     # Default language
     default_language: str = "en"

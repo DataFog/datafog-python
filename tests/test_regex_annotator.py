@@ -1,12 +1,9 @@
-from typing import Dict, List, Tuple
-
 import pytest
 
 # Import the regex annotator module
 from datafog.processing.text_processing.regex_annotator import (
     AnnotationResult,
     RegexAnnotator,
-    Span,
 )
 
 

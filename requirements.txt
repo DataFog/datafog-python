@@ -1,18 +1,23 @@
-pandas
+# Core dependencies with pinned versions
+pandas==2.2.3
 requests==2.32.3
 spacy==3.7.5
-pydantic>=2.8.2,<3.0.0
-Pillow
-sentencepiece
-protobuf
-pytesseract
-aiohttp
-pytest-asyncio
-numpy
-fastapi
-asyncio
-setuptools
+pydantic==2.11.4
+Pillow==11.2.1
+sentencepiece==0.2.0
+protobuf==6.30.2
+pytesseract==0.3.13
+aiohttp==3.11.18
+numpy==1.26.4
+fastapi==0.115.12
+asyncio==3.4.3
+setuptools>=68.0.0
 pydantic-settings==2.3.4
 typer==0.12.3
-sphinx
-cryptography
+sphinx==7.2.6
+cryptography==44.0.2
+
+# Testing dependencies
+pytest==7.4.0
+pytest-asyncio==0.21.0
+pytest-cov==4.1.0

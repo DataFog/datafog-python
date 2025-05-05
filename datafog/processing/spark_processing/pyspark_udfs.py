@@ -23,10 +23,6 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
     """
     ensure_installed("pyspark")
     ensure_installed("spacy")
-    import spacy
-    from pyspark.sql import SparkSession
-    from pyspark.sql.functions import udf
-    from pyspark.sql.types import ArrayType, StringType, StructField, StructType
 
     if text:
         if len(text) > MAXIMAL_STRING_SIZE:
@@ -57,7 +53,7 @@ def broadcast_pii_annotator_udf(
     import spacy
     from pyspark.sql import SparkSession
     from pyspark.sql.functions import udf
-    from pyspark.sql.types import ArrayType, StringType, StructField, StructType
+    from pyspark.sql.types import ArrayType, StringType
 
     if not spark_session:
         spark_session = SparkSession.builder.getOrCreate()

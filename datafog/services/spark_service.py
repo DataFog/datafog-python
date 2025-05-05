@@ -6,11 +6,10 @@ JSON reading, and package management.
 """
 
 import importlib
-import json
 import os
 import subprocess
 import sys
-from typing import Any, List
+from typing import List
 
 
 class SparkService:

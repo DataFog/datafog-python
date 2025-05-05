@@ -1,9 +1,5 @@
-import asyncio
-import importlib
 import sys
 from unittest.mock import patch
-
-import pytest
 
 from datafog.services.image_service import ImageService
 

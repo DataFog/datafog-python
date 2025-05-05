@@ -21,6 +21,13 @@ repos:
         additional_dependencies: [flake8-bugbear, flake8-comprehensions]
         exclude: .venv
 
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.4
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        exclude: .venv
+
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8
     hooks:

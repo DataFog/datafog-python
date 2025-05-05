@@ -2,9 +2,9 @@ name: Performance Benchmarks
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, dev]
   pull_request:
-    branches: [main, develop]
+    branches: [main, dev]
   # Schedule benchmarks to run weekly
   schedule:
     - cron: "0 0 * * 0" # Run at midnight on Sundays
@@ -13,12 +13,12 @@ jobs:
   benchmark:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Fetch all history for proper comparison
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
@@ -28,10 +28,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
           pip install -r requirements-dev.txt
-          pip install pytest-benchmark
 
       - name: Restore benchmark data
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .benchmarks
           key: benchmark-${{ runner.os }}-${{ hashFiles('**/requirements*.txt') }}
@@ -41,15 +40,16 @@ jobs:
       - name: Run benchmarks and save baseline
         run: |
           # Run benchmarks and save results
-          pytest tests/benchmark_text_service.py -v --benchmark-autosave
+          python -m pytest tests/benchmark_text_service.py -v --benchmark-autosave --benchmark-json=benchmark-results.json
 
       - name: Check for performance regression
         run: |
           # Compare against the previous benchmark if available
           # Fail if performance degrades by more than 10%
           if [ -d ".benchmarks" ]; then
-            BASELINE=$(ls -t .benchmarks/Linux-CPython-3.10-64bit | head -n 2 | tail -n 1)
-            CURRENT=$(ls -t .benchmarks/Linux-CPython-3.10-64bit | head -n 1)
+            benchmark_dir=".benchmarks/Linux-CPython-3.10-64bit"
+            BASELINE=$(ls -t $benchmark_dir | head -n 2 | tail -n 1)
+            CURRENT=$(ls -t $benchmark_dir | head -n 1)
             if [ -n "$BASELINE" ] && [ "$BASELINE" != "$CURRENT" ]; then
               # Set full paths to the benchmark files
               BASELINE_FILE="$benchmark_dir/$BASELINE"
@@ -71,10 +71,12 @@ jobs:
           fi
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
-          path: .benchmarks/
+          path: |
+            .benchmarks/
+            benchmark-results.json
 
       - name: Alert on regression
         if: failure()

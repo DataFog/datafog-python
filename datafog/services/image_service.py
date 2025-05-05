@@ -11,7 +11,7 @@ import io
 import logging
 import os
 import ssl
-from typing import List
+from typing import List, Union
 
 import aiohttp
 import certifi
@@ -95,7 +95,9 @@ class ImageService:
             PytesseractProcessor() if self.use_tesseract else None
         )
 
-    async def download_images(self, urls: List[str]) -> List[Image.Image]:
+    async def download_images(
+        self, urls: List[str]
+    ) -> List[Union[Image.Image, BaseException]]:
         tasks = [
             asyncio.create_task(self.downloader.download_image(url)) for url in urls
         ]
@@ -114,9 +116,9 @@ class ImageService:
                     # URL
                     image = await self.downloader.download_image(path)
 
-                if self.use_tesseract:
+                if self.use_tesseract and self.tesseract_processor is not None:
                     text = await self.tesseract_processor.extract_text_from_image(image)
-                elif self.use_donut:
+                elif self.use_donut and self.donut_processor is not None:
                     text = await self.donut_processor.extract_text_from_image(image)
                 else:
                     raise ValueError("No OCR processor selected")

@@ -167,7 +167,7 @@ class RegexAnnotator:
         Returns:
             A dictionary mapping entity labels to lists of matched strings
         """
-        result = {label: [] for label in self.LABELS}
+        result: Dict[str, List[str]] = {label: [] for label in self.LABELS}
 
         # Return empty result for empty text
         if not text:
@@ -193,8 +193,8 @@ class RegexAnnotator:
             - A dictionary mapping entity labels to lists of matched strings
             - An AnnotationResult object with structured span information
         """
-        spans_by_label = {label: [] for label in self.LABELS}
-        all_spans = []
+        spans_by_label: Dict[str, List[Span]] = {label: [] for label in self.LABELS}
+        all_spans: List[Span] = []
 
         if not text:
             return spans_by_label, AnnotationResult(text=text, spans=all_spans)

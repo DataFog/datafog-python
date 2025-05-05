@@ -4,10 +4,9 @@ Provides synchronous and asynchronous methods for annotating text with personall
 """
 
 import asyncio
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-    AnnotationResult,
     RegexAnnotator,
     Span,
 )

@@ -14,10 +14,8 @@ import os
 import re
 import subprocess
 import sys
-from io import BytesIO
 
 import numpy as np
-import requests
 from PIL import Image
 
 from .image_downloader import ImageDownloader

@@ -6,8 +6,6 @@ Otherwise, they will use a mock implementation.
 """
 
 import io
-import json
-import os
 from unittest.mock import patch
 
 import pytest
