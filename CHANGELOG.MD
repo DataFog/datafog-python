@@ -1,6 +1,6 @@
 # ChangeLog
 
-## [2025-05-02]
+## [2025-05-05]
 
 ### `datafog-python` [4.1.0]
 
@@ -13,6 +13,11 @@
 - Added 'When do I need spaCy?' guidance to documentation
 - Created scripts for running benchmarks locally and comparing results
 - Improved documentation with performance metrics and engine selection guidance
+- Extended .gitignore to better handle build artifacts and development files
+- Added GitHub Actions workflows for testing, linting, and benchmarking
+- Pinned all dependency versions in requirements.txt and requirements-dev.txt for reproducible builds
+- Added mypy type checking to CI pipeline
+- Added ruff linting to development dependencies
 
 ## [2024-03-25]
 

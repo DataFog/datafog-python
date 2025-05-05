@@ -2,17 +2,16 @@
 -r requirements.txt
 
 # Development and testing dependencies
-just
-isort
-black
-blacken-docs
-certifi
-flake8
-prettier
-tox
-pytest==7.4.0
-pytest-asyncio==0.21.0
-pytest-cov
-mypy
-autoflake
-pre-commit
+just==0.8.162
+isort==5.13.2
+black==24.3.0
+blacken-docs==1.13.0
+certifi==2025.4.26
+flake8==7.0.0
+prettier==0.0.7
+tox==4.14.2
+pytest-benchmark==4.0.0
+mypy==1.9.0
+autoflake==2.2.1
+pre-commit==3.7.0
+ruff==0.3.4

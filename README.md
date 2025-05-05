@@ -11,6 +11,9 @@
   <a href="https://pypi.org/project/datafog/"><img src="https://img.shields.io/pypi/pyversions/datafog.svg?style=flat-square" alt="PyPI pyversions"></a>
   <a href="https://github.com/datafog/datafog-python"><img src="https://img.shields.io/github/stars/datafog/datafog-python.svg?style=flat-square&logo=github&label=Stars&logoColor=white" alt="GitHub stars"></a>
   <a href="https://pypistats.org/packages/datafog"><img src="https://img.shields.io/pypi/dm/datafog.svg?style=flat-square" alt="PyPi downloads"></a>
+  <a href="https://github.com/datafog/datafog-python/actions/workflows/tests.yml"><img src="https://github.com/datafog/datafog-python/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.com/datafog/datafog-python/actions/workflows/lint.yml"><img src="https://github.com/datafog/datafog-python/actions/workflows/lint.yml/badge.svg" alt="Lint"></a>
+  <a href="https://github.com/datafog/datafog-python/actions/workflows/benchmark.yml"><img src="https://github.com/datafog/datafog-python/actions/workflows/benchmark.yml/badge.svg" alt="Benchmarks"></a>
   <a href="https://discord.gg/bzDth394R4"><img src="https://img.shields.io/discord/1173803135341449227?style=flat" alt="Discord"></a>
   <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square" alt="Code style: black"></a>
   <a href="https://codecov.io/gh/datafog/datafog-python"><img src="https://img.shields.io/codecov/c/github/datafog/datafog-python.svg?style=flat-square" alt="codecov"></a>
