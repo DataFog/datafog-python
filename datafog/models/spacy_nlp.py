@@ -5,7 +5,7 @@ This module implements a SpacyAnnotator class that uses spaCy models for
 text annotation, entity recognition, and related NLP tasks.
 """
 
-from typing import List, Optional
+from typing import List
 from uuid import uuid4
 
 import spacy

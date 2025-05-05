@@ -6,14 +6,9 @@ Provides CLI commands for scanning images and text using DataFog's OCR and PII d
 
 import asyncio
 import logging
-from enum import Enum
-from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import typer
-from pydantic import BaseModel
-from rich import print
-from rich.progress import track
 
 from .config import OperationType, get_config
 from .main import DataFog

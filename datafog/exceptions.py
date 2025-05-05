@@ -4,6 +4,7 @@ Exceptions module for DataFog SDK.
 This module defines custom exceptions and utility functions for error handling in the DataFog SDK.
 """
 
+from typing import Optional
 
 class DataFogException(Exception):
     """
@@ -14,7 +15,7 @@ class DataFogException(Exception):
         status_code (int, optional): The HTTP status code associated with the error.
     """
 
-    def __init__(self, message: str, status_code: int = None):
+    def __init__(self, message: str, status_code: Optional[int] = None):
         """
         Initialize a DataFogException.
 
