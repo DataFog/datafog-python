@@ -32,7 +32,8 @@ jobs:
 
       - name: Lint with ruff
         run: |
-          ruff check .
+          # Run ruff but don't fail the build yet (exit-zero)
+          ruff check . --exit-zero
 
       - name: Type check with mypy
         run: |

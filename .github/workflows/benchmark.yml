@@ -47,8 +47,9 @@ jobs:
           # Compare against the previous benchmark if available
           # Fail if performance degrades by more than 10%
           if [ -d ".benchmarks" ]; then
-            BASELINE=$(ls -t .benchmarks/Linux-CPython-3.10-64bit | head -n 2 | tail -n 1)
-            CURRENT=$(ls -t .benchmarks/Linux-CPython-3.10-64bit | head -n 1)
+            benchmark_dir=".benchmarks/Linux-CPython-3.10-64bit"
+            BASELINE=$(ls -t $benchmark_dir | head -n 2 | tail -n 1)
+            CURRENT=$(ls -t $benchmark_dir | head -n 1)
             if [ -n "$BASELINE" ] && [ "$BASELINE" != "$CURRENT" ]; then
               # Set full paths to the benchmark files
               BASELINE_FILE="$benchmark_dir/$BASELINE"
