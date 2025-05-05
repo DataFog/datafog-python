@@ -5,15 +5,11 @@ These tests verify basic CLI functionality using temporary files.
 
 import os
 import tempfile
-from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
 
 from datafog.client import app
-from datafog.models.anonymizer import Anonymizer, AnonymizerType
-from datafog.models.spacy_nlp import SpacyAnnotator
 
 
 @pytest.fixture

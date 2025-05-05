@@ -1,12 +1,9 @@
 """Benchmark tests for comparing regex vs spaCy performance in TextService."""
 
 import time
-from typing import Dict, List
 
 import pytest
 
-from datafog.processing.text_processing.regex_annotator import RegexAnnotator
-from datafog.processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from datafog.services.text_service import TextService
 
 

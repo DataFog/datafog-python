@@ -95,7 +95,9 @@ class ImageService:
             PytesseractProcessor() if self.use_tesseract else None
         )
 
-    async def download_images(self, urls: List[str]) -> List[Union[Image.Image, BaseException]]:
+    async def download_images(
+        self, urls: List[str]
+    ) -> List[Union[Image.Image, BaseException]]:
         tasks = [
             asyncio.create_task(self.downloader.download_image(url)) for url in urls
         ]

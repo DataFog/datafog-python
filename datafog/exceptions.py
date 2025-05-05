@@ -6,6 +6,7 @@ This module defines custom exceptions and utility functions for error handling i
 
 from typing import Optional
 
+
 class DataFogException(Exception):
     """
     Base exception for DataFog SDK.

@@ -63,7 +63,9 @@ class SpacyPIIAnnotator(BaseModel):
             if len(text) > MAXIMAL_STRING_SIZE:
                 text = text[:MAXIMAL_STRING_SIZE]
             doc = self.nlp(text)
-            classified_entities: Dict[str, List[str]] = {label: [] for label in PII_ANNOTATION_LABELS}
+            classified_entities: Dict[str, List[str]] = {
+                label: [] for label in PII_ANNOTATION_LABELS
+            }
             for ent in doc.ents:
                 if ent.label_ in classified_entities:
                     classified_entities[ent.label_].append(ent.text)

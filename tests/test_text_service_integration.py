@@ -1,13 +1,7 @@
 """Integration tests for TextService engine selection functionality."""
 
-from unittest.mock import MagicMock, patch
-
 import pytest
 
-from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-    RegexAnnotator,
-)
-from datafog.processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from datafog.services.text_service import TextService
 
 
