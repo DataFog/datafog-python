@@ -127,9 +127,10 @@ class TextService:
                 # Try regex first
                 regex_dict = self.regex_annotator.annotate(text)
 
-                # Check if any entities were found
+                # Check if any VALID entities were found (ignore empty strings)
                 has_entities = any(
-                    len(entities) > 0 for entities in regex_dict.values()
+                    any(entity.strip() for entity in entities)
+                    for entities in regex_dict.values()
                 )
 
                 # If regex found entities, return those results
