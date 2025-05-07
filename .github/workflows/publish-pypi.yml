@@ -83,11 +83,20 @@ jobs:
         id: beta_version
         run: |
           # Read current version from setup.py
-          CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' setup.py | cut -d"" -f2)
+          CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' setup.py | sed 's/__version__ = "\(.*\)"/\1/')
           echo "Current version in files: $CURRENT_VERSION"
 
           # Split version into components
-          IFS='.' read -r MAJOR MINOR PATCH_FULL <<< "$CURRENT_VERSION"
+          IFS='.' read -r MAJOR MINOR PATCH_FULL <<< "$CURRENT_VERSION" || true
+
+          # Validate we got valid version components
+          if [[ -z "$MAJOR" || -z "$MINOR" || -z "$PATCH_FULL" ]]; then
+            echo "Error: Could not parse version components from $CURRENT_VERSION"
+            echo "Using default version 0.0.1b1"
+            MAJOR=0
+            MINOR=0
+            PATCH_FULL=1
+          fi
 
           # Handle beta suffix if it exists
           if [[ $PATCH_FULL == *b* ]]; then
@@ -95,7 +104,13 @@ jobs:
             PATCH_NUM=${PATCH_FULL%%b*}
             # Extract the beta number and increment it
             BETA_NUM=${PATCH_FULL#*b}
-            BETA_NUM=$((BETA_NUM + 1))
+            # Ensure beta number is a valid integer
+            if ! [[ $BETA_NUM =~ ^[0-9]+$ ]]; then
+              echo "Warning: Invalid beta number format. Resetting to beta1."
+              BETA_NUM=1
+            else
+              BETA_NUM=$((BETA_NUM + 1))
+            fi
           else
             # If not already a beta, use the patch number and start with beta1
             PATCH_NUM=$PATCH_FULL
