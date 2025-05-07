@@ -146,9 +146,15 @@ jobs:
           # Create and push tag
           git tag v$BETA_VERSION
 
-          # Push both the commit and the tag
-          git push origin HEAD:dev
+          # Create a new branch for the version bump
+          git checkout -b bump-version-to-$BETA_VERSION
+
+          # Push the branch and tag
+          git push origin bump-version-to-$BETA_VERSION
           git push origin v$BETA_VERSION
+
+          # Create a pull request for the version bump
+          gh pr create --base dev --head bump-version-to-$BETA_VERSION --title "Bump version to $BETA_VERSION" --body "Automated version bump to $BETA_VERSION"
 
           # Create GitHub release
           gh release create v$BETA_VERSION --prerelease --title "Beta Release v$BETA_VERSION" --notes "Automated beta release from dev branch"
