@@ -82,12 +82,21 @@ jobs:
       - name: Generate beta version
         id: beta_version
         run: |
-          # Read current version from setup.py
-          CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' setup.py | cut -d"" -f2)
+          # Read current version from __about__.py (single source of truth)
+          CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' datafog/__about__.py | sed 's/__version__ = "\(.*\)"/\1/')
           echo "Current version in files: $CURRENT_VERSION"
 
           # Split version into components
-          IFS='.' read -r MAJOR MINOR PATCH_FULL <<< "$CURRENT_VERSION"
+          IFS='.' read -r MAJOR MINOR PATCH_FULL <<< "$CURRENT_VERSION" || true
+
+          # Validate we got valid version components
+          if [[ -z "$MAJOR" || -z "$MINOR" || -z "$PATCH_FULL" ]]; then
+            echo "Error: Could not parse version components from $CURRENT_VERSION"
+            echo "Using default version 0.0.1b1"
+            MAJOR=0
+            MINOR=0
+            PATCH_FULL=1
+          fi
 
           # Handle beta suffix if it exists
           if [[ $PATCH_FULL == *b* ]]; then
@@ -95,7 +104,12 @@ jobs:
             PATCH_NUM=${PATCH_FULL%%b*}
             # Extract the beta number and increment it
             BETA_NUM=${PATCH_FULL#*b}
-            BETA_NUM=$((BETA_NUM + 1))
+            # Ensure beta number is a valid integer
+            if ! [[ $BETA_NUM =~ ^[0-9]+$ ]]; then
+              BETA_NUM=1
+            else
+              BETA_NUM=$((BETA_NUM + 1))
+            fi
           else
             # If not already a beta, use the patch number and start with beta1
             PATCH_NUM=$PATCH_FULL
@@ -107,13 +121,8 @@ jobs:
           echo "Generated beta version: $BETA_VERSION"
           echo "version=$BETA_VERSION" >> $GITHUB_OUTPUT
 
-          # Update version in setup.py
-          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$BETA_VERSION\"/g" setup.py
-
-          # Update version in __about__.py if it exists
-          if [ -f "datafog/__about__.py" ]; then
-            sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$BETA_VERSION\"/g" datafog/__about__.py
-          fi
+          # Update version in __about__.py (single source of truth)
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$BETA_VERSION\"/g" datafog/__about__.py
       - name: Build package
         run: python -m build
       - name: Create GitHub Pre-Release
@@ -125,7 +134,7 @@ jobs:
           git config user.email github-actions@github.com
 
           # Commit the version changes
-          git add setup.py datafog/__about__.py
+          git add datafog/__about__.py
           git commit -m "Bump version to $BETA_VERSION [skip ci]"
 
           # Create and push tag
