@@ -82,22 +82,38 @@ jobs:
       - name: Generate beta version
         id: beta_version
         run: |
-          # Get the latest tag
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
-          # Remove the 'v' prefix if present
-          LATEST_VERSION=${LATEST_TAG#v}
+          # Read current version from setup.py
+          CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' setup.py | cut -d"" -f2)
+          echo "Current version in files: $CURRENT_VERSION"
+
           # Split version into components
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
-          # Extract any existing beta suffix
-          PATCH_NUM=${PATCH%%b*}
-          # Get commit count since last tag for unique beta number
-          COMMIT_COUNT=$(git rev-list --count $LATEST_TAG..HEAD 2>/dev/null || echo "1")
-          # Generate beta version
-          BETA_VERSION="$MAJOR.$MINOR.$(($PATCH_NUM))b$COMMIT_COUNT"
+          IFS='.' read -r MAJOR MINOR PATCH_FULL <<< "$CURRENT_VERSION"
+
+          # Handle beta suffix if it exists
+          if [[ $PATCH_FULL == *b* ]]; then
+            # Extract the numeric part before 'b'
+            PATCH_NUM=${PATCH_FULL%%b*}
+            # Extract the beta number and increment it
+            BETA_NUM=${PATCH_FULL#*b}
+            BETA_NUM=$((BETA_NUM + 1))
+          else
+            # If not already a beta, use the patch number and start with beta1
+            PATCH_NUM=$PATCH_FULL
+            BETA_NUM=1
+          fi
+
+          # Generate new beta version
+          BETA_VERSION="$MAJOR.$MINOR.${PATCH_NUM}b$BETA_NUM"
           echo "Generated beta version: $BETA_VERSION"
           echo "version=$BETA_VERSION" >> $GITHUB_OUTPUT
-          # Update version in setup.py or pyproject.toml if needed
-          # This depends on how your versioning is configured
+
+          # Update version in setup.py
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$BETA_VERSION\"/g" setup.py
+
+          # Update version in __about__.py if it exists
+          if [ -f "datafog/__about__.py" ]; then
+            sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$BETA_VERSION\"/g" datafog/__about__.py
+          fi
       - name: Build package
         run: python -m build
       - name: Create GitHub Pre-Release
@@ -107,8 +123,19 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+
+          # Commit the version changes
+          git add setup.py datafog/__about__.py
+          git commit -m "Bump version to $BETA_VERSION [skip ci]"
+
+          # Create and push tag
           git tag v$BETA_VERSION
+
+          # Push both the commit and the tag
+          git push origin HEAD:dev
           git push origin v$BETA_VERSION
+
+          # Create GitHub release
           gh release create v$BETA_VERSION --prerelease --title "Beta Release v$BETA_VERSION" --notes "Automated beta release from dev branch"
       - name: Publish to PyPI as Beta
         env:
