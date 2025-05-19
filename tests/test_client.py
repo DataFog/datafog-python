@@ -263,13 +263,11 @@ def test_hash_text(mock_anonymizer, mock_spacy_annotator):
     )
 
     # Test with custom hash type
+    mock_anonymizer.reset_mock()  # Reset the mock to clear the previous call
     result = runner.invoke(app, ["hash-text", sample_text, "--hash-type", "md5"])
 
-    print(f"Exit code: {result.exit_code}")
-    print(f"Output: {result.stdout}")
-    print(f"Exception: {result.exception}")
-
     assert result.exit_code == 0
+    assert "5ab5c95f works at 7b23f032" in result.stdout
     mock_anonymizer.assert_called_with(
         anonymizer_type=AnonymizerType.HASH, hash_type=HashType.MD5
     )
