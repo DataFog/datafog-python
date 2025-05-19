@@ -122,7 +122,7 @@ def download_model(model_name: str = typer.Argument(None, help="Model to downloa
     if not model_name:
         typer.echo("No model name provided to download.")
         raise typer.Exit(code=1)
-    
+
     SpacyAnnotator.download_model(model_name)
     typer.echo(f"Model {model_name} downloaded.")
 
@@ -142,7 +142,7 @@ def show_spacy_model_directory(
     if not model_name:
         typer.echo("No model name provided to check.")
         raise typer.Exit(code=1)
-    
+
     annotator = SpacyAnnotator(model_name)
     typer.echo(annotator.show_model_path())
 
@@ -182,7 +182,7 @@ def redact_text(text: str = typer.Argument(None, help="Text to redact")):
     if not text:
         typer.echo("No text provided to redact.")
         raise typer.Exit(code=1)
-        
+
     annotator = SpacyAnnotator()
     anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REDACT)
     annotations = annotator.annotate_text(text)
@@ -203,7 +203,7 @@ def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
     if not text:
         typer.echo("No text provided to replace PII.")
         raise typer.Exit(code=1)
-        
+
     annotator = SpacyAnnotator()
     anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REPLACE)
     annotations = annotator.annotate_text(text)
@@ -228,7 +228,7 @@ def hash_text(
     if not text:
         typer.echo("No text provided to hash.")
         raise typer.Exit(code=1)
-        
+
     annotator = SpacyAnnotator()
     anonymizer = Anonymizer(anonymizer_type=AnonymizerType.HASH, hash_type=hash_type)
     annotations = annotator.annotate_text(text)
