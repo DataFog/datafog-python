@@ -48,9 +48,9 @@ def test_anonymizer_replace(sample_text, sample_annotations):
 
     assert isinstance(result, AnonymizationResult)
     assert result.anonymized_text != sample_text
-    assert len(result.replaced_entities) == 3
+    assert len(result.anonymized_entities) == 3
 
-    for replacement in result.replaced_entities:
+    for replacement in result.anonymized_entities:
         assert replacement["original"] in sample_text
         assert replacement["replacement"] not in sample_text
         assert replacement["entity_type"] in EntityTypes.__members__
@@ -65,9 +65,9 @@ def test_anonymizer_redact(sample_text, sample_annotations):
     result = anonymizer.anonymize(sample_text, sample_annotations)
 
     assert result.anonymized_text != sample_text
-    assert len(result.replaced_entities) == 3
+    assert len(result.anonymized_entities) == 3
 
-    for replacement in result.replaced_entities:
+    for replacement in result.anonymized_entities:
         assert replacement["original"] in sample_text
         assert replacement["replacement"] == "[REDACTED]"
 
@@ -80,9 +80,9 @@ def test_anonymizer_hash(sample_text, sample_annotations, hash_type):
     result = anonymizer.anonymize(sample_text, sample_annotations)
 
     assert result.anonymized_text != sample_text
-    assert len(result.replaced_entities) == 3
+    assert len(result.anonymized_entities) == 3
 
-    for replacement in result.replaced_entities:
+    for replacement in result.anonymized_entities:
         assert replacement["original"] in sample_text
         assert replacement["replacement"] not in sample_text
         # assert len(replacement["replacement"]) == len(replacement["original"])
@@ -100,11 +100,11 @@ def test_anonymizer_with_specific_entities(sample_text, sample_annotations):
     result = anonymizer.anonymize(sample_text, sample_annotations)
 
     assert result.anonymized_text != sample_text
-    assert len(result.replaced_entities) == 1
-    assert result.replaced_entities[0]["entity_type"] == EntityTypes.ORGANIZATION
-    assert result.replaced_entities[0]["original"] == "DigiCorp Incorporated "
-    assert result.replaced_entities[0]["replacement"].startswith("[ORGANIZATION_")
-    assert result.replaced_entities[0]["replacement"].endswith("]")
+    assert len(result.anonymized_entities) == 1
+    assert result.anonymized_entities[0]["entity_type"] == EntityTypes.ORGANIZATION
+    assert result.anonymized_entities[0]["original"] == "DigiCorp Incorporated "
+    assert result.anonymized_entities[0]["replacement"].startswith("[ORGANIZATION_")
+    assert result.anonymized_entities[0]["replacement"].endswith("]")
 
     assert "Jeff Smith" in result.anonymized_text
     assert "Paris" in result.anonymized_text
@@ -123,4 +123,4 @@ def test_all_anonymizer_types(anonymizer_type, sample_text, sample_annotations):
 
     assert isinstance(result, AnonymizationResult)
     assert result.anonymized_text != sample_text
-    assert len(result.replaced_entities) == 3
+    assert len(result.anonymized_entities) == 3
