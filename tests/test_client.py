@@ -1,4 +1,5 @@
 from unittest.mock import patch
+import re
 
 import pytest
 from typer.testing import CliRunner
@@ -263,6 +264,9 @@ def test_hash_text(mock_anonymizer, mock_spacy_annotator):
     )
 
     # Test with custom hash type
+    mock_anonymizer_instance.anonymize.return_value = AnonymizationResult(
+        anonymized_text="d41d8cd98f00b204e9800998ecf8427e", anonymized_entities=[]
+    )
     result = runner.invoke(app, ["hash-text", sample_text, "--hash-type", "md5"])
 
     print(f"Exit code: {result.exit_code}")
@@ -270,6 +274,7 @@ def test_hash_text(mock_anonymizer, mock_spacy_annotator):
     print(f"Exception: {result.exception}")
 
     assert result.exit_code == 0
+    assert re.search(r"[0-9a-f]{32}", result.stdout)
     mock_anonymizer.assert_called_with(
         anonymizer_type=AnonymizerType.HASH, hash_type=HashType.MD5
     )
