@@ -81,17 +81,15 @@ def test_scan_text_no_texts():
     assert "No texts provided" in result.stdout
 
 
-@pytest.mark.asyncio
-async def test_scan_text_success(mock_datafog):
+def test_scan_text_success(mock_datafog):
     mock_instance = mock_datafog.return_value
-    mock_instance.run_text_pipeline.return_value = ["Mocked result"]
+    mock_instance.run_text_pipeline_sync.return_value = ["Mocked result"]
 
-    with patch("datafog.client.asyncio.run", new=lambda x: x):
-        result = runner.invoke(app, ["scan-text", "Sample text"])
+    result = runner.invoke(app, ["scan-text", "Sample text"])
 
     assert result.exit_code == 0
     assert "Text Pipeline Results: ['Mocked result']" in result.stdout
-    mock_instance.run_text_pipeline.assert_called_once_with(str_list=["Sample text"])
+    mock_instance.run_text_pipeline_sync.assert_called_once_with(str_list=["Sample text"])
 
 
 def test_health():

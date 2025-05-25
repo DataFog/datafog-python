@@ -81,7 +81,7 @@ def scan_text(
     operation_list = [OperationType(op.strip()) for op in operations.split(",")]
     text_client = DataFog(operations=operation_list)
     try:
-        results = asyncio.run(text_client.run_text_pipeline(str_list=str_list))
+        results = text_client.run_text_pipeline_sync(str_list=str_list)
         typer.echo(f"Text Pipeline Results: {results}")
     except Exception as e:
         logging.exception("Text pipeline error")
