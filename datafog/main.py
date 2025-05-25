@@ -85,12 +85,37 @@ class DataFog:
                         OperationType.HASH,
                     ]
                 ):
-                    return [
-                        self.anonymizer.anonymize(text, annotations).anonymized_text
-                        for text, annotations in zip(
-                            str_list, annotated_text, strict=True
+                    # Convert to AnnotationResult format for anonymizer
+                    from .models.annotator import AnnotationResult
+                    from .models.common import AnnotatorMetadata
+
+                    anonymized_results = []
+                    for text in str_list:
+                        # Get structured annotations for this text
+                        _, structured_result = self.regex_annotator.annotate_with_spans(
+                            text
                         )
-                    ]
+
+                        # Convert to AnnotationResult format
+                        annotation_results = []
+                        for span in structured_result.spans:
+                            annotation_results.append(
+                                AnnotationResult(
+                                    start=span.start,
+                                    end=span.end,
+                                    score=1.0,  # regex patterns have full confidence
+                                    entity_type=span.label,
+                                    recognition_metadata=AnnotatorMetadata(),
+                                )
+                            )
+
+                        # Anonymize this text
+                        anonymized_result = self.anonymizer.anonymize(
+                            text, annotation_results
+                        )
+                        anonymized_results.append(anonymized_result.anonymized_text)
+
+                    return anonymized_results
                 else:
                     return annotated_text
 
@@ -128,11 +153,30 @@ class DataFog:
         Returns:
             Dictionary with original text, anonymized text (if requested), and findings
         """
-        annotations = self.detect(text)
+        annotations_dict = self.detect(text)
 
-        result = {"original": text, "findings": annotations}
+        result = {"original": text, "findings": annotations_dict}
 
         if anonymize:
+            # Get structured annotations for anonymizer
+            _, structured_result = self.regex_annotator.annotate_with_spans(text)
+
+            # Convert to AnnotationResult format expected by Anonymizer
+            from .models.annotator import AnnotationResult
+            from .models.common import AnnotatorMetadata
+
+            annotation_results = []
+            for span in structured_result.spans:
+                annotation_results.append(
+                    AnnotationResult(
+                        start=span.start,
+                        end=span.end,
+                        score=1.0,  # regex patterns have full confidence
+                        entity_type=span.label,
+                        recognition_metadata=AnnotatorMetadata(),
+                    )
+                )
+
             if method == "redact":
                 anonymizer_type = AnonymizerType.REDACT
             elif method == "replace":
@@ -142,9 +186,11 @@ class DataFog:
             else:
                 anonymizer_type = AnonymizerType.REDACT
 
-            anonymized_result = self.anonymizer.anonymize(
-                text, annotations, anonymizer_type
+            # Create a temporary anonymizer with the desired type
+            temp_anonymizer = Anonymizer(
+                anonymizer_type=anonymizer_type, hash_type=self.anonymizer.hash_type
             )
+            anonymized_result = temp_anonymizer.anonymize(text, annotation_results)
             result["anonymized"] = anonymized_result.anonymized_text
 
         return result
