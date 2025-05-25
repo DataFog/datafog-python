@@ -16,10 +16,6 @@ on:
         type: boolean
         default: false
         required: false
-  # Auto-trigger for beta releases when merged to dev
-  push:
-    branches:
-      - dev
 
 jobs:
   # Job for manual releases (stable or pre-release)
