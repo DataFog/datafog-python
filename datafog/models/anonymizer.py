@@ -35,7 +35,12 @@ class AnonymizerRequest(BaseModel):
 
 class AnonymizationResult(BaseModel):
     anonymized_text: str
-    replaced_entities: List[dict] = Field(default_factory=list)
+    anonymized_entities: List[dict] = Field(
+        default_factory=list, alias="replaced_entities"
+    )
+
+    class Config:
+        populate_by_name = True
 
 
 class Anonymizer(BaseModel):
@@ -78,7 +83,9 @@ class Anonymizer(BaseModel):
                 )
                 text = text[: annotation.start] + replacement + text[annotation.end :]
 
-        return AnonymizationResult(anonymized_text=text, replaced_entities=replacements)
+        return AnonymizationResult(
+            anonymized_text=text, anonymized_entities=replacements
+        )
 
     def _generate_replacement(self, original: str, entity_type: EntityTypes) -> str:
         """Generate a replacement for the given entity."""
@@ -115,7 +122,9 @@ class Anonymizer(BaseModel):
                 }
             )
 
-        return AnonymizationResult(anonymized_text=text, replaced_entities=replacements)
+        return AnonymizationResult(
+            anonymized_text=text, anonymized_entities=replacements
+        )
 
     def _hash_text(self, text: str) -> str:
         if self.hash_type == HashType.MD5:
@@ -148,4 +157,6 @@ class Anonymizer(BaseModel):
                 }
             )
 
-        return AnonymizationResult(anonymized_text=text, replaced_entities=replacements)
+        return AnonymizationResult(
+            anonymized_text=text, anonymized_entities=replacements
+        )

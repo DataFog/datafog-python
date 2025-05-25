@@ -81,7 +81,7 @@ def scan_text(
     operation_list = [OperationType(op.strip()) for op in operations.split(",")]
     text_client = DataFog(operations=operation_list)
     try:
-        results = asyncio.run(text_client.run_text_pipeline(str_list=str_list))
+        results = text_client.run_text_pipeline_sync(str_list=str_list)
         typer.echo(f"Text Pipeline Results: {results}")
     except Exception as e:
         logging.exception("Text pipeline error")
@@ -110,7 +110,7 @@ def show_config():
 
 
 @app.command()
-def download_model(model_name: str = typer.Argument(..., help="Model to download")):
+def download_model(model_name: str = typer.Argument(None, help="Model to download")):
     """
     Download a spaCy model.
 
@@ -119,13 +119,17 @@ def download_model(model_name: str = typer.Argument(..., help="Model to download
 
     Prints a confirmation message after downloading.
     """
+    if not model_name:
+        typer.echo("No model name provided to download.")
+        raise typer.Exit(code=1)
+
     SpacyAnnotator.download_model(model_name)
     typer.echo(f"Model {model_name} downloaded.")
 
 
 @app.command()
 def show_spacy_model_directory(
-    model_name: str = typer.Argument(..., help="Model to check")
+    model_name: str = typer.Argument(None, help="Model to check")
 ):
     """
     Show the directory path for a spaCy model.
@@ -135,6 +139,10 @@ def show_spacy_model_directory(
 
     Prints the directory path of the specified model.
     """
+    if not model_name:
+        typer.echo("No model name provided to check.")
+        raise typer.Exit(code=1)
+
     annotator = SpacyAnnotator(model_name)
     typer.echo(annotator.show_model_path())
 
@@ -162,7 +170,7 @@ def list_entities():
 
 
 @app.command()
-def redact_text(text: str = typer.Argument(..., help="Text to redact")):
+def redact_text(text: str = typer.Argument(None, help="Text to redact")):
     """
     Redact PII in text.
 
@@ -171,6 +179,10 @@ def redact_text(text: str = typer.Argument(..., help="Text to redact")):
 
     Prints the redacted text.
     """
+    if not text:
+        typer.echo("No text provided to redact.")
+        raise typer.Exit(code=1)
+
     annotator = SpacyAnnotator()
     anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REDACT)
     annotations = annotator.annotate_text(text)
@@ -179,7 +191,7 @@ def redact_text(text: str = typer.Argument(..., help="Text to redact")):
 
 
 @app.command()
-def replace_text(text: str = typer.Argument(..., help="Text to replace PII")):
+def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
     """
     Replace PII in text with anonymized values.
 
@@ -188,6 +200,10 @@ def replace_text(text: str = typer.Argument(..., help="Text to replace PII")):
 
     Prints the text with PII replaced.
     """
+    if not text:
+        typer.echo("No text provided to replace PII.")
+        raise typer.Exit(code=1)
+
     annotator = SpacyAnnotator()
     anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REPLACE)
     annotations = annotator.annotate_text(text)
@@ -197,7 +213,7 @@ def replace_text(text: str = typer.Argument(..., help="Text to replace PII")):
 
 @app.command()
 def hash_text(
-    text: str = typer.Argument(..., help="Text to hash PII"),
+    text: str = typer.Argument(None, help="Text to hash PII"),
     hash_type: HashType = typer.Option(HashType.SHA256, help="Hash algorithm to use"),
 ):
     """
@@ -209,6 +225,10 @@ def hash_text(
 
     Prints the text with PII hashed.
     """
+    if not text:
+        typer.echo("No text provided to hash.")
+        raise typer.Exit(code=1)
+
     annotator = SpacyAnnotator()
     anonymizer = Anonymizer(anonymizer_type=AnonymizerType.HASH, hash_type=hash_type)
     annotations = annotator.annotate_text(text)

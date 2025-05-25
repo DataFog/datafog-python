@@ -11,6 +11,7 @@ DataFog is an open-source tool for PII detection and anonymization of unstructur
    cli
    python-sdk
    definitions
+   roadmap
 
 =====================
 Getting Started

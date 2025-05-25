@@ -2,7 +2,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from datafog.services.text_service import TextService
+# Test the full-featured TextService from text_service_original
+from datafog.services.text_service_original import TextService
 
 
 @pytest.fixture
@@ -47,11 +48,11 @@ def text_service(mock_annotator, mock_regex_annotator):
     }
 
     with patch(
-        "datafog.services.text_service.SpacyPIIAnnotator.create",
+        "datafog.services.text_service_original.SpacyPIIAnnotator.create",
         return_value=mock_annotator,
     ):
         with patch(
-            "datafog.services.text_service.RegexAnnotator",
+            "datafog.services.text_service_original.RegexAnnotator",
             return_value=mock_regex_annotator,
         ):
             # Use 'auto' engine to match production default, but regex will find nothing
@@ -63,11 +64,11 @@ def text_service(mock_annotator, mock_regex_annotator):
 def text_service_with_engine(mock_annotator, mock_regex_annotator):
     def _create_service(engine="auto"):
         with patch(
-            "datafog.services.text_service.SpacyPIIAnnotator.create",
+            "datafog.services.text_service_original.SpacyPIIAnnotator.create",
             return_value=mock_annotator,
         ):
             with patch(
-                "datafog.services.text_service.RegexAnnotator",
+                "datafog.services.text_service_original.RegexAnnotator",
                 return_value=mock_regex_annotator,
             ):
                 return TextService(text_chunk_length=10, engine=engine)
@@ -99,10 +100,10 @@ def test_init_with_custom_engine(text_service_with_engine):
 def test_init_with_invalid_engine():
     with pytest.raises(AssertionError, match="Invalid engine"):
         with patch(
-            "datafog.services.text_service.SpacyPIIAnnotator.create",
+            "datafog.services.text_service_original.SpacyPIIAnnotator.create",
         ):
             with patch(
-                "datafog.services.text_service.RegexAnnotator",
+                "datafog.services.text_service_original.RegexAnnotator",
             ):
                 TextService(engine="invalid")
 

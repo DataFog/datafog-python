@@ -9,29 +9,57 @@ from datafog.config import OperationType
 from datafog.main import DataFog
 from datafog.models.annotator import AnnotationResult
 from datafog.models.anonymizer import AnonymizerType, HashType
-from datafog.processing.text_processing.spacy_pii_annotator import (
-    SpacyPIIAnnotator as TextPIIAnnotator,
-)
-from datafog.services.image_service import ImageService
-from datafog.services.text_service import TextService
+
+# Try to import optional dependencies
+try:
+    from datafog.processing.text_processing.spacy_pii_annotator import (
+        SpacyPIIAnnotator as TextPIIAnnotator,
+    )
+    from datafog.services.image_service import ImageService
+    from datafog.services.text_service import TextService
+
+    HAS_FULL_DEPS = True
+except ImportError:
+    HAS_FULL_DEPS = False
+    TextPIIAnnotator = None
+    ImageService = None
+    TextService = None
+
+# Try to import the full-featured DataFog for integration tests
+try:
+    from datafog.main_original import DataFog as FullDataFog
+
+    HAS_ORIGINAL_MAIN = True
+except ImportError:
+    HAS_ORIGINAL_MAIN = False
+    FullDataFog = None
 
 
 @pytest.fixture
 def mock_image_service():
-    with patch("datafog.main.ImageService") as mock:
+    if not HAS_FULL_DEPS:
+        pytest.skip("Full dependencies not available")
+    with patch("datafog.services.image_service.ImageService") as mock:
         mock.return_value.ocr_extract = AsyncMock()
         yield mock.return_value
 
 
 @pytest.fixture
 def mock_text_service():
-    with patch("datafog.main.TextService") as mock:
+    if not HAS_FULL_DEPS:
+        pytest.skip("Full dependencies not available")
+    with patch("datafog.services.text_service.TextService") as mock:
         mock.return_value.batch_annotate_text_async = AsyncMock()
+        mock.return_value.batch_annotate_text_sync.return_value = [
+            {"PERSON": ["Test Person"]}
+        ]
         yield mock.return_value
 
 
 @pytest.fixture
 def text_annotator():
+    if not HAS_FULL_DEPS:
+        pytest.skip("Full dependencies not available")
     return TextPIIAnnotator.create()
 
 
@@ -46,6 +74,7 @@ def image_url():
         return json.load(f)["executive_email"]
 
 
+@pytest.mark.skipif(not HAS_FULL_DEPS, reason="Full dependencies not available")
 def test_text_pii_annotator(text_annotator):
     text = "Travis Kalanick lives at 1234 Elm St, Springfield."
     annotated_text = text_annotator.annotate(text)
@@ -84,7 +113,21 @@ def assert_file_output(annotated_text):
 
 
 def test_datafog_init():
+    """Test the lean DataFog initialization."""
     datafog = DataFog()
+    # Test lean version attributes
+    assert hasattr(datafog, "regex_annotator")
+    assert hasattr(datafog, "operations")
+    assert hasattr(datafog, "anonymizer")
+    assert datafog.operations == [OperationType.SCAN]
+
+
+@pytest.mark.skipif(
+    not HAS_FULL_DEPS or not HAS_ORIGINAL_MAIN, reason="Full dependencies not available"
+)
+def test_full_datafog_init():
+    """Test the full-featured DataFog initialization when dependencies are available."""
+    datafog = FullDataFog()
     assert isinstance(datafog.image_service, ImageService)
     assert isinstance(datafog.text_service, TextService)
     assert datafog.spark_service is None
@@ -94,7 +137,7 @@ def test_datafog_init():
     custom_text_service = TextService()
     custom_operations = [OperationType.SCAN, OperationType.REDACT]
 
-    datafog_custom = DataFog(
+    datafog_custom = FullDataFog(
         image_service=custom_image_service,
         text_service=custom_text_service,
         operations=custom_operations,
@@ -105,9 +148,14 @@ def test_datafog_init():
     assert datafog_custom.operations == custom_operations
 
 
+@pytest.mark.skipif(
+    not HAS_FULL_DEPS or not HAS_ORIGINAL_MAIN, reason="Full dependencies not available"
+)
 @pytest.mark.asyncio
 async def test_run_ocr_pipeline(mock_image_service, mock_text_service):
-    datafog = DataFog(image_service=mock_image_service, text_service=mock_text_service)
+    datafog = FullDataFog(
+        image_service=mock_image_service, text_service=mock_text_service
+    )
 
     mock_image_service.ocr_extract.return_value = ["Extracted text"]
     mock_text_service.batch_annotate_text_async.return_value = {
@@ -123,9 +171,12 @@ async def test_run_ocr_pipeline(mock_image_service, mock_text_service):
     assert result == {"PERSON": ["Satya Nadella"]}
 
 
+@pytest.mark.skipif(
+    not HAS_FULL_DEPS or not HAS_ORIGINAL_MAIN, reason="Full dependencies not available"
+)
 @pytest.mark.asyncio
 async def test_run_text_pipeline(mock_text_service):
-    datafog = DataFog(text_service=mock_text_service)
+    datafog = FullDataFog(text_service=mock_text_service)
 
     mock_text_service.batch_annotate_text_async.return_value = {"PERSON": ["Elon Musk"]}
 
@@ -139,29 +190,32 @@ async def test_run_text_pipeline(mock_text_service):
     assert result == {"PERSON": ["Elon Musk"]}
 
 
+@pytest.mark.skipif(not HAS_ORIGINAL_MAIN, reason="Full main module not available")
 @pytest.mark.asyncio
 async def test_run_text_pipeline_no_annotation():
-    datafog = DataFog(operations=[])
+    datafog = FullDataFog(operations=[])
 
     result = await datafog.run_text_pipeline(["Sample text"])
 
     assert result == ["Sample text"]
 
 
-def test_run_text_pipeline_sync(mock_text_service):
-    datafog = DataFog(text_service=mock_text_service)
+def test_run_text_pipeline_sync():
+    """Test lean DataFog run_text_pipeline_sync with regex annotator."""
+    datafog = DataFog()
 
-    mock_text_service.batch_annotate_text_sync.return_value = {"PERSON": ["Jeff Bezos"]}
+    # Test with sample text containing PII
+    test_text = "Contact john@example.com or call (555) 123-4567"
+    result = datafog.run_text_pipeline_sync([test_text])
 
-    result = datafog.run_text_pipeline_sync(["Jeff Bezos steps down as Amazon CEO"])
-
-    mock_text_service.batch_annotate_text_sync.assert_called_once_with(
-        ["Jeff Bezos steps down as Amazon CEO"]
-    )
-    assert result == {"PERSON": ["Jeff Bezos"]}
+    # Should return annotations (dict format) since default is scan only
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert isinstance(result[0], dict)
 
 
 def test_run_text_pipeline_sync_no_annotation():
+    """Test lean DataFog with no annotation operations."""
     datafog = DataFog(operations=[])
 
     result = datafog.run_text_pipeline_sync(["Sample text"])
@@ -169,6 +223,61 @@ def test_run_text_pipeline_sync_no_annotation():
     assert result == ["Sample text"]
 
 
+@pytest.mark.skipif(
+    not HAS_FULL_DEPS or not HAS_ORIGINAL_MAIN, reason="Full dependencies not available"
+)
+def test_full_run_text_pipeline_sync(mock_text_service):
+    """Test full DataFog run_text_pipeline_sync with mocked text service."""
+    datafog = FullDataFog(text_service=mock_text_service)
+
+    mock_text_service.batch_annotate_text_sync.return_value = [
+        {"PERSON": ["Jeff Bezos"]}
+    ]
+
+    result = datafog.run_text_pipeline_sync(["Jeff Bezos steps down as Amazon CEO"])
+
+    mock_text_service.batch_annotate_text_sync.assert_called_once_with(
+        ["Jeff Bezos steps down as Amazon CEO"]
+    )
+    assert result == [{"PERSON": ["Jeff Bezos"]}]
+
+
+def test_lean_datafog_detect():
+    """Test lean DataFog detect method."""
+    datafog = DataFog()
+
+    test_text = "Contact john@example.com or call (555) 123-4567"
+    result = datafog.detect(test_text)
+
+    assert isinstance(result, dict)
+    # Should detect email and phone
+    assert "EMAIL" in result
+    assert "PHONE" in result
+
+
+def test_lean_datafog_process():
+    """Test lean DataFog process method."""
+    datafog = DataFog()
+
+    test_text = "Contact john@example.com or call (555) 123-4567"
+
+    # Test without anonymization
+    result = datafog.process(test_text, anonymize=False)
+    assert result["original"] == test_text
+    assert "findings" in result
+    assert "anonymized" not in result
+
+    # Test with anonymization
+    result = datafog.process(test_text, anonymize=True, method="redact")
+    assert result["original"] == test_text
+    assert "findings" in result
+    assert "anonymized" in result
+    assert result["anonymized"] != test_text
+
+
+@pytest.mark.skipif(
+    not HAS_FULL_DEPS or not HAS_ORIGINAL_MAIN, reason="Full dependencies not available"
+)
 @pytest.mark.parametrize(
     "operation, hash_type, expected_pattern",
     [
@@ -199,11 +308,12 @@ def test_run_text_pipeline_sync_no_annotation():
         ),
     ],
 )
-def test_run_text_pipeline_anonymization(
+def test_full_run_text_pipeline_anonymization(
     mock_text_service, operation, hash_type, expected_pattern
 ):
+    """Test full DataFog anonymization with mocked services."""
     logging.basicConfig(level=logging.INFO)
-    datafog = DataFog(
+    datafog = FullDataFog(
         text_service=mock_text_service,
         operations=[OperationType.SCAN, operation],
         hash_type=hash_type,

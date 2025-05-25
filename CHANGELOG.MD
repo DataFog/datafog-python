@@ -18,6 +18,7 @@
 - Pinned all dependency versions in requirements.txt and requirements-dev.txt for reproducible builds
 - Added mypy type checking to CI pipeline
 - Added ruff linting to development dependencies
+- Finalized stable release, no breaking changes from 4.1.0b5
 
 ## [2024-03-25]
 
