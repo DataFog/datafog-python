@@ -2,20 +2,20 @@ name: Wheel Size Check
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, dev]
   pull_request:
-    branches: [main, develop]
+    branches: [main, dev]
 
 jobs:
   check-wheel-size:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
@@ -29,19 +29,10 @@ jobs:
         run: python -m build --wheel
 
       - name: Check wheel size
-        run: |
-          WHEEL_PATH=$(find dist -name "*.whl")
-          WHEEL_SIZE=$(du -m "$WHEEL_PATH" | cut -f1)
-          echo "Wheel size: $WHEEL_SIZE MB"
-          if [ "$WHEEL_SIZE" -ge 8 ]; then
-            echo "::error::Wheel size exceeds 8 MB limit: $WHEEL_SIZE MB"
-            exit 1
-          else
-            echo "::notice::Wheel size is within limit: $WHEEL_SIZE MB"
-          fi
+        run: python scripts/check_wheel_size.py
 
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheel
           path: dist/*.whl
