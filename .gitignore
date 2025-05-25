@@ -64,3 +64,4 @@ docs/*
 # Keep all files but ignore their contents
 Claude.md
 notes/benchmarking_notes.md
+Roadmap.md
