@@ -15,73 +15,90 @@ project_urls = {
     "GitHub": "https://github.com/datafog/datafog-python",
 }
 
+# Core lightweight dependencies only
+core_deps = [
+    "pydantic>=2.0,<3.0",
+    "typing-extensions>=4.0",
+]
+
+# Optional heavy dependencies
+extras_require = {
+    "nlp": [
+        "spacy>=3.7.0,<4.0",
+    ],
+    "ocr": [
+        "pytesseract>=0.3.0",
+        "Pillow>=10.0.0",
+        "sentencepiece>=0.2.0",
+        "protobuf>=4.0.0",
+    ],
+    "distributed": [
+        "pandas>=2.0.0",
+        "numpy>=1.24.0",
+    ],
+    "web": [
+        "fastapi>=0.100.0",
+        "aiohttp>=3.8.0",
+        "requests>=2.30.0",
+    ],
+    "cli": [
+        "typer>=0.12.0",
+    ],
+    "crypto": [
+        "cryptography>=40.0.0",
+    ],
+    "dev": [
+        "pytest>=7.0.0",
+        "pytest-asyncio>=0.21.0",
+        "pytest-cov>=4.0.0",
+        "sphinx>=7.0.0",
+    ],
+    # Convenience bundles
+    "all": [
+        "spacy>=3.7.0,<4.0",
+        "pytesseract>=0.3.0",
+        "Pillow>=10.0.0",
+        "sentencepiece>=0.2.0",
+        "protobuf>=4.0.0",
+        "pandas>=2.0.0",
+        "numpy>=1.24.0",
+        "fastapi>=0.100.0",
+        "aiohttp>=3.8.0",
+        "requests>=2.30.0",
+        "typer>=0.12.0",
+        "cryptography>=40.0.0",
+    ],
+}
+
 setup(
     name="datafog",
     version=__version__,
     author="Sid Mohan",
     author_email="sid@datafog.ai",
-    description="Scan, redact, and manage PII in your documents before they get uploaded to a Retrieval Augmented Generation (RAG) system.",
+    description="Lightning-fast PII detection and anonymization library with 190x performance advantage",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
-    install_requires=[
-        "pandas",
-        "requests==2.32.3",
-        "spacy==3.7.5",
-        "pydantic",
-        "Pillow",
-        "sentencepiece",
-        "protobuf",
-        "pytesseract",
-        "aiohttp",
-        "pytest-asyncio",
-        "numpy",
-        "fastapi",
-        "asyncio",
-        "setuptools",
-        "pydantic-settings==2.3.4",
-        "typer==0.12.3",
-        "sphinx",
-        "cryptography",
-    ],
+    install_requires=core_deps,
+    extras_require=extras_require,
     python_requires=">=3.10,<3.13",
     entry_points={
         "console_scripts": [
-            "datafog=datafog.client:app",
+            "datafog=datafog.client:app [cli]",  # Requires cli extra
         ],
     },
     classifiers=[
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.10",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Framework :: tox",
-        "Framework :: Pytest",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "Intended Audience :: Information Technology",
-        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Text Processing",
+        "Topic :: Security",
     ],
-    keywords="pii, redaction, nlp, rag, retrieval augmented generation",
-    maintainer="DataFog",
-    maintainer_email="hi@datafog.ai",
-    url="https://datafog.ai",
     project_urls=project_urls,
-    license="MIT",
-    extras_require={
-        "dev": [
-            "just",
-            "isort",
-            "black",
-            "blacken-docs",
-            "flake8",
-            "tox",
-            "pytest",
-            "pytest-codeblocks",
-            "pytest-cov",
-            "build",
-            "twine",
-        ],
-    },
+    keywords="pii detection anonymization privacy regex performance",
 )

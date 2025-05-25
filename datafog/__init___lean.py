@@ -95,19 +95,18 @@ def detect(text: str) -> list:
         [{'type': 'EMAIL', 'value': 'john@example.com', 'start': 8, 'end': 24}]
     """
     annotator = RegexAnnotator()
-    # Use the structured output to get proper positions
-    _, result = annotator.annotate_with_spans(text)
+    result = annotator.annotate(text)
 
-    # Convert to simple format, filtering out empty matches
+    # Convert to simple format
     entities = []
-    for span in result.spans:
-        if span.text.strip():  # Only include non-empty matches
+    for entity_type, matches in result.items():
+        for match in matches:
             entities.append(
                 {
-                    "type": span.label,
-                    "value": span.text,
-                    "start": span.start,
-                    "end": span.end,
+                    "type": entity_type,
+                    "value": match,
+                    "start": text.find(match),
+                    "end": text.find(match) + len(match),
                 }
             )
 
