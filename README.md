@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-    <b>Lightning-Fast PII Detection & Anonymization</b> <br />
-    <i>190x faster than spaCy • Lightweight • Production Ready</i>
+    <b>Comprehensive PII Detection & Anonymization</b> <br />
+    <i>Intelligent Engine Selection • Lightweight • Production Ready</i>
 </p>
 
 <p align="center">
@@ -21,27 +21,33 @@
   <a href="https://github.com/datafog/datafog-python/issues"><img src="https://img.shields.io/github/issues/datafog/datafog-python.svg?style=flat-square" alt="GitHub Issues"></a>
 </p>
 
-DataFog is the fastest open-source library for detecting and anonymizing personally identifiable information (PII) in unstructured data. Built for production workloads, it delivers enterprise-grade performance without the complexity.
+DataFog is a comprehensive open-source library for detecting and anonymizing personally identifiable information (PII) in unstructured data. Built for production workloads, it delivers intelligent engine selection to handle both structured identifiers and contextual entities across different industries and use cases.
 
 ## ⚡ Why Choose DataFog?
 
-**🚀 Blazing Fast Performance**
-- **190x faster** than spaCy for structured PII detection
-- Sub-3ms processing times for most documents
-- Optimized pattern engine with intelligent spaCy fallback
+**🧠 Intelligent Engine Selection**
+
+- Automatically chooses the best detection approach for your data
+- Pattern-based engine for structured PII (emails, phones, SSNs, credit cards)
+- NLP-based engine for contextual entities (names, organizations, locations)
+- Industry-optimized detection across financial, healthcare, legal, and enterprise domains
 
 **📦 Lightweight & Modular**
+
 - Core package under 2MB (vs 800MB+ alternatives)
 - Install only what you need: `datafog[nlp]`, `datafog[ocr]`, `datafog[all]`
 - Zero ML model downloads for basic usage
 
 **🎯 Production Ready**
-- Battle-tested detection patterns for emails, phones, SSNs, credit cards
+
+- Comprehensive PII coverage for diverse enterprise needs
+- Battle-tested detection patterns with high precision
 - Comprehensive test suite with 99.4% coverage
 - CLI tools and Python SDK for any workflow
 
 **🔧 Developer Friendly**
-- Simple API: `detect("Contact john@example.com")` 
+
+- Simple API: `detect("Contact john@example.com")`
 - Multiple anonymization methods: redact, replace, hash
 - OCR support for images and documents
 
@@ -225,7 +231,7 @@ DataFog now supports multiple annotation engines through the `TextService` class
 ```python
 from datafog.services.text_service import TextService
 
-# Use fast engine only (fastest, pattern-based detection)  
+# Use fast engine only (fastest, pattern-based detection)
 fast_service = TextService(engine="regex")
 
 # Use spaCy engine only (more comprehensive NLP-based detection)
@@ -235,11 +241,11 @@ spacy_service = TextService(engine="spacy")
 auto_service = TextService()  # engine="auto" is the default
 ```
 
-Each engine has different strengths:
+Each engine targets different PII detection needs:
 
-- **regex**: Fast pattern matching, optimized for structured data like emails, phone numbers, credit cards, etc.
-- **spacy**: NLP-based entity recognition, better for detecting names, organizations, locations, etc.
-- **auto**: Best of both worlds - uses fast patterns for speed, falls back to spaCy for comprehensive detection
+- **regex**: Pattern-based detection optimized for structured identifiers like emails, phone numbers, credit cards, SSNs, and IP addresses
+- **spacy**: NLP-based entity recognition for contextual entities like names, organizations, locations, dates, and monetary amounts
+- **auto**: Intelligent selection - tries pattern-based detection first, falls back to NLP for comprehensive contextual analysis
 
 ## Text PII Annotation
 
@@ -351,67 +357,81 @@ Output:
 
 You can choose from SHA256 (default), SHA3-256, and MD5 hashing algorithms by specifying the `hash_type` parameter
 
-## Performance
+## PII Detection Capabilities
 
-DataFog provides multiple annotation engines with different performance characteristics:
+DataFog provides multiple annotation engines designed for different PII detection scenarios:
 
 ### Engine Selection
 
 The `TextService` class supports three engine modes:
 
 ```python
-# Use fast engine only (fastest, pattern-based detection)  
-fast_service = TextService(engine="regex")
+# Use regex engine for structured identifiers
+regex_service = TextService(engine="regex")
 
-# Use spaCy engine only (more comprehensive NLP-based detection)
+# Use spaCy engine for contextual entities
 spacy_service = TextService(engine="spacy")
 
-# Use auto mode (default) - tries fast engine first, falls back to spaCy if no entities found
+# Use auto mode (default) - intelligent engine selection
 auto_service = TextService()  # engine="auto" is the default
 ```
 
-### Performance Comparison
+### PII Coverage by Engine
 
-Benchmark tests show that the fast pattern engine is significantly faster than spaCy for PII detection:
+Different engines excel at detecting different types of personally identifiable information:
 
-| Engine | Processing Time (10KB text) | Entities Detected                                    |
-| ------ | --------------------------- | ---------------------------------------------------- |
-| Fast   | ~0.004 seconds              | EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP |
-| SpaCy  | ~0.48 seconds               | PERSON, ORG, GPE, CARDINAL, FAC                      |
-| Auto   | ~0.004 seconds              | Same as fast engine when patterns are found          |
+| Engine | PII Types Detected                                     | Best For                                                |
+| ------ | ------------------------------------------------------ | ------------------------------------------------------- |
+| Regex  | EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP   | Financial services, healthcare, compliance              |
+| SpaCy  | PERSON, ORG, GPE, CARDINAL, DATE, TIME, MONEY, PRODUCT | Legal documents, communication monitoring, general text |
+| Auto   | All of the above (context-dependent)                   | Mixed data sources, unknown content types               |
 
-**Key findings:**
+### Industry-Specific Use Cases
 
-- The fast pattern engine is approximately **190x faster** than spaCy for processing the same text
-- The auto engine provides the best balance between speed and comprehensiveness
-  - Uses optimized patterns first for instant detection
-  - Falls back to spaCy only when no patterns are matched
+**Financial Services & Healthcare:**
+
+- Primary need: Structured identifiers (SSNs, credit cards, account numbers)
+- Recommended: `regex` engine for high precision on regulatory requirements
+- Common PII: ~60% structured identifiers, ~40% names/addresses
+
+**Legal & Document Review:**
+
+- Primary need: Names, organizations, locations in unstructured text
+- Recommended: `spacy` engine for comprehensive entity recognition
+- Common PII: ~30% structured identifiers, ~70% contextual entities
+
+**Enterprise Communication & Mixed Content:**
+
+- Primary need: Both structured and contextual PII detection
+- Recommended: `auto` engine for intelligent selection
+- Benefits from both engines depending on content type
 
 ### When to Use Each Engine
 
-- **Fast Engine**: Use when processing large volumes of text or when performance is critical
-- **SpaCy Engine**: Use when you need to detect a wider range of named entities beyond structured PII
-- **Auto Engine**: Recommended for most use cases as it combines blazing speed with comprehensive fallback detection
+**Regex Engine**: Choose when you need to detect specific, well-formatted identifiers:
 
-### When do I need spaCy?
+- Processing structured databases or forms
+- Compliance scanning for specific regulatory requirements (GDPR, HIPAA)
+- High-volume processing where deterministic results are important
+- Financial data with credit cards, SSNs, account numbers
 
-While the fast pattern engine is significantly faster (190x faster in our benchmarks), there are specific scenarios where you might want to use spaCy:
+**SpaCy Engine**: Choose when you need contextual understanding:
 
-1. **Complex entity recognition**: When you need to identify entities not covered by standard patterns, such as organization names, locations, or product names that don't follow predictable formats.
+- Analyzing unstructured documents, emails, or communications
+- Legal eDiscovery where names and organizations are key
+- Content where entities don't follow standard patterns
+- Multi-language support requirements
 
-2. **Context-aware detection**: When the meaning of text depends on surrounding context that patterns cannot easily capture, such as distinguishing between a person's name and a company with the same name based on context.
+**Auto Engine**: Choose for general-purpose PII detection:
 
-3. **Multi-language support**: When processing text in languages other than English where standard patterns might need significant customization.
+- Unknown or mixed content types
+- Applications serving multiple industries
+- When you want comprehensive coverage without manual engine selection
+- Default choice for most production applications
 
-4. **Research and exploration**: When experimenting with NLP capabilities and need the full power of a dedicated NLP library with features like part-of-speech tagging, dependency parsing, etc.
+### Running Detection Tests
 
-5. **Unknown entity types**: When you don't know in advance what types of entities might be present in your text and need a more general-purpose entity recognition approach.
-
-For high-performance production systems processing large volumes of text with known entity types (emails, phone numbers, credit cards, etc.), the fast pattern engine is strongly recommended due to its significant speed advantage.
-
-### Running Benchmarks Locally
-
-You can run the performance benchmarks locally using pytest-benchmark:
+You can test the different engines locally using pytest:
 
 ```bash
 pip install pytest-benchmark

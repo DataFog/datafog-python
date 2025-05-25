@@ -89,7 +89,9 @@ def test_scan_text_success(mock_datafog):
 
     assert result.exit_code == 0
     assert "Text Pipeline Results: ['Mocked result']" in result.stdout
-    mock_instance.run_text_pipeline_sync.assert_called_once_with(str_list=["Sample text"])
+    mock_instance.run_text_pipeline_sync.assert_called_once_with(
+        str_list=["Sample text"]
+    )
 
 
 def test_health():
