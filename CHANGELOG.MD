@@ -2,7 +2,7 @@
 
 ## [2025-05-05]
 
-### `datafog-python` [4.1.0]
+### `datafog-python` [4.1.1]
 
 - Added engine selection functionality to TextService class, allowing users to choose between 'regex', 'spacy', or 'auto' annotation engines
 - Enhanced TextService with intelligent fallback mechanism in 'auto' mode that tries regex first and falls back to spaCy if no entities are found

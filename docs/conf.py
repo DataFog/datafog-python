@@ -9,7 +9,7 @@
 project = "DataFog"
 copyright = "2024, DataFog Inc."
 author = "Sid Mohan"
-release = "v4.1.0"
+release = "v4.1.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
