@@ -2,12 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [main, dev, "feature/*", "fix/*", "chore/*"]
+    branches: [main, dev, "feature/*", "fix/*", "chore/*", "cleanup/*"]
   pull_request:
     branches: [main, dev]
 
 jobs:
-  pre-commit:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
 
-  test:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
