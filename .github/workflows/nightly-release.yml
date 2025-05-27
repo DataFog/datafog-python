@@ -32,9 +32,8 @@ jobs:
       - name: Check for changes since last alpha release
         id: changes
         run: |
-          # Get last alpha release tag
           LAST_ALPHA=$(git tag -l "*alpha*" --sort=-version:refname | head -n1)
-          
+
           if [ -z "$LAST_ALPHA" ]; then
             echo "No previous alpha release found, checking last 24 hours"
             SINCE="24 hours ago"
@@ -43,11 +42,11 @@ jobs:
             echo "Last alpha release: $LAST_ALPHA"
             COMMIT_COUNT=$(git rev-list --count ${LAST_ALPHA}..dev)
           fi
-          
+
           echo "Commits since last alpha: $COMMIT_COUNT"
           echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
-          
-          if [ "$COMMIT_COUNT" -gt 0 ] || [ "${{ github.event.inputs.force_build }}" = "true" ]; then
+
+          if [ "$COMMIT_COUNT" -gt 0 ] || [ "${{ github.event.inputs.force_build == 'true' }}" = "true" ]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "✅ Changes detected, proceeding with nightly build"
           else
@@ -87,20 +86,18 @@ jobs:
       - name: Generate alpha version
         id: version
         run: |
-          # Get current version
+          set -e
+
           CURRENT_VERSION=$(python -c "from datafog.__about__ import __version__; print(__version__)")
           echo "Current version: $CURRENT_VERSION"
-          
-          # Generate alpha version with timestamp
+
           DATE_STAMP=$(date +"%Y%m%d")
           TIME_STAMP=$(date +"%H%M")
           COMMIT_SHORT=$(git rev-parse --short HEAD)
-          
-          # If current version already has alpha, increment it
+
           if [[ $CURRENT_VERSION == *"alpha"* ]]; then
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
           else
-            # Bump minor version for alpha (4.1.1 -> 4.2.0)
             BASE_VERSION=$(python3 -c "
 version = '$CURRENT_VERSION'
 parts = version.split('.')
@@ -109,12 +106,11 @@ parts[2] = '0'
 print('.'.join(parts))
 ")
           fi
-          
+
           ALPHA_VERSION="${BASE_VERSION}a${DATE_STAMP}.${TIME_STAMP}.${COMMIT_SHORT}"
           echo "Alpha version: $ALPHA_VERSION"
           echo "alpha_version=$ALPHA_VERSION" >> $GITHUB_OUTPUT
-          
-          # Update version in files
+
           sed -i "s/__version__ = \".*\"/__version__ = \"$ALPHA_VERSION\"/" datafog/__about__.py
           sed -i "s/version=\".*\"/version=\"$ALPHA_VERSION\"/" setup.py
 
@@ -125,8 +121,6 @@ print('.'.join(parts))
       - name: Build package
         run: |
           python -m build
-          
-          # Verify wheel size
           python scripts/check_wheel_size.py
 
       - name: Create alpha release
@@ -134,14 +128,12 @@ print('.'.join(parts))
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ALPHA_VERSION="${{ steps.version.outputs.alpha_version }}"
-          
-          # Create and push tag
+
           git add datafog/__about__.py setup.py
           git commit -m "chore: bump version to $ALPHA_VERSION for nightly release"
           git tag -a "v$ALPHA_VERSION" -m "Alpha release $ALPHA_VERSION"
           git push origin "v$ALPHA_VERSION"
-          
-          # Create GitHub release
+
           gh release create "v$ALPHA_VERSION" \
             --title "🌙 Nightly Alpha $ALPHA_VERSION" \
             --notes-file ALPHA_CHANGELOG.md \
@@ -171,10 +163,9 @@ print('.'.join(parts))
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🧹 Cleaning up old alpha releases (keep last 7)..."
-          
-          # Get all alpha releases, sorted by creation date
+
           ALPHA_RELEASES=$(gh release list --limit 50 | grep alpha | tail -n +8 | cut -f3)
-          
+
           for release in $ALPHA_RELEASES; do
             echo "Deleting old alpha release: $release"
             gh release delete "$release" --yes || true
