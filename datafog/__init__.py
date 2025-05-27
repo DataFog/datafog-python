@@ -10,6 +10,9 @@ Optional extras available for advanced features:
 
 from .__about__ import __version__
 
+# Import core API functions
+from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
+
 # Core imports - always available
 from .models.annotator import AnnotationResult, AnnotatorRequest
 from .models.anonymizer import (
@@ -76,9 +79,6 @@ SpacyPIIAnnotator = _optional_import(
 SparkService = _optional_import(
     "SparkService", "datafog.services.spark_service", "distributed"
 )
-
-# Import core API functions
-from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
 
 
 # Simple API for core functionality (backward compatibility)
