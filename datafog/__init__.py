@@ -10,19 +10,49 @@ Optional extras available for advanced features:
 
 from .__about__ import __version__
 
-# Import core API functions
+# Core API functions - always available (lightweight)
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
 
-# Core imports - always available
-from .models.annotator import AnnotationResult, AnnotatorRequest
-from .models.anonymizer import (
-    AnonymizationResult,
-    Anonymizer,
-    AnonymizerRequest,
-    AnonymizerType,
-)
+# Essential models - always available
 from .models.common import EntityTypes
-from .processing.text_processing.regex_annotator import RegexAnnotator
+
+
+# Conditional imports for better lightweight performance
+def _lazy_import_core_models():
+    """Lazy import of core models to reduce startup time."""
+    global AnnotationResult, AnnotatorRequest, AnonymizationResult
+    global Anonymizer, AnonymizerRequest, AnonymizerType
+
+    if "AnnotationResult" not in globals():
+        from .models.annotator import AnnotationResult, AnnotatorRequest
+        from .models.anonymizer import (
+            AnonymizationResult,
+            Anonymizer,
+            AnonymizerRequest,
+            AnonymizerType,
+        )
+
+        globals().update(
+            {
+                "AnnotationResult": AnnotationResult,
+                "AnnotatorRequest": AnnotatorRequest,
+                "AnonymizationResult": AnonymizationResult,
+                "Anonymizer": Anonymizer,
+                "AnonymizerRequest": AnonymizerRequest,
+                "AnonymizerType": AnonymizerType,
+            }
+        )
+
+
+def _lazy_import_regex_annotator():
+    """Lazy import of regex annotator to reduce startup time."""
+    global RegexAnnotator
+
+    if "RegexAnnotator" not in globals():
+        from .processing.text_processing.regex_annotator import RegexAnnotator
+
+        globals()["RegexAnnotator"] = RegexAnnotator
+
 
 # Optional imports with graceful fallback
 try:
@@ -40,6 +70,28 @@ try:
     from .services.text_service import TextService
 except ImportError:
     TextService = None
+
+
+def __getattr__(name: str):
+    """Handle lazy imports for better lightweight performance."""
+    # Lazy import core models when first accessed
+    if name in {
+        "AnnotationResult",
+        "AnnotatorRequest",
+        "AnonymizationResult",
+        "Anonymizer",
+        "AnonymizerRequest",
+        "AnonymizerType",
+    }:
+        _lazy_import_core_models()
+        return globals()[name]
+
+    # Lazy import regex annotator when first accessed
+    elif name == "RegexAnnotator":
+        _lazy_import_regex_annotator()
+        return globals()[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # Optional heavy features - only import if dependencies available

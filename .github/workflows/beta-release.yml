@@ -1,0 +1,238 @@
+name: Beta Release (Thursday)
+
+on:
+  schedule:
+    # Thursday at 2 AM UTC - consolidate week's alpha changes into beta
+    - cron: '0 2 * * 4'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (skip PyPI publish)'
+        required: false
+        default: 'false'
+        type: boolean
+      force_build:
+        description: 'Force build even if no changes'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+      commit_count: ${{ steps.changes.outputs.commit_count }}
+      last_beta: ${{ steps.changes.outputs.last_beta }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: dev
+
+      - name: Check for changes since last beta release
+        id: changes
+        run: |
+          # Get last beta release tag
+          LAST_BETA=$(git tag -l "*b*" --sort=-version:refname | head -n1)
+          
+          if [ -z "$LAST_BETA" ]; then
+            echo "No previous beta release found, checking last week"
+            SINCE="1 week ago"
+            COMMIT_COUNT=$(git rev-list --count --since="$SINCE" dev)
+          else
+            echo "Last beta release: $LAST_BETA"
+            COMMIT_COUNT=$(git rev-list --count ${LAST_BETA}..dev)
+          fi
+          
+          echo "Commits since last beta: $COMMIT_COUNT"
+          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          echo "last_beta=$LAST_BETA" >> $GITHUB_OUTPUT
+          
+          if [ "$COMMIT_COUNT" -gt 0 ] || [ "${{ github.event.inputs.force_build }}" = "true" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected, proceeding with beta build"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes since last beta, skipping build"
+          fi
+
+  beta-release:
+    needs: check-changes
+    if: needs.check-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      beta_version: ${{ steps.version.outputs.beta_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bump2version build twine
+          pip install -e ".[dev]"
+
+      - name: Configure git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Generate beta version
+        id: version
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(python -c "from datafog.__about__ import __version__; print(__version__)")
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Generate beta version
+          if [[ $CURRENT_VERSION == *"b"* ]]; then
+            # If already beta, increment beta number
+            BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'b' -f1)
+            BETA_NUM=$(echo $CURRENT_VERSION | cut -d'b' -f2)
+            BETA_VERSION="${BASE_VERSION}b$((BETA_NUM + 1))"
+          elif [[ $CURRENT_VERSION == *"a"* ]]; then
+            # If alpha, convert to beta
+            BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
+            BETA_VERSION="${BASE_VERSION}b1"
+          else
+            # If stable, bump minor and add beta (4.1.1 -> 4.2.0)
+            BASE_VERSION=$(python -c "import re; version = '$CURRENT_VERSION'; parts = version.split('.'); parts[1] = str(int(parts[1]) + 1); parts[2] = '0'; print('.'.join(parts))")
+            BETA_VERSION="${BASE_VERSION}b1"
+          fi
+          
+          echo "Beta version: $BETA_VERSION"
+          echo "beta_version=$BETA_VERSION" >> $GITHUB_OUTPUT
+          
+          # Update version in files
+          sed -i "s/__version__ = \".*\"/__version__ = \"$BETA_VERSION\"/" datafog/__about__.py
+          sed -i "s/version=\".*\"/version=\"$BETA_VERSION\"/" setup.py
+
+      - name: Generate changelog for beta
+        run: |
+          python scripts/generate_changelog.py --beta --output BETA_CHANGELOG.md
+
+      - name: Run comprehensive tests
+        run: |
+          echo "🧪 Running comprehensive test suite for beta release..."
+          
+          # Run core tests
+          python -m pytest tests/ -v --tb=short
+          
+          # Run integration tests
+          python -m pytest -m integration -v
+          
+          # Run benchmarks to ensure performance
+          python -m pytest tests/benchmark_text_service.py -v
+          
+          echo "✅ All tests passed for beta release"
+
+      - name: Build package
+        run: |
+          python -m build
+          
+          # Verify wheel size
+          python scripts/check_wheel_size.py
+          
+          echo "📦 Beta package built successfully"
+
+      - name: Create beta release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          
+          # Create and push tag
+          git add datafog/__about__.py setup.py
+          git commit -m "chore: bump version to $BETA_VERSION for beta release"
+          git tag -a "v$BETA_VERSION" -m "Beta release $BETA_VERSION"
+          git push origin "v$BETA_VERSION"
+          
+          # Create GitHub release
+          gh release create "v$BETA_VERSION" \
+            --title "🚧 Beta Release $BETA_VERSION" \
+            --notes-file BETA_CHANGELOG.md \
+            --prerelease \
+            --target dev \
+            dist/*
+
+      - name: Publish to PyPI (Beta)
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          echo "🚀 Publishing beta release to PyPI..."
+          python -m twine upload dist/* --verbose
+
+      - name: Dry run summary
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "🏃‍♂️ DRY RUN COMPLETED"
+          echo "Would have published: ${{ steps.version.outputs.beta_version }}"
+          echo "Package contents:"
+          ls -la dist/
+          echo "Test results: All tests would be run"
+
+      - name: Cleanup old beta releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🧹 Cleaning up old beta releases (keep last 5)..."
+          
+          # Get all beta releases, sorted by creation date
+          BETA_RELEASES=$(gh release list --limit 30 | grep "🚧.*b[0-9]" | tail -n +6 | cut -f3)
+          
+          for release in $BETA_RELEASES; do
+            echo "Deleting old beta release: $release"
+            gh release delete "$release" --yes || true
+            git push --delete origin "$release" || true
+          done
+
+  notify-beta:
+    needs: [check-changes, beta-release]
+    if: needs.check-changes.outputs.has_changes == 'true' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Beta release notification
+        run: |
+          echo "🚧 Thursday beta release completed!"
+          echo "📦 Beta version ready for final testing"
+          echo "💡 Install with: pip install datafog==${{ needs.beta-release.outputs.beta_version }}"
+          echo "📊 Commits included: ${{ needs.check-changes.outputs.commit_count }}"
+          echo "🗓️ Stable release scheduled for Friday"
+          echo ""
+          echo "🧪 Beta Testing Checklist:"
+          echo "  ✅ All automated tests passed"
+          echo "  ⏳ Manual testing recommended"
+          echo "  ⏳ Performance validation"
+          echo "  ⏳ Integration testing"
+
+  prepare-friday-release:
+    needs: [beta-release]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare Friday stable release
+        run: |
+          echo "🎯 Preparing for Friday stable release..."
+          echo "Current beta: ${{ needs.beta-release.outputs.beta_version }}"
+          
+          # Extract base version for Friday
+          BETA_VERSION="${{ needs.beta-release.outputs.beta_version }}"
+          STABLE_VERSION=$(echo $BETA_VERSION | cut -d'b' -f1)
+          
+          echo "Planned stable version: $STABLE_VERSION"
+          echo "📋 Friday Release Checklist:"
+          echo "  ⏳ Final beta testing"
+          echo "  ⏳ Update CHANGELOG.md"
+          echo "  ⏳ Run weekly release workflow"
+          echo "  ⏳ Social media announcement"
