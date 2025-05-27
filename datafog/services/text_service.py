@@ -10,6 +10,19 @@ from typing import TYPE_CHECKING, Dict, List, Union
 
 if TYPE_CHECKING:
     from datafog.processing.text_processing.regex_annotator.regex_annotator import Span
+else:
+    # Runtime import for Span when needed
+    Span = None
+
+
+def _get_span_class():
+    """Lazily import Span class when needed."""
+    global Span
+    if Span is None:
+        from datafog.processing.text_processing.regex_annotator.regex_annotator import (
+            Span,
+        )
+    return Span
 
 
 class TextService:
@@ -172,7 +185,8 @@ class TextService:
                     chunk_spans = self.annotate_text_sync(chunk, structured=True)
                     # Adjust span positions to account for chunk offset
                     for span in chunk_spans:
-                        adjusted_span = Span(
+                        SpanClass = _get_span_class()
+                        adjusted_span = SpanClass(
                             start=span.start + current_offset,
                             end=span.end + current_offset,
                             text=span.text,
