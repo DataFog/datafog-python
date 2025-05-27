@@ -77,8 +77,11 @@ SparkService = _optional_import(
     "SparkService", "datafog.services.spark_service", "distributed"
 )
 
+# Import core API functions
+from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
 
-# Simple API for core functionality
+
+# Simple API for core functionality (backward compatibility)
 def detect(text: str) -> list:
     """
     Detect PII in text using regex patterns.
@@ -169,6 +172,10 @@ __all__ = [
     "__version__",
     "detect",
     "process",
+    "detect_pii",
+    "anonymize_text",
+    "scan_text",
+    "get_supported_entities",
     "AnnotationResult",
     "AnnotatorRequest",
     "AnonymizationResult",

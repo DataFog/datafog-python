@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 # Use a single source of truth for the version
-__version__ = "4.1.1"
+version = "4.1.1"
 
 project_urls = {
     "Homepage": "https://datafog.ai",
@@ -72,7 +72,7 @@ extras_require = {
 
 setup(
     name="datafog",
-    version=__version__,
+    version=version,
     author="Sid Mohan",
     author_email="sid@datafog.ai",
     description="Lightning-fast PII detection and anonymization library with 190x performance advantage",
