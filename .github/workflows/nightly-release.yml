@@ -98,12 +98,13 @@ jobs:
           if [[ $CURRENT_VERSION == *"alpha"* ]]; then
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
           else
-            # Bump patch version for alpha
+            # Bump minor version for alpha (4.1.1 -> 4.2.0)
             BASE_VERSION=$(python -c "
 import re
 version = '$CURRENT_VERSION'
 parts = version.split('.')
-parts[2] = str(int(parts[2]) + 1)
+parts[1] = str(int(parts[1]) + 1)
+parts[2] = '0'
 print('.'.join(parts))
 ")
           fi
