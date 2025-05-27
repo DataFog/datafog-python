@@ -20,32 +20,7 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
 
-  test-core:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
-
-      - name: Install core dependencies only
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-          pip install pytest pytest-cov
-
-      - name: Test core functionality
-        run: |
-          python -c "from datafog import detect_pii, anonymize_text; print('Core API works')"
-          python -c "from datafog import detect, process; print('Legacy API works')"
-          python -m pytest tests/test_regex_annotator.py -v
-
-  test-full:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -78,6 +53,31 @@ jobs:
         with:
           file: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-core:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install core dependencies only
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest pytest-cov
+
+      - name: Test core functionality
+        run: |
+          python -c "from datafog import detect_pii, anonymize_text; print('Core API works')"
+          python -c "from datafog import detect, process; print('Legacy API works')"
+          python -m pytest tests/test_regex_annotator.py -v
 
   wheel-size:
     runs-on: ubuntu-latest
