@@ -6,12 +6,10 @@ and batch processing. SpaCy integration available as optional extra.
 """
 
 import asyncio
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
-from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-    RegexAnnotator,
-    Span,
-)
+if TYPE_CHECKING:
+    from datafog.processing.text_processing.regex_annotator.regex_annotator import Span
 
 
 class TextService:
@@ -43,26 +41,58 @@ class TextService:
         """
         assert engine in {"regex", "spacy", "auto"}, "Invalid engine"
         self.engine = engine
-        self.regex_annotator = RegexAnnotator()
         self.text_chunk_length = text_chunk_length
 
-        # Only initialize spacy if needed and available
-        self.spacy_annotator = None
-        if engine in {"spacy", "auto"}:
-            try:
-                from datafog.processing.text_processing.spacy_pii_annotator import (
-                    SpacyPIIAnnotator,
-                )
+        # Lazy initialization - annotators created only when needed
+        self._regex_annotator = None
+        self._spacy_annotator = None
+        self._spacy_import_attempted = False
 
-                self.spacy_annotator = SpacyPIIAnnotator.create()
-            except ImportError:
-                if engine == "spacy":
-                    raise ImportError(
-                        "SpaCy engine requires additional dependencies. "
-                        "Install with: pip install datafog[nlp]"
-                    )
-                # For auto mode, just continue with regex only
-                self.spacy_annotator = None
+        # For spacy-only mode, validate dependencies at init time
+        if engine == "spacy":
+            self._ensure_spacy_available()
+
+    @property
+    def regex_annotator(self):
+        """Lazy-loaded regex annotator."""
+        if self._regex_annotator is None:
+            from datafog.processing.text_processing.regex_annotator.regex_annotator import (
+                RegexAnnotator,
+            )
+
+            self._regex_annotator = RegexAnnotator()
+        return self._regex_annotator
+
+    @property
+    def spacy_annotator(self):
+        """Lazy-loaded spaCy annotator."""
+        if self._spacy_annotator is None and not self._spacy_import_attempted:
+            self._spacy_annotator = self._create_spacy_annotator()
+            self._spacy_import_attempted = True
+        return self._spacy_annotator
+
+    def _ensure_spacy_available(self):
+        """Ensure spaCy dependencies are available, raise ImportError if not."""
+        try:
+            from datafog.processing.text_processing.spacy_pii_annotator import (  # noqa: F401
+                SpacyPIIAnnotator,
+            )
+        except ImportError:
+            raise ImportError(
+                "SpaCy engine requires additional dependencies. "
+                "Install with: pip install datafog[nlp]"
+            )
+
+    def _create_spacy_annotator(self):
+        """Create spaCy annotator if dependencies are available."""
+        try:
+            from datafog.processing.text_processing.spacy_pii_annotator import (
+                SpacyPIIAnnotator,
+            )
+
+            return SpacyPIIAnnotator.create()
+        except ImportError:
+            return None
 
     def _chunk_text(self, text: str) -> List[str]:
         """Split the text into chunks of specified length."""
@@ -85,7 +115,7 @@ class TextService:
 
     def annotate_text_sync(
         self, text: str, structured: bool = False
-    ) -> Union[Dict[str, List[str]], List[Span]]:
+    ) -> Union[Dict[str, List[str]], List["Span"]]:
         """
         Annotate text synchronously for PII entities.
 
@@ -162,7 +192,7 @@ class TextService:
 
     async def annotate_text_async(
         self, text: str, structured: bool = False
-    ) -> Union[Dict[str, List[str]], List[Span]]:
+    ) -> Union[Dict[str, List[str]], List["Span"]]:
         """
         Annotate text asynchronously for PII entities.
 
