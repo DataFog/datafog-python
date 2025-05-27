@@ -59,6 +59,8 @@ jobs:
     needs: check-changes
     if: needs.check-changes.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      alpha_version: ${{ steps.version.outputs.alpha_version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,14 +101,7 @@ jobs:
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
           else
             # Bump minor version for alpha (4.1.1 -> 4.2.0)
-            BASE_VERSION=$(python -c "
-import re
-version = '$CURRENT_VERSION'
-parts = version.split('.')
-parts[1] = str(int(parts[1]) + 1)
-parts[2] = '0'
-print('.'.join(parts))
-")
+            BASE_VERSION=$(python -c "import re; version = '$CURRENT_VERSION'; parts = version.split('.'); parts[1] = str(int(parts[1]) + 1); parts[2] = '0'; print('.'.join(parts))")
           fi
           
           ALPHA_VERSION="${BASE_VERSION}a${DATE_STAMP}.${TIME_STAMP}.${COMMIT_SHORT}"
