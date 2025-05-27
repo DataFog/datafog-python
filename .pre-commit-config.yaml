@@ -32,5 +32,9 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        files: '.*\.(md|markdown|json|yaml|yml|js|jsx|css|html)$'
-        exclude: .venv
+        files: '.*\.(md|markdown|json|js|jsx|css|html)$'
+        exclude: |
+          (?x)^(
+            .venv|
+            .*\.github/workflows/.*\.ya?ml$
+          )$
