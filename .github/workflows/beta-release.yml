@@ -45,7 +45,7 @@ jobs:
           echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
           echo "last_beta=$LAST_BETA" >> $GITHUB_OUTPUT
 
-          if [ "$COMMIT_COUNT" -gt 0 ] || [ "${{ github.event.inputs.force_build == 'true' }}" = "true" ]; then
+          if [ "$COMMIT_COUNT" -gt 0 ] || [ "${{ github.event.inputs.force_build }}" = "true" ]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
