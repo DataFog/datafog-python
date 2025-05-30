@@ -27,6 +27,12 @@ extras_require = {
     "nlp": [
         "spacy>=3.7.0,<4.0",
     ],
+    "nlp-advanced": [
+        "gliner>=0.2.5",
+        "torch>=2.1.0,<2.7",
+        "transformers>=4.20.0",
+        "huggingface-hub>=0.16.0",
+    ],
     "ocr": [
         "pytesseract>=0.3.0",
         "Pillow>=10.0.0",
@@ -58,6 +64,10 @@ extras_require = {
     # Convenience bundles
     "all": [
         "spacy>=3.7.0,<4.0",
+        "gliner>=0.2.5",
+        "torch>=2.1.0,<2.7",
+        "transformers>=4.20.0",
+        "huggingface-hub>=0.16.0",
         "pytesseract>=0.3.0",
         "Pillow>=10.0.0",
         "sentencepiece>=0.2.0",
