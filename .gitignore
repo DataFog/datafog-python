@@ -28,6 +28,7 @@ venv/
 env/
 examples/venv/
 benchmark_env/
+gliner_research_env/
 
 # Editors
 *.swp
