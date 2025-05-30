@@ -98,13 +98,7 @@ jobs:
           if [[ $CURRENT_VERSION == *"alpha"* ]]; then
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
           else
-            BASE_VERSION=$(python3 -c "
-version = '$CURRENT_VERSION'
-parts = version.split('.')
-parts[1] = str(int(parts[1]) + 1)
-parts[2] = '0'
-print('.'.join(parts))
-")
+            BASE_VERSION=$(python3 -c "import sys; version='$CURRENT_VERSION'; parts=version.split('.'); parts[1]=str(int(parts[1])+1); parts[2]='0'; print('.'.join(parts))")
           fi
 
           ALPHA_VERSION="${BASE_VERSION}a${DATE_STAMP}.${TIME_STAMP}.${COMMIT_SHORT}"

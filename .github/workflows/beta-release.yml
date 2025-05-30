@@ -95,13 +95,7 @@ jobs:
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
             BETA_VERSION="${BASE_VERSION}b1"
           else
-            BASE_VERSION=$(python3 -c "
-version = '$CURRENT_VERSION'
-parts = version.split('.')
-parts[1] = str(int(parts[1]) + 1)
-parts[2] = '0'
-print('.'.join(parts))
-")
+            BASE_VERSION=$(python3 -c "import sys; version='$CURRENT_VERSION'; parts=version.split('.'); parts[1]=str(int(parts[1])+1); parts[2]='0'; print('.'.join(parts))")
             BETA_VERSION="${BASE_VERSION}b1"
           fi
 
