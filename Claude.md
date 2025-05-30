@@ -252,6 +252,8 @@ export PYTHONPATH=$(pwd)             # Local development imports
 
 ## Best Practices for Claude Agents
 
+Before beginning any task please checkout a branch from `dev` and create a pull request to `dev`.
+
 ### Code Quality
 - Follow existing patterns before implementing new approaches
 - Add comprehensive tests for all new functionality
@@ -269,5 +271,6 @@ export PYTHONPATH=$(pwd)             # Local development imports
 - Performance validation on realistic data sets
 - Cross-platform testing (Linux, macOS, Windows)
 - Community-facing documentation and examples
+- In Release Notes or Comments, do not reference that it was sauthored by Claude (all code is anonymously authored)
 
 This guide provides the essential information for DataFog development while maintaining focus on current priorities and recent GLiNER integration work.
