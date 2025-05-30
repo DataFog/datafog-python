@@ -183,11 +183,13 @@ class TestGLiNERAnnotatorWithoutDependencies:
         original_gliner = sys.modules.pop("gliner", None)
 
         try:
-            # Mock the import to raise ImportError
-            with patch(
-                "builtins.__import__",
-                side_effect=ImportError("No module named 'gliner'"),
-            ):
+            # Re-import the module to test import failure
+
+            if "datafog.processing.text_processing.gliner_annotator" in sys.modules:
+                del sys.modules["datafog.processing.text_processing.gliner_annotator"]
+
+            # Mock only the gliner import
+            with patch.dict("sys.modules", {"gliner": None}):
                 from datafog.processing.text_processing.gliner_annotator import (
                     GLiNERAnnotator,
                 )
@@ -200,6 +202,15 @@ class TestGLiNERAnnotatorWithoutDependencies:
             # Restore gliner module
             if original_gliner:
                 sys.modules["gliner"] = original_gliner
+            else:
+                # Restore our mock
+                mock_gliner = MagicMock()
+                mock_gliner_class = MagicMock()
+                mock_model = MagicMock()
+                mock_model.predict_entities.return_value = []
+                mock_gliner_class.from_pretrained.return_value = mock_model
+                mock_gliner.GLiNER = mock_gliner_class
+                sys.modules["gliner"] = mock_gliner
 
     def test_gliner_import_error_on_download(self):
         """Test that ImportError is raised when trying to download without GLiNER."""
@@ -207,11 +218,13 @@ class TestGLiNERAnnotatorWithoutDependencies:
         original_gliner = sys.modules.pop("gliner", None)
 
         try:
-            # Mock the import to raise ImportError
-            with patch(
-                "builtins.__import__",
-                side_effect=ImportError("No module named 'gliner'"),
-            ):
+            # Re-import the module to test import failure
+
+            if "datafog.processing.text_processing.gliner_annotator" in sys.modules:
+                del sys.modules["datafog.processing.text_processing.gliner_annotator"]
+
+            # Mock only the gliner import
+            with patch.dict("sys.modules", {"gliner": None}):
                 from datafog.processing.text_processing.gliner_annotator import (
                     GLiNERAnnotator,
                 )
@@ -224,6 +237,15 @@ class TestGLiNERAnnotatorWithoutDependencies:
             # Restore gliner module
             if original_gliner:
                 sys.modules["gliner"] = original_gliner
+            else:
+                # Restore our mock
+                mock_gliner = MagicMock()
+                mock_gliner_class = MagicMock()
+                mock_model = MagicMock()
+                mock_model.predict_entities.return_value = []
+                mock_gliner_class.from_pretrained.return_value = mock_model
+                mock_gliner.GLiNER = mock_gliner_class
+                sys.modules["gliner"] = mock_gliner
 
 
 class TestTextServiceGLiNERIntegration:
@@ -254,7 +276,9 @@ class TestTextServiceGLiNERIntegration:
 
     def test_text_service_gliner_engine_init(self):
         """Test TextService initialization with GLiNER engine."""
-        with patch("datafog.services.text_service.GLiNERAnnotator"):
+        with patch(
+            "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
+        ):
             from datafog.services.text_service import TextService
 
             service = TextService(engine="gliner")
@@ -263,7 +287,9 @@ class TestTextServiceGLiNERIntegration:
 
     def test_text_service_gliner_engine_custom_model(self):
         """Test TextService with custom GLiNER model."""
-        with patch("datafog.services.text_service.GLiNERAnnotator"):
+        with patch(
+            "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
+        ):
             from datafog.services.text_service import TextService
 
             service = TextService(engine="gliner", gliner_model="urchade/gliner_base")
@@ -271,7 +297,9 @@ class TestTextServiceGLiNERIntegration:
 
     def test_text_service_smart_engine_init(self):
         """Test TextService initialization with smart cascading engine."""
-        with patch("datafog.services.text_service.GLiNERAnnotator"):
+        with patch(
+            "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
+        ):
             from datafog.services.text_service import TextService
 
             service = TextService(engine="smart")
@@ -280,7 +308,8 @@ class TestTextServiceGLiNERIntegration:
     def test_text_service_gliner_engine_without_dependencies(self):
         """Test TextService GLiNER engine raises ImportError when dependencies missing."""
         with patch(
-            "datafog.services.text_service.GLiNERAnnotator", side_effect=ImportError()
+            "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator",
+            side_effect=ImportError(),
         ):
             from datafog.services.text_service import TextService
 
@@ -292,7 +321,8 @@ class TestTextServiceGLiNERIntegration:
     def test_text_service_smart_engine_without_dependencies(self):
         """Test TextService smart engine raises ImportError when GLiNER dependencies missing."""
         with patch(
-            "datafog.services.text_service.GLiNERAnnotator", side_effect=ImportError()
+            "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator",
+            side_effect=ImportError(),
         ):
             from datafog.services.text_service import TextService
 
@@ -306,19 +336,26 @@ class TestTextServiceGLiNERIntegration:
         valid_engines = ["regex", "spacy", "gliner", "auto", "smart"]
 
         for engine in valid_engines:
-            # Mock dependencies based on engine
+            # Mock dependencies based on engine at the correct import paths
             patches = {}
             if engine in ["spacy", "auto"]:
-                patches["SpacyPIIAnnotator"] = Mock()
+                patches[
+                    "datafog.processing.text_processing.spacy_pii_annotator.SpacyPIIAnnotator"
+                ] = Mock()
             if engine in ["gliner", "smart"]:
-                patches["GLiNERAnnotator"] = Mock()
+                patches[
+                    "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
+                ] = Mock()
 
             if patches:
-                with patch.multiple("datafog.services.text_service", **patches):
-                    from datafog.services.text_service import TextService
+                with patch.dict(
+                    "sys.modules", {k.rsplit(".", 1)[0]: Mock() for k in patches.keys()}
+                ):
+                    with patch.multiple(patches):
+                        from datafog.services.text_service import TextService
 
-                    service = TextService(engine=engine)
-                    assert service.engine == engine
+                        service = TextService(engine=engine)
+                        assert service.engine == engine
             else:
                 from datafog.services.text_service import TextService
 
@@ -360,12 +397,14 @@ class TestTextServiceGLiNERIntegration:
 
     def test_smart_cascade_flow(self, mock_gliner_annotator):
         """Test the smart cascading flow."""
-        with patch("datafog.services.text_service.RegexAnnotator") as mock_regex_cls:
+        with patch(
+            "datafog.processing.text_processing.regex_annotator.regex_annotator.RegexAnnotator"
+        ) as mock_regex_cls:
             with patch(
-                "datafog.services.text_service.GLiNERAnnotator"
+                "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
             ) as mock_gliner_cls:
                 with patch(
-                    "datafog.services.text_service.SpacyPIIAnnotator"
+                    "datafog.processing.text_processing.spacy_pii_annotator.SpacyPIIAnnotator"
                 ) as mock_spacy_cls:
 
                     # Configure mocks
