@@ -307,12 +307,16 @@ class TestTextServiceGLiNERIntegration:
 
     def test_text_service_gliner_engine_without_dependencies(self):
         """Test TextService GLiNER engine raises ImportError when dependencies missing."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator",
-            side_effect=ImportError(),
-        ):
-            from datafog.services.text_service import TextService
+        from datafog.services.text_service import TextService
 
+        # Mock the _ensure_gliner_available method to raise ImportError
+        with patch.object(
+            TextService,
+            "_ensure_gliner_available",
+            side_effect=ImportError(
+                "GLiNER engine requires additional dependencies. Install with: pip install datafog[nlp-advanced]"
+            ),
+        ):
             with pytest.raises(
                 ImportError, match="GLiNER engine requires additional dependencies"
             ):
@@ -320,12 +324,16 @@ class TestTextServiceGLiNERIntegration:
 
     def test_text_service_smart_engine_without_dependencies(self):
         """Test TextService smart engine raises ImportError when GLiNER dependencies missing."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator",
-            side_effect=ImportError(),
-        ):
-            from datafog.services.text_service import TextService
+        from datafog.services.text_service import TextService
 
+        # Mock the _ensure_gliner_available method to raise ImportError
+        with patch.object(
+            TextService,
+            "_ensure_gliner_available",
+            side_effect=ImportError(
+                "GLiNER engine requires additional dependencies. Install with: pip install datafog[nlp-advanced]"
+            ),
+        ):
             with pytest.raises(
                 ImportError, match="GLiNER engine requires additional dependencies"
             ):
@@ -336,31 +344,33 @@ class TestTextServiceGLiNERIntegration:
         valid_engines = ["regex", "spacy", "gliner", "auto", "smart"]
 
         for engine in valid_engines:
-            # Mock dependencies based on engine at the correct import paths
-            patches = {}
-            if engine in ["spacy", "auto"]:
-                patches[
-                    "datafog.processing.text_processing.spacy_pii_annotator.SpacyPIIAnnotator"
-                ] = Mock()
-            if engine in ["gliner", "smart"]:
-                patches[
-                    "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
-                ] = Mock()
-
-            if patches:
-                with patch.dict(
-                    "sys.modules", {k.rsplit(".", 1)[0]: Mock() for k in patches.keys()}
-                ):
-                    with patch.multiple(patches):
-                        from datafog.services.text_service import TextService
-
-                        service = TextService(engine=engine)
-                        assert service.engine == engine
-            else:
+            # Test each engine individually with appropriate mocks
+            if engine == "regex":
+                # Regex engine doesn't need external dependencies
                 from datafog.services.text_service import TextService
 
                 service = TextService(engine=engine)
                 assert service.engine == engine
+
+            elif engine in ["spacy", "auto"]:
+                # Mock spaCy dependencies
+                with patch(
+                    "datafog.processing.text_processing.spacy_pii_annotator.SpacyPIIAnnotator"
+                ):
+                    from datafog.services.text_service import TextService
+
+                    service = TextService(engine=engine)
+                    assert service.engine == engine
+
+            elif engine in ["gliner", "smart"]:
+                # Mock GLiNER dependencies
+                with patch(
+                    "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
+                ):
+                    from datafog.services.text_service import TextService
+
+                    service = TextService(engine=engine)
+                    assert service.engine == engine
 
     def test_text_service_invalid_engine(self):
         """Test that invalid engines raise AssertionError."""
