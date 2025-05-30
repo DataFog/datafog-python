@@ -18,6 +18,7 @@ project_urls = {
 # Core lightweight dependencies only
 core_deps = [
     "pydantic>=2.0,<3.0",
+    "pydantic-settings>=2.0.0",
     "typing-extensions>=4.0",
 ]
 
@@ -43,6 +44,7 @@ extras_require = {
     ],
     "cli": [
         "typer>=0.12.0",
+        "pydantic-settings>=2.0.0",
     ],
     "crypto": [
         "cryptography>=40.0.0",
@@ -66,6 +68,7 @@ extras_require = {
         "aiohttp>=3.8.0",
         "requests>=2.30.0",
         "typer>=0.12.0",
+        "pydantic-settings>=2.0.0",
         "cryptography>=40.0.0",
     ],
 }
