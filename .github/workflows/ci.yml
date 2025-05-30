@@ -46,7 +46,7 @@ jobs:
 
       - name: Run full test suite
         run: |
-          python -m pytest tests/ --cov=datafog --cov-report=xml --cov-report=term
+          python -m pytest tests/ --cov=datafog --cov-report=xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
