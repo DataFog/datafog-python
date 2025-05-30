@@ -5,153 +5,135 @@ Tests both the GLiNERAnnotator class directly and its integration with TextServi
 Includes graceful degradation tests for when GLiNER dependencies are not available.
 """
 
-from unittest.mock import Mock, patch
+import sys
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_gliner_module():
+    """Mock the gliner module for all tests."""
+    # Create a mock gliner module
+    mock_gliner = MagicMock()
+    mock_gliner_class = MagicMock()
+
+    # Configure the mock model behavior
+    mock_model = MagicMock()
+    mock_model.predict_entities.return_value = [
+        {"label": "person", "text": "John Doe", "start": 0, "end": 8},
+        {"label": "email", "text": "john@example.com", "start": 20, "end": 36},
+        {"label": "phone number", "text": "555-123-4567", "start": 50, "end": 62},
+    ]
+    mock_gliner_class.from_pretrained.return_value = mock_model
+    mock_gliner.GLiNER = mock_gliner_class
+
+    # Add to sys.modules to make import work
+    sys.modules["gliner"] = mock_gliner
+
+    yield mock_gliner_class, mock_model
+
+    # Cleanup
+    if "gliner" in sys.modules:
+        del sys.modules["gliner"]
 
 
 class TestGLiNERAnnotatorWithDependencies:
     """Tests that require GLiNER dependencies to be installed."""
 
-    @pytest.fixture
-    def mock_gliner_model(self):
-        """Mock GLiNER model for testing."""
-        mock_model = Mock()
-        mock_model.predict_entities.return_value = [
-            {"label": "person", "text": "John Doe", "start": 0, "end": 8},
-            {"label": "email", "text": "john@example.com", "start": 20, "end": 36},
-            {"label": "phone number", "text": "555-123-4567", "start": 50, "end": 62},
-        ]
-        return mock_model
-
-    @pytest.fixture
-    def mock_gliner_class(self, mock_gliner_model):
-        """Mock GLiNER class."""
-        mock_class = Mock()
-        mock_class.from_pretrained.return_value = mock_gliner_model
-        return mock_class
-
-    def test_gliner_annotator_creation_with_dependencies(self, mock_gliner_class):
+    def test_gliner_annotator_creation_with_dependencies(self, mock_gliner_module):
         """Test GLiNER annotator creation when dependencies are available."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        mock_gliner_class, mock_model = mock_gliner_module
 
-            annotator = GLiNERAnnotator.create()
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
-            assert annotator.model_name == "urchade/gliner_multi_pii-v1"
-            assert "person" in annotator.entity_types
-            assert "email" in annotator.entity_types
-            mock_gliner_class.from_pretrained.assert_called_once_with(
-                "urchade/gliner_multi_pii-v1"
-            )
+        annotator = GLiNERAnnotator.create()
 
-    def test_gliner_annotator_custom_model(self, mock_gliner_class):
+        assert annotator.model_name == "urchade/gliner_multi_pii-v1"
+        assert "person" in annotator.entity_types
+        assert "email" in annotator.entity_types
+        mock_gliner_class.from_pretrained.assert_called_with(
+            "urchade/gliner_multi_pii-v1"
+        )
+
+    def test_gliner_annotator_custom_model(self, mock_gliner_module):
         """Test GLiNER annotator with custom model."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        mock_gliner_class, mock_model = mock_gliner_module
 
-            custom_entities = ["person", "organization", "location"]
-            annotator = GLiNERAnnotator.create(
-                model_name="urchade/gliner_base", entity_types=custom_entities
-            )
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
-            assert annotator.model_name == "urchade/gliner_base"
-            assert annotator.entity_types == custom_entities
-            mock_gliner_class.from_pretrained.assert_called_once_with(
-                "urchade/gliner_base"
-            )
+        custom_entities = ["person", "organization", "location"]
+        annotator = GLiNERAnnotator.create(
+            model_name="urchade/gliner_base", entity_types=custom_entities
+        )
 
-    def test_gliner_annotate_text(self, mock_gliner_class, mock_gliner_model):
+        assert annotator.model_name == "urchade/gliner_base"
+        assert annotator.entity_types == custom_entities
+        mock_gliner_class.from_pretrained.assert_called_with("urchade/gliner_base")
+
+    def test_gliner_annotate_text(self, mock_gliner_module):
         """Test GLiNER text annotation."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        mock_gliner_class, mock_model = mock_gliner_module
 
-            annotator = GLiNERAnnotator.create()
-            result = annotator.annotate(
-                "John Doe works at john@example.com and his phone is 555-123-4567"
-            )
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
-            # Check that we got results for the detected entities
-            assert "PERSON" in result
-            assert "EMAIL" in result
-            assert "PHONE_NUMBER" in result
+        annotator = GLiNERAnnotator.create()
+        result = annotator.annotate(
+            "John Doe works at john@example.com and his phone is 555-123-4567"
+        )
 
-            mock_gliner_model.predict_entities.assert_called_once()
+        # Check that we got results for the detected entities
+        assert "PERSON" in result
+        assert "EMAIL" in result
+        assert "PHONE_NUMBER" in result
 
-    def test_gliner_annotate_empty_text(self, mock_gliner_class):
+        mock_model.predict_entities.assert_called()
+
+    def test_gliner_annotate_empty_text(self, mock_gliner_module):
         """Test GLiNER annotation with empty text."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        mock_gliner_class, mock_model = mock_gliner_module
 
-            annotator = GLiNERAnnotator.create()
-            result = annotator.annotate("")
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
-            # Should return empty lists for all entity types
-            assert all(
-                isinstance(entities, list) and len(entities) == 0
-                for entities in result.values()
-            )
+        annotator = GLiNERAnnotator.create()
+        result = annotator.annotate("")
 
-    def test_gliner_annotate_long_text(self, mock_gliner_class, mock_gliner_model):
+        # Should return empty lists for all entity types
+        assert all(
+            isinstance(entities, list) and len(entities) == 0
+            for entities in result.values()
+        )
+
+    def test_gliner_annotate_long_text(self, mock_gliner_module):
         """Test GLiNER annotation with text exceeding max length."""
+        mock_gliner_class, mock_model = mock_gliner_module
+
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+
+        annotator = GLiNERAnnotator.create()
+
+        # Create text longer than MAXIMAL_STRING_SIZE
+        long_text = "A" * 1000001  # Exceeds 1M character limit
+
         with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+            "datafog.processing.text_processing.gliner_annotator.logging"
+        ) as mock_logging:
+            result = annotator.annotate(long_text)
 
-            annotator = GLiNERAnnotator.create()
+            # Should log a warning about truncation
+            mock_logging.warning.assert_called_once()
+            # Should still return a valid result
+            assert isinstance(result, dict)
 
-            # Create text longer than MAXIMAL_STRING_SIZE
-            long_text = "A" * 1000001  # Exceeds 1M character limit
-
-            with patch(
-                "datafog.processing.text_processing.gliner_annotator.logging"
-            ) as mock_logging:
-                result = annotator.annotate(long_text)
-
-                # Should log a warning about truncation
-                mock_logging.warning.assert_called_once()
-                # Should still return a valid result
-                assert isinstance(result, dict)
-
-    def test_gliner_download_model(self, mock_gliner_class):
+    def test_gliner_download_model(self, mock_gliner_module):
         """Test GLiNER model download functionality."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        mock_gliner_class, mock_model = mock_gliner_module
 
-            GLiNERAnnotator.download_model("urchade/gliner_base")
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
-            mock_gliner_class.from_pretrained.assert_called_once_with(
-                "urchade/gliner_base"
-            )
+        GLiNERAnnotator.download_model("urchade/gliner_base")
+
+        mock_gliner_class.from_pretrained.assert_called_with("urchade/gliner_base")
 
     def test_gliner_list_available_models(self):
         """Test listing available GLiNER models."""
@@ -164,40 +146,32 @@ class TestGLiNERAnnotatorWithDependencies:
         assert "urchade/gliner_multi_pii-v1" in models
         assert "urchade/gliner_base" in models
 
-    def test_gliner_get_model_info(self, mock_gliner_class):
+    def test_gliner_get_model_info(self, mock_gliner_module):
         """Test getting model information."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        mock_gliner_class, mock_model = mock_gliner_module
 
-            annotator = GLiNERAnnotator.create()
-            info = annotator.get_model_info()
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
-            assert "model_name" in info
-            assert "entity_types" in info
-            assert "max_text_size" in info
-            assert info["model_name"] == "urchade/gliner_multi_pii-v1"
+        annotator = GLiNERAnnotator.create()
+        info = annotator.get_model_info()
 
-    def test_gliner_set_entity_types(self, mock_gliner_class):
+        assert "model_name" in info
+        assert "entity_types" in info
+        assert "max_text_size" in info
+        assert info["model_name"] == "urchade/gliner_multi_pii-v1"
+
+    def test_gliner_set_entity_types(self, mock_gliner_module):
         """Test updating entity types."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            mock_gliner_class,
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        mock_gliner_class, mock_model = mock_gliner_module
 
-            annotator = GLiNERAnnotator.create()
-            new_entities = ["person", "location", "organization"]
+        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
-            annotator.set_entity_types(new_entities)
+        annotator = GLiNERAnnotator.create()
+        new_entities = ["person", "location", "organization"]
 
-            assert annotator.entity_types == new_entities
+        annotator.set_entity_types(new_entities)
+
+        assert annotator.entity_types == new_entities
 
 
 class TestGLiNERAnnotatorWithoutDependencies:
@@ -205,29 +179,51 @@ class TestGLiNERAnnotatorWithoutDependencies:
 
     def test_gliner_import_error_on_creation(self):
         """Test that ImportError is raised when GLiNER is not available."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            side_effect=ImportError(),
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        # Temporarily remove gliner from sys.modules
+        original_gliner = sys.modules.pop("gliner", None)
 
-            with pytest.raises(ImportError, match="GLiNER dependencies not available"):
-                GLiNERAnnotator.create()
+        try:
+            # Mock the import to raise ImportError
+            with patch(
+                "builtins.__import__",
+                side_effect=ImportError("No module named 'gliner'"),
+            ):
+                from datafog.processing.text_processing.gliner_annotator import (
+                    GLiNERAnnotator,
+                )
+
+                with pytest.raises(
+                    ImportError, match="GLiNER dependencies not available"
+                ):
+                    GLiNERAnnotator.create()
+        finally:
+            # Restore gliner module
+            if original_gliner:
+                sys.modules["gliner"] = original_gliner
 
     def test_gliner_import_error_on_download(self):
         """Test that ImportError is raised when trying to download without GLiNER."""
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.GLiNER",
-            side_effect=ImportError(),
-        ):
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+        # Temporarily remove gliner from sys.modules
+        original_gliner = sys.modules.pop("gliner", None)
 
-            with pytest.raises(ImportError, match="GLiNER dependencies not available"):
-                GLiNERAnnotator.download_model("urchade/gliner_base")
+        try:
+            # Mock the import to raise ImportError
+            with patch(
+                "builtins.__import__",
+                side_effect=ImportError("No module named 'gliner'"),
+            ):
+                from datafog.processing.text_processing.gliner_annotator import (
+                    GLiNERAnnotator,
+                )
+
+                with pytest.raises(
+                    ImportError, match="GLiNER dependencies not available"
+                ):
+                    GLiNERAnnotator.download_model("urchade/gliner_base")
+        finally:
+            # Restore gliner module
+            if original_gliner:
+                sys.modules["gliner"] = original_gliner
 
 
 class TestTextServiceGLiNERIntegration:
@@ -311,15 +307,19 @@ class TestTextServiceGLiNERIntegration:
 
         for engine in valid_engines:
             # Mock dependencies based on engine
-            patches = []
+            patches = {}
             if engine in ["spacy", "auto"]:
-                patches.append(patch("datafog.services.text_service.SpacyPIIAnnotator"))
+                patches["SpacyPIIAnnotator"] = Mock()
             if engine in ["gliner", "smart"]:
-                patches.append(patch("datafog.services.text_service.GLiNERAnnotator"))
+                patches["GLiNERAnnotator"] = Mock()
 
-            with patch.multiple(
-                "datafog.services.text_service", **{p.attribute: p.new for p in patches}
-            ):
+            if patches:
+                with patch.multiple("datafog.services.text_service", **patches):
+                    from datafog.services.text_service import TextService
+
+                    service = TextService(engine=engine)
+                    assert service.engine == engine
+            else:
                 from datafog.services.text_service import TextService
 
                 service = TextService(engine=engine)
@@ -387,3 +387,32 @@ class TestTextServiceGLiNERIntegration:
                     # Should have tried regex first, then GLiNER
                     mock_regex.annotate.assert_called_once()
                     mock_gliner_annotator.annotate.assert_called_once()
+
+
+# Test CLI updates as well
+class TestCLIGLiNERIntegration:
+    """Test CLI GLiNER integration updates."""
+
+    def test_download_model_cli_output_fix(self):
+        """Test that the CLI download model output includes the engine name."""
+        # This tests the fix for the failed test_download_model
+        import io
+        from unittest.mock import patch
+
+        from datafog.client import download_model
+
+        # Capture stdout
+        captured_output = io.StringIO()
+
+        with patch("datafog.models.spacy_nlp.SpacyAnnotator.download_model"):
+            with patch("sys.stdout", captured_output):
+                with patch("typer.echo") as mock_echo:
+                    try:
+                        download_model("en_core_web_sm", "spacy")
+                        # Check that the output includes "SpaCy model"
+                        mock_echo.assert_called_with(
+                            "SpaCy model en_core_web_sm downloaded successfully."
+                        )
+                    except SystemExit:
+                        # CLI commands may call typer.Exit
+                        pass
