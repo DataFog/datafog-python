@@ -18,6 +18,7 @@ project_urls = {
 # Core lightweight dependencies only
 core_deps = [
     "pydantic>=2.0,<3.0",
+    "pydantic-settings>=2.0.0",
     "typing-extensions>=4.0",
 ]
 
