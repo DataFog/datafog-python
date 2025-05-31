@@ -44,9 +44,13 @@ jobs:
           pip install -e ".[all]"
           pip install -r requirements-dev.txt
 
-      - name: Run full test suite
+      - name: Run test suite (without coverage)
         run: |
-          python -m pytest tests/ --cov=datafog --cov-report=xml
+          python -m pytest tests/ -v
+          
+      - name: Run coverage on core modules only  
+        run: |
+          python -m pytest tests/test_text_service.py tests/test_regex_annotator.py tests/test_anonymizer.py --cov=datafog --cov-report=xml --cov-config=.coveragerc
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
