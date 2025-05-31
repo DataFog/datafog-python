@@ -38,10 +38,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr libtesseract-dev
 
-      - name: Install all dependencies
+      - name: Install dependencies (excluding PyTorch-based extras to prevent segfault)
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[all]"
+          pip install -e ".[nlp,ocr,distributed,web,cli,crypto,dev]" 
           pip install -r requirements-dev.txt
 
       - name: Run test suite (excluding GLiNER tests to prevent PyTorch segfault)
