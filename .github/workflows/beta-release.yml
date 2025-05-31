@@ -62,7 +62,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: dev
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -90,15 +90,18 @@ jobs:
           echo "Current version: $CURRENT_VERSION"
 
           if [[ $CURRENT_VERSION == *"b"* ]]; then
+            # Already a beta, increment beta number
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'b' -f1)
             BETA_NUM=$(echo $CURRENT_VERSION | cut -d'b' -f2)
             BETA_VERSION="${BASE_VERSION}b$((BETA_NUM + 1))"
           elif [[ $CURRENT_VERSION == *"a"* ]]; then
+            # Alpha version, convert to beta
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
             BETA_VERSION="${BASE_VERSION}b1"
           else
-            BASE_VERSION=$(python3 -c "import sys; version='$CURRENT_VERSION'; parts=version.split('.'); parts[1]=str(int(parts[1])+1); parts[2]='0'; print('.'.join(parts))")
-            BETA_VERSION="${BASE_VERSION}b1"
+            # Stable version - create beta of current version for unreleased features
+            # Don't auto-increment minor version; use current version for beta testing
+            BETA_VERSION="${CURRENT_VERSION}b1"
           fi
 
           echo "beta_version=$BETA_VERSION" >> $GITHUB_OUTPUT
@@ -137,7 +140,7 @@ jobs:
 
       - name: Create GitHub release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           BETA_VERSION="${{ steps.version.outputs.beta_version }}"
           git add datafog/__about__.py setup.py
@@ -169,7 +172,7 @@ jobs:
 
       - name: Cleanup old betas
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           BETA_RELEASES=$(gh release list --limit 30 | grep b | tail -n +6 | cut -f3)
 
