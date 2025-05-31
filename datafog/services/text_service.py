@@ -204,12 +204,21 @@ class TextService:
             Annotations from the first engine that finds sufficient entities
         """
         # Stage 1: Try regex first (fastest)
-        regex_result = self.regex_annotator.annotate(text)
-        if self._cascade_should_stop("regex", regex_result):
-            if structured:
-                _, result = self.regex_annotator.annotate_with_spans(text)
+        if structured:
+            # For structured output, use annotate_with_spans directly to avoid double processing
+            _, result = self.regex_annotator.annotate_with_spans(text)
+            regex_result = {}
+            for span in result.spans:
+                if span.label not in regex_result:
+                    regex_result[span.label] = []
+                regex_result[span.label].append(span.text)
+
+            if self._cascade_should_stop("regex", regex_result):
                 return result.spans
-            return regex_result
+        else:
+            regex_result = self.regex_annotator.annotate(text)
+            if self._cascade_should_stop("regex", regex_result):
+                return regex_result
 
         # Stage 2: Try GLiNER (balanced speed/accuracy)
         if self.gliner_annotator is not None:
@@ -268,14 +277,24 @@ class TextService:
                 return self._annotate_with_smart_cascade(text, structured)
             elif self.engine == "auto":
                 # Try regex first
-                regex_result = self.regex_annotator.annotate(text)
+                if structured:
+                    # For structured output, use annotate_with_spans directly to avoid double processing
+                    _, result = self.regex_annotator.annotate_with_spans(text)
+                    regex_result = {}
+                    for span in result.spans:
+                        if span.label not in regex_result:
+                            regex_result[span.label] = []
+                        regex_result[span.label].append(span.text)
 
-                # Check if regex found any entities
-                if any(entities for entities in regex_result.values()):
-                    if structured:
-                        _, result = self.regex_annotator.annotate_with_spans(text)
+                    # Check if regex found any entities
+                    if any(entities for entities in regex_result.values()):
                         return result.spans
-                    return regex_result
+                else:
+                    regex_result = self.regex_annotator.annotate(text)
+
+                    # Check if regex found any entities
+                    if any(entities for entities in regex_result.values()):
+                        return regex_result
 
                 # Fall back to spacy if available
                 if self.spacy_annotator is not None:
@@ -283,7 +302,7 @@ class TextService:
 
                 # Return regex result even if empty
                 if structured:
-                    _, result = self.regex_annotator.annotate_with_spans(text)
+                    # We already have the result from above in structured mode
                     return result.spans
                 return regex_result
         else:
@@ -295,11 +314,13 @@ class TextService:
                 all_spans = []
                 current_offset = 0
 
+                # Get Span class once outside the loop for efficiency
+                SpanClass = _get_span_class()
+
                 for chunk in chunks:
                     chunk_spans = self.annotate_text_sync(chunk, structured=True)
                     # Adjust span positions to account for chunk offset
                     for span in chunk_spans:
-                        SpanClass = _get_span_class()
                         adjusted_span = SpanClass(
                             start=span.start + current_offset,
                             end=span.end + current_offset,
