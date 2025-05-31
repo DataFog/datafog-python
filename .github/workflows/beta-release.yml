@@ -72,8 +72,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install bump2version build twine
+          pip install bump2version build twine psutil
           pip install -e ".[all,dev]"
+          # Install memory monitoring tools
+          pip install memory_profiler
 
       - name: Configure git
         run: |
@@ -107,11 +109,26 @@ jobs:
         run: |
           python scripts/generate_changelog.py --beta --output BETA_CHANGELOG.md
 
-      - name: Run tests
+      - name: Run tests with segfault protection
+        env:
+          # Memory optimization environment variables (set by run_tests.py)
+          CI: true
+          GITHUB_ACTIONS: true
         run: |
-          python -m pytest tests/ -v --tb=short
-          python -m pytest -m integration -v
-          python -m pytest tests/benchmark_text_service.py -v
+          # Print system memory info
+          free -h || echo "free command not available"
+          
+          # Use our robust test runner that handles segfaults
+          echo "Running main tests with segfault protection..."
+          python run_tests.py tests/ -k "not benchmark and not integration" --no-header
+          
+          # Run integration tests separately with segfault protection
+          echo "Running integration tests..."
+          python run_tests.py -m integration --no-header
+          
+          # Run benchmark tests with segfault protection
+          echo "Running benchmark tests with safeguards..."
+          python run_tests.py tests/benchmark_text_service.py --no-header
 
       - name: Build package
         run: |

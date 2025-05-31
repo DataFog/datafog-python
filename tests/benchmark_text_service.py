@@ -9,7 +9,10 @@ from datafog.services.text_service import TextService
 
 @pytest.fixture
 def sample_text_10kb():
-    """Generate a 10KB sample text with various PII entities."""
+    """Generate a sample text with various PII entities.
+
+    Note: Reduced size for CI environments to prevent memory issues.
+    """
     # Base text with PII entities
     base_text = (
         "Contact John Doe at john.doe@example.com or call (555) 123-4567. "
@@ -20,8 +23,16 @@ def sample_text_10kb():
         "Her phone number is 555-987-6543 and email is jane.smith@company.org. "
     )
 
-    # Repeat the text to reach approximately 10KB
-    repetitions = 10000 // len(base_text) + 1
+    # Check if running in CI environment
+    import os
+
+    if os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
+        # Use moderate sample in CI for stable benchmarks (not too small to avoid variance)
+        repetitions = 100  # Increased from 50 for more stable results
+    else:
+        # Use full size for local development
+        repetitions = 10000 // len(base_text) + 1
+
     return base_text * repetitions
 
 

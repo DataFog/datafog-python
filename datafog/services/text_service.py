@@ -241,6 +241,97 @@ class TextService:
             return result.spans
         return regex_result
 
+    def _annotate_single_chunk(
+        self, text: str, structured: bool = False
+    ) -> Union[Dict[str, List[str]], List["Span"]]:
+        """Annotate a single chunk of text based on the engine type."""
+        if self.engine == "regex":
+            if structured:
+                _, result = self.regex_annotator.annotate_with_spans(text)
+                return result.spans
+            return self.regex_annotator.annotate(text)
+        elif self.engine == "spacy":
+            if self.spacy_annotator is None:
+                raise ImportError(
+                    "SpaCy engine not available. Install with: pip install datafog[nlp]"
+                )
+            return self.spacy_annotator.annotate(text)
+        elif self.engine == "gliner":
+            if self.gliner_annotator is None:
+                raise ImportError(
+                    "GLiNER engine not available. Install with: pip install datafog[nlp-advanced]"
+                )
+            return self.gliner_annotator.annotate(text)
+        elif self.engine == "smart":
+            return self._annotate_with_smart_cascade(text, structured)
+        elif self.engine == "auto":
+            return self._annotate_with_auto_engine(text, structured)
+
+    def _annotate_with_auto_engine(
+        self, text: str, structured: bool = False
+    ) -> Union[Dict[str, List[str]], List["Span"]]:
+        """Handle auto engine annotation with regex fallback to spacy."""
+        # Try regex first
+        if structured:
+            # For structured output, use annotate_with_spans directly to avoid double processing
+            _, result = self.regex_annotator.annotate_with_spans(text)
+            regex_result = {}
+            for span in result.spans:
+                if span.label not in regex_result:
+                    regex_result[span.label] = []
+                regex_result[span.label].append(span.text)
+
+            # Check if regex found any entities
+            if any(entities for entities in regex_result.values()):
+                return result.spans
+        else:
+            regex_result = self.regex_annotator.annotate(text)
+
+            # Check if regex found any entities
+            if any(entities for entities in regex_result.values()):
+                return regex_result
+
+        # Fall back to spacy if available
+        if self.spacy_annotator is not None:
+            return self.spacy_annotator.annotate(text)
+
+        # Return regex result even if empty
+        if structured:
+            # We already have the result from above in structured mode
+            return result.spans
+        return regex_result
+
+    def _annotate_multiple_chunks_structured(self, chunks: List[str]) -> List["Span"]:
+        """Handle structured annotation across multiple chunks."""
+        all_spans = []
+        current_offset = 0
+
+        # Get Span class once outside the loop for efficiency
+        SpanClass = _get_span_class()
+
+        for chunk in chunks:
+            chunk_spans = self._annotate_single_chunk(chunk, structured=True)
+            # Adjust span positions to account for chunk offset
+            for span in chunk_spans:
+                adjusted_span = SpanClass(
+                    start=span.start + current_offset,
+                    end=span.end + current_offset,
+                    text=span.text,
+                    label=span.label,
+                )
+                all_spans.append(adjusted_span)
+            current_offset += len(chunk)
+
+        return all_spans
+
+    def _annotate_multiple_chunks_dict(self, chunks: List[str]) -> Dict[str, List[str]]:
+        """Handle dictionary annotation across multiple chunks."""
+        chunk_annotations = []
+        for chunk in chunks:
+            chunk_result = self._annotate_single_chunk(chunk, structured=False)
+            chunk_annotations.append(chunk_result)
+        return self._combine_annotations(chunk_annotations)
+
     def annotate_text_sync(
         self, text: str, structured: bool = False
     ) -> Union[Dict[str, List[str]], List["Span"]]:
@@ -256,88 +347,15 @@ class TextService:
         """
         if len(text) <= self.text_chunk_length:
             # Single chunk processing
-            if self.engine == "regex":
-                if structured:
-                    _, result = self.regex_annotator.annotate_with_spans(text)
-                    return result.spans
-                return self.regex_annotator.annotate(text)
-            elif self.engine == "spacy":
-                if self.spacy_annotator is None:
-                    raise ImportError(
-                        "SpaCy engine not available. Install with: pip install datafog[nlp]"
-                    )
-                return self.spacy_annotator.annotate(text)
-            elif self.engine == "gliner":
-                if self.gliner_annotator is None:
-                    raise ImportError(
-                        "GLiNER engine not available. Install with: pip install datafog[nlp-advanced]"
-                    )
-                return self.gliner_annotator.annotate(text)
-            elif self.engine == "smart":
-                return self._annotate_with_smart_cascade(text, structured)
-            elif self.engine == "auto":
-                # Try regex first
-                if structured:
-                    # For structured output, use annotate_with_spans directly to avoid double processing
-                    _, result = self.regex_annotator.annotate_with_spans(text)
-                    regex_result = {}
-                    for span in result.spans:
-                        if span.label not in regex_result:
-                            regex_result[span.label] = []
-                        regex_result[span.label].append(span.text)
-
-                    # Check if regex found any entities
-                    if any(entities for entities in regex_result.values()):
-                        return result.spans
-                else:
-                    regex_result = self.regex_annotator.annotate(text)
-
-                    # Check if regex found any entities
-                    if any(entities for entities in regex_result.values()):
-                        return regex_result
-
-                # Fall back to spacy if available
-                if self.spacy_annotator is not None:
-                    return self.spacy_annotator.annotate(text)
-
-                # Return regex result even if empty
-                if structured:
-                    # We already have the result from above in structured mode
-                    return result.spans
-                return regex_result
+            return self._annotate_single_chunk(text, structured)
         else:
             # Multi-chunk processing
             chunks = self._chunk_text(text)
 
             if structured:
-                # For structured output, we need to handle span positions across chunks
-                all_spans = []
-                current_offset = 0
-
-                # Get Span class once outside the loop for efficiency
-                SpanClass = _get_span_class()
-
-                for chunk in chunks:
-                    chunk_spans = self.annotate_text_sync(chunk, structured=True)
-                    # Adjust span positions to account for chunk offset
-                    for span in chunk_spans:
-                        adjusted_span = SpanClass(
-                            start=span.start + current_offset,
-                            end=span.end + current_offset,
-                            text=span.text,
-                            label=span.label,
-                        )
-                        all_spans.append(adjusted_span)
-                    current_offset += len(chunk)
-
-                return all_spans
+                return self._annotate_multiple_chunks_structured(chunks)
             else:
-                # Dictionary format - combine annotations
-                chunk_annotations = []
-                for chunk in chunks:
-                    chunk_result = self.annotate_text_sync(chunk, structured=False)
-                    chunk_annotations.append(chunk_result)
-                return self._combine_annotations(chunk_annotations)
+                return self._annotate_multiple_chunks_dict(chunks)
 
     async def annotate_text_async(
         self, text: str, structured: bool = False
