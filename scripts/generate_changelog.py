@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Generate changelog for weekly releases."""
 
+import argparse
 import re
 import subprocess
 from datetime import datetime
@@ -60,7 +61,7 @@ def categorize_commits(commits):
     return categories
 
 
-def generate_changelog():
+def generate_changelog(beta=False):
     """Generate changelog content."""
     latest_tag = get_latest_tag()
     commits = get_commits_since_tag(latest_tag)
@@ -70,8 +71,13 @@ def generate_changelog():
 
     categories = categorize_commits(commits)
 
-    changelog = "# What's New\n\n"
-    changelog += f"*Released: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
+    if beta:
+        changelog = "# Beta Release Notes\n\n"
+        changelog += f"*Beta Release: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
+        changelog += "⚠️ **This is a beta release for testing purposes.**\n\n"
+    else:
+        changelog = "# What's New\n\n"
+        changelog += f"*Released: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
 
     if categories["features"]:
         changelog += "## 🚀 New Features\n"
@@ -121,13 +127,23 @@ def generate_changelog():
 
 
 if __name__ == "__main__":
-    changelog_content = generate_changelog()
+    parser = argparse.ArgumentParser(description="Generate changelog for releases")
+    parser.add_argument(
+        "--beta", action="store_true", help="Generate beta release changelog"
+    )
+    parser.add_argument(
+        "--output", help="Output file name", default="CHANGELOG_LATEST.md"
+    )
+
+    args = parser.parse_args()
+
+    changelog_content = generate_changelog(beta=args.beta)
 
     # Write to file for GitHub release
-    with open("CHANGELOG_LATEST.md", "w") as f:
+    with open(args.output, "w") as f:
         f.write(changelog_content)
 
-    print("✅ Changelog generated: CHANGELOG_LATEST.md")
+    print(f"✅ Changelog generated: {args.output}")
     print("\nPreview:")
     print("=" * 50)
     print(changelog_content)
