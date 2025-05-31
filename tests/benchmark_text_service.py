@@ -27,8 +27,8 @@ def sample_text_10kb():
     import os
 
     if os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
-        # Use smaller sample in CI to prevent memory issues
-        repetitions = 50
+        # Use moderate sample in CI for stable benchmarks (not too small to avoid variance)
+        repetitions = 100  # Increased from 50 for more stable results
     else:
         # Use full size for local development
         repetitions = 10000 // len(base_text) + 1
