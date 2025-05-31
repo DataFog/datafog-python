@@ -126,9 +126,9 @@ jobs:
           echo "Running integration tests..."
           python run_tests.py -m integration --no-header
           
-          # Run benchmark tests with segfault protection
-          echo "Running benchmark tests with safeguards..."
-          python run_tests.py tests/benchmark_text_service.py --no-header
+          # Run benchmark tests with optimal performance (no memory debugging)
+          echo "Running benchmark tests with performance optimizations..."
+          OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python -m pytest tests/benchmark_text_service.py -v --no-header
 
       - name: Build package
         run: |

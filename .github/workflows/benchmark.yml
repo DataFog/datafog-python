@@ -39,11 +39,14 @@ jobs:
 
       - name: Run benchmarks and save baseline
         env:
-          CI: true
-          GITHUB_ACTIONS: true
+          # DO NOT set CI=true or GITHUB_ACTIONS=true here to avoid memory optimization slowdowns
+          # Set optimal performance environment for benchmarks
+          OMP_NUM_THREADS: 4
+          MKL_NUM_THREADS: 4
+          OPENBLAS_NUM_THREADS: 4
         run: |
-          # Run benchmarks with segfault protection and save results
-          echo "Running benchmarks with memory optimizations..."
+          # Run benchmarks with optimal performance settings (no memory debugging)
+          echo "Running benchmarks with performance-optimized settings..."
           python -m pytest tests/benchmark_text_service.py -v --benchmark-autosave --benchmark-json=benchmark-results.json --tb=short
 
       - name: Check for performance regression
