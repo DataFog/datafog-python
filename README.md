@@ -76,12 +76,23 @@ pip install datafog[all]                # Everything included
 ```python
 from datafog import DataFog
 
-# Simple detection
+# Simple detection (uses fast regex engine)
 detector = DataFog()
 text = "Contact John Doe at john.doe@company.com or (555) 123-4567"
 results = detector.scan_text(text)
 print(results)
 # Finds: emails, phone numbers, and more
+
+# Modern NER with GLiNER (requires: pip install datafog[nlp-advanced])
+from datafog.services import TextService
+gliner_service = TextService(engine="gliner")
+result = gliner_service.annotate_text_sync("Dr. John Smith works at General Hospital")
+# Detects: PERSON, ORGANIZATION with high accuracy
+
+# Best of both worlds: Smart cascading (recommended for production)
+smart_service = TextService(engine="smart")
+result = smart_service.annotate_text_sync("Contact john@company.com or call (555) 123-4567")
+# Uses regex for structured PII (fast), GLiNER for entities (accurate)
 ```
 
 **Anonymize on the fly:**
