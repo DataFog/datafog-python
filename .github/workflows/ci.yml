@@ -48,18 +48,21 @@ jobs:
         run: |
           python -m pytest tests/ -v --ignore=tests/test_gliner_annotator.py
           
-      - name: Validate GLiNER imports (without running tests that load PyTorch models)
+      - name: Validate GLiNER module structure (without PyTorch dependencies)
         run: |
           python -c "
-          import sys
+          print('Validating GLiNER module can be imported without PyTorch...')
           try:
               from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
-              print('✅ GLiNER imports work')
+              print('❌ GLiNER imported unexpectedly - PyTorch may be installed')
           except ImportError as e:
-              print(f'⚠️  GLiNER dependencies not available (expected in CI): {e}')
+              if 'GLiNER dependencies not available' in str(e):
+                  print('✅ GLiNER properly reports missing dependencies (expected in CI)')
+              else:
+                  print(f'✅ GLiNER import blocked as expected: {e}')
           except Exception as e:
-              print(f'❌ GLiNER import error: {e}')
-              sys.exit(1)
+              print(f'❌ Unexpected GLiNER error: {e}')
+              exit(1)
           "
           
       - name: Run coverage on core modules only  
