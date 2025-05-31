@@ -4,8 +4,9 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as f:
     long_description = f.read()
 
-# Use a single source of truth for the version
-version = "4.2.0"
+# Use a single source of truth for the version from __about__.py
+exec(open("datafog/__about__.py").read())
+version = __version__  # noqa: F821
 
 project_urls = {
     "Homepage": "https://datafog.ai",
