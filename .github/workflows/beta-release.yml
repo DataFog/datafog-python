@@ -116,7 +116,6 @@ jobs:
 
           echo "beta_version=$BETA_VERSION" >> $GITHUB_OUTPUT
           sed -i "s/__version__ = \".*\"/__version__ = \"$BETA_VERSION\"/" datafog/__about__.py
-          sed -i "s/version=\".*\"/version=\"$BETA_VERSION\"/" setup.py
 
       - name: Generate changelog
         run: |
@@ -153,7 +152,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           BETA_VERSION="${{ steps.version.outputs.beta_version }}"
-          git add datafog/__about__.py setup.py
+          git add datafog/__about__.py
           git commit -m "chore: bump version to $BETA_VERSION for beta release"
           git tag -a "v$BETA_VERSION" -m "Beta release $BETA_VERSION"
           git push origin "v$BETA_VERSION"
