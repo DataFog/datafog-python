@@ -109,29 +109,26 @@ jobs:
         run: |
           python scripts/generate_changelog.py --beta --output BETA_CHANGELOG.md
 
-      - name: Run tests
+      - name: Run tests with segfault protection
         env:
-          # Control memory usage to prevent segmentation faults
-          PYTHONMALLOC: debug
-          # Limit the number of threads used by numpy/OpenMP
-          OMP_NUM_THREADS: 1
-          MKL_NUM_THREADS: 1
-          OPENBLAS_NUM_THREADS: 1
-          # Limit spaCy's memory usage
-          SPACY_MAX_THREADS: 1
+          # Memory optimization environment variables (set by run_tests.py)
+          CI: true
+          GITHUB_ACTIONS: true
         run: |
           # Print system memory info
           free -h || echo "free command not available"
           
-          # Split tests into smaller batches to avoid memory issues
-          python -m pytest tests/ -v --tb=short -k "not benchmark and not integration" --no-header
+          # Use our robust test runner that handles segfaults
+          echo "Running main tests with segfault protection..."
+          python run_tests.py tests/ -k "not benchmark and not integration" --no-header
           
-          # Run integration tests separately
-          python -m pytest -m integration -v --no-header
+          # Run integration tests separately with segfault protection
+          echo "Running integration tests..."
+          python run_tests.py -m integration --no-header
           
-          # Run benchmark tests with reduced sample size
-          python -c "print('Running memory-intensive benchmark tests with safeguards')"
-          python -m pytest tests/benchmark_text_service.py -v --no-header
+          # Run benchmark tests with segfault protection
+          echo "Running benchmark tests with safeguards..."
+          python run_tests.py tests/benchmark_text_service.py --no-header
 
       - name: Build package
         run: |
