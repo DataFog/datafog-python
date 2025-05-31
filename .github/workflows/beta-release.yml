@@ -86,23 +86,33 @@ jobs:
         id: version
         run: |
           set -e
+          
+          # Fetch all tags to ensure we have the complete tag history
+          git fetch --tags
+          
           CURRENT_VERSION=$(python -c "from datafog.__about__ import __version__; print(__version__)")
           echo "Current version: $CURRENT_VERSION"
 
+          # Extract base version (remove any alpha/beta suffix)
           if [[ $CURRENT_VERSION == *"b"* ]]; then
-            # Already a beta, increment beta number
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'b' -f1)
-            BETA_NUM=$(echo $CURRENT_VERSION | cut -d'b' -f2)
-            BETA_VERSION="${BASE_VERSION}b$((BETA_NUM + 1))"
           elif [[ $CURRENT_VERSION == *"a"* ]]; then
-            # Alpha version, convert to beta
             BASE_VERSION=$(echo $CURRENT_VERSION | cut -d'a' -f1)
-            BETA_VERSION="${BASE_VERSION}b1"
           else
-            # Stable version - create beta of current version for unreleased features
-            # Don't auto-increment minor version; use current version for beta testing
-            BETA_VERSION="${CURRENT_VERSION}b1"
+            BASE_VERSION=$CURRENT_VERSION
           fi
+
+          echo "Base version: $BASE_VERSION"
+
+          # Find the next available beta version by checking existing tags
+          BETA_NUM=1
+          while git tag -l "v${BASE_VERSION}b${BETA_NUM}" | grep -q "v${BASE_VERSION}b${BETA_NUM}"; do
+            echo "Tag v${BASE_VERSION}b${BETA_NUM} already exists"
+            BETA_NUM=$((BETA_NUM + 1))
+          done
+
+          BETA_VERSION="${BASE_VERSION}b${BETA_NUM}"
+          echo "Next available beta version: $BETA_VERSION"
 
           echo "beta_version=$BETA_VERSION" >> $GITHUB_OUTPUT
           sed -i "s/__version__ = \".*\"/__version__ = \"$BETA_VERSION\"/" datafog/__about__.py
