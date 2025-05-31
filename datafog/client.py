@@ -110,21 +110,41 @@ def show_config():
 
 
 @app.command()
-def download_model(model_name: str = typer.Argument(None, help="Model to download")):
+def download_model(
+    model_name: str = typer.Argument(..., help="Model to download"),
+    engine: str = typer.Option("spacy", help="Engine type (spacy, gliner)"),
+):
     """
-    Download a spaCy model.
+    Download a model for specified engine.
 
-    Args:
-        model_name: Name of the model to download.
-
-    Prints a confirmation message after downloading.
+    Examples:
+        spaCy: datafog download-model en_core_web_sm --engine spacy
+        GLiNER: datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
     """
-    if not model_name:
-        typer.echo("No model name provided to download.")
+    if engine == "spacy":
+        SpacyAnnotator.download_model(model_name)
+        typer.echo(f"SpaCy model {model_name} downloaded successfully.")
+
+    elif engine == "gliner":
+        try:
+            from datafog.processing.text_processing.gliner_annotator import (
+                GLiNERAnnotator,
+            )
+
+            GLiNERAnnotator.download_model(model_name)
+            typer.echo(f"GLiNER model {model_name} downloaded and cached successfully.")
+        except ImportError:
+            typer.echo(
+                "GLiNER not available. Install with: pip install datafog[nlp-advanced]"
+            )
+            raise typer.Exit(code=1)
+        except Exception as e:
+            typer.echo(f"Error downloading GLiNER model {model_name}: {str(e)}")
+            raise typer.Exit(code=1)
+
+    else:
+        typer.echo(f"Unknown engine: {engine}. Supported engines: spacy, gliner")
         raise typer.Exit(code=1)
-
-    SpacyAnnotator.download_model(model_name)
-    typer.echo(f"Model {model_name} downloaded.")
 
 
 @app.command()
@@ -156,6 +176,42 @@ def list_spacy_models():
     """
     annotator = SpacyAnnotator()
     typer.echo(annotator.list_models())
+
+
+@app.command()
+def list_models(
+    engine: str = typer.Option(
+        "spacy", help="Engine to list models for (spacy, gliner)"
+    )
+):
+    """
+    List available models for specified engine.
+
+    Examples:
+        datafog list-models --engine spacy
+        datafog list-models --engine gliner
+    """
+    if engine == "spacy":
+        annotator = SpacyAnnotator()
+        typer.echo("Available spaCy models:")
+        typer.echo(annotator.list_models())
+
+    elif engine == "gliner":
+        typer.echo("Popular GLiNER models:")
+        models = [
+            "urchade/gliner_base (recommended starting point)",
+            "urchade/gliner_multi_pii-v1 (specialized for PII detection)",
+            "urchade/gliner_large-v2 (higher accuracy)",
+            "knowledgator/modern-gliner-bi-large-v1.0 (4x faster, modern)",
+            "urchade/gliner_medium-v2.1 (balanced size/performance)",
+        ]
+        for model in models:
+            typer.echo(f"  • {model}")
+        typer.echo("\nSee more at: https://huggingface.co/models?search=gliner")
+
+    else:
+        typer.echo(f"Unknown engine: {engine}. Supported engines: spacy, gliner")
+        raise typer.Exit(code=1)
 
 
 @app.command()

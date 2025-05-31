@@ -112,7 +112,7 @@ def test_show_config(mock_get_config):
 def test_download_model(mock_download_model):
     result = runner.invoke(app, ["download-model", "en_core_web_sm"])
     assert result.exit_code == 0
-    assert "Model en_core_web_sm downloaded" in result.stdout
+    assert "SpaCy model en_core_web_sm downloaded successfully" in result.stdout
     mock_download_model.assert_called_once_with("en_core_web_sm")
 
 

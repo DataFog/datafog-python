@@ -31,10 +31,14 @@ results = DataFog().scan_text("John's email is john@example.com and SSN is 123-4
 
 ### Performance Comparison
 
-| Engine                | 10KB Text Processing | Relative Speed  |
-| --------------------- | -------------------- | --------------- |
-| **DataFog (Pattern)** | ~4ms                 | **123x faster** |
-| spaCy                 | ~480ms               | baseline        |
+| Engine               | 10KB Text Processing | Relative Speed  | Accuracy          |
+| -------------------- | -------------------- | --------------- | ----------------- |
+| **DataFog (Regex)**  | ~2.4ms               | **190x faster** | High (structured) |
+| **DataFog (GLiNER)** | ~15ms                | **32x faster**  | Very High         |
+| **DataFog (Smart)**  | ~3-15ms              | **60x faster**  | Highest           |
+| spaCy                | ~459ms               | baseline        | Good              |
+
+_Performance measured on 13.3KB business document. GLiNER provides excellent accuracy for named entities while maintaining speed advantage._
 
 ### Supported PII Types
 
@@ -55,7 +59,14 @@ results = DataFog().scan_text("John's email is john@example.com and SSN is 123-4
 ### Installation
 
 ```bash
+# Lightweight core (fast regex-based PII detection)
 pip install datafog
+
+# With advanced ML models for better accuracy
+pip install datafog[nlp]                # spaCy for advanced NLP
+pip install datafog[nlp-advanced]       # GLiNER for modern NER
+pip install datafog[ocr]                # Image processing with OCR
+pip install datafog[all]                # Everything included
 ```
 
 ### Basic Usage
@@ -65,12 +76,23 @@ pip install datafog
 ```python
 from datafog import DataFog
 
-# Simple detection
+# Simple detection (uses fast regex engine)
 detector = DataFog()
 text = "Contact John Doe at john.doe@company.com or (555) 123-4567"
 results = detector.scan_text(text)
 print(results)
 # Finds: emails, phone numbers, and more
+
+# Modern NER with GLiNER (requires: pip install datafog[nlp-advanced])
+from datafog.services import TextService
+gliner_service = TextService(engine="gliner")
+result = gliner_service.annotate_text_sync("Dr. John Smith works at General Hospital")
+# Detects: PERSON, ORGANIZATION with high accuracy
+
+# Best of both worlds: Smart cascading (recommended for production)
+smart_service = TextService(engine="smart")
+result = smart_service.annotate_text_sync("Contact john@company.com or call (555) 123-4567")
+# Uses regex for structured PII (fast), GLiNER for entities (accurate)
 ```
 
 **Anonymize on the fly:**
@@ -119,14 +141,45 @@ Choose the appropriate engine for your needs:
 ```python
 from datafog.services import TextService
 
-# Pattern: Fast, pattern-based (recommended)
-pattern_service = TextService(engine="pattern")
+# Regex: Fast, pattern-based (recommended for speed)
+regex_service = TextService(engine="regex")
 
-# spaCy: Comprehensive NLP with broader entity recognition
+# spaCy: Traditional NLP with broad entity recognition
 spacy_service = TextService(engine="spacy")
 
-# Auto: Combines both - tries pattern first, falls back to spaCy
-auto_service = TextService(engine="auto")  # Default
+# GLiNER: Modern ML model optimized for NER (requires nlp-advanced extra)
+gliner_service = TextService(engine="gliner")
+
+# Smart: Cascading approach - regex → GLiNER → spaCy (best accuracy/speed balance)
+smart_service = TextService(engine="smart")
+
+# Auto: Regex → spaCy fallback (legacy)
+auto_service = TextService(engine="auto")
+```
+
+**Performance & Accuracy Guide:**
+
+| Engine   | Speed       | Accuracy | Use Case                        | Install Requirements                |
+| -------- | ----------- | -------- | ------------------------------- | ----------------------------------- |
+| `regex`  | 🚀 Fastest  | Good     | Structured PII (emails, phones) | Core only                           |
+| `gliner` | ⚡ Fast     | Better   | Modern NER, custom entities     | `pip install datafog[nlp-advanced]` |
+| `spacy`  | 🐌 Slower   | Good     | Traditional NLP entities        | `pip install datafog[nlp]`          |
+| `smart`  | ⚡ Balanced | Best     | Combines all approaches         | `pip install datafog[nlp-advanced]` |
+
+**Model Management:**
+
+```python
+# Download specific GLiNER models
+import subprocess
+
+# PII-specialized model (recommended)
+subprocess.run(["datafog", "download-model", "urchade/gliner_multi_pii-v1", "--engine", "gliner"])
+
+# General-purpose model
+subprocess.run(["datafog", "download-model", "urchade/gliner_base", "--engine", "gliner"])
+
+# List available models
+subprocess.run(["datafog", "list-models", "--engine", "gliner"])
 ```
 
 ### Anonymization Options
