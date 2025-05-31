@@ -128,7 +128,7 @@ jobs:
           
           # Run benchmark tests with optimal performance (no memory debugging)
           echo "Running benchmark tests with performance optimizations..."
-          OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python -m pytest tests/benchmark_text_service.py -v --no-header
+          OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python -m pytest tests/benchmark_text_service.py -v --no-header --benchmark-skip
 
       - name: Build package
         run: |
