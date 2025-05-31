@@ -26,12 +26,14 @@ def sample_text_10kb():
     # Check if running in CI environment
     import os
 
+    # For performance benchmarks, always use consistent moderate size for stable results
+    # regardless of environment to avoid performance variance from text size differences
     if os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
         # Use moderate sample in CI for stable benchmarks (not too small to avoid variance)
         repetitions = 100  # Increased from 50 for more stable results
     else:
-        # Use full size for local development
-        repetitions = 10000 // len(base_text) + 1
+        # Use moderate size for local development benchmarks too for consistency
+        repetitions = 100  # Keep consistent with CI for fair comparison
 
     return base_text * repetitions
 
