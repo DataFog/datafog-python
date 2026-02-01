@@ -10,20 +10,14 @@
 - **Production Ready**: Comprehensive testing, CI/CD, and performance validation
 
 ## Current Project Status
-**Version: 4.1.1** → **Targeting 4.2.0** with GLiNER integration
+**Version: 4.3.0**
 
 ### ✅ Recently Completed (Latest)
 - **GLiNER Integration**: Modern NER engine with PII-specialized models
-- **Smart Cascading**: Intelligent regex → GLiNER → spaCy progression  
+- **Smart Cascading**: Intelligent regex → GLiNER → spaCy progression
 - **Enhanced CLI**: Model management with `--engine` flags
 - **Performance Validation**: 190x regex, 32x GLiNER benchmarks confirmed
-- **Comprehensive Testing**: 87% pass rate (156/180 tests)
-
-### 🎯 Current Focus (v4.2.0)
-- **Final test cleanup**: Address remaining test failures
-- **GLiNER refinement**: Optimize cascading thresholds
-- **Documentation polish**: Update all GLiNER references
-- **Release preparation**: Version bump and changelog
+- **CI/CD Consolidation**: 7 workflows → 3 (ci, release, benchmark)
 
 ## Quick Development Setup
 
@@ -219,19 +213,31 @@ except ImportError:
 
 ## CI/CD & Release Process
 
-### Automated Validation
-- **Tests**: Python 3.10-3.12 across all platforms
-- **Performance**: Regression detection with 10% threshold
-- **Package Size**: <2MB core, <8MB full enforcement
-- **Pre-commit**: Code formatting and linting
+### Workflow Architecture (3 workflows)
 
-### Release Workflow
-1. **Feature complete**: All planned changes implemented
-2. **Tests passing**: Full CI green across all platforms  
-3. **Performance validated**: No regression in benchmarks
-4. **Documentation updated**: README, CHANGELOG, examples current
-5. **Version bump**: Update `__about__.py` and `setup.py`
-6. **Release tag**: Deploy via GitHub Actions
+| Workflow | Purpose | Trigger |
+|----------|---------|---------|
+| `ci.yml` | Lint + Test + Coverage + Wheel size | Push/PR to main/dev |
+| `release.yml` | Alpha/Beta/Stable publishing | Schedule + manual dispatch |
+| `benchmark.yml` | Performance benchmarks | Push/PR/weekly |
+
+### Release Cadence
+- **Alpha** (Mon-Wed 2AM UTC): Automatic from `dev`, date+commit versioning
+- **Beta** (Thursday 2AM UTC): Automatic from `dev`, incremental beta numbers
+- **Stable** (manual dispatch): From `main`, base version or override
+
+### Release Pipeline
+`determine-release` → `test` → `publish` → `cleanup`
+- Tests are a hard gate — no tests = no publish
+- Stable releases check out `main`; alpha/beta check out `dev`
+- Old alphas pruned to 7, betas to 5
+- `[skip ci]` in version bump commits to prevent loops
+
+### Pre-commit Hooks
+- **isort**, **black**, **flake8**, **ruff**: Code formatting and linting
+- **prettier**: Markdown, JSON, YAML formatting
+- **gitleaks**: Secret scanning
+- **pre-commit-hooks**: Large file checks, merge conflict detection, YAML validation
 
 ## Environment Variables
 ```bash
@@ -267,10 +273,10 @@ Before beginning any task please checkout a branch from `dev` and create a pull 
 - Consider model download time and caching strategies
 
 ### Release Preparation
-- Feature freeze by Thursday for Friday releases
+- Alpha/beta releases are automated via `release.yml` schedule
+- Stable releases: merge `dev` → `main`, then trigger `release.yml` with `stable` type
+- Use `dry_run: true` to validate before actual publish
 - Performance validation on realistic data sets
-- Cross-platform testing (Linux, macOS, Windows)
-- Community-facing documentation and examples
-- In Release Notes or Comments, do not reference that it was sauthored by Claude (all code is anonymously authored)
+- In Release Notes or Comments, do not reference that it was authored by Claude (all code is anonymously authored)
 
 This guide provides the essential information for DataFog development while maintaining focus on current priorities and recent GLiNER integration work.

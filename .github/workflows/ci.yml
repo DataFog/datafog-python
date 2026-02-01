@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, dev]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -20,7 +24,7 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
 
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -41,85 +45,37 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[all,dev]"
           pip install -r requirements-dev.txt
-          pip install -e ".[nlp,cli]"
           pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
 
-      - name: Run test suite (ignore segfault during cleanup)
+      - name: Run tests with segfault protection
         run: |
-          python -m pytest tests/ -v --ignore=tests/test_gliner_annotator.py || echo "Tests completed successfully, segfault during cleanup ignored"
-          
-      - name: Verify test results (check for test failures vs cleanup segfault)
-        run: |
-          # Run tests again to capture just the test results without letting segfault fail the job
-          python -m pytest tests/ -v --ignore=tests/test_gliner_annotator.py > test_results.txt 2>&1 || true
-          
-          # Check if tests actually passed
-          if grep -q "failed" test_results.txt; then
-            echo "❌ Tests actually failed:"
-            cat test_results.txt
-            exit 1
-          elif grep -q "passed" test_results.txt; then
-            echo "✅ Tests passed successfully (cleanup segfault ignored)"
-            grep "passed" test_results.txt
-          else
-            echo "⚠️ Unable to determine test status"
-            cat test_results.txt
-            exit 1
-          fi
-          
+          python run_tests.py tests/ --ignore=tests/test_gliner_annotator.py --cov-report=xml --cov-config=.coveragerc
+
       - name: Validate GLiNER module structure (without PyTorch dependencies)
         run: |
           python -c "
           print('Validating GLiNER module can be imported without PyTorch...')
           try:
               from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
-              print('❌ GLiNER imported unexpectedly - PyTorch may be installed')
+              print('GLiNER imported unexpectedly - PyTorch may be installed')
           except ImportError as e:
               if 'GLiNER dependencies not available' in str(e):
-                  print('✅ GLiNER properly reports missing dependencies (expected in CI)')
+                  print('GLiNER properly reports missing dependencies (expected in CI)')
               else:
-                  print(f'✅ GLiNER import blocked as expected: {e}')
+                  print(f'GLiNER import blocked as expected: {e}')
           except Exception as e:
-              print(f'❌ Unexpected GLiNER error: {e}')
+              print(f'Unexpected GLiNER error: {e}')
               exit(1)
           "
-          
-      - name: Run coverage
-        run: |
-          python -m pytest tests/ -v --ignore=tests/test_gliner_annotator.py --cov=datafog --cov-report=xml --cov-config=.coveragerc
 
       - name: Upload coverage
+        if: matrix.python-version == '3.10'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  test-core:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
-
-      - name: Install core dependencies only
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-          pip install pytest pytest-cov
-
-      - name: Test core functionality
-        run: |
-          python -c "from datafog import detect_pii, anonymize_text; print('Core API works')"
-          python -c "from datafog import detect, process; print('Legacy API works')"
-          python -m pytest tests/test_regex_annotator.py -v
 
   wheel-size:
     runs-on: ubuntu-latest
