@@ -294,6 +294,29 @@ async def redact_pii_middleware(request, call_next):
 
 ---
 
+## Privacy & Telemetry
+
+DataFog collects **anonymous** usage telemetry to help us understand which features are used and prioritize development. This data contains:
+
+- Function and engine usage (e.g., "regex" vs "gliner")
+- Coarse performance buckets (e.g., "10-100ms"), never exact timings
+- Error class names only (e.g., "ImportError"), never error messages or stack traces
+- A one-way hashed machine identifier — no IP addresses, usernames, or file paths
+
+**No text content, PII, or personally identifiable information is ever collected.**
+
+To opt out, set either environment variable before running DataFog:
+
+```bash
+export DATAFOG_NO_TELEMETRY=1
+# or
+export DO_NOT_TRACK=1
+```
+
+Telemetry uses only Python's standard library (`urllib.request`) — no additional dependencies are installed. All sends are fire-and-forget in background threads and will never affect performance or raise exceptions.
+
+---
+
 ## Common Use Cases
 
 ### Enterprise

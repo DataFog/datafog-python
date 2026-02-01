@@ -80,6 +80,19 @@ class TextService:
         elif engine == "smart":
             self._ensure_gliner_available()  # Smart mode requires GLiNER
 
+        try:
+            from datafog.telemetry import track_function_call
+
+            track_function_call(
+                function_name="TextService.__init__",
+                module="datafog.services.text_service",
+                engine=engine,
+                text_chunk_length=text_chunk_length,
+                gliner_model=gliner_model if engine in ("gliner", "smart") else None,
+            )
+        except Exception:
+            pass
+
     @property
     def regex_annotator(self):
         """Lazy-loaded regex annotator."""
@@ -345,17 +358,42 @@ class TextService:
         Returns:
             Dictionary mapping entity types to lists of entities, or list of Span objects
         """
+        import time as _time
+
+        _start = _time.monotonic()
+
         if len(text) <= self.text_chunk_length:
             # Single chunk processing
-            return self._annotate_single_chunk(text, structured)
+            result = self._annotate_single_chunk(text, structured)
         else:
             # Multi-chunk processing
             chunks = self._chunk_text(text)
 
             if structured:
-                return self._annotate_multiple_chunks_structured(chunks)
+                result = self._annotate_multiple_chunks_structured(chunks)
             else:
-                return self._annotate_multiple_chunks_dict(chunks)
+                result = self._annotate_multiple_chunks_dict(chunks)
+
+        try:
+            from datafog.telemetry import (
+                _get_duration_bucket,
+                _get_text_length_bucket,
+                track_function_call,
+            )
+
+            _duration = (_time.monotonic() - _start) * 1000
+            track_function_call(
+                function_name="TextService.annotate_text_sync",
+                module="datafog.services.text_service",
+                engine=self.engine,
+                text_length_bucket=_get_text_length_bucket(len(text)),
+                structured=structured,
+                duration_ms_bucket=_get_duration_bucket(_duration),
+            )
+        except Exception:
+            pass
+
+        return result
 
     async def annotate_text_async(
         self, text: str, structured: bool = False

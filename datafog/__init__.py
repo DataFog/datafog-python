@@ -149,6 +149,11 @@ def detect(text: str) -> list:
         >>> detect("Contact john@example.com")
         [{'type': 'EMAIL', 'value': 'john@example.com', 'start': 8, 'end': 24}]
     """
+    import time as _time
+
+    _start = _time.monotonic()
+
+    _lazy_import_regex_annotator()
     annotator = RegexAnnotator()
     # Use the structured output to get proper positions
     _, result = annotator.annotate_with_spans(text)
@@ -165,6 +170,27 @@ def detect(text: str) -> list:
                     "end": span.end,
                 }
             )
+
+    try:
+        from .telemetry import (
+            _get_duration_bucket,
+            _get_text_length_bucket,
+            track_function_call,
+        )
+
+        _duration = (_time.monotonic() - _start) * 1000
+        entity_types = list({e["type"] for e in entities})
+        track_function_call(
+            function_name="detect",
+            module="datafog",
+            engine="regex",
+            text_length_bucket=_get_text_length_bucket(len(text)),
+            entity_count=len(entities),
+            entity_types_found=entity_types,
+            duration_ms_bucket=_get_duration_bucket(_duration),
+        )
+    except Exception:
+        pass
 
     return entities
 
@@ -190,6 +216,10 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
             'findings': [{'type': 'EMAIL', 'value': 'john@example.com', ...}]
         }
     """
+    import time as _time
+
+    _start = _time.monotonic()
+
     findings = detect(text)
 
     result = {"original": text, "findings": findings}
@@ -215,6 +245,21 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
             anonymized = anonymized[:start] + replacement + anonymized[end:]
 
         result["anonymized"] = anonymized
+
+    try:
+        from .telemetry import _get_duration_bucket, track_function_call
+
+        _duration = (_time.monotonic() - _start) * 1000
+        track_function_call(
+            function_name="process",
+            module="datafog",
+            anonymize=anonymize,
+            method=method,
+            entity_count=len(findings),
+            duration_ms_bucket=_get_duration_bucket(_duration),
+        )
+    except Exception:
+        pass
 
     return result
 

@@ -48,8 +48,26 @@ def scan_image(
     try:
         results = asyncio.run(ocr_client.run_ocr_pipeline(image_urls=image_urls))
         typer.echo(f"OCR Pipeline Results: {results}")
+
+        try:
+            from .telemetry import track_function_call
+
+            track_function_call(
+                function_name="scan_image",
+                module="datafog.client",
+                source="cli",
+                batch_size=len(image_urls),
+            )
+        except Exception:
+            pass
     except Exception as e:
         logging.exception("Error in run_ocr_pipeline")
+        try:
+            from .telemetry import track_error
+
+            track_error("scan_image", type(e).__name__, source="cli")
+        except Exception:
+            pass
         typer.echo(f"Error: {str(e)}", err=True)
         raise typer.Exit(code=1)
 
@@ -83,8 +101,27 @@ def scan_text(
     try:
         results = text_client.run_text_pipeline_sync(str_list=str_list)
         typer.echo(f"Text Pipeline Results: {results}")
+
+        try:
+            from .telemetry import track_function_call
+
+            track_function_call(
+                function_name="scan_text",
+                module="datafog.client",
+                source="cli",
+                batch_size=len(str_list),
+                operations=[op.value for op in operation_list],
+            )
+        except Exception:
+            pass
     except Exception as e:
         logging.exception("Text pipeline error")
+        try:
+            from .telemetry import track_error
+
+            track_error("scan_text", type(e).__name__, source="cli")
+        except Exception:
+            pass
         typer.echo(f"Error: {str(e)}", err=True)
         raise typer.Exit(code=1)
 
@@ -245,6 +282,18 @@ def redact_text(text: str = typer.Argument(None, help="Text to redact")):
     result = anonymizer.anonymize(text, annotations)
     typer.echo(result.anonymized_text)
 
+    try:
+        from .telemetry import track_function_call
+
+        track_function_call(
+            function_name="redact_text",
+            module="datafog.client",
+            source="cli",
+            method="redact",
+        )
+    except Exception:
+        pass
+
 
 @app.command()
 def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
@@ -265,6 +314,18 @@ def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
     annotations = annotator.annotate_text(text)
     result = anonymizer.anonymize(text, annotations)
     typer.echo(result.anonymized_text)
+
+    try:
+        from .telemetry import track_function_call
+
+        track_function_call(
+            function_name="replace_text",
+            module="datafog.client",
+            source="cli",
+            method="replace",
+        )
+    except Exception:
+        pass
 
 
 @app.command()
@@ -290,6 +351,19 @@ def hash_text(
     annotations = annotator.annotate_text(text)
     result = anonymizer.anonymize(text, annotations)
     typer.echo(result.anonymized_text)
+
+    try:
+        from .telemetry import track_function_call
+
+        track_function_call(
+            function_name="hash_text",
+            module="datafog.client",
+            source="cli",
+            method="hash",
+            hash_type=hash_type.value,
+        )
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

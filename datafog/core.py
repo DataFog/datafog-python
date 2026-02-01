@@ -30,6 +30,10 @@ def detect_pii(text: str) -> Dict[str, List[str]]:
         >>> print(result)
         {'EMAIL': ['john@example.com'], 'PHONE': ['(555) 123-4567']}
     """
+    import time as _time
+
+    _start = _time.monotonic()
+
     try:
         from datafog.services.text_service import TextService
 
@@ -46,9 +50,36 @@ def detect_pii(text: str) -> Dict[str, List[str]]:
                     pii_dict[entity_type] = []
                 pii_dict[entity_type].append(annotation.text)
 
+        try:
+            from datafog.telemetry import (
+                _get_duration_bucket,
+                _get_text_length_bucket,
+                track_function_call,
+            )
+
+            _duration = (_time.monotonic() - _start) * 1000
+            entity_count = sum(len(v) for v in pii_dict.values())
+            track_function_call(
+                function_name="detect_pii",
+                module="datafog.core",
+                engine="regex",
+                text_length_bucket=_get_text_length_bucket(len(text)),
+                entity_count=entity_count,
+                entity_types_found=list(pii_dict.keys()),
+                duration_ms_bucket=_get_duration_bucket(_duration),
+            )
+        except Exception:
+            pass
+
         return pii_dict
 
     except ImportError as e:
+        try:
+            from datafog.telemetry import track_error
+
+            track_error("detect_pii", type(e).__name__, engine="regex")
+        except Exception:
+            pass
         raise ImportError(
             "Core dependencies missing. Install with: pip install datafog[all]"
         ) from e
@@ -70,6 +101,11 @@ def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> 
         >>> print(result)
         "Contact [EMAIL_REDACTED]"
     """
+    import time as _time
+
+    _start = _time.monotonic()
+    _method_str = method if isinstance(method, str) else method.value
+
     try:
         from datafog.models.anonymizer import Anonymizer, AnonymizerType
         from datafog.services.text_service import TextService
@@ -109,9 +145,34 @@ def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> 
         # Create anonymizer and apply
         anonymizer = Anonymizer(anonymizer_type=method)
         result = anonymizer.anonymize(text, annotations)
+
+        try:
+            from datafog.telemetry import (
+                _get_duration_bucket,
+                _get_text_length_bucket,
+                track_function_call,
+            )
+
+            _duration = (_time.monotonic() - _start) * 1000
+            track_function_call(
+                function_name="anonymize_text",
+                module="datafog.core",
+                method=_method_str,
+                text_length_bucket=_get_text_length_bucket(len(text)),
+                duration_ms_bucket=_get_duration_bucket(_duration),
+            )
+        except Exception:
+            pass
+
         return result.anonymized_text
 
     except ImportError as e:
+        try:
+            from datafog.telemetry import track_error
+
+            track_error("anonymize_text", type(e).__name__, method=_method_str)
+        except Exception:
+            pass
         raise ImportError(
             "Core dependencies missing. Install with: pip install datafog[all]"
         ) from e
@@ -139,12 +200,28 @@ def scan_text(
         >>> print(entities)
         {'EMAIL': ['john@example.com']}
     """
+    import time as _time
+
+    _start = _time.monotonic()
+
     entities = detect_pii(text)
 
-    if return_entities:
-        return entities
-    else:
-        return len(entities) > 0
+    result = entities if return_entities else len(entities) > 0
+
+    try:
+        from datafog.telemetry import _get_duration_bucket, track_function_call
+
+        _duration = (_time.monotonic() - _start) * 1000
+        track_function_call(
+            function_name="scan_text",
+            module="datafog.core",
+            return_entities=return_entities,
+            duration_ms_bucket=_get_duration_bucket(_duration),
+        )
+    except Exception:
+        pass
+
+    return result
 
 
 def get_supported_entities() -> List[str]:
@@ -165,7 +242,19 @@ def get_supported_entities() -> List[str]:
         )
 
         annotator = RegexAnnotator()
-        return [entity.value for entity in annotator.supported_entities]
+        result = [entity.value for entity in annotator.supported_entities]
+
+        try:
+            from datafog.telemetry import track_function_call
+
+            track_function_call(
+                function_name="get_supported_entities",
+                module="datafog.core",
+            )
+        except Exception:
+            pass
+
+        return result
 
     except ImportError:
         # Fallback to basic list if imports fail
