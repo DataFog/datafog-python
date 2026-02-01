@@ -74,7 +74,9 @@ def generate_changelog(beta=False, alpha=False):
     if alpha:
         changelog = "# Alpha Release Notes\n\n"
         changelog += f"*Alpha Build: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
-        changelog += "⚠️ **This is an alpha build for early testing. Expect rough edges.**\n\n"
+        changelog += (
+            "⚠️ **This is an alpha build for early testing. Expect rough edges.**\n\n"
+        )
     elif beta:
         changelog = "# Beta Release Notes\n\n"
         changelog += f"*Beta Release: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
