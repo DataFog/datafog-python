@@ -1,12 +1,18 @@
 [run]
 source = datafog
-omit = 
+omit =
     */tests/*
     */test_*
     */__pycache__/*
     */venv/*
     */env/*
     setup.py
+    datafog/__init___lean.py
+    datafog/__init___original.py
+    datafog/main_lean.py
+    datafog/main_original.py
+    datafog/services/text_service_lean.py
+    datafog/services/text_service_original.py
 
 [report]
 exclude_lines =

@@ -50,6 +50,19 @@ class DataFog:
         self.logger.info(f"Hash Type: {hash_type}")
         self.logger.info(f"Anonymizer Type: {anonymizer_type}")
 
+        try:
+            from .telemetry import track_function_call
+
+            track_function_call(
+                function_name="DataFog.__init__",
+                module="datafog.main",
+                operations=[op.value for op in operations],
+                hash_type=hash_type.value,
+                anonymizer_type=anonymizer_type.value,
+            )
+        except Exception:
+            pass
+
     def run_text_pipeline_sync(self, str_list: List[str]) -> List[str]:
         """
         Run the text pipeline synchronously on a list of input text.
@@ -63,6 +76,9 @@ class DataFog:
         Raises:
             Exception: Any error encountered during the text processing.
         """
+        import time as _time
+
+        _start = _time.monotonic()
         try:
             self.logger.info(f"Starting text pipeline with {len(str_list)} texts.")
             if OperationType.SCAN in self.operations:
@@ -115,16 +131,42 @@ class DataFog:
                         )
                         anonymized_results.append(anonymized_result.anonymized_text)
 
-                    return anonymized_results
+                    _pipeline_result = anonymized_results
                 else:
-                    return annotated_text
+                    _pipeline_result = annotated_text
+            else:
+                self.logger.info(
+                    "No annotation or anonymization operation found; returning original texts."
+                )
+                _pipeline_result = str_list
 
-            self.logger.info(
-                "No annotation or anonymization operation found; returning original texts."
-            )
-            return str_list
+            try:
+                from .telemetry import _get_duration_bucket, track_function_call
+
+                _duration = (_time.monotonic() - _start) * 1000
+                track_function_call(
+                    function_name="DataFog.run_text_pipeline_sync",
+                    module="datafog.main",
+                    batch_size=len(str_list),
+                    operations=[op.value for op in self.operations],
+                    duration_ms_bucket=_get_duration_bucket(_duration),
+                )
+            except Exception:
+                pass
+
+            return _pipeline_result
         except Exception as e:
             self.logger.error(f"Error in run_text_pipeline_sync: {str(e)}")
+            try:
+                from .telemetry import track_error
+
+                track_error(
+                    "DataFog.run_text_pipeline_sync",
+                    type(e).__name__,
+                    engine="regex",
+                )
+            except Exception:
+                pass
             raise
 
     def detect(self, text: str) -> dict:
@@ -137,7 +179,32 @@ class DataFog:
         Returns:
             Dictionary mapping entity types to lists of found entities
         """
-        return self.regex_annotator.annotate(text)
+        import time as _time
+
+        _start = _time.monotonic()
+
+        result = self.regex_annotator.annotate(text)
+
+        try:
+            from .telemetry import (
+                _get_duration_bucket,
+                _get_text_length_bucket,
+                track_function_call,
+            )
+
+            _duration = (_time.monotonic() - _start) * 1000
+            entity_count = sum(len(v) for v in result.values())
+            track_function_call(
+                function_name="DataFog.detect",
+                module="datafog.main",
+                text_length_bucket=_get_text_length_bucket(len(text)),
+                entity_count=entity_count,
+                duration_ms_bucket=_get_duration_bucket(_duration),
+            )
+        except Exception:
+            pass
+
+        return result
 
     def process(
         self, text: str, anonymize: bool = False, method: str = "redact"
@@ -153,6 +220,10 @@ class DataFog:
         Returns:
             Dictionary with original text, anonymized text (if requested), and findings
         """
+        import time as _time
+
+        _start = _time.monotonic()
+
         annotations_dict = self.detect(text)
 
         result = {"original": text, "findings": annotations_dict}
@@ -192,6 +263,20 @@ class DataFog:
             )
             anonymized_result = temp_anonymizer.anonymize(text, annotation_results)
             result["anonymized"] = anonymized_result.anonymized_text
+
+        try:
+            from .telemetry import _get_duration_bucket, track_function_call
+
+            _duration = (_time.monotonic() - _start) * 1000
+            track_function_call(
+                function_name="DataFog.process",
+                module="datafog.main",
+                anonymize=anonymize,
+                method=method,
+                duration_ms_bucket=_get_duration_bucket(_duration),
+            )
+        except Exception:
+            pass
 
         return result
 
