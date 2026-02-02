@@ -61,7 +61,7 @@ def categorize_commits(commits):
     return categories
 
 
-def generate_changelog(beta=False):
+def generate_changelog(beta=False, alpha=False):
     """Generate changelog content."""
     latest_tag = get_latest_tag()
     commits = get_commits_since_tag(latest_tag)
@@ -71,7 +71,13 @@ def generate_changelog(beta=False):
 
     categories = categorize_commits(commits)
 
-    if beta:
+    if alpha:
+        changelog = "# Alpha Release Notes\n\n"
+        changelog += f"*Alpha Build: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
+        changelog += (
+            "⚠️ **This is an alpha build for early testing. Expect rough edges.**\n\n"
+        )
+    elif beta:
         changelog = "# Beta Release Notes\n\n"
         changelog += f"*Beta Release: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
         changelog += "⚠️ **This is a beta release for testing purposes.**\n\n"
@@ -129,6 +135,9 @@ def generate_changelog(beta=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate changelog for releases")
     parser.add_argument(
+        "--alpha", action="store_true", help="Generate alpha release changelog"
+    )
+    parser.add_argument(
         "--beta", action="store_true", help="Generate beta release changelog"
     )
     parser.add_argument(
@@ -137,7 +146,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    changelog_content = generate_changelog(beta=args.beta)
+    changelog_content = generate_changelog(beta=args.beta, alpha=args.alpha)
 
     # Write to file for GitHub release
     with open(args.output, "w") as f:
