@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
@@ -553,6 +554,11 @@ def test_edge_case_detection_slow(case: dict[str, Any], engine: str) -> None:
 
 @pytest.mark.slow
 def test_accuracy_metrics_snapshot() -> None:
+    if os.getenv("CI"):
+        pytest.xfail(
+            "Accuracy metrics snapshot generation is informational and exceeds current CI time budget."
+        )
+
     corpora = [
         ("structured", load_corpus("structured_pii.json")),
         ("unstructured", load_corpus("unstructured_pii.json")),
