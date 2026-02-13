@@ -58,6 +58,8 @@ docs/*
 !docs/conf.py
 !docs/Makefile
 !docs/make.bat
+!docs/audit/
+!docs/audit/**
 
 # Keep all directories but ignore their contents
 */**/__pycache__/

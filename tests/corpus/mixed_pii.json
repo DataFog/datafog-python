@@ -1,0 +1,482 @@
+[
+  {
+    "id": "clinical-note",
+    "input": "Patient Emily Johnson, DOB 03/15/1989, MRN 00987654. Email: emily.j@hospital.org. Primary physician: Dr. Robert Chen at (415) 555-0198.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Emily Johnson",
+        "start": 8,
+        "end": 21
+      },
+      {
+        "type": "DATE",
+        "text": "03/15/1989",
+        "start": 27,
+        "end": 37
+      },
+      {
+        "type": "EMAIL",
+        "text": "emily.j@hospital.org",
+        "start": 60,
+        "end": 80
+      },
+      {
+        "type": "PERSON",
+        "text": "Robert Chen",
+        "start": 105,
+        "end": 116
+      },
+      {
+        "type": "PHONE",
+        "text": "(415) 555-0198",
+        "start": 120,
+        "end": 134
+      }
+    ]
+  },
+  {
+    "id": "support-ticket",
+    "input": "Ticket from John Miller <john.miller@acme.com> says account 4111 1111 1111 1111 was charged twice.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "John Miller",
+        "start": 12,
+        "end": 23
+      },
+      {
+        "type": "EMAIL",
+        "text": "john.miller@acme.com",
+        "start": 25,
+        "end": 45
+      },
+      {
+        "type": "CREDIT_CARD",
+        "text": "4111 1111 1111 1111",
+        "start": 60,
+        "end": 79
+      }
+    ]
+  },
+  {
+    "id": "hr-record",
+    "input": "Employee: Priya Nair, SSN 123-45-6789, phone 555-222-3333, office Seattle.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Priya Nair",
+        "start": 10,
+        "end": 20
+      },
+      {
+        "type": "SSN",
+        "text": "123-45-6789",
+        "start": 26,
+        "end": 37
+      },
+      {
+        "type": "PHONE",
+        "text": "555-222-3333",
+        "start": 45,
+        "end": 57
+      },
+      {
+        "type": "LOCATION",
+        "text": "Seattle",
+        "start": 66,
+        "end": 73
+      }
+    ]
+  },
+  {
+    "id": "financial-note",
+    "input": "Wire beneficiary Apple Bank account 5500000000000004 due 2024-11-01.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "Apple Bank",
+        "start": 17,
+        "end": 27
+      },
+      {
+        "type": "CREDIT_CARD",
+        "text": "5500000000000004",
+        "start": 36,
+        "end": 52
+      },
+      {
+        "type": "DATE",
+        "text": "2024-11-01",
+        "start": 57,
+        "end": 67
+      }
+    ]
+  },
+  {
+    "id": "incident-log",
+    "input": "Alert: login by maria@corp.io from 203.0.113.10 at 2025-08-09.",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "maria@corp.io",
+        "start": 16,
+        "end": 29
+      },
+      {
+        "type": "IP_ADDRESS",
+        "text": "203.0.113.10",
+        "start": 35,
+        "end": 47
+      },
+      {
+        "type": "DATE",
+        "text": "2025-08-09",
+        "start": 51,
+        "end": 61
+      }
+    ]
+  },
+  {
+    "id": "json-payload",
+    "input": "{\"name\":\"Leo Wang\",\"email\":\"leo@sample.dev\",\"phone\":\"(212) 555-0100\"}",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Leo Wang",
+        "start": 9,
+        "end": 17
+      },
+      {
+        "type": "EMAIL",
+        "text": "leo@sample.dev",
+        "start": 28,
+        "end": 42
+      },
+      {
+        "type": "PHONE",
+        "text": "(212) 555-0100",
+        "start": 53,
+        "end": 67
+      }
+    ]
+  },
+  {
+    "id": "code-comment",
+    "input": "# Contact Sarah Connor at sarah.connor@example.net before deploy",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Sarah Connor",
+        "start": 10,
+        "end": 22
+      },
+      {
+        "type": "EMAIL",
+        "text": "sarah.connor@example.net",
+        "start": 26,
+        "end": 50
+      }
+    ]
+  },
+  {
+    "id": "markdown-row",
+    "input": "| Owner | Email |\n| Nina Patel | nina@co.com |",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Nina Patel",
+        "start": 20,
+        "end": 30
+      },
+      {
+        "type": "EMAIL",
+        "text": "nina@co.com",
+        "start": 33,
+        "end": 44
+      }
+    ]
+  },
+  {
+    "id": "ops-page",
+    "input": "Pager duty: Mike Ross, +1-555-777-8888, mike.ross@firm.com",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Mike Ross",
+        "start": 12,
+        "end": 21
+      },
+      {
+        "type": "PHONE",
+        "text": "+1-555-777-8888",
+        "start": 23,
+        "end": 38
+      },
+      {
+        "type": "EMAIL",
+        "text": "mike.ross@firm.com",
+        "start": 40,
+        "end": 58
+      }
+    ]
+  },
+  {
+    "id": "medical-summary",
+    "input": "Attending: Dr. Ana Silva, visit date 2023-07-12, call 555.111.2222.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Ana Silva",
+        "start": 15,
+        "end": 24
+      },
+      {
+        "type": "DATE",
+        "text": "2023-07-12",
+        "start": 37,
+        "end": 47
+      },
+      {
+        "type": "PHONE",
+        "text": "555.111.2222",
+        "start": 54,
+        "end": 66
+      }
+    ]
+  },
+  {
+    "id": "customer-chat",
+    "input": "Hi, I'm Kevin from Denver. Reach me at kevin@chat.io",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Kevin",
+        "start": 8,
+        "end": 13
+      },
+      {
+        "type": "LOCATION",
+        "text": "Denver",
+        "start": 19,
+        "end": 25
+      },
+      {
+        "type": "EMAIL",
+        "text": "kevin@chat.io",
+        "start": 39,
+        "end": 52
+      }
+    ]
+  },
+  {
+    "id": "passport-log",
+    "input": "Traveler Omar Aziz, passport X1234567, phone 5551234567.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Omar Aziz",
+        "start": 9,
+        "end": 18
+      },
+      {
+        "type": "PHONE",
+        "text": "5551234567",
+        "start": 45,
+        "end": 55
+      }
+    ]
+  },
+  {
+    "id": "invoice-line",
+    "input": "Bill to Acme Corp, ZIP 10001, card 4111111111111111.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "Acme Corp",
+        "start": 8,
+        "end": 17
+      },
+      {
+        "type": "ZIP_CODE",
+        "text": "10001",
+        "start": 23,
+        "end": 28
+      },
+      {
+        "type": "CREDIT_CARD",
+        "text": "4111111111111111",
+        "start": 35,
+        "end": 51
+      }
+    ]
+  },
+  {
+    "id": "chat-transcript",
+    "input": "User Laura sent from IP 10.0.0.2 and email laura@domain.ai",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Laura",
+        "start": 5,
+        "end": 10
+      },
+      {
+        "type": "IP_ADDRESS",
+        "text": "10.0.0.2",
+        "start": 24,
+        "end": 32
+      },
+      {
+        "type": "EMAIL",
+        "text": "laura@domain.ai",
+        "start": 43,
+        "end": 58
+      }
+    ]
+  },
+  {
+    "id": "ops-json",
+    "input": "{\"owner\":\"Raj Mehta\",\"ssn\":\"111-22-3333\"}",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Raj Mehta",
+        "start": 10,
+        "end": 19
+      },
+      {
+        "type": "SSN",
+        "text": "111-22-3333",
+        "start": 28,
+        "end": 39
+      }
+    ]
+  },
+  {
+    "id": "compliance",
+    "input": "Record for Maria Lopez born March 15, 1989 in Madrid.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Maria Lopez",
+        "start": 11,
+        "end": 22
+      },
+      {
+        "type": "DATE",
+        "text": "March 15, 1989",
+        "start": 28,
+        "end": 42
+      },
+      {
+        "type": "LOCATION",
+        "text": "Madrid",
+        "start": 46,
+        "end": 52
+      }
+    ]
+  },
+  {
+    "id": "two-contacts",
+    "input": "Contacts: Tim Cook tim@apple.com; Satya Nadella satya@microsoft.com",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Tim Cook",
+        "start": 10,
+        "end": 18
+      },
+      {
+        "type": "EMAIL",
+        "text": "tim@apple.com",
+        "start": 19,
+        "end": 32
+      },
+      {
+        "type": "PERSON",
+        "text": "Satya Nadella",
+        "start": 34,
+        "end": 47
+      },
+      {
+        "type": "EMAIL",
+        "text": "satya@microsoft.com",
+        "start": 48,
+        "end": 67
+      }
+    ]
+  },
+  {
+    "id": "server-audit",
+    "input": "Node 172.16.0.4 owned by Jane Doe, ticket janedoe@ops.org",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "172.16.0.4",
+        "start": 5,
+        "end": 15
+      },
+      {
+        "type": "PERSON",
+        "text": "Jane Doe",
+        "start": 25,
+        "end": 33
+      },
+      {
+        "type": "EMAIL",
+        "text": "janedoe@ops.org",
+        "start": 42,
+        "end": 57
+      }
+    ]
+  },
+  {
+    "id": "lab-order",
+    "input": "Order by Dr. Wei Zhang, patient ID 778899, callback (646) 555-9988",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Wei Zhang",
+        "start": 13,
+        "end": 22
+      },
+      {
+        "type": "PHONE",
+        "text": "(646) 555-9988",
+        "start": 52,
+        "end": 66
+      }
+    ]
+  },
+  {
+    "id": "cross-border",
+    "input": "Ship to 1600 Amphitheatre Parkway, Mountain View, CA 94043 for Google.",
+    "expected_entities": [
+      {
+        "type": "ADDRESS",
+        "text": "1600 Amphitheatre Parkway",
+        "start": 8,
+        "end": 33
+      },
+      {
+        "type": "LOCATION",
+        "text": "Mountain View",
+        "start": 35,
+        "end": 48
+      },
+      {
+        "type": "ZIP_CODE",
+        "text": "94043",
+        "start": 53,
+        "end": 58
+      },
+      {
+        "type": "ORGANIZATION",
+        "text": "Google",
+        "start": 63,
+        "end": 69
+      }
+    ]
+  }
+]

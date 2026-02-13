@@ -1,0 +1,737 @@
+[
+  {
+    "id": "email-simple",
+    "input": "Contact us at support@example.com for help.",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "support@example.com",
+        "start": 14,
+        "end": 33
+      }
+    ]
+  },
+  {
+    "id": "email-plus-addressing",
+    "input": "Send to john.doe+tag@company.co.uk please.",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "john.doe+tag@company.co.uk",
+        "start": 8,
+        "end": 34
+      }
+    ]
+  },
+  {
+    "id": "email-subdomain",
+    "input": "Route alerts to ops@alerts.eu.acme.io now.",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "ops@alerts.eu.acme.io",
+        "start": 16,
+        "end": 37
+      }
+    ]
+  },
+  {
+    "id": "email-uppercase",
+    "input": "Inbox owner: JANE.DOE@EXAMPLE.ORG",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "JANE.DOE@EXAMPLE.ORG",
+        "start": 13,
+        "end": 33
+      }
+    ]
+  },
+  {
+    "id": "email-international-tld",
+    "input": "Reach mario@azienda.italia today.",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "mario@azienda.italia",
+        "start": 6,
+        "end": 26
+      }
+    ]
+  },
+  {
+    "id": "email-minimal",
+    "input": "Use a@b.co for the test account.",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "a@b.co",
+        "start": 4,
+        "end": 10
+      }
+    ]
+  },
+  {
+    "id": "email-two-values",
+    "input": "Primary alpha@x.com secondary beta@y.net",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "alpha@x.com",
+        "start": 8,
+        "end": 19
+      },
+      {
+        "type": "EMAIL",
+        "text": "beta@y.net",
+        "start": 30,
+        "end": 40
+      }
+    ]
+  },
+  {
+    "id": "email-invalid-missing-domain",
+    "input": "This should not match: not-an-email@",
+    "expected_entities": []
+  },
+  {
+    "id": "email-invalid-at-alone",
+    "input": "This should not match: @alone",
+    "expected_entities": []
+  },
+  {
+    "id": "email-punctuation-boundary",
+    "input": "(billing-team@sub.domain.com), thanks",
+    "expected_entities": [
+      {
+        "type": "EMAIL",
+        "text": "billing-team@sub.domain.com",
+        "start": 1,
+        "end": 28
+      }
+    ]
+  },
+  {
+    "id": "phone-us-parentheses",
+    "input": "Call me at (555) 123-4567 tomorrow.",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "(555) 123-4567",
+        "start": 11,
+        "end": 25
+      }
+    ]
+  },
+  {
+    "id": "phone-us-dashes",
+    "input": "Main line 555-123-4567 is active.",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "555-123-4567",
+        "start": 10,
+        "end": 22
+      }
+    ]
+  },
+  {
+    "id": "phone-country-code",
+    "input": "Emergency +1-555-123-4567 now.",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "+1-555-123-4567",
+        "start": 10,
+        "end": 25
+      }
+    ]
+  },
+  {
+    "id": "phone-plain-digits",
+    "input": "Desk: 5551234567 ext 9",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "5551234567",
+        "start": 6,
+        "end": 16
+      }
+    ]
+  },
+  {
+    "id": "phone-dots",
+    "input": "Use 555.123.4567 during office hours",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "555.123.4567",
+        "start": 4,
+        "end": 16
+      }
+    ]
+  },
+  {
+    "id": "phone-international",
+    "input": "London office +44 20 7946 0958",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "+44 20 7946 0958",
+        "start": 14,
+        "end": 30
+      }
+    ]
+  },
+  {
+    "id": "phone-extension",
+    "input": "Dial 555-123-4567 x89",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "555-123-4567",
+        "start": 5,
+        "end": 17
+      }
+    ]
+  },
+  {
+    "id": "phone-false-product-code",
+    "input": "Part number: 555-123-4567-A",
+    "expected_entities": []
+  },
+  {
+    "id": "phone-false-zip",
+    "input": "ZIP 94105 is not a phone",
+    "expected_entities": []
+  },
+  {
+    "id": "phone-two-values",
+    "input": "Ops 555-000-1111, backup (555) 222-3333",
+    "expected_entities": [
+      {
+        "type": "PHONE",
+        "text": "555-000-1111",
+        "start": 4,
+        "end": 16
+      },
+      {
+        "type": "PHONE",
+        "text": "(555) 222-3333",
+        "start": 25,
+        "end": 39
+      }
+    ]
+  },
+  {
+    "id": "ssn-standard",
+    "input": "Employee SSN is 123-45-6789 on file.",
+    "expected_entities": [
+      {
+        "type": "SSN",
+        "text": "123-45-6789",
+        "start": 16,
+        "end": 27
+      }
+    ]
+  },
+  {
+    "id": "ssn-second-valid",
+    "input": "Backup SSN 987-65-4321 recorded.",
+    "expected_entities": [
+      {
+        "type": "SSN",
+        "text": "987-65-4321",
+        "start": 11,
+        "end": 22
+      }
+    ]
+  },
+  {
+    "id": "ssn-invalid-zero-group",
+    "input": "Invalid SSN 000-00-0000 should be ignored.",
+    "expected_entities": []
+  },
+  {
+    "id": "ssn-invalid-666-prefix",
+    "input": "Invalid SSN 666-12-9999 should be ignored.",
+    "expected_entities": []
+  },
+  {
+    "id": "ssn-no-dashes",
+    "input": "Legacy value 123456789 appears here.",
+    "expected_entities": [
+      {
+        "type": "SSN",
+        "text": "123456789",
+        "start": 13,
+        "end": 22
+      }
+    ]
+  },
+  {
+    "id": "ssn-spaced",
+    "input": "Suspicious token 123 45 6789 appears.",
+    "expected_entities": []
+  },
+  {
+    "id": "ssn-embedded",
+    "input": "SSN:123-45-6789;DOB:1990-01-01",
+    "expected_entities": [
+      {
+        "type": "SSN",
+        "text": "123-45-6789",
+        "start": 4,
+        "end": 15
+      }
+    ]
+  },
+  {
+    "id": "ssn-two-values",
+    "input": "Values 123-45-6789 and 111-22-3333",
+    "expected_entities": [
+      {
+        "type": "SSN",
+        "text": "123-45-6789",
+        "start": 7,
+        "end": 18
+      },
+      {
+        "type": "SSN",
+        "text": "111-22-3333",
+        "start": 23,
+        "end": 34
+      }
+    ]
+  },
+  {
+    "id": "ssn-too-short",
+    "input": "Bad SSN 123-45-678",
+    "expected_entities": []
+  },
+  {
+    "id": "ssn-too-long",
+    "input": "Bad SSN 123-45-67890",
+    "expected_entities": []
+  },
+  {
+    "id": "cc-visa-plain",
+    "input": "Card 4111111111111111 approved.",
+    "expected_entities": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "4111111111111111",
+        "start": 5,
+        "end": 21
+      }
+    ]
+  },
+  {
+    "id": "cc-mastercard-plain",
+    "input": "Card 5500000000000004 approved.",
+    "expected_entities": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "5500000000000004",
+        "start": 5,
+        "end": 21
+      }
+    ]
+  },
+  {
+    "id": "cc-amex-plain",
+    "input": "Card 340000000000009 approved.",
+    "expected_entities": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "340000000000009",
+        "start": 5,
+        "end": 20
+      }
+    ]
+  },
+  {
+    "id": "cc-visa-spaces",
+    "input": "Card 4111 1111 1111 1111 approved.",
+    "expected_entities": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "4111 1111 1111 1111",
+        "start": 5,
+        "end": 24
+      }
+    ]
+  },
+  {
+    "id": "cc-mastercard-dashes",
+    "input": "Card 5500-0000-0000-0004 approved.",
+    "expected_entities": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "5500-0000-0000-0004",
+        "start": 5,
+        "end": 24
+      }
+    ]
+  },
+  {
+    "id": "cc-amex-formatted",
+    "input": "Card 3400-000000-00009 approved.",
+    "expected_entities": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "3400-000000-00009",
+        "start": 5,
+        "end": 22
+      }
+    ]
+  },
+  {
+    "id": "cc-too-few",
+    "input": "Number 411111111111111 is too short.",
+    "expected_entities": []
+  },
+  {
+    "id": "cc-too-many",
+    "input": "Number 41111111111111111 is too long.",
+    "expected_entities": []
+  },
+  {
+    "id": "cc-random-digits",
+    "input": "Inventory code 1234567890123456 not card.",
+    "expected_entities": []
+  },
+  {
+    "id": "cc-two-values",
+    "input": "Cards 4111111111111111 and 5500000000000004",
+    "expected_entities": [
+      {
+        "type": "CREDIT_CARD",
+        "text": "4111111111111111",
+        "start": 6,
+        "end": 22
+      },
+      {
+        "type": "CREDIT_CARD",
+        "text": "5500000000000004",
+        "start": 27,
+        "end": 43
+      }
+    ]
+  },
+  {
+    "id": "ip-localhost",
+    "input": "Ping 127.0.0.1 for diagnostics.",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "127.0.0.1",
+        "start": 5,
+        "end": 14
+      }
+    ]
+  },
+  {
+    "id": "ip-private",
+    "input": "Server on 192.168.1.10 is online.",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "192.168.1.10",
+        "start": 10,
+        "end": 22
+      }
+    ]
+  },
+  {
+    "id": "ip-public",
+    "input": "DNS is 8.8.8.8 for this host.",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "8.8.8.8",
+        "start": 7,
+        "end": 14
+      }
+    ]
+  },
+  {
+    "id": "ip-zero",
+    "input": "Route to 0.0.0.0 is default.",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "0.0.0.0",
+        "start": 9,
+        "end": 16
+      }
+    ]
+  },
+  {
+    "id": "ip-max",
+    "input": "Broadcast 255.255.255.255 appears.",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "255.255.255.255",
+        "start": 10,
+        "end": 25
+      }
+    ]
+  },
+  {
+    "id": "ip-invalid-high-octet",
+    "input": "Invalid 256.1.1.1 should fail.",
+    "expected_entities": []
+  },
+  {
+    "id": "ip-invalid-short",
+    "input": "Invalid 192.168.1 should fail.",
+    "expected_entities": []
+  },
+  {
+    "id": "ip-invalid-alpha",
+    "input": "Invalid 10.0.one.2 should fail.",
+    "expected_entities": []
+  },
+  {
+    "id": "ip-two-values",
+    "input": "Hosts 10.0.0.1 and 172.16.0.5",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "10.0.0.1",
+        "start": 6,
+        "end": 14
+      },
+      {
+        "type": "IP_ADDRESS",
+        "text": "172.16.0.5",
+        "start": 19,
+        "end": 29
+      }
+    ]
+  },
+  {
+    "id": "ip-boundary-punctuation",
+    "input": "[203.0.113.9] in logs",
+    "expected_entities": [
+      {
+        "type": "IP_ADDRESS",
+        "text": "203.0.113.9",
+        "start": 1,
+        "end": 12
+      }
+    ]
+  },
+  {
+    "id": "date-us",
+    "input": "DOB 03/15/1989 recorded.",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "03/15/1989",
+        "start": 4,
+        "end": 14
+      }
+    ]
+  },
+  {
+    "id": "date-iso",
+    "input": "Date 1989-03-15 recorded.",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "1989-03-15",
+        "start": 5,
+        "end": 15
+      }
+    ]
+  },
+  {
+    "id": "date-month-name",
+    "input": "Meeting on March 15, 1989 was archived.",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "March 15, 1989",
+        "start": 11,
+        "end": 25
+      }
+    ]
+  },
+  {
+    "id": "date-slash-short",
+    "input": "Try 3/5/2020 for one entry.",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "3/5/2020",
+        "start": 4,
+        "end": 12
+      }
+    ]
+  },
+  {
+    "id": "date-dash-short",
+    "input": "Try 3-5-2020 for another entry.",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "3-5-2020",
+        "start": 4,
+        "end": 12
+      }
+    ]
+  },
+  {
+    "id": "date-year-only",
+    "input": "Fiscal year 2024 planning.",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "year 2024",
+        "start": 7,
+        "end": 16
+      }
+    ]
+  },
+  {
+    "id": "date-invalid-month",
+    "input": "Bad date 13/01/2020 should not match.",
+    "expected_entities": []
+  },
+  {
+    "id": "date-invalid-day",
+    "input": "Bad date 01/32/2020 should not match.",
+    "expected_entities": []
+  },
+  {
+    "id": "date-two-values",
+    "input": "Range 2020-01-01 to 2021-12-31",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "2020-01-01",
+        "start": 6,
+        "end": 16
+      },
+      {
+        "type": "DATE",
+        "text": "2021-12-31",
+        "start": 20,
+        "end": 30
+      }
+    ]
+  },
+  {
+    "id": "date-boundary",
+    "input": "1980-01-01 starts the string",
+    "expected_entities": [
+      {
+        "type": "DATE",
+        "text": "1980-01-01",
+        "start": 0,
+        "end": 10
+      }
+    ]
+  },
+  {
+    "id": "zip-five",
+    "input": "Ship to ZIP 94105 today.",
+    "expected_entities": [
+      {
+        "type": "ZIP_CODE",
+        "text": "94105",
+        "start": 12,
+        "end": 17
+      }
+    ]
+  },
+  {
+    "id": "zip-nine",
+    "input": "Ship to ZIP 94105-1234 today.",
+    "expected_entities": [
+      {
+        "type": "ZIP_CODE",
+        "text": "94105-1234",
+        "start": 12,
+        "end": 22
+      }
+    ]
+  },
+  {
+    "id": "zip-leading-zero",
+    "input": "ZIP 00501 is valid.",
+    "expected_entities": [
+      {
+        "type": "ZIP_CODE",
+        "text": "00501",
+        "start": 4,
+        "end": 9
+      }
+    ]
+  },
+  {
+    "id": "zip-max",
+    "input": "ZIP 99999 is valid.",
+    "expected_entities": [
+      {
+        "type": "ZIP_CODE",
+        "text": "99999",
+        "start": 4,
+        "end": 9
+      }
+    ]
+  },
+  {
+    "id": "zip-two-values",
+    "input": "ZIPs 10001 and 30301",
+    "expected_entities": [
+      {
+        "type": "ZIP_CODE",
+        "text": "10001",
+        "start": 5,
+        "end": 10
+      },
+      {
+        "type": "ZIP_CODE",
+        "text": "30301",
+        "start": 15,
+        "end": 20
+      }
+    ]
+  },
+  {
+    "id": "zip-invalid-short",
+    "input": "ZIP 1234 is invalid.",
+    "expected_entities": []
+  },
+  {
+    "id": "zip-invalid-long",
+    "input": "ZIP 123456 is invalid.",
+    "expected_entities": []
+  },
+  {
+    "id": "zip-invalid-plus4-short",
+    "input": "ZIP 12345-123 is invalid.",
+    "expected_entities": []
+  },
+  {
+    "id": "zip-invalid-plus4-long",
+    "input": "ZIP 12345-12345 is invalid.",
+    "expected_entities": []
+  },
+  {
+    "id": "zip-boundary",
+    "input": "94105, San Francisco",
+    "expected_entities": [
+      {
+        "type": "ZIP_CODE",
+        "text": "94105",
+        "start": 0,
+        "end": 5
+      }
+    ]
+  }
+]

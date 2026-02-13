@@ -9,6 +9,7 @@ Optional extras available for advanced features:
 """
 
 from .__about__ import __version__
+from .agent import create_guardrail, filter_output, sanitize, scan_prompt
 
 # Core API functions - always available (lightweight)
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
@@ -273,6 +274,10 @@ __all__ = [
     "anonymize_text",
     "scan_text",
     "get_supported_entities",
+    "sanitize",
+    "scan_prompt",
+    "filter_output",
+    "create_guardrail",
     "AnnotationResult",
     "AnnotatorRequest",
     "AnonymizationResult",

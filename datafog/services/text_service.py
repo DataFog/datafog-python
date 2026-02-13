@@ -6,6 +6,7 @@ and batch processing. SpaCy integration available as optional extra.
 """
 
 import asyncio
+import warnings
 from typing import TYPE_CHECKING, Dict, List, Union
 
 if TYPE_CHECKING:
@@ -71,14 +72,14 @@ class TextService:
         self._gliner_annotator = None
         self._spacy_import_attempted = False
         self._gliner_import_attempted = False
+        self._warned_missing_spacy = False
+        self._warned_missing_gliner = False
 
         # For engine-specific modes, validate dependencies at init time
         if engine == "spacy":
             self._ensure_spacy_available()
         elif engine == "gliner":
             self._ensure_gliner_available()
-        elif engine == "smart":
-            self._ensure_gliner_available()  # Smart mode requires GLiNER
 
         try:
             from datafog.telemetry import track_function_call
@@ -123,9 +124,7 @@ class TextService:
     def _ensure_spacy_available(self):
         """Ensure spaCy dependencies are available, raise ImportError if not."""
         try:
-            from datafog.processing.text_processing.spacy_pii_annotator import (  # noqa: F401
-                SpacyPIIAnnotator,
-            )
+            import spacy  # noqa: F401
         except ImportError:
             raise ImportError(
                 "SpaCy engine requires additional dependencies. "
@@ -135,9 +134,7 @@ class TextService:
     def _ensure_gliner_available(self):
         """Ensure GLiNER dependencies are available, raise ImportError if not."""
         try:
-            from datafog.processing.text_processing.gliner_annotator import (  # noqa: F401
-                GLiNERAnnotator,
-            )
+            from gliner import GLiNER  # noqa: F401
         except ImportError:
             raise ImportError(
                 "GLiNER engine requires additional dependencies. "
@@ -239,10 +236,26 @@ class TextService:
             if self._cascade_should_stop("gliner", gliner_result):
                 # Note: GLiNER doesn't support structured output yet, return dict
                 return gliner_result
+        elif not self._warned_missing_gliner:
+            warnings.warn(
+                "GLiNER not available, smart cascade will run without GLiNER. "
+                "Install with: pip install datafog[nlp-advanced]",
+                UserWarning,
+                stacklevel=2,
+            )
+            self._warned_missing_gliner = True
 
         # Stage 3: Fall back to spaCy (most comprehensive)
         if self.spacy_annotator is not None:
             return self.spacy_annotator.annotate(text)
+        if not self._warned_missing_spacy:
+            warnings.warn(
+                "SpaCy not available, smart cascade will run without spaCy. "
+                "Install with: pip install datafog[nlp]",
+                UserWarning,
+                stacklevel=2,
+            )
+            self._warned_missing_spacy = True
 
         # Return best available result
         if self.gliner_annotator is not None:
@@ -408,8 +421,8 @@ class TextService:
         Returns:
             Dictionary mapping entity types to lists of entities, or list of Span objects
         """
-        # For regex processing, we can just run synchronously since it's fast
-        return self.annotate_text_sync(text, structured)
+        # Run sync processing on a worker thread so async callers avoid event-loop blocking.
+        return await asyncio.to_thread(self.annotate_text_sync, text, structured)
 
     def batch_annotate_text_sync(self, texts: List[str]) -> List[Dict[str, List[str]]]:
         """

@@ -11,8 +11,9 @@ from typing import List
 import typer
 
 from .config import OperationType, get_config
+from .engine import scan_and_redact
 from .main import DataFog
-from .models.anonymizer import Anonymizer, AnonymizerType, HashType
+from .models.anonymizer import HashType
 from .models.spacy_nlp import SpacyAnnotator
 
 app = typer.Typer()
@@ -276,11 +277,8 @@ def redact_text(text: str = typer.Argument(None, help="Text to redact")):
         typer.echo("No text provided to redact.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator()
-    anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REDACT)
-    annotations = annotator.annotate_text(text)
-    result = anonymizer.anonymize(text, annotations)
-    typer.echo(result.anonymized_text)
+    result = scan_and_redact(text=text, engine="smart", strategy="token")
+    typer.echo(result.redacted_text)
 
     try:
         from .telemetry import track_function_call
@@ -309,11 +307,8 @@ def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
         typer.echo("No text provided to replace PII.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator()
-    anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REPLACE)
-    annotations = annotator.annotate_text(text)
-    result = anonymizer.anonymize(text, annotations)
-    typer.echo(result.anonymized_text)
+    result = scan_and_redact(text=text, engine="smart", strategy="pseudonymize")
+    typer.echo(result.redacted_text)
 
     try:
         from .telemetry import track_function_call
@@ -346,11 +341,10 @@ def hash_text(
         typer.echo("No text provided to hash.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator()
-    anonymizer = Anonymizer(anonymizer_type=AnonymizerType.HASH, hash_type=hash_type)
-    annotations = annotator.annotate_text(text)
-    result = anonymizer.anonymize(text, annotations)
-    typer.echo(result.anonymized_text)
+    # HashType is retained for backward-compatible CLI signature.
+    _ = hash_type
+    result = scan_and_redact(text=text, engine="smart", strategy="hash")
+    typer.echo(result.redacted_text)
 
     try:
         from .telemetry import track_function_call

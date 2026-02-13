@@ -27,54 +27,115 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
+        install-profile: ["core", "nlp", "nlp-advanced"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install Tesseract OCR
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tesseract-ocr libtesseract-dev
-
-      - name: Install dependencies
+      - name: Install base tooling
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[all,dev]"
-          pip install -r requirements-dev.txt
-          pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
+          pip install pytest pytest-cov coverage
 
-      - name: Run tests with segfault protection
+      - name: Install dependencies (core)
+        if: matrix.install-profile == 'core'
         run: |
-          python run_tests.py tests/ --ignore=tests/test_gliner_annotator.py --cov-report=xml --cov-config=.coveragerc
+          pip install -e ".[dev,cli]"
 
-      - name: Validate GLiNER module structure (without PyTorch dependencies)
+      - name: Install dependencies (nlp)
+        if: matrix.install-profile == 'nlp'
         run: |
-          python -c "
-          print('Validating GLiNER module can be imported without PyTorch...')
-          try:
-              from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
-              print('GLiNER imported unexpectedly - PyTorch may be installed')
-          except ImportError as e:
-              if 'GLiNER dependencies not available' in str(e):
-                  print('GLiNER properly reports missing dependencies (expected in CI)')
-              else:
-                  print(f'GLiNER import blocked as expected: {e}')
-          except Exception as e:
-              print(f'Unexpected GLiNER error: {e}')
-              exit(1)
-          "
+          pip install -e ".[dev,cli,nlp]"
+          python -m spacy download en_core_web_sm
+
+      - name: Install dependencies (nlp-advanced)
+        if: matrix.install-profile == 'nlp-advanced'
+        run: |
+          pip install -e ".[dev,cli,nlp,nlp-advanced]"
+          python -m spacy download en_core_web_sm
+
+      - name: Run tests (core)
+        if: matrix.install-profile == 'core'
+        run: |
+          pytest tests/ \
+            -m "not slow" \
+            --ignore=tests/test_gliner_annotator.py \
+            --ignore=tests/test_image_service.py \
+            --ignore=tests/test_ocr_integration.py \
+            --ignore=tests/test_spark_integration.py \
+            --ignore=tests/test_text_service_integration.py \
+            --cov=datafog \
+            --cov-branch \
+            --cov-report=xml \
+            --cov-report=term-missing
+
+      - name: Run tests (nlp)
+        if: matrix.install-profile == 'nlp'
+        run: |
+          pytest tests/ \
+            -m "not slow" \
+            --ignore=tests/test_gliner_annotator.py \
+            --ignore=tests/test_image_service.py \
+            --ignore=tests/test_ocr_integration.py \
+            --ignore=tests/test_spark_integration.py \
+            --cov=datafog \
+            --cov-branch \
+            --cov-report=xml \
+            --cov-report=term-missing
+
+      - name: Run tests (nlp-advanced)
+        if: matrix.install-profile == 'nlp-advanced'
+        run: |
+          pytest tests/ \
+            --ignore=tests/test_image_service.py \
+            --ignore=tests/test_ocr_integration.py \
+            --ignore=tests/test_spark_integration.py \
+            --cov=datafog \
+            --cov-branch \
+            --cov-report=xml \
+            --cov-report=term-missing
+
+      - name: Enforce coverage thresholds
+        if: matrix.python-version == '3.11' && matrix.install-profile == 'nlp-advanced'
+        run: |
+          python - <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse("coverage.xml").getroot()
+          line_rate = float(root.attrib.get("line-rate", 0.0))
+          branch_rate = float(root.attrib.get("branch-rate", 0.0))
+          line_pct = line_rate * 100
+          branch_pct = branch_rate * 100
+
+          print(f"Line coverage: {line_pct:.2f}%")
+          print(f"Branch coverage: {branch_pct:.2f}%")
+
+          if line_pct < 85:
+              print("Line coverage below 85% threshold.")
+              sys.exit(1)
+          if branch_pct < 75:
+              print("Branch coverage below 75% threshold.")
+              sys.exit(1)
+          PY
+
+      - name: Run detection accuracy corpus
+        if: matrix.python-version == '3.11' && matrix.install-profile == 'nlp-advanced'
+        run: |
+          pytest tests/test_detection_accuracy.py -v --tb=short
 
       - name: Upload coverage
-        if: matrix.python-version == '3.10'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml
+          flags: ${{ matrix.install-profile }}-py${{ matrix.python-version }}
           token: ${{ secrets.CODECOV_TOKEN }}
 
   wheel-size:

@@ -13,6 +13,7 @@ import logging
 from typing import List
 
 from .config import OperationType
+from .engine import scan, scan_and_redact
 from .models.anonymizer import Anonymizer, AnonymizerType, HashType
 from .processing.text_processing.regex_annotator import RegexAnnotator
 
@@ -40,13 +41,24 @@ class DataFog:
         anonymizer_type: AnonymizerType = AnonymizerType.REPLACE,
     ):
         self.regex_annotator = RegexAnnotator()
-        self.operations: List[OperationType] = operations
+        normalized_ops: List[OperationType] = []
+        for op in operations:
+            if isinstance(op, OperationType):
+                normalized_ops.append(op)
+            elif isinstance(op, str):
+                normalized_ops.append(OperationType(op.strip()))
+            else:
+                raise ValueError(f"Unsupported operation type: {type(op)!r}")
+
+        self.operations: List[OperationType] = normalized_ops
         self.anonymizer = Anonymizer(
             hash_type=hash_type, anonymizer_type=anonymizer_type
         )
+        self.hash_type = hash_type
+        self.anonymizer_type = anonymizer_type
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initializing lightweight DataFog class with regex engine")
-        self.logger.info(f"Operations: {operations}")
+        self.logger.info(f"Operations: {self.operations}")
         self.logger.info(f"Hash Type: {hash_type}")
         self.logger.info(f"Anonymizer Type: {anonymizer_type}")
 
@@ -56,14 +68,22 @@ class DataFog:
             track_function_call(
                 function_name="DataFog.__init__",
                 module="datafog.main",
-                operations=[op.value for op in operations],
+                operations=[op.value for op in self.operations],
                 hash_type=hash_type.value,
                 anonymizer_type=anonymizer_type.value,
             )
         except Exception:
             pass
 
-    def run_text_pipeline_sync(self, str_list: List[str]) -> List[str]:
+    async def run_ocr_pipeline(self, image_urls: List[str]) -> List[str]:
+        """Run OCR + text pipeline for CLI/backward compatibility."""
+        from .services.image_service import ImageService
+
+        image_service = ImageService()
+        extracted_text = await image_service.ocr_extract(image_urls)
+        return self.run_text_pipeline_sync(extracted_text)
+
+    def run_text_pipeline_sync(self, str_list: List[str]) -> List:
         """
         Run the text pipeline synchronously on a list of input text.
 
@@ -82,12 +102,7 @@ class DataFog:
         try:
             self.logger.info(f"Starting text pipeline with {len(str_list)} texts.")
             if OperationType.SCAN in self.operations:
-                annotated_text = []
-
-                for text in str_list:
-                    # Use regex annotator for core PII detection
-                    annotations = self.regex_annotator.annotate(text)
-                    annotated_text.append(annotations)
+                annotated_text = [self.detect(text) for text in str_list]
 
                 self.logger.info(
                     f"Text annotation completed with {len(annotated_text)} annotations."
@@ -101,35 +116,16 @@ class DataFog:
                         OperationType.HASH,
                     ]
                 ):
-                    # Convert to AnnotationResult format for anonymizer
-                    from .models.annotator import AnnotationResult
-                    from .models.common import AnnotatorMetadata
-
                     anonymized_results = []
                     for text in str_list:
-                        # Get structured annotations for this text
-                        _, structured_result = self.regex_annotator.annotate_with_spans(
-                            text
-                        )
-
-                        # Convert to AnnotationResult format
-                        annotation_results = []
-                        for span in structured_result.spans:
-                            annotation_results.append(
-                                AnnotationResult(
-                                    start=span.start,
-                                    end=span.end,
-                                    score=1.0,  # regex patterns have full confidence
-                                    entity_type=span.label,
-                                    recognition_metadata=AnnotatorMetadata(),
-                                )
-                            )
-
-                        # Anonymize this text
-                        anonymized_result = self.anonymizer.anonymize(
-                            text, annotation_results
-                        )
-                        anonymized_results.append(anonymized_result.anonymized_text)
+                        if OperationType.HASH in self.operations:
+                            method = "hash"
+                        elif OperationType.REPLACE in self.operations:
+                            method = "replace"
+                        else:
+                            method = "redact"
+                        process_result = self.process(text, anonymize=True, method=method)
+                        anonymized_results.append(process_result["anonymized"])
 
                     _pipeline_result = anonymized_results
                 else:
@@ -183,7 +179,12 @@ class DataFog:
 
         _start = _time.monotonic()
 
-        result = self.regex_annotator.annotate(text)
+        scan_result = scan(text=text, engine="regex")
+        result = {label: [] for label in RegexAnnotator.LABELS}
+        legacy_map = {"DATE": "DOB", "ZIP_CODE": "ZIP"}
+        for entity in scan_result.entities:
+            label = legacy_map.get(entity.type, entity.type)
+            result.setdefault(label, []).append(entity.text)
 
         try:
             from .telemetry import (
@@ -205,6 +206,10 @@ class DataFog:
             pass
 
         return result
+
+    def scan_text(self, text: str) -> dict:
+        """Backward-compatible alias for simple text scanning."""
+        return self.detect(text)
 
     def process(
         self, text: str, anonymize: bool = False, method: str = "redact"
@@ -229,40 +234,18 @@ class DataFog:
         result = {"original": text, "findings": annotations_dict}
 
         if anonymize:
-            # Get structured annotations for anonymizer
-            _, structured_result = self.regex_annotator.annotate_with_spans(text)
-
-            # Convert to AnnotationResult format expected by Anonymizer
-            from .models.annotator import AnnotationResult
-            from .models.common import AnnotatorMetadata
-
-            annotation_results = []
-            for span in structured_result.spans:
-                annotation_results.append(
-                    AnnotationResult(
-                        start=span.start,
-                        end=span.end,
-                        score=1.0,  # regex patterns have full confidence
-                        entity_type=span.label,
-                        recognition_metadata=AnnotatorMetadata(),
-                    )
-                )
-
-            if method == "redact":
-                anonymizer_type = AnonymizerType.REDACT
-            elif method == "replace":
-                anonymizer_type = AnonymizerType.REPLACE
-            elif method == "hash":
-                anonymizer_type = AnonymizerType.HASH
-            else:
-                anonymizer_type = AnonymizerType.REDACT
-
-            # Create a temporary anonymizer with the desired type
-            temp_anonymizer = Anonymizer(
-                anonymizer_type=anonymizer_type, hash_type=self.anonymizer.hash_type
+            strategy_map = {
+                "redact": "token",
+                "replace": "pseudonymize",
+                "hash": "hash",
+            }
+            strategy = strategy_map.get(method, "token")
+            redact_result = scan_and_redact(
+                text=text,
+                engine="regex",
+                strategy=strategy,
             )
-            anonymized_result = temp_anonymizer.anonymize(text, annotation_results)
-            result["anonymized"] = anonymized_result.anonymized_text
+            result["anonymized"] = redact_result.redacted_text
 
         try:
             from .telemetry import _get_duration_bucket, track_function_call
@@ -279,6 +262,17 @@ class DataFog:
             pass
 
         return result
+
+    def process_text(self, text: str):
+        """Backward-compatible helper mirroring pipeline behavior for one text."""
+        if not self.operations:
+            return text
+        if any(
+            op in self.operations
+            for op in [OperationType.REDACT, OperationType.REPLACE, OperationType.HASH]
+        ):
+            return self.run_text_pipeline_sync([text])[0]
+        return self.detect(text)
 
 
 class TextPIIAnnotator:

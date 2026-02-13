@@ -81,12 +81,11 @@ def test_redact_text_command(runner):
     result = runner.invoke(app, ["redact-text", test_text])
 
     assert result.exit_code == 0
-    # Check that PII has been redacted (replaced with [REDACTED])
-    assert "[REDACTED]" in result.stdout
+    # Check that PII has been redacted with token placeholders.
+    assert "[PERSON_" in result.stdout or "[EMAIL_" in result.stdout
     # The person name should be redacted
     assert "John Doe" not in result.stdout
-    # Note: The current implementation might not redact emails correctly
-    # This is a known limitation we're accepting for the smoke test
+    assert "john.doe@example.com" not in result.stdout
 
 
 @pytest.mark.integration

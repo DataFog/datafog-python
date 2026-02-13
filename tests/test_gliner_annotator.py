@@ -323,21 +323,18 @@ class TestTextServiceGLiNERIntegration:
                 TextService(engine="gliner")
 
     def test_text_service_smart_engine_without_dependencies(self):
-        """Test TextService smart engine raises ImportError when GLiNER dependencies missing."""
+        """Test smart engine degrades gracefully when GLiNER dependencies are missing."""
         from datafog.services.text_service import TextService
 
-        # Mock the _ensure_gliner_available method to raise ImportError
-        with patch.object(
-            TextService,
-            "_ensure_gliner_available",
-            side_effect=ImportError(
-                "GLiNER engine requires additional dependencies. Install with: pip install datafog[nlp-advanced]"
-            ),
-        ):
-            with pytest.raises(
-                ImportError, match="GLiNER engine requires additional dependencies"
-            ):
-                TextService(engine="smart")
+        with patch.object(TextService, "_create_gliner_annotator", return_value=None):
+            with patch.object(TextService, "_create_spacy_annotator", return_value=None):
+                service = TextService(engine="smart")
+                with pytest.warns(UserWarning, match="GLiNER not available"):
+                    result = service.annotate_text_sync(
+                        "John Doe from Acme Corporation needs follow up."
+                    )
+                assert "EMAIL" in result
+                assert result["EMAIL"] == []
 
     def test_text_service_valid_engines(self):
         """Test that all valid engines are accepted."""
