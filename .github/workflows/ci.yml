@@ -94,11 +94,24 @@ jobs:
         if: matrix.install-profile == 'nlp-advanced'
         run: |
           pytest tests/ \
+            -m "not slow" \
+            --ignore=tests/test_detection_accuracy.py \
             --ignore=tests/test_image_service.py \
             --ignore=tests/test_ocr_integration.py \
             --ignore=tests/test_spark_integration.py \
             --cov=datafog \
             --cov-branch \
+            --cov-report=xml \
+            --cov-report=term-missing
+
+      - name: Run detection accuracy corpus
+        if: matrix.python-version == '3.11' && matrix.install-profile == 'nlp-advanced'
+        run: |
+          pytest tests/test_detection_accuracy.py \
+            -v --tb=short \
+            --cov=datafog \
+            --cov-branch \
+            --cov-append \
             --cov-report=xml \
             --cov-report=term-missing
 
@@ -125,11 +138,6 @@ jobs:
               print("Branch coverage below 75% threshold.")
               sys.exit(1)
           PY
-
-      - name: Run detection accuracy corpus
-        if: matrix.python-version == '3.11' && matrix.install-profile == 'nlp-advanced'
-        run: |
-          pytest tests/test_detection_accuracy.py -v --tb=short
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5
