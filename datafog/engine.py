@@ -42,6 +42,13 @@ ALL_ENTITY_TYPES = {
 NER_ENTITY_TYPES = {"PERSON", "ORGANIZATION", "LOCATION", "ADDRESS"}
 
 
+@dataclass(frozen=True)
+class _UnavailableAnnotator:
+    """Cached marker used when an optional annotator cannot be initialized."""
+
+    message: str
+
+
 @dataclass
 class Entity:
     """A detected PII entity."""
@@ -146,12 +153,16 @@ def _regex_entities(text: str) -> list[Entity]:
 
 def _spacy_entities(text: str) -> list[Entity]:
     annotator = _get_spacy_annotator()
+    if isinstance(annotator, _UnavailableAnnotator):
+        raise EngineNotAvailable(annotator.message)
     payload = annotator.annotate(text)
     return _entities_from_dict(text, payload, engine="spacy", confidence=0.7)
 
 
 def _gliner_entities(text: str) -> list[Entity]:
     annotator = _get_gliner_annotator()
+    if isinstance(annotator, _UnavailableAnnotator):
+        raise EngineNotAvailable(annotator.message)
     payload = annotator.annotate(text)
     return _entities_from_dict(text, payload, engine="gliner", confidence=0.8)
 
@@ -160,36 +171,44 @@ def _gliner_entities(text: str) -> list[Entity]:
 def _get_spacy_annotator():
     try:
         from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
-    except ImportError as exc:
-        raise EngineNotAvailable(
+    except ImportError:
+        return _UnavailableAnnotator(
             "SpaCy engine requires the nlp extra. Install with: pip install datafog[nlp]"
-        ) from exc
+        )
 
     try:
         return SpacyPIIAnnotator.create()
-    except ImportError as exc:
-        raise EngineNotAvailable(
+    except ImportError:
+        return _UnavailableAnnotator(
             "SpaCy engine requires the nlp extra. Install with: pip install datafog[nlp]"
-        ) from exc
+        )
+    except Exception as exc:
+        return _UnavailableAnnotator(
+            f"SpaCy engine initialization failed: {type(exc).__name__}: {exc}"
+        )
 
 
 @lru_cache(maxsize=1)
 def _get_gliner_annotator():
     try:
         from .processing.text_processing.gliner_annotator import GLiNERAnnotator
-    except ImportError as exc:
-        raise EngineNotAvailable(
+    except ImportError:
+        return _UnavailableAnnotator(
             "GLiNER engine requires the nlp-advanced extra. "
             "Install with: pip install datafog[nlp-advanced]"
-        ) from exc
+        )
 
     try:
         annotator = GLiNERAnnotator.create()
-    except ImportError as exc:
-        raise EngineNotAvailable(
+    except ImportError:
+        return _UnavailableAnnotator(
             "GLiNER engine requires the nlp-advanced extra. "
             "Install with: pip install datafog[nlp-advanced]"
-        ) from exc
+        )
+    except Exception as exc:
+        return _UnavailableAnnotator(
+            f"GLiNER engine initialization failed: {type(exc).__name__}: {exc}"
+        )
 
     return annotator
 

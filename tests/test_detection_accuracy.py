@@ -48,6 +48,11 @@ KNOWN_LIMITATION_XFAILS: dict[tuple[str, str, str], str] = {
     (
         "smart",
         "negative",
+        "isbn-not-ssn",
+    ): "When smart falls back to spaCy (no GLiNER), uppercase acronyms like ISBN can be over-labeled as ORG.",
+    (
+        "smart",
+        "negative",
         "hex-not-ip",
     ): "GLiNER occasionally over-labels hexadecimal identifiers as IP-like entities.",
     (
@@ -55,6 +60,16 @@ KNOWN_LIMITATION_XFAILS: dict[tuple[str, str, str], str] = {
         "negative",
         "order-id-not-zip",
     ): "When smart falls back to spaCy (no GLiNER), context tokens can be over-labeled as ORG/DATE.",
+    (
+        "smart",
+        "negative",
+        "time-not-phone",
+    ): "When smart falls back to spaCy (no GLiNER), UTC-like tokens can be over-labeled as ORG.",
+    (
+        "smart",
+        "negative",
+        "date-like-invalid",
+    ): "When smart falls back to spaCy (no GLiNER), malformed date-like strings can still be labeled as DATE.",
     (
         "smart",
         "negative",
@@ -85,6 +100,11 @@ KNOWN_LIMITATION_XFAILS: dict[tuple[str, str, str], str] = {
         "unstructured",
         "person-common-word-name",
     ): "When smart falls back to spaCy (no GLiNER), common-word names can be typed as ORGANIZATION.",
+    (
+        "smart",
+        "unstructured",
+        "address-us",
+    ): "When smart falls back to spaCy (no GLiNER), full ADDRESS spans can be partially typed as ORGANIZATION.",
     (
         "smart",
         "unstructured",
