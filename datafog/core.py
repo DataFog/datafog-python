@@ -7,6 +7,7 @@ without requiring heavy dependencies like spaCy or PyTorch.
 
 from typing import Dict, List, Union
 
+from datafog.engine import scan, scan_and_redact
 from datafog.models.anonymizer import AnonymizerType
 
 # Engine types as constants
@@ -35,20 +36,15 @@ def detect_pii(text: str) -> Dict[str, List[str]]:
     _start = _time.monotonic()
 
     try:
-        from datafog.services.text_service import TextService
-
-        # Use lightweight regex engine only
-        service = TextService(engine=REGEX_ENGINE)
-        result = service.annotate_text_sync(text, structured=True)
-
-        # Convert to simple dictionary format, filtering out empty matches
-        pii_dict = {}
-        for annotation in result:
-            if annotation.text.strip():  # Only include non-empty matches
-                entity_type = annotation.label
-                if entity_type not in pii_dict:
-                    pii_dict[entity_type] = []
-                pii_dict[entity_type].append(annotation.text)
+        # Use engine boundary for canonical scan behavior.
+        scan_result = scan(text=text, engine=REGEX_ENGINE)
+        pii_dict: Dict[str, List[str]] = {}
+        for entity in scan_result.entities:
+            if not entity.text.strip():
+                continue
+            if entity.type not in pii_dict:
+                pii_dict[entity.type] = []
+            pii_dict[entity.type].append(entity.text)
 
         try:
             from datafog.telemetry import (
@@ -107,44 +103,24 @@ def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> 
     _method_str = method if isinstance(method, str) else method.value
 
     try:
-        from datafog.models.anonymizer import Anonymizer, AnonymizerType
-        from datafog.services.text_service import TextService
+        if isinstance(method, AnonymizerType):
+            method = method.value
 
-        # Convert string method to enum if needed
-        if isinstance(method, str):
-            method_map = {
-                "redact": AnonymizerType.REDACT,
-                "replace": AnonymizerType.REPLACE,
-                "hash": AnonymizerType.HASH,
-            }
-            if method not in method_map:
-                raise ValueError(
-                    f"Invalid method: {method}. Use 'redact', 'replace', or 'hash'"
-                )
-            method = method_map[method]
+        strategy_map = {
+            "redact": "token",
+            "replace": "pseudonymize",
+            "hash": "hash",
+        }
+        if method not in strategy_map:
+            raise ValueError(
+                f"Invalid method: {method}. Use 'redact', 'replace', or 'hash'"
+            )
 
-        # Use lightweight regex engine only
-        service = TextService(engine=REGEX_ENGINE)
-        span_results = service.annotate_text_sync(text, structured=True)
-
-        # Convert Span objects to AnnotationResult format for anonymizer, filtering empty matches
-        from datafog.models.annotator import AnnotationResult
-
-        annotations = []
-        for span in span_results:
-            if span.text.strip():  # Only include non-empty matches
-                annotation = AnnotationResult(
-                    entity_type=span.label,
-                    start=span.start,
-                    end=span.end,
-                    score=1.0,  # Regex matches are certain
-                    recognition_metadata=None,
-                )
-                annotations.append(annotation)
-
-        # Create anonymizer and apply
-        anonymizer = Anonymizer(anonymizer_type=method)
-        result = anonymizer.anonymize(text, annotations)
+        result = scan_and_redact(
+            text=text,
+            engine=REGEX_ENGINE,
+            strategy=strategy_map[method],
+        )
 
         try:
             from datafog.telemetry import (
@@ -164,7 +140,7 @@ def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> 
         except Exception:
             pass
 
-        return result.anonymized_text
+        return result.redacted_text
 
     except ImportError as e:
         try:
@@ -236,29 +212,27 @@ def get_supported_entities() -> List[str]:
         >>> print(entities)
         ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DOB', 'ZIP']
     """
+    result = [
+        "EMAIL",
+        "PHONE",
+        "SSN",
+        "CREDIT_CARD",
+        "IP_ADDRESS",
+        "DATE",
+        "ZIP_CODE",
+    ]
+
     try:
-        from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-            RegexAnnotator,
+        from datafog.telemetry import track_function_call
+
+        track_function_call(
+            function_name="get_supported_entities",
+            module="datafog.core",
         )
+    except Exception:
+        pass
 
-        annotator = RegexAnnotator()
-        result = [entity.value for entity in annotator.supported_entities]
-
-        try:
-            from datafog.telemetry import track_function_call
-
-            track_function_call(
-                function_name="get_supported_entities",
-                module="datafog.core",
-            )
-        except Exception:
-            pass
-
-        return result
-
-    except ImportError:
-        # Fallback to basic list if imports fail
-        return ["EMAIL", "PHONE", "SSN", "CREDIT_CARD", "IP_ADDRESS", "DOB", "ZIP"]
+    return result
 
 
 # Backward compatibility aliases

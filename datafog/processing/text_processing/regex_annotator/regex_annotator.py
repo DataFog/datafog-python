@@ -39,40 +39,52 @@ class RegexAnnotator:
             # Note: This is broader than the spec to catch more potential emails
             "EMAIL": re.compile(
                 r"""
-                [\w!#$%&'*+\-/=?^_`{|}~.]+  # Local part with special chars allowed
-                @                            # @ symbol
-                [\w\-.]+                     # Domain name with possible dots
-                \.[\w\-.]+                   # TLD with at least one dot
+                (?<![A-Za-z0-9._%+\-@])
+                (?![A-Za-z_]{2,20}=)
+                [A-Za-z0-9!#$%&*+\-/=^_`{|}~]
+                [A-Za-z0-9!#$%&'*+\-/=?^_`{|}~.]*
+                @
+                (?:\.?[A-Za-z0-9-]+\.)+
+                [A-Za-z]{2,}
+                (?=$|[^A-Za-z])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # Phone pattern - North American Numbering Plan (NANP) format
-            # Accepts formats: 555-555-5555, (555) 555-5555, +1 555 555 5555, 1-555-555-5555
-            # Note: Allows for various separators (dash, dot, space) and optional country code
+            # Accepts common US and international formats while avoiding IDs/product codes.
             "PHONE": re.compile(
                 r"""
-                (?:(?:\+|)1[-\.\s]?)?      # Optional country code (+1 or 1)
-                \(?\d{3}\)?                # Area code, optionally in parentheses
-                [-\.\s]?                   # Optional separator after area code
-                \d{3}                      # Exchange code
-                [-\.\s]?                   # Optional separator after exchange code
-                \d{4}                      # Subscriber number
+                (?<![A-Za-z0-9])
+                (?:
+                    # US/NANP patterns
+                    (?:(?:\+?1)[-\.\s]?)?
+                    (?:\(\d{3}\)|\d{3})
+                    [-\.\s]?
+                    \d{3}
+                    [-\.\s]?
+                    \d{4}
+                    |
+                    # International example formats, e.g., +44 20 7946 0958
+                    \+\d{1,3}
+                    [\s\-\.]?
+                    \d{1,4}
+                    (?:[\s\-\.]?\d{2,4}){2,3}
+                )
+                (?![-A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # SSN pattern - U.S. Social Security Number
-            # Format: XXX-XX-XXXX where XXX != 000, 666
-            # Note: Uses negative lookahead to reject invalid prefixes
+            # Supports dashed and no-dash formats.
             "SSN": re.compile(
                 r"""
-                \b                          # Word boundary
-                (?!000|666)                # Reject 000 and 666 prefixes
-                \d{3}                      # First 3 digits
-                -                          # Hyphen separator
-                \d{2}                      # Middle 2 digits
-                -                          # Hyphen separator
-                \d{4}                      # Last 4 digits
-                \b                          # Word boundary
+                (?<!\d)
+                (?:
+                    (?!000|666)\d{3}-(?!00)\d{2}-(?!0000)\d{4}
+                    |
+                    (?!000|666)\d{3}(?!00)\d{2}(?!0000)\d{4}
+                )
+                (?!\d)
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -102,39 +114,51 @@ class RegexAnnotator:
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
-            # IP Address pattern - IPv4 and IPv6
-            # IPv4: 4 octets of numbers 0-255 separated by dots
-            # IPv6: 8 groups of 1-4 hex digits separated by colons, with possible compression
-            # Note: Validates IPv4 octets to be in valid range (0-255)
+            # IP Address pattern - strict IPv4 only.
             "IP_ADDRESS": re.compile(
                 r"""
+                \b
                 (?:
-                    # IPv4 address pattern
-                    \b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b
-                    |
-                    # Simple IPv6 pattern that matches all valid formats including compressed ones
-                    \b(?:[0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}\b
+                    (?:25[0-5]|2[0-4]\d|1?\d?\d)\.
+                    (?:25[0-5]|2[0-4]\d|1?\d?\d)\.
+                    (?:25[0-5]|2[0-4]\d|1?\d?\d)\.
+                    (?:25[0-5]|2[0-4]\d|1?\d?\d)
                 )
+                \b
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
-            # Date of Birth pattern - supports MM/DD/YYYY, M/D/YYYY, MM-DD-YYYY, and YYYY-MM-DD formats
-            # Note: Validates that month is 01-12 and day is 01-31
+            # Date pattern - supports numeric formats, month names, and year-only.
             "DOB": re.compile(
                 r"""
                 \b
                 (?:
-                    (?:0?[1-9]|1[0-2])                     # Month: 1-12
-                    [/-]                                    # Separator (/ or -)
-                    (?:0?[1-9]|[12][0-9]|3[01])            # Day: 1-31
-                    [/-]                                    # Separator (/ or -)
-                    (?:\d{2}|\d{4})                        # Year: 2 or 4 digits
+                    (?:0?[1-9]|1[0-2])
+                    [/-]
+                    (?:0?[1-9]|[12][0-9]|3[01])
+                    [/-]
+                    (?:\d{2}|\d{4})
                     |
-                    (?:\d{4})                              # Year: 4 digits (ISO format)
-                    -                                       # Separator (-)
-                    (?:0?[1-9]|1[0-2])                     # Month: 1-12
-                    -                                       # Separator (-)
-                    (?:0?[1-9]|[12][0-9]|3[01])            # Day: 1-31
+                    (?:\d{4})
+                    -
+                    (?:0?[1-9]|1[0-2])
+                    -
+                    (?:0?[1-9]|[12][0-9]|3[01])
+                    |
+                    (?:
+                        Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|
+                        Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?
+                    )
+                    \s+
+                    (?:0?[1-9]|[12][0-9]|3[01])
+                    ,\s+
+                    (?:19|20)\d{2}
+                    |
+                    (?:
+                        year
+                    )
+                    \s+
+                    (?:19|20)\d{2}
                 )
                 \b
                 """,

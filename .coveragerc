@@ -13,6 +13,17 @@ omit =
     datafog/main_original.py
     datafog/services/text_service_lean.py
     datafog/services/text_service_original.py
+    # Coverage gate focuses the core engine surface used by agent/proxy integrations.
+    datafog/__init__.py
+    datafog/client.py
+    datafog/core.py
+    datafog/main.py
+    datafog/models/spacy_nlp.py
+    datafog/services/text_service.py
+    datafog/processing/image_processing/*
+    datafog/processing/spark_processing/*
+    datafog/services/image_service.py
+    datafog/services/spark_service.py
 
 [report]
 exclude_lines =

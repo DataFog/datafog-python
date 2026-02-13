@@ -2,6 +2,7 @@
 
 import json
 import os
+import shutil
 import tempfile
 
 import pytest
@@ -12,8 +13,14 @@ from datafog.services.spark_service import SparkService
 @pytest.fixture(scope="module")
 def spark_service():
     """Create a shared SparkService instance for all tests."""
+    if not os.environ.get("JAVA_HOME") and shutil.which("java") is None:
+        pytest.skip("Java runtime not available; skipping Spark integration tests.")
+
     # Initialize SparkService with explicit local mode
-    service = SparkService(master="local[1]")
+    try:
+        service = SparkService(master="local[1]")
+    except Exception as exc:
+        pytest.skip(f"Spark unavailable in this environment: {exc}")
 
     yield service
 

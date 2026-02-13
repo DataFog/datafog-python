@@ -1,0 +1,79 @@
+[
+  {
+    "id": "isbn-not-ssn",
+    "input": "The book ISBN is 978-3-16-148410-0",
+    "expected_entities": [],
+    "note": "ISBN should not be flagged as SSN"
+  },
+  {
+    "id": "product-code-not-phone",
+    "input": "Part number: 555-123-4567-A",
+    "expected_entities": [],
+    "note": "Product code should not be phone"
+  },
+  {
+    "id": "hex-not-ip",
+    "input": "Build id 0x7f00ff00 is not an IP address",
+    "expected_entities": []
+  },
+  {
+    "id": "order-id-not-zip",
+    "input": "Order 12345ABC ships tomorrow",
+    "expected_entities": []
+  },
+  {
+    "id": "version-not-date",
+    "input": "Release v2026.2.9 fixed the issue",
+    "expected_entities": []
+  },
+  {
+    "id": "time-not-phone",
+    "input": "The event starts at 12:30:45 UTC",
+    "expected_entities": []
+  },
+  {
+    "id": "uuid-not-ssn",
+    "input": "Trace id 550e8400-e29b-41d4-a716-446655440000",
+    "expected_entities": []
+  },
+  {
+    "id": "math-not-credit-card",
+    "input": "Sequence 1234 5678 90 is not a card",
+    "expected_entities": []
+  },
+  {
+    "id": "hostname-not-email",
+    "input": "Host mailserver.local accepted message",
+    "expected_entities": []
+  },
+  {
+    "id": "markdown-link",
+    "input": "See [RFC 1918](https://example.com/rfc1918)",
+    "expected_entities": []
+  },
+  {
+    "id": "code-symbol",
+    "input": "const EMAIL_PATTERN = /[a-z]+@[a-z]+/;",
+    "expected_entities": []
+  },
+  {
+    "id": "random-digits",
+    "input": "Numbers 111222333444 are identifiers",
+    "expected_entities": []
+  },
+  {
+    "id": "ticket-id",
+    "input": "Ticket ABC-123-XYZ is now closed",
+    "expected_entities": []
+  },
+  {
+    "id": "date-like-invalid",
+    "input": "Date 2026-99-99 is not valid",
+    "expected_entities": []
+  },
+  {
+    "id": "url-with-at",
+    "input": "https://example.com/@user/profile is a URL path",
+    "expected_entities": []
+  }
+]

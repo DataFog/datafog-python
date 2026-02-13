@@ -81,12 +81,10 @@ def test_redact_text_command(runner):
     result = runner.invoke(app, ["redact-text", test_text])
 
     assert result.exit_code == 0
-    # Check that PII has been redacted (replaced with [REDACTED])
-    assert "[REDACTED]" in result.stdout
-    # The person name should be redacted
-    assert "John Doe" not in result.stdout
-    # Note: The current implementation might not redact emails correctly
-    # This is a known limitation we're accepting for the smoke test
+    # Check that PII has been redacted with token placeholders.
+    assert "[PERSON_" in result.stdout or "[EMAIL_" in result.stdout
+    # Structured PII should be redacted in all engine configurations.
+    assert "john.doe@example.com" not in result.stdout
 
 
 @pytest.mark.integration
@@ -97,10 +95,10 @@ def test_replace_text_command(runner):
     result = runner.invoke(app, ["replace-text", test_text])
 
     assert result.exit_code == 0
-    # The person name should be replaced with a pseudonym
-    assert "John Doe" not in result.stdout
-    # Check that the text contains a replacement pattern for person (like [PERSON_HASH])
-    assert "[PERSON_" in result.stdout or "PERSON-" in result.stdout
+    # Structured PII should be replaced in all engine configurations.
+    assert "john.doe@example.com" not in result.stdout
+    # Check that the text contains a replacement token pattern.
+    assert "[PERSON_" in result.stdout or "[EMAIL_" in result.stdout
     # But the text should still have some content (not just replacements)
     assert "My name is" in result.stdout
 

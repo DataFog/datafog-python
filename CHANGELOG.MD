@@ -1,5 +1,53 @@
 # ChangeLog
 
+## [2026-02-13]
+
+### `datafog-python` [4.3.0]
+
+#### Audit and Architecture
+
+- Added a new internal engine boundary in `datafog/engine.py`:
+  - `scan()`
+  - `redact()`
+  - `scan_and_redact()`
+  - dataclasses: `Entity`, `ScanResult`, `RedactResult`
+- Updated core compatibility layers (`datafog.core`, `datafog.main`, CLI paths) to delegate through the engine interface.
+- Added `EngineNotAvailable` error for clear optional dependency failures.
+- Improved smart engine behavior for graceful fallback when optional NLP dependencies are unavailable.
+
+#### Accuracy and Testing
+
+- Added a corpus-driven detection accuracy suite:
+  - `tests/corpus/structured_pii.json`
+  - `tests/corpus/unstructured_pii.json`
+  - `tests/corpus/mixed_pii.json`
+  - `tests/corpus/negative_cases.json`
+  - `tests/corpus/edge_cases.json`
+  - `tests/test_detection_accuracy.py`
+- Improved regex patterns for email, date/year handling, SSN boundaries, and strict IPv4 matching.
+- Added explicit `xfail` markers for known model limitations in select smart/NER corpus cases.
+- Added engine API tests in `tests/test_engine_api.py`.
+- Added agent API tests in `tests/test_agent_api.py`.
+- Updated Spark integration tests to skip cleanly when Java is not available.
+
+#### Agent API
+
+- Added `datafog/agent.py` with:
+  - `sanitize()`
+  - `scan_prompt()`
+  - `filter_output()`
+  - `create_guardrail()`
+  - `Guardrail` and `GuardrailWatch`
+- Exported agent-oriented API from top-level `datafog` package.
+
+#### CI/CD and Documentation
+
+- Updated GitHub Actions CI matrix to test Python `3.10`, `3.11`, and `3.12` across `core`, `nlp`, and `nlp-advanced` profiles.
+- Added coverage enforcement thresholds in CI (line and branch).
+- Added a dedicated corpus accuracy run in CI.
+- Rewrote `README.md` with validated, copy-pasteable examples and a dedicated LLM guardrails section.
+- Added/updated audit reports under `docs/audit/`.
+
 ## [2025-05-29]
 
 ### `datafog-python` [4.2.0]

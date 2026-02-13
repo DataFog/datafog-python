@@ -11,16 +11,10 @@ import io
 import logging
 import os
 import ssl
-from typing import List, Union
+from typing import TYPE_CHECKING, Any, List, Union
 
-import aiohttp
-import certifi
-from PIL import Image
-
-from datafog.processing.image_processing.donut_processor import DonutProcessor
-from datafog.processing.image_processing.pytesseract_processor import (
-    PytesseractProcessor,
-)
+if TYPE_CHECKING:
+    from PIL import Image
 
 # Check if the PYTEST_DONUT flag is set to enable OCR testing
 DONUT_TESTING_ENABLED = os.environ.get("PYTEST_DONUT", "").lower() == "yes"
@@ -29,7 +23,17 @@ DONUT_TESTING_ENABLED = os.environ.get("PYTEST_DONUT", "").lower() == "yes"
 class ImageDownloader:
     """Asynchronous image downloader with SSL support."""
 
-    async def download_image(self, url: str) -> Image.Image:
+    async def download_image(self, url: str) -> "Image.Image":
+        try:
+            import aiohttp
+            import certifi
+            from PIL import Image
+        except ImportError as e:
+            raise ModuleNotFoundError(
+                "Image download requires optional dependencies. "
+                "Install with: pip install datafog[web,ocr]"
+            ) from e
+
         ssl_context = ssl.create_default_context(cafile=certifi.where())
         async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(ssl=ssl_context)
@@ -88,22 +92,55 @@ class ImageService:
         self.use_donut = use_donut
         self.use_tesseract = use_tesseract
 
-        # Only create the processors if they're going to be used
-        # This ensures torch/transformers are only imported when needed
-        self.donut_processor = DonutProcessor() if self.use_donut else None
-        self.tesseract_processor = (
-            PytesseractProcessor() if self.use_tesseract else None
-        )
+        # Keep processor construction lazy so optional deps are not required at import/init time.
+        self.donut_processor: Any = None
+        self.tesseract_processor: Any = None
+
+    def _get_tesseract_processor(self):
+        if self.tesseract_processor is not None:
+            return self.tesseract_processor
+
+        try:
+            from datafog.processing.image_processing.pytesseract_processor import (
+                PytesseractProcessor,
+            )
+        except ImportError as e:
+            raise ModuleNotFoundError(
+                "Tesseract OCR requires optional dependencies. "
+                "Install with: pip install datafog[ocr]"
+            ) from e
+
+        self.tesseract_processor = PytesseractProcessor()
+        return self.tesseract_processor
+
+    def _get_donut_processor(self):
+        if self.donut_processor is not None:
+            return self.donut_processor
+
+        try:
+            from datafog.processing.image_processing.donut_processor import (
+                DonutProcessor,
+            )
+        except ImportError as e:
+            raise ModuleNotFoundError(
+                "Donut OCR requires optional dependencies. "
+                "Install with: pip install datafog[nlp-advanced,ocr]"
+            ) from e
+
+        self.donut_processor = DonutProcessor()
+        return self.donut_processor
 
     async def download_images(
         self, urls: List[str]
-    ) -> List[Union[Image.Image, BaseException]]:
+    ) -> List[Union["Image.Image", BaseException]]:
         tasks = [
             asyncio.create_task(self.downloader.download_image(url)) for url in urls
         ]
         return await asyncio.gather(*tasks, return_exceptions=True)
 
     async def ocr_extract(self, image_paths: List[str]) -> List[str]:
+        from PIL import Image
+
         results = []
         for path in image_paths:
             try:
@@ -116,10 +153,16 @@ class ImageService:
                     # URL
                     image = await self.downloader.download_image(path)
 
-                if self.use_tesseract and self.tesseract_processor is not None:
-                    text = await self.tesseract_processor.extract_text_from_image(image)
-                elif self.use_donut and self.donut_processor is not None:
-                    text = await self.donut_processor.extract_text_from_image(image)
+                if self.use_tesseract:
+                    text = (
+                        await self._get_tesseract_processor().extract_text_from_image(
+                            image
+                        )
+                    )
+                elif self.use_donut:
+                    text = await self._get_donut_processor().extract_text_from_image(
+                        image
+                    )
                 else:
                     raise ValueError("No OCR processor selected")
 

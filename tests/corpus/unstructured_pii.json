@@ -1,0 +1,254 @@
+[
+  {
+    "id": "person-full-name",
+    "input": "Please contact Emily Johnson about the contract.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Emily Johnson",
+        "start": 15,
+        "end": 28
+      }
+    ]
+  },
+  {
+    "id": "person-first-name-ambiguous",
+    "input": "Chase approved the ticket.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Chase",
+        "start": 0,
+        "end": 5
+      }
+    ]
+  },
+  {
+    "id": "person-with-title",
+    "input": "Dr. Robert Chen will review your lab results.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Robert Chen",
+        "start": 4,
+        "end": 15
+      }
+    ]
+  },
+  {
+    "id": "person-with-suffix",
+    "input": "The witness was Martin Luther King Jr.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Martin Luther King Jr.",
+        "start": 16,
+        "end": 38
+      }
+    ]
+  },
+  {
+    "id": "person-non-western",
+    "input": "????????????",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "???",
+        "start": 0,
+        "end": 3
+      }
+    ]
+  },
+  {
+    "id": "person-common-word-name",
+    "input": "Crystal will join the call at noon.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Crystal",
+        "start": 0,
+        "end": 7
+      }
+    ]
+  },
+  {
+    "id": "org-standard",
+    "input": "General Electric announced a new product.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "General Electric",
+        "start": 0,
+        "end": 16
+      }
+    ]
+  },
+  {
+    "id": "org-ambiguous-apple",
+    "input": "Apple reported quarterly revenue today.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "Apple",
+        "start": 0,
+        "end": 5
+      }
+    ]
+  },
+  {
+    "id": "org-abbreviation",
+    "input": "IBM signed the enterprise agreement.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "IBM",
+        "start": 0,
+        "end": 3
+      }
+    ]
+  },
+  {
+    "id": "org-with-common-words",
+    "input": "The board of United Health Group met yesterday.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "United Health Group",
+        "start": 13,
+        "end": 32
+      }
+    ]
+  },
+  {
+    "id": "location-city-state",
+    "input": "They relocated to Austin, Texas in 2023.",
+    "expected_entities": [
+      {
+        "type": "LOCATION",
+        "text": "Austin, Texas",
+        "start": 18,
+        "end": 31
+      }
+    ]
+  },
+  {
+    "id": "location-country",
+    "input": "The office is now in S?o Paulo, Brazil.",
+    "expected_entities": [
+      {
+        "type": "LOCATION",
+        "text": "S?o Paulo",
+        "start": 21,
+        "end": 30
+      },
+      {
+        "type": "LOCATION",
+        "text": "Brazil",
+        "start": 32,
+        "end": 38
+      }
+    ]
+  },
+  {
+    "id": "location-address",
+    "input": "Please visit 221B Baker Street for pickup.",
+    "expected_entities": [
+      {
+        "type": "ADDRESS",
+        "text": "221B Baker Street",
+        "start": 13,
+        "end": 30
+      }
+    ]
+  },
+  {
+    "id": "location-ambiguous",
+    "input": "Jordan completed the shipment to Jordan.",
+    "expected_entities": [
+      {
+        "type": "LOCATION",
+        "text": "Jordan",
+        "start": 0,
+        "end": 6
+      }
+    ]
+  },
+  {
+    "id": "org-government",
+    "input": "The U.S. Department of Energy issued guidance.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "U.S. Department of Energy",
+        "start": 4,
+        "end": 29
+      }
+    ]
+  },
+  {
+    "id": "person-arabic",
+    "input": "???? ??????? ?? ???? ??? ????? ?????.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "???? ???",
+        "start": 0,
+        "end": 8
+      }
+    ]
+  },
+  {
+    "id": "address-us",
+    "input": "Ship replacement parts to 1600 Pennsylvania Avenue NW.",
+    "expected_entities": [
+      {
+        "type": "ADDRESS",
+        "text": "1600 Pennsylvania Avenue NW",
+        "start": 26,
+        "end": 53
+      }
+    ]
+  },
+  {
+    "id": "location-europe",
+    "input": "Conference moved from Paris to Berlin.",
+    "expected_entities": [
+      {
+        "type": "LOCATION",
+        "text": "Paris",
+        "start": 22,
+        "end": 27
+      },
+      {
+        "type": "LOCATION",
+        "text": "Berlin",
+        "start": 31,
+        "end": 37
+      }
+    ]
+  },
+  {
+    "id": "org-healthcare",
+    "input": "Mayo Clinic approved your referral.",
+    "expected_entities": [
+      {
+        "type": "ORGANIZATION",
+        "text": "Mayo Clinic",
+        "start": 0,
+        "end": 11
+      }
+    ]
+  },
+  {
+    "id": "person-hyphenated",
+    "input": "Marie-Claire Dubois submitted the report.",
+    "expected_entities": [
+      {
+        "type": "PERSON",
+        "text": "Marie-Claire Dubois",
+        "start": 0,
+        "end": 19
+      }
+    ]
+  }
+]

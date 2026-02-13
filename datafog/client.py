@@ -11,9 +11,35 @@ from typing import List
 import typer
 
 from .config import OperationType, get_config
+from .engine import scan_and_redact
 from .main import DataFog
-from .models.anonymizer import Anonymizer, AnonymizerType, HashType
-from .models.spacy_nlp import SpacyAnnotator
+from .models.anonymizer import HashType
+
+try:
+    from .models.spacy_nlp import SpacyAnnotator
+except ImportError:
+    _SPACY_MISSING_MESSAGE = (
+        "spaCy engine is not available. Install with: pip install datafog[nlp]"
+    )
+
+    class SpacyAnnotator:  # type: ignore[no-redef]
+        """Fallback annotator used when spaCy optional dependency is missing."""
+
+        def __init__(self, *_args, **_kwargs):
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
+        @staticmethod
+        def download_model(_model_name: str):
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
+        @staticmethod
+        def list_models():
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
+        @staticmethod
+        def list_entities():
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
 
 app = typer.Typer()
 
@@ -159,8 +185,12 @@ def download_model(
         GLiNER: datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
     """
     if engine == "spacy":
-        SpacyAnnotator.download_model(model_name)
-        typer.echo(f"SpaCy model {model_name} downloaded successfully.")
+        try:
+            SpacyAnnotator.download_model(model_name)
+            typer.echo(f"SpaCy model {model_name} downloaded successfully.")
+        except ModuleNotFoundError as e:
+            typer.echo(str(e))
+            raise typer.Exit(code=1)
 
     elif engine == "gliner":
         try:
@@ -200,8 +230,12 @@ def show_spacy_model_directory(
         typer.echo("No model name provided to check.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator(model_name)
-    typer.echo(annotator.show_model_path())
+    try:
+        annotator = SpacyAnnotator(model_name)
+        typer.echo(annotator.show_model_path())
+    except ModuleNotFoundError as e:
+        typer.echo(str(e))
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -211,8 +245,12 @@ def list_spacy_models():
 
     Prints a list of all available spaCy models.
     """
-    annotator = SpacyAnnotator()
-    typer.echo(annotator.list_models())
+    try:
+        annotator = SpacyAnnotator()
+        typer.echo(annotator.list_models())
+    except ModuleNotFoundError as e:
+        typer.echo(str(e))
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -229,9 +267,13 @@ def list_models(
         datafog list-models --engine gliner
     """
     if engine == "spacy":
-        annotator = SpacyAnnotator()
-        typer.echo("Available spaCy models:")
-        typer.echo(annotator.list_models())
+        try:
+            annotator = SpacyAnnotator()
+            typer.echo("Available spaCy models:")
+            typer.echo(annotator.list_models())
+        except ModuleNotFoundError as e:
+            typer.echo(str(e))
+            raise typer.Exit(code=1)
 
     elif engine == "gliner":
         typer.echo("Popular GLiNER models:")
@@ -258,8 +300,19 @@ def list_entities():
 
     Prints a list of all available entities that can be recognized.
     """
-    annotator = SpacyAnnotator()
-    typer.echo(annotator.list_entities())
+    try:
+        annotator = SpacyAnnotator()
+        typer.echo(annotator.list_entities())
+    except ModuleNotFoundError as e:
+        try:
+            from .processing.text_processing.spacy_pii_annotator import (
+                PII_ANNOTATION_LABELS,
+            )
+
+            typer.echo(PII_ANNOTATION_LABELS)
+        except Exception:
+            typer.echo(str(e))
+            raise typer.Exit(code=1)
 
 
 @app.command()
@@ -276,11 +329,8 @@ def redact_text(text: str = typer.Argument(None, help="Text to redact")):
         typer.echo("No text provided to redact.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator()
-    anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REDACT)
-    annotations = annotator.annotate_text(text)
-    result = anonymizer.anonymize(text, annotations)
-    typer.echo(result.anonymized_text)
+    result = scan_and_redact(text=text, engine="smart", strategy="token")
+    typer.echo(result.redacted_text)
 
     try:
         from .telemetry import track_function_call
@@ -309,11 +359,8 @@ def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
         typer.echo("No text provided to replace PII.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator()
-    anonymizer = Anonymizer(anonymizer_type=AnonymizerType.REPLACE)
-    annotations = annotator.annotate_text(text)
-    result = anonymizer.anonymize(text, annotations)
-    typer.echo(result.anonymized_text)
+    result = scan_and_redact(text=text, engine="smart", strategy="pseudonymize")
+    typer.echo(result.redacted_text)
 
     try:
         from .telemetry import track_function_call
@@ -346,11 +393,10 @@ def hash_text(
         typer.echo("No text provided to hash.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator()
-    anonymizer = Anonymizer(anonymizer_type=AnonymizerType.HASH, hash_type=hash_type)
-    annotations = annotator.annotate_text(text)
-    result = anonymizer.anonymize(text, annotations)
-    typer.echo(result.anonymized_text)
+    # HashType is retained for backward-compatible CLI signature.
+    _ = hash_type
+    result = scan_and_redact(text=text, engine="smart", strategy="hash")
+    typer.echo(result.redacted_text)
 
     try:
         from .telemetry import track_function_call
