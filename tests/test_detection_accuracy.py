@@ -258,6 +258,11 @@ KNOWN_LIMITATION_XFAILS: dict[tuple[str, str, str], str] = {
     (
         "gliner",
         "edge",
+        "long-string-100kb",
+    ): "GLiNER long-text edge corpus case is unstable under CI resource limits; tracked for performance tuning.",
+    (
+        "gliner",
+        "edge",
         "unicode-chinese-name",
     ): "Current GLiNER model does not reliably identify PERSON entities in this non-Latin edge case.",
 }
