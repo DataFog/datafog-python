@@ -44,11 +44,6 @@ jobs:
       has_changes: ${{ steps.changes.outputs.has_changes }}
       target_branch: ${{ steps.resolve.outputs.target_branch }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: dev
-
       - name: Resolve release type
         id: resolve
         run: |
@@ -70,6 +65,11 @@ jobs:
           echo "target_branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "Release type: $TYPE from $BRANCH"
 
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.resolve.outputs.target_branch }}
+
       - name: Check for changes
         id: changes
         run: |
@@ -80,7 +80,7 @@ jobs:
           elif [ "$TYPE" = "beta" ]; then
             LAST_TAG=$(git tag -l "*b*" --sort=-version:refname | head -n1)
           else
-            LAST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]" 2>/dev/null || echo "")
+            LAST_TAG=$(git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "")
           fi
 
           if [ -z "$LAST_TAG" ]; then
@@ -177,13 +177,15 @@ jobs:
           echo "Current version: $CURRENT"
 
           # Strip any pre-release suffix to get base version
-          BASE=$(echo "$CURRENT" | sed -E 's/(a|b)[0-9.]+$//')
+          BASE=$(echo "$CURRENT" | sed -E 's/(a|b)[0-9]+([.][0-9A-Za-z]+)?$//')
           echo "Base version: $BASE"
 
           if [ "$TYPE" = "alpha" ]; then
-            DATE_STAMP=$(date +"%Y%m%d")
-            COMMIT_SHORT=$(git rev-parse --short HEAD)
-            VERSION="${BASE}a${DATE_STAMP}.${COMMIT_SHORT}"
+            ALPHA_NUM=1
+            while git tag -l "v${BASE}a${ALPHA_NUM}" | grep -q .; do
+              ALPHA_NUM=$((ALPHA_NUM + 1))
+            done
+            VERSION="${BASE}a${ALPHA_NUM}"
 
           elif [ "$TYPE" = "beta" ]; then
             BETA_NUM=1
@@ -234,6 +236,7 @@ jobs:
           python -m twine upload dist/* --verbose
 
       - name: Commit version bump & create release
+        if: inputs.dry_run != true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: |
@@ -242,8 +245,8 @@ jobs:
           BRANCH="${{ needs.determine-release.outputs.target_branch }}"
 
           git add datafog/__about__.py setup.py
-          git commit -m "chore: bump version to $VERSION [skip ci]" || true
-          git push origin "$BRANCH" || true
+          git commit -m "chore: bump version to $VERSION [skip ci]" || echo "No version changes to commit"
+          git push origin "$BRANCH"
 
           git tag -a "v$VERSION" -m "Release $VERSION"
           git push origin "v$VERSION"
@@ -278,7 +281,7 @@ jobs:
   # ── 4. Cleanup old pre-releases ───────────────────────────────────────
   cleanup:
     needs: [determine-release, publish]
-    if: needs.determine-release.outputs.release_type != 'stable'
+    if: needs.determine-release.outputs.release_type != 'stable' && inputs.dry_run != true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
