@@ -1,28 +1,32 @@
-﻿# DataFog Python
+# DataFog Python
 
-DataFog is a Python library for detecting and redacting personally identifiable information (PII).
+[![PyPI version](https://img.shields.io/pypi/v/datafog)](https://pypi.org/project/datafog/)
+[![Python versions](https://img.shields.io/pypi/pyversions/datafog)](https://pypi.org/project/datafog/)
+[![CI](https://github.com/DataFog/datafog-python/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/DataFog/datafog-python/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/DataFog/datafog-python/branch/dev/graph/badge.svg)](https://codecov.io/gh/DataFog/datafog-python)
+[![License](https://img.shields.io/github/license/DataFog/datafog-python)](LICENSE)
 
-It provides:
+Python SDK for PII detection and redaction in text and images, combining regex and NLP pipelines for production privacy workflows.
 
-- Fast structured PII detection via regex
-- Optional NER support via spaCy and GLiNER
-- A simple agent-oriented API for LLM applications
-- Backward-compatible `DataFog` and `TextService` classes
+- Website: https://www.datafog.ai
+- Docs: https://docs.datafog.ai
+- PyPI: https://pypi.org/project/datafog/
+- Discord: https://discord.gg/bzDth394R4
 
 ## Installation
 
 ```bash
-# Core install (regex engine)
+# Core install (regex engine only)
 pip install datafog
 
 # Add spaCy support
-pip install datafog[nlp]
+pip install "datafog[nlp]"
 
-# Add GLiNER + spaCy support
-pip install datafog[nlp-advanced]
+# Add advanced NER support (GLiNER + dependencies)
+pip install "datafog[nlp-advanced]"
 
-# Everything
-pip install datafog[all]
+# Full feature set
+pip install "datafog[all]"
 ```
 
 ## Quick Start
@@ -31,87 +35,29 @@ pip install datafog[all]
 import datafog
 
 text = "Contact john@example.com or call (555) 123-4567"
-clean = datafog.sanitize(text, engine="regex")
-print(clean)
+
+# One-liner redaction
+print(datafog.sanitize(text, engine="regex"))
 # Contact [EMAIL_1] or call [PHONE_1]
+
+# Scan first, then choose handling strategy
+scan = datafog.scan_prompt("My SSN is 123-45-6789", engine="regex")
+print(len(scan.entities))
 ```
 
-## For LLM Applications
+## LLM Guardrail API
 
 ```python
 import datafog
 
-# 1) Scan prompt text before sending to an LLM
-prompt = "My SSN is 123-45-6789"
-scan_result = datafog.scan_prompt(prompt, engine="regex")
-if scan_result.entities:
-    print(f"Detected {len(scan_result.entities)} PII entities")
-
-# 2) Redact model output before returning it
-output = "Email me at jane.doe@example.com"
-safe_result = datafog.filter_output(output, engine="regex")
-print(safe_result.redacted_text)
-# Email me at [EMAIL_1]
-
-# 3) One-liner redaction
-print(datafog.sanitize("Card: 4111-1111-1111-1111", engine="regex"))
-# Card: [CREDIT_CARD_1]
-```
-
-### Guardrails
-
-```python
-import datafog
-
-# Reusable guardrail object
 guard = datafog.create_guardrail(engine="regex", on_detect="redact")
 
 @guard
 def call_llm() -> str:
-    return "Send to admin@example.com"
+    return "Email admin@example.com"
 
 print(call_llm())
-# Send to [EMAIL_1]
-```
-
-## Engines
-
-Use the engine that matches your accuracy and dependency constraints:
-
-- `regex`:
-  - Fastest and always available.
-  - Best for structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DATE`, `ZIP_CODE`.
-- `spacy`:
-  - Requires `pip install datafog[nlp]`.
-  - Useful for unstructured entities like person and organization names.
-- `gliner`:
-  - Requires `pip install datafog[nlp-advanced]`.
-  - Stronger NER coverage than regex for unstructured text.
-- `smart`:
-  - Cascades regex with optional NER engines.
-  - If optional deps are missing, it degrades gracefully and warns.
-
-## Backward-Compatible APIs
-
-The existing public API remains available.
-
-### `DataFog` class
-
-```python
-from datafog import DataFog
-
-result = DataFog().scan_text("Email john@example.com")
-print(result["EMAIL"])
-```
-
-### `TextService` class
-
-```python
-from datafog.services import TextService
-
-service = TextService(engine="regex")
-result = service.annotate_text_sync("Call (555) 123-4567")
-print(result["PHONE"])
+# Email [EMAIL_1]
 ```
 
 ## CLI
@@ -130,9 +76,35 @@ datafog replace-text "john@example.com"
 datafog hash-text "john@example.com"
 ```
 
+## Engines
+
+- `regex`: fastest, zero extra dependencies, strong for structured PII.
+- `spacy`: install with `datafog[nlp]` for better unstructured entity detection.
+- `gliner`: install with `datafog[nlp-advanced]` for stronger NER coverage.
+- `smart`: cascades regex with optional NER engines and degrades gracefully.
+
+## Compatibility APIs
+
+```python
+from datafog import DataFog
+from datafog.services import TextService
+
+print(DataFog().scan_text("Email john@example.com"))
+print(TextService(engine="regex").annotate_text_sync("Call (555) 123-4567"))
+```
+
+## Release Channels
+
+Current release workflow is branch-based:
+
+- `dev`: active development and prerelease flow (alpha/beta).
+- `main`: stable release source branch.
+
+For stable publishes, release automation targets `main`.
+
 ## Telemetry
 
-DataFog includes anonymous telemetry by default.
+DataFog collects anonymous telemetry by default. Input text and detected PII values are not sent.
 
 To opt out:
 
@@ -142,12 +114,10 @@ export DATAFOG_NO_TELEMETRY=1
 export DO_NOT_TRACK=1
 ```
 
-Telemetry does not include input text or detected PII values.
-
 ## Development
 
 ```bash
-git clone https://github.com/datafog/datafog-python
+git clone https://github.com/DataFog/datafog-python
 cd datafog-python
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
