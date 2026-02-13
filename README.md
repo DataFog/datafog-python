@@ -3,6 +3,7 @@
 DataFog is a Python library for detecting and redacting personally identifiable information (PII).
 
 It provides:
+
 - Fast structured PII detection via regex
 - Optional NER support via spaCy and GLiNER
 - A simple agent-oriented API for LLM applications

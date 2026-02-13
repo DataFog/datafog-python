@@ -17,10 +17,10 @@ coverage xml -o coverage.xml
 
 ## Baseline vs Final
 
-| Metric | Baseline (Phase 1) | Final (Phase 6) | Delta |
-|---|---:|---:|---:|
-| Line coverage | 66.08% | 87.47% | +21.39 pts |
-| Branch coverage | 56.97% | 76.63% | +19.66 pts |
+| Metric          | Baseline (Phase 1) | Final (Phase 6) |      Delta |
+| --------------- | -----------------: | --------------: | ---------: |
+| Line coverage   |             66.08% |          87.47% | +21.39 pts |
+| Branch coverage |             56.97% |          76.63% | +19.66 pts |
 
 ## Notes on Scope
 
@@ -30,15 +30,15 @@ Optional/legacy surfaces with environment-heavy dependencies (Spark/OCR/image pi
 
 ## Module Breakdown (Final Run)
 
-| Module | Coverage |
-|---|---:|
-| `datafog/agent.py` | 88% |
-| `datafog/engine.py` | 82% |
-| `datafog/processing/text_processing/regex_annotator/regex_annotator.py` | 100% |
-| `datafog/processing/text_processing/gliner_annotator.py` | 89% |
-| `datafog/processing/text_processing/spacy_pii_annotator.py` | 73% |
-| `datafog/telemetry.py` | 86% |
-| `datafog/models/anonymizer.py` | 88% |
+| Module                                                                  | Coverage |
+| ----------------------------------------------------------------------- | -------: |
+| `datafog/agent.py`                                                      |      88% |
+| `datafog/engine.py`                                                     |      82% |
+| `datafog/processing/text_processing/regex_annotator/regex_annotator.py` |     100% |
+| `datafog/processing/text_processing/gliner_annotator.py`                |      89% |
+| `datafog/processing/text_processing/spacy_pii_annotator.py`             |      73% |
+| `datafog/telemetry.py`                                                  |      86% |
+| `datafog/models/anonymizer.py`                                          |      88% |
 
 ## Artifacts
 

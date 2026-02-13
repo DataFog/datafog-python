@@ -124,7 +124,9 @@ class DataFog:
                             method = "replace"
                         else:
                             method = "redact"
-                        process_result = self.process(text, anonymize=True, method=method)
+                        process_result = self.process(
+                            text, anonymize=True, method=method
+                        )
                         anonymized_results.append(process_result["anonymized"])
 
                     _pipeline_result = anonymized_results

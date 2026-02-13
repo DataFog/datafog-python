@@ -165,7 +165,12 @@ def _get_spacy_annotator():
             "SpaCy engine requires the nlp extra. Install with: pip install datafog[nlp]"
         ) from exc
 
-    return SpacyPIIAnnotator.create()
+    try:
+        return SpacyPIIAnnotator.create()
+    except ImportError as exc:
+        raise EngineNotAvailable(
+            "SpaCy engine requires the nlp extra. Install with: pip install datafog[nlp]"
+        ) from exc
 
 
 @lru_cache(maxsize=1)
@@ -233,7 +238,9 @@ def scan(
 
     if engine == "regex":
         filtered = _filter_entity_types(regex_entities, entity_types)
-        return ScanResult(entities=_dedupe_entities(filtered), text=text, engine_used="regex")
+        return ScanResult(
+            entities=_dedupe_entities(filtered), text=text, engine_used="regex"
+        )
 
     combined: list[Entity] = list(regex_entities)
     engines_used = {"regex"}
@@ -322,7 +329,9 @@ def redact(
         for entity in entities
         if 0 <= entity.start < entity.end <= len(text) and entity.text
     ]
-    valid_entities = sorted(valid_entities, key=lambda e: (e.start, e.end), reverse=True)
+    valid_entities = sorted(
+        valid_entities, key=lambda e: (e.start, e.end), reverse=True
+    )
 
     for entity in valid_entities:
         original = redacted_text[entity.start : entity.end]
@@ -335,7 +344,9 @@ def redact(
             key = (entity.type, original)
             if key not in pseudonym_by_value:
                 counters[entity.type] = counters.get(entity.type, 0) + 1
-                pseudonym_by_value[key] = f"[{entity.type}_PSEUDO_{counters[entity.type]}]"
+                pseudonym_by_value[key] = (
+                    f"[{entity.type}_PSEUDO_{counters[entity.type]}]"
+                )
             replacement = pseudonym_by_value[key]
         else:  # token
             counters[entity.type] = counters.get(entity.type, 0) + 1

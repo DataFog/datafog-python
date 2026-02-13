@@ -7,8 +7,8 @@ without requiring heavy dependencies like spaCy or PyTorch.
 
 from typing import Dict, List, Union
 
-from datafog.models.anonymizer import AnonymizerType
 from datafog.engine import scan, scan_and_redact
+from datafog.models.anonymizer import AnonymizerType
 
 # Engine types as constants
 REGEX_ENGINE = "regex"

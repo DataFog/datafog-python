@@ -14,7 +14,32 @@ from .config import OperationType, get_config
 from .engine import scan_and_redact
 from .main import DataFog
 from .models.anonymizer import HashType
-from .models.spacy_nlp import SpacyAnnotator
+
+try:
+    from .models.spacy_nlp import SpacyAnnotator
+except ImportError:
+    _SPACY_MISSING_MESSAGE = (
+        "spaCy engine is not available. Install with: pip install datafog[nlp]"
+    )
+
+    class SpacyAnnotator:  # type: ignore[no-redef]
+        """Fallback annotator used when spaCy optional dependency is missing."""
+
+        def __init__(self, *_args, **_kwargs):
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
+        @staticmethod
+        def download_model(_model_name: str):
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
+        @staticmethod
+        def list_models():
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
+        @staticmethod
+        def list_entities():
+            raise ModuleNotFoundError(_SPACY_MISSING_MESSAGE)
+
 
 app = typer.Typer()
 
@@ -160,8 +185,12 @@ def download_model(
         GLiNER: datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
     """
     if engine == "spacy":
-        SpacyAnnotator.download_model(model_name)
-        typer.echo(f"SpaCy model {model_name} downloaded successfully.")
+        try:
+            SpacyAnnotator.download_model(model_name)
+            typer.echo(f"SpaCy model {model_name} downloaded successfully.")
+        except ModuleNotFoundError as e:
+            typer.echo(str(e))
+            raise typer.Exit(code=1)
 
     elif engine == "gliner":
         try:
@@ -201,8 +230,12 @@ def show_spacy_model_directory(
         typer.echo("No model name provided to check.")
         raise typer.Exit(code=1)
 
-    annotator = SpacyAnnotator(model_name)
-    typer.echo(annotator.show_model_path())
+    try:
+        annotator = SpacyAnnotator(model_name)
+        typer.echo(annotator.show_model_path())
+    except ModuleNotFoundError as e:
+        typer.echo(str(e))
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -212,8 +245,12 @@ def list_spacy_models():
 
     Prints a list of all available spaCy models.
     """
-    annotator = SpacyAnnotator()
-    typer.echo(annotator.list_models())
+    try:
+        annotator = SpacyAnnotator()
+        typer.echo(annotator.list_models())
+    except ModuleNotFoundError as e:
+        typer.echo(str(e))
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -230,9 +267,13 @@ def list_models(
         datafog list-models --engine gliner
     """
     if engine == "spacy":
-        annotator = SpacyAnnotator()
-        typer.echo("Available spaCy models:")
-        typer.echo(annotator.list_models())
+        try:
+            annotator = SpacyAnnotator()
+            typer.echo("Available spaCy models:")
+            typer.echo(annotator.list_models())
+        except ModuleNotFoundError as e:
+            typer.echo(str(e))
+            raise typer.Exit(code=1)
 
     elif engine == "gliner":
         typer.echo("Popular GLiNER models:")
@@ -259,8 +300,19 @@ def list_entities():
 
     Prints a list of all available entities that can be recognized.
     """
-    annotator = SpacyAnnotator()
-    typer.echo(annotator.list_entities())
+    try:
+        annotator = SpacyAnnotator()
+        typer.echo(annotator.list_entities())
+    except ModuleNotFoundError as e:
+        try:
+            from .processing.text_processing.spacy_pii_annotator import (
+                PII_ANNOTATION_LABELS,
+            )
+
+            typer.echo(PII_ANNOTATION_LABELS)
+        except Exception:
+            typer.echo(str(e))
+            raise typer.Exit(code=1)
 
 
 @app.command()

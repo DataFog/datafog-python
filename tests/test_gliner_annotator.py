@@ -327,7 +327,9 @@ class TestTextServiceGLiNERIntegration:
         from datafog.services.text_service import TextService
 
         with patch.object(TextService, "_create_gliner_annotator", return_value=None):
-            with patch.object(TextService, "_create_spacy_annotator", return_value=None):
+            with patch.object(
+                TextService, "_create_spacy_annotator", return_value=None
+            ):
                 service = TextService(engine="smart")
                 with pytest.warns(UserWarning, match="GLiNER not available"):
                     result = service.annotate_text_sync(

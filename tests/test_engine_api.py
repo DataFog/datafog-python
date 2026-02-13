@@ -102,7 +102,9 @@ async def test_scan_from_async_context() -> None:
     assert len(result.entities) >= 1
 
 
-def test_gliner_engine_unavailable_raises_clear_error(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_gliner_engine_unavailable_raises_clear_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     def _raise(_: str):
         raise EngineNotAvailable(
             "GLiNER engine requires the nlp-advanced extra. Install with: pip install datafog[nlp-advanced]"

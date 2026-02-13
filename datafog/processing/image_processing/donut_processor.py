@@ -14,11 +14,12 @@ import os
 import re
 import subprocess
 import sys
-
-import numpy as np
-from PIL import Image
+from typing import TYPE_CHECKING, Any
 
 from .image_downloader import ImageDownloader
+
+if TYPE_CHECKING:
+    from PIL import Image
 
 # Check if we're running in a test environment
 # More robust test environment detection
@@ -50,7 +51,9 @@ class DonutProcessor:
                 [sys.executable, "-m", "pip", "install", package_name]
             )
 
-    def preprocess_image(self, image: Image.Image) -> np.ndarray:
+    def preprocess_image(self, image: "Image.Image") -> Any:
+        import numpy as np
+
         # Convert to RGB if the image is not already in RGB mode
         if image.mode != "RGB":
             image = image.convert("RGB")
@@ -65,7 +68,7 @@ class DonutProcessor:
 
         return image_np
 
-    async def extract_text_from_image(self, image: Image.Image) -> str:
+    async def extract_text_from_image(self, image: "Image.Image") -> str:
         """Extract text from an image using the Donut model"""
         logging.info("DonutProcessor.extract_text_from_image called")
 
@@ -160,6 +163,6 @@ class DonutProcessor:
         image = await self.downloader.download_image(url)
         return await self.extract_text_from_image(image)
 
-    async def download_image(self, url: str) -> Image.Image:
+    async def download_image(self, url: str) -> "Image.Image":
         """Download an image from URL."""
         return await self.downloader.download_image(url)

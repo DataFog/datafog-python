@@ -32,12 +32,12 @@ pytest tests/test_detection_accuracy.py -v --tb=short
 
 Baseline result: **325 passed, 236 failed** (561 total)
 
-| Engine | Precision | Recall | F1 | TP | FP | FN |
-|---|---:|---:|---:|---:|---:|---:|
-| regex | 0.2903 | 0.9000 | 0.4390 | 99 | 242 | 11 |
-| smart | 0.2903 | 0.6111 | 0.3936 | 99 | 242 | 63 |
-| spacy | 0.2895 | 0.2716 | 0.2803 | 44 | 108 | 118 |
-| gliner | 0.5974 | 0.5679 | 0.5823 | 92 | 62 | 70 |
+| Engine | Precision | Recall |     F1 |  TP |  FP |  FN |
+| ------ | --------: | -----: | -----: | --: | --: | --: |
+| regex  |    0.2903 | 0.9000 | 0.4390 |  99 | 242 |  11 |
+| smart  |    0.2903 | 0.6111 | 0.3936 |  99 | 242 |  63 |
+| spacy  |    0.2895 | 0.2716 | 0.2803 |  44 | 108 | 118 |
+| gliner |    0.5974 | 0.5679 | 0.5823 |  92 |  62 |  70 |
 
 ## 2.4 After Phase 4 Fixes
 
@@ -49,12 +49,12 @@ pytest tests/test_detection_accuracy.py -v --tb=short
 
 Post-fix result: **534 passed, 27 xfailed, 0 failed** (561 total)
 
-| Engine | Precision | Recall | F1 | TP | FP | FN |
-|---|---:|---:|---:|---:|---:|---:|
-| regex | 0.9483 | 1.0000 | 0.9735 | 110 | 6 | 0 |
-| smart | 0.7317 | 0.9259 | 0.8174 | 150 | 55 | 12 |
-| spacy | 0.6967 | 0.9074 | 0.7882 | 147 | 64 | 15 |
-| gliner | 0.7317 | 0.9259 | 0.8174 | 150 | 55 | 12 |
+| Engine | Precision | Recall |     F1 |  TP |  FP |  FN |
+| ------ | --------: | -----: | -----: | --: | --: | --: |
+| regex  |    0.9483 | 1.0000 | 0.9735 | 110 |   6 |   0 |
+| smart  |    0.7317 | 0.9259 | 0.8174 | 150 |  55 |  12 |
+| spacy  |    0.6967 | 0.9074 | 0.7882 | 147 |  64 |  15 |
+| gliner |    0.7317 | 0.9259 | 0.8174 | 150 |  55 |  12 |
 
 ## 2.5 What Changed
 

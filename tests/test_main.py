@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from importlib.util import find_spec
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -12,6 +13,9 @@ from datafog.models.anonymizer import AnonymizerType, HashType
 
 # Try to import optional dependencies
 try:
+    if find_spec("spacy") is None:
+        raise ImportError("spacy not installed")
+
     from datafog.processing.text_processing.spacy_pii_annotator import (
         SpacyPIIAnnotator as TextPIIAnnotator,
     )
