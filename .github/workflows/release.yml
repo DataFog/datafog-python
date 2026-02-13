@@ -173,7 +173,11 @@ jobs:
           git fetch --tags
 
           TYPE="${{ needs.determine-release.outputs.release_type }}"
-          CURRENT=$(python -c "from datafog.__about__ import __version__; print(__version__)")
+          CURRENT=$(sed -n 's/^__version__ = "\([^"]*\)"/\1/p' datafog/__about__.py)
+          if [ -z "$CURRENT" ]; then
+            echo "Failed to parse current version from datafog/__about__.py"
+            exit 1
+          fi
           echo "Current version: $CURRENT"
 
           # Strip any pre-release suffix to get base version
