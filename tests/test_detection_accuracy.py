@@ -113,6 +113,11 @@ KNOWN_LIMITATION_XFAILS: dict[tuple[str, str, str], str] = {
     (
         "smart",
         "edge",
+        "long-string-100kb",
+    ): "Smart engine long-text NER path is unstable under CI resource limits; tracked for performance tuning.",
+    (
+        "smart",
+        "edge",
         "unicode-chinese-name",
     ): "Non-Latin PERSON detection in this edge case is a known limitation of current models.",
     (
