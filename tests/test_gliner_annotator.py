@@ -406,35 +406,28 @@ class TestTextServiceGLiNERIntegration:
 
     def test_smart_cascade_flow(self, mock_gliner_annotator):
         """Test the smart cascading flow."""
-        with patch(
-            "datafog.processing.text_processing.regex_annotator.regex_annotator.RegexAnnotator"
-        ) as mock_regex_cls:
-            with patch(
-                "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
-            ) as mock_gliner_cls:
-                with patch(
-                    "datafog.processing.text_processing.spacy_pii_annotator.SpacyPIIAnnotator"
-                ) as mock_spacy_cls:
+        from datafog.services.text_service import TextService
 
-                    # Configure mocks
-                    mock_regex = Mock()
-                    mock_regex.annotate.return_value = {}  # No entities found
-                    mock_regex_cls.return_value = mock_regex
+        # Inject annotators directly to keep this cascade test deterministic
+        # across Python versions and import ordering.
+        mock_regex = Mock()
+        mock_regex.annotate.return_value = {"EMAIL": []}
 
-                    mock_gliner_cls.create.return_value = mock_gliner_annotator
+        mock_spacy = Mock()
+        mock_spacy.annotate.return_value = {"PERSON": ["John Doe"]}
 
-                    mock_spacy = Mock()
-                    mock_spacy.annotate.return_value = {"PERSON": ["John Doe"]}
-                    mock_spacy_cls.create.return_value = mock_spacy
+        service = TextService(engine="smart")
+        service._regex_annotator = mock_regex
+        service._gliner_annotator = mock_gliner_annotator
+        service._gliner_import_attempted = True
+        service._spacy_annotator = mock_spacy
+        service._spacy_import_attempted = True
 
-                    from datafog.services.text_service import TextService
+        service.annotate_text_sync("John Doe works at john@example.com")
 
-                    service = TextService(engine="smart")
-                    service.annotate_text_sync("John Doe works at john@example.com")
-
-                    # Should have tried regex first, then GLiNER
-                    mock_regex.annotate.assert_called_once()
-                    mock_gliner_annotator.annotate.assert_called_once()
+        # Should have tried regex first, then GLiNER.
+        mock_regex.annotate.assert_called_once()
+        mock_gliner_annotator.annotate.assert_called_once()
 
 
 # Test CLI updates as well
