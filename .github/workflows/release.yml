@@ -27,7 +27,7 @@ on:
         default: false
         type: boolean
       version_override:
-        description: "Override version (e.g. 4.4.0) — stable only"
+        description: "Override stable version or prerelease base (e.g. 4.4.0)"
         required: false
         type: string
 
@@ -214,6 +214,13 @@ jobs:
 
           # Strip any pre-release suffix to get base version
           BASE=$(echo "$CURRENT" | sed -E 's/(a|b)[0-9]+([.][0-9A-Za-z]+)?$//')
+          if [ -n "${{ inputs.version_override }}" ]; then
+            BASE="${{ inputs.version_override }}"
+            if echo "$BASE" | grep -Eq '(a|b)[0-9]+([.][0-9A-Za-z]+)?$'; then
+              echo "version_override must be a stable base version like 4.4.0, not a prerelease"
+              exit 1
+            fi
+          fi
           echo "Base version: $BASE"
 
           if [ "$TYPE" = "alpha" ]; then
@@ -231,12 +238,7 @@ jobs:
             VERSION="${BASE}b${BETA_NUM}"
 
           else
-            # Stable: use override or base version
-            if [ -n "${{ inputs.version_override }}" ]; then
-              VERSION="${{ inputs.version_override }}"
-            else
-              VERSION="$BASE"
-            fi
+            VERSION="$BASE"
           fi
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
