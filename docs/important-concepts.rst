@@ -1,6 +1,6 @@
-===========
+==================
 Important Concepts
-===========
+==================
 
 Overview
 --------
@@ -20,6 +20,7 @@ Key data models to support PII annotation and OCR analysis.
 Processors
 ^^^^^^^^^^^
 Main processors:
+
 * SpacyAnnotator
     Text annotation with spaCy
 * DonutProcessor
@@ -30,6 +31,7 @@ Main processors:
 Services
 ^^^^^^^^^^^
 Core services:
+
 * ImageService
     Image handling and OCR
 * SparkService
@@ -47,6 +49,7 @@ Data Models
 .. autosummary::
    :toctree: generated/
    :template: class.rst
+
    AnnotatorRequest
    AnnotationResult
    AnalysisExplanation
@@ -57,6 +60,7 @@ Data Models
 .. autosummary::
    :toctree: generated/
    :template: class.rst
+
    EntityTypes
    Pattern
    PatternRecognizer
@@ -68,6 +72,7 @@ Data Models
 .. autosummary::
    :toctree: generated/
    :template: class.rst
+
    SpacyAnnotator
 
 Processors
@@ -98,6 +103,7 @@ Services
 .. autosummary::
    :toctree: generated/
    :template: class.rst
+
    ImageDownloader
    ImageService
 
@@ -107,6 +113,7 @@ Services
 .. autosummary::
    :toctree: generated/
    :template: class.rst
+
    SparkService
 
 
@@ -116,4 +123,5 @@ Services
 .. autosummary::
    :toctree: generated/
    :template: class.rst
+
    TextService
