@@ -127,9 +127,9 @@ Compatibility Matrix
      - Deferred for v5.1+ overhaul.
      - Keep compatibility where practical; no runtime package installs.
    * - Telemetry
-     - Default-on opt-out telemetry.
+     - Opt-in telemetry.
      - Trust-critical behavior change.
-     - Make opt-in or no-network-by-default.
+     - Keep no-network-by-default.
    * - ``*_lean`` and ``*_original`` modules
      - Parallel historical implementations.
      - Remove or make private after migration path.
