@@ -356,7 +356,8 @@ class TestIntegration:
     def test_detect_triggers_telemetry(self, mock_urlopen):
         from datafog import detect
 
-        detect("Contact john@example.com")
+        with pytest.warns(FutureWarning, match=r"Use datafog\.scan\(\) instead"):
+            detect("Contact john@example.com")
         time.sleep(0.3)
 
         events = []
@@ -369,7 +370,11 @@ class TestIntegration:
     def test_process_triggers_telemetry(self, mock_urlopen):
         from datafog import process
 
-        process("Contact john@example.com", anonymize=True)
+        with pytest.warns(
+            FutureWarning,
+            match=r"datafog\.scan\(\) or datafog\.redact\(\)",
+        ):
+            process("Contact john@example.com", anonymize=True)
         time.sleep(0.3)
 
         events = []

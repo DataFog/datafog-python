@@ -139,8 +139,40 @@ jobs:
           OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python tests/simple_performance_test.py
 
   # ── 3. Build & Publish ────────────────────────────────────────────────
+  python313-core:
+    needs: determine-release
+    if: needs.determine-release.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.determine-release.outputs.target_branch }}
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install core + CLI dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov coverage
+          pip install -e ".[dev,cli]"
+
+      - name: Run Python 3.13 core + CLI tests
+        run: |
+          pytest tests/ \
+            -m "not slow" \
+            --ignore=tests/test_gliner_annotator.py \
+            --ignore=tests/test_image_service.py \
+            --ignore=tests/test_ocr_integration.py \
+            --ignore=tests/test_spark_integration.py \
+            --ignore=tests/test_text_service_integration.py
+
   publish:
-    needs: [determine-release, test]
+    needs: [determine-release, test, python313-core]
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}

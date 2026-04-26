@@ -1,0 +1,62 @@
+name: Bug report
+description: Report something that is broken or surprising.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting a DataFog issue.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Minimal code, command, or steps to reproduce.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: DataFog version
+      placeholder: "4.3.0"
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.4"
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Install profile
+      options:
+        - core
+        - cli
+        - nlp
+        - nlp-advanced
+        - ocr
+        - distributed
+        - all
+        - not sure
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: OS, package manager, relevant dependency versions, or CI link.
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Logs, screenshots, or related issues.
