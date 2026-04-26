@@ -78,7 +78,5 @@ def test_import_does_not_emit_migration_warnings() -> None:
         importlib.reload(datafog)
 
     assert not [
-        warning
-        for warning in captured
-        if issubclass(warning.category, FutureWarning)
+        warning for warning in captured if issubclass(warning.category, FutureWarning)
     ]

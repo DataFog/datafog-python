@@ -12,17 +12,13 @@ import warnings
 
 from .__about__ import __version__
 from .agent import create_guardrail, filter_output, sanitize, scan_prompt
-from .engine import (
-    Entity,
-    RedactResult,
-    ScanResult,
-    redact as _redact_entities,
-    scan as _scan,
-    scan_and_redact as _scan_and_redact,
-)
 
 # Core API functions - always available (lightweight)
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
+from .engine import Entity, RedactResult, ScanResult
+from .engine import redact as _redact_entities
+from .engine import scan as _scan
+from .engine import scan_and_redact as _scan_and_redact
 
 # Essential models - always available
 from .models.common import EntityTypes
