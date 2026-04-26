@@ -28,11 +28,18 @@ def _reset_telemetry_state():
 def _clean_state(monkeypatch):
     """Ensure clean telemetry state for every test and disable network."""
     _reset_telemetry_state()
-    # Default: telemetry enabled but network mocked
+    # Default: telemetry disabled unless a test opts in explicitly.
+    monkeypatch.delenv("DATAFOG_TELEMETRY", raising=False)
     monkeypatch.delenv("DATAFOG_NO_TELEMETRY", raising=False)
     monkeypatch.delenv("DO_NOT_TRACK", raising=False)
     yield
     _reset_telemetry_state()
+
+
+@pytest.fixture
+def enable_telemetry(monkeypatch):
+    """Opt telemetry in for tests that assert payload behavior."""
+    monkeypatch.setenv("DATAFOG_TELEMETRY", "1")
 
 
 @pytest.fixture
@@ -51,25 +58,61 @@ class TestOptOut:
     def test_datafog_no_telemetry_disables(self, monkeypatch):
         from datafog.telemetry import _is_telemetry_enabled
 
+        monkeypatch.setenv("DATAFOG_TELEMETRY", "1")
         monkeypatch.setenv("DATAFOG_NO_TELEMETRY", "1")
         assert _is_telemetry_enabled() is False
 
     def test_do_not_track_disables(self, monkeypatch):
         from datafog.telemetry import _is_telemetry_enabled
 
+        monkeypatch.setenv("DATAFOG_TELEMETRY", "1")
         monkeypatch.setenv("DO_NOT_TRACK", "1")
         assert _is_telemetry_enabled() is False
 
-    def test_enabled_by_default(self):
+    def test_disabled_by_default(self):
         from datafog.telemetry import _is_telemetry_enabled
 
+        assert _is_telemetry_enabled() is False
+
+    def test_datafog_telemetry_enables(self, monkeypatch):
+        from datafog.telemetry import _is_telemetry_enabled
+
+        monkeypatch.setenv("DATAFOG_TELEMETRY", "1")
         assert _is_telemetry_enabled() is True
 
-    def test_non_one_value_does_not_disable(self, monkeypatch):
+    @pytest.mark.parametrize("value", ["true", "yes", "on"])
+    def test_truthy_values_enable(self, monkeypatch, value):
         from datafog.telemetry import _is_telemetry_enabled
 
+        monkeypatch.setenv("DATAFOG_TELEMETRY", value)
+        assert _is_telemetry_enabled() is True
+
+    def test_falsey_value_does_not_enable(self, monkeypatch):
+        from datafog.telemetry import _is_telemetry_enabled
+
+        monkeypatch.setenv("DATAFOG_TELEMETRY", "0")
+        assert _is_telemetry_enabled() is False
+
+    def test_truthy_opt_out_overrides_opt_in(self, monkeypatch):
+        from datafog.telemetry import _is_telemetry_enabled
+
+        monkeypatch.setenv("DATAFOG_TELEMETRY", "1")
         monkeypatch.setenv("DATAFOG_NO_TELEMETRY", "true")
-        assert _is_telemetry_enabled() is True
+        assert _is_telemetry_enabled() is False
+
+    def test_send_event_noop_by_default(self, mock_urlopen):
+        from datafog.telemetry import _send_event
+
+        _send_event("test_event", {"key": "value"})
+        time.sleep(0.1)
+        mock_urlopen.assert_not_called()
+
+    def test_track_function_call_noop_by_default(self, mock_urlopen):
+        from datafog.telemetry import track_function_call
+
+        track_function_call("test_fn", "test_module")
+        time.sleep(0.1)
+        mock_urlopen.assert_not_called()
 
     def test_send_event_noop_when_disabled(self, monkeypatch, mock_urlopen):
         from datafog.telemetry import _send_event
@@ -166,7 +209,7 @@ class TestPrivacy:
         id2 = tel._get_anonymous_id()
         assert id1 == id2
 
-    def test_payload_never_contains_text_content(self, mock_urlopen):
+    def test_payload_never_contains_text_content(self, mock_urlopen, enable_telemetry):
         """Verify that tracked events don't leak text content."""
         from datafog.telemetry import track_function_call
 
@@ -197,7 +240,7 @@ class TestPrivacy:
 
 
 class TestNonBlocking:
-    def test_send_event_returns_immediately(self, mock_urlopen):
+    def test_send_event_returns_immediately(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _send_event
 
         # Make urlopen block
@@ -210,7 +253,9 @@ class TestNonBlocking:
         # Should return in <100ms even though urlopen blocks for 10s
         assert elapsed < 0.1
 
-    def test_track_function_call_returns_immediately(self, mock_urlopen):
+    def test_track_function_call_returns_immediately(
+        self, mock_urlopen, enable_telemetry
+    ):
         from datafog.telemetry import track_function_call
 
         mock_urlopen.side_effect = lambda *a, **k: time.sleep(10)
@@ -221,7 +266,7 @@ class TestNonBlocking:
 
         assert elapsed < 0.1
 
-    def test_network_failure_is_silent(self, mock_urlopen):
+    def test_network_failure_is_silent(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import track_function_call
 
         mock_urlopen.side_effect = Exception("Network down")
@@ -229,7 +274,7 @@ class TestNonBlocking:
         track_function_call("fn", "mod")
         time.sleep(0.3)
 
-    def test_urlopen_timeout_is_bounded(self, mock_urlopen):
+    def test_urlopen_timeout_is_bounded(self, mock_urlopen, enable_telemetry):
         """Verify we pass a timeout to urlopen."""
         from datafog.telemetry import _send_event
 
@@ -248,7 +293,7 @@ class TestNonBlocking:
 
 
 class TestPayloadCorrectness:
-    def test_init_event_sent_once(self, mock_urlopen):
+    def test_init_event_sent_once(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _ensure_initialized
 
         _ensure_initialized()
@@ -259,7 +304,7 @@ class TestPayloadCorrectness:
         # Should only create one thread/call for init
         assert mock_urlopen.call_count <= 1
 
-    def test_init_event_has_required_properties(self, mock_urlopen):
+    def test_init_event_has_required_properties(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _ensure_initialized
 
         _ensure_initialized()
@@ -281,7 +326,7 @@ class TestPayloadCorrectness:
         assert "is_ci" in props
         assert "distinct_id" in props
 
-    def test_function_call_event_properties(self, mock_urlopen):
+    def test_function_call_event_properties(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import track_function_call
 
         track_function_call(
@@ -308,7 +353,7 @@ class TestPayloadCorrectness:
                 found = True
         assert found, "datafog_function_called event not found"
 
-    def test_error_event_properties(self, mock_urlopen):
+    def test_error_event_properties(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import track_error
 
         track_error("detect", "ValueError", engine="regex")
@@ -326,7 +371,7 @@ class TestPayloadCorrectness:
                 found = True
         assert found, "datafog_error event not found"
 
-    def test_posthog_endpoint_url(self, mock_urlopen):
+    def test_posthog_endpoint_url(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _send_event
 
         _send_event("test_event", {"k": "v"})
@@ -336,7 +381,7 @@ class TestPayloadCorrectness:
         req = mock_urlopen.call_args[0][0]
         assert req.full_url == "https://us.i.posthog.com/capture/"
 
-    def test_content_type_is_json(self, mock_urlopen):
+    def test_content_type_is_json(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _send_event
 
         _send_event("test_event", {"k": "v"})
@@ -353,7 +398,7 @@ class TestPayloadCorrectness:
 
 
 class TestIntegration:
-    def test_detect_triggers_telemetry(self, mock_urlopen):
+    def test_detect_triggers_telemetry(self, mock_urlopen, enable_telemetry):
         from datafog import detect
 
         with pytest.warns(FutureWarning, match=r"Use datafog\.scan\(\) instead"):
@@ -367,7 +412,7 @@ class TestIntegration:
             events.append(body["event"])
         assert "datafog_function_called" in events
 
-    def test_process_triggers_telemetry(self, mock_urlopen):
+    def test_process_triggers_telemetry(self, mock_urlopen, enable_telemetry):
         from datafog import process
 
         with pytest.warns(
@@ -384,7 +429,7 @@ class TestIntegration:
             events.append(body["event"])
         assert "datafog_function_called" in events
 
-    def test_datafog_class_triggers_telemetry(self, mock_urlopen):
+    def test_datafog_class_triggers_telemetry(self, mock_urlopen, enable_telemetry):
         from datafog.main import DataFog
 
         df = DataFog()
@@ -398,7 +443,7 @@ class TestIntegration:
             events.append(body["event"])
         assert "datafog_function_called" in events
 
-    def test_text_service_triggers_telemetry(self, mock_urlopen):
+    def test_text_service_triggers_telemetry(self, mock_urlopen, enable_telemetry):
         try:
             from datafog.services.text_service import TextService
         except ImportError:
@@ -415,7 +460,7 @@ class TestIntegration:
             events.append(body["event"])
         assert "datafog_function_called" in events
 
-    def test_core_detect_pii_triggers_telemetry(self, mock_urlopen):
+    def test_core_detect_pii_triggers_telemetry(self, mock_urlopen, enable_telemetry):
         try:
             from datafog.core import detect_pii
 
@@ -440,7 +485,7 @@ class TestIntegration:
 
 
 class TestEdgeCases:
-    def test_empty_text(self, mock_urlopen):
+    def test_empty_text(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _get_text_length_bucket, track_function_call
 
         track_function_call(
@@ -456,7 +501,7 @@ class TestEdgeCases:
 
         assert _get_text_length_bucket(10_000_000) == "100k+"
 
-    def test_concurrent_init(self, mock_urlopen):
+    def test_concurrent_init(self, mock_urlopen, enable_telemetry):
         """Multiple threads calling _ensure_initialized should only init once."""
         from datafog.telemetry import _ensure_initialized
 
@@ -492,7 +537,7 @@ class TestEdgeCases:
         anon_id = tel._get_anonymous_id()
         assert len(anon_id) == 64
 
-    def test_dedup_nested_calls(self, mock_urlopen):
+    def test_dedup_nested_calls(self, mock_urlopen, enable_telemetry):
         """Nested track_function_call should only record the outer call."""
         from datafog.telemetry import track_function_call
 
@@ -531,7 +576,7 @@ class TestEdgeCases:
         ts = TextService(engine="regex")
         assert ts.engine == "regex"
 
-    def test_track_error_sent_on_exception(self, mock_urlopen):
+    def test_track_error_sent_on_exception(self, mock_urlopen, enable_telemetry):
         """track_error should fire a datafog_error event."""
         from datafog.telemetry import track_error
 
@@ -550,7 +595,7 @@ class TestEdgeCases:
         assert error_events[0]["error_type"] == "ValueError"
         assert error_events[0]["engine"] == "regex"
 
-    def test_pipeline_error_triggers_track_error(self, mock_urlopen):
+    def test_pipeline_error_triggers_track_error(self, mock_urlopen, enable_telemetry):
         """DataFog.run_text_pipeline_sync should fire datafog_error on failure."""
         from datafog.main import DataFog
 
