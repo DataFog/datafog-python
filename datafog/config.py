@@ -9,7 +9,7 @@ import os
 from enum import Enum
 from typing import Optional
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DataFogConfig(BaseSettings):
@@ -24,6 +24,8 @@ class DataFogConfig(BaseSettings):
     All settings have default values that can be overridden as needed. The class
     uses Pydantic for data validation and settings management.
     """
+
+    model_config = SettingsConfigDict(env_prefix="DATAFOG_", case_sensitive=False)
 
     # API Keys and Authentication
     api_key: str = os.environ.get("DATAFOG_API_KEY", "")
@@ -47,10 +49,6 @@ class DataFogConfig(BaseSettings):
 
     # Logging
     log_level: str = "INFO"
-
-    class Config:
-        env_prefix = "DATAFOG_"
-        case_sensitive = False
 
     def update(self, **kwargs):
         """Update configuration with new values"""

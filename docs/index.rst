@@ -12,13 +12,17 @@ DataFog is an open-source tool for PII detection and anonymization of unstructur
    python-sdk
    definitions
    roadmap
+   v44-bridge-release
+   v5-product-brief
+   v5-compatibility-matrix
+   v5-cut-line
 
 =====================
 Getting Started
 =====================
 
----------------------
 Installation
+------------
 
 Install DataFog via pip:
 
@@ -102,5 +106,3 @@ Scan image for PII:
    asyncio.run(run_ocr_pipeline_demo())
 
 For detailed information on the Python SDK, see :doc:`python-sdk`.
-
-

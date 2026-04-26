@@ -1,10 +1,13 @@
 """
-Anonymous, opt-out usage telemetry for DataFog.
+Anonymous, opt-in usage telemetry for DataFog.
 
 Collects anonymous usage data to help the DataFog team understand which engines,
 functions, and features are actually used. No text content is ever sent.
 
-Opt out by setting either environment variable:
+Telemetry is disabled by default. Opt in by setting:
+    DATAFOG_TELEMETRY=1
+
+Force telemetry off by setting either environment variable:
     DATAFOG_NO_TELEMETRY=1
     DO_NOT_TRACK=1
 """
@@ -29,13 +32,18 @@ _anonymous_id = None
 _scope = threading.local()
 
 
+def _env_truthy(name: str) -> bool:
+    """Return True when an environment variable explicitly opts in/out."""
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _is_telemetry_enabled() -> bool:
-    """Check if telemetry is enabled (opt-out via env vars)."""
-    if os.environ.get("DATAFOG_NO_TELEMETRY", "").strip() == "1":
+    """Check if telemetry is enabled (opt-in, with opt-out overrides)."""
+    if _env_truthy("DATAFOG_NO_TELEMETRY"):
         return False
-    if os.environ.get("DO_NOT_TRACK", "").strip() == "1":
+    if _env_truthy("DO_NOT_TRACK"):
         return False
-    return True
+    return _env_truthy("DATAFOG_TELEMETRY")
 
 
 def _get_anonymous_id() -> str:
