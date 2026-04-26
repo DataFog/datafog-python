@@ -30,3 +30,7 @@ autosummary_generate = True
 napoleon_use_rtype = False
 napoleon_use_ivar = False
 napoleon_use_param = False
+
+# Keep API docs buildable from the lightweight core/dev install. These
+# integrations are documented, but they live behind optional extras.
+autodoc_mock_imports = ["PIL", "pytesseract", "spacy"]

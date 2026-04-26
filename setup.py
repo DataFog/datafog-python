@@ -95,7 +95,7 @@ setup(
     packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=core_deps,
     extras_require=extras_require,
-    python_requires=">=3.10,<3.13",
+    python_requires=">=3.10,<3.14",
     entry_points={
         "console_scripts": [
             "datafog=datafog.client:app [cli]",  # Requires cli extra
@@ -109,6 +109,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Text Processing",
         "Topic :: Security",

@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 PII_ANNOTATION_LABELS = [
     "CARDINAL",
@@ -27,6 +27,8 @@ MAXIMAL_STRING_SIZE = 1000000
 
 
 class SpacyPIIAnnotator(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     nlp: Any
 
     @classmethod
@@ -75,6 +77,3 @@ class SpacyPIIAnnotator(BaseModel):
             return {
                 label: [] for label in PII_ANNOTATION_LABELS
             }  # Return empty annotations in case of error
-
-    class Config:
-        arbitrary_types_allowed = True

@@ -9,6 +9,69 @@ to a lightweight, modular architecture with optional extras.
    :local:
    :depth: 1
 
+v4.4.0 - Python 3.13 and v5 Migration Bridge
+--------------------------------------------
+
+Before v5.0.0, DataFog should ship a focused v4.4.0 bridge release. The
+purpose is to give users a concrete compatibility win while introducing the
+v5 direction gently.
+
+v4.4.0 should focus on:
+
+* Python 3.13 support for the core SDK and CLI.
+* Dependency validation for optional profiles without blocking core/CLI.
+* v5-style preview APIs where they can land safely.
+* Targeted deprecation warnings with no warnings on import.
+* Migration docs and release notes that announce the v5 path.
+
+Scope artifact:
+
+* :doc:`v44-bridge-release`
+
+v5.0.0 - Offline PII Firewall for AI Apps
+-----------------------------------------
+
+The v5.0.0 release is scoped around a sharper adoption wedge:
+
+   DataFog should be the fastest, easiest offline PII firewall for AI apps,
+   logs, and datasets.
+
+The release should prioritize trust and time-to-first-value over broad
+enterprise surface area. The first path should be a core install, a simple
+top-level API, no network surprises, and copy-pasteable workflows for LLM
+prompts/outputs, logs, JSONL datasets, and CI checks.
+
+Scope artifacts:
+
+* :doc:`v5-product-brief`
+* :doc:`v5-compatibility-matrix`
+* :doc:`v5-cut-line`
+
+v5.0.0 must focus on:
+
+* Stable top-level APIs: ``scan``, ``redact``, ``protect``, and ``restore``.
+* Privacy-safe defaults: no default network behavior, no runtime package
+  installation, and no implicit model downloads.
+* Policy-based redaction with presets for LLMs, logs, strict workflows, and
+  datasets.
+* Reversible token sessions that are explicit and opt-in.
+* LLM guardrails, including sync, async, and streaming protection.
+* CLI workflows for stdin, files, directories, CSV, JSONL, machine-readable
+  output, and CI-friendly exit codes.
+* Custom recognizers and stronger structured detection for app/log/secrets
+  data.
+* Modern packaging and release gates for install profiles, no-network
+  behavior, import time, wheel size, accuracy, coverage, and benchmarks.
+
+Deferred to v5.1+:
+
+* OCR overhaul.
+* Spark overhaul.
+* Cloud DLP integrations.
+* Enterprise dashboards and analytics.
+* Broad multilingual model tuning.
+* Large Presidio-style framework expansion.
+
 ✅ 4.1.0 (Released)
 --------------------
 The ``4.1.0`` release represents a major architectural shift to a lightweight
