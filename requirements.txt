@@ -1,6 +1,6 @@
 # Core dependencies with pinned versions
 pandas==2.2.3
-requests==2.32.3
+requests==2.33.0
 spacy==3.7.5
 pydantic==2.11.4
 Pillow==12.2.0
