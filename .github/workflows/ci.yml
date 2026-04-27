@@ -47,26 +47,25 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install base tooling
+      - name: Upgrade pip
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov coverage
 
       - name: Install dependencies (core)
         if: matrix.install-profile == 'core'
         run: |
-          pip install -e ".[dev,cli]"
+          pip install -e ".[test,cli]" -r requirements-test.txt
 
       - name: Install dependencies (nlp)
         if: matrix.install-profile == 'nlp'
         run: |
-          pip install -e ".[dev,cli,nlp]"
+          pip install -e ".[test,cli,nlp]" -r requirements-test.txt
           python -m spacy download en_core_web_sm
 
       - name: Install dependencies (nlp-advanced)
         if: matrix.install-profile == 'nlp-advanced'
         run: |
-          pip install -e ".[dev,cli,nlp,nlp-advanced]"
+          pip install -e ".[test,cli,nlp,nlp-advanced]" -r requirements-test.txt
           python -m spacy download en_core_web_sm
 
       - name: Run tests (core)

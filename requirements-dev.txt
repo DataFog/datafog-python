@@ -1,7 +1,11 @@
-# Include the base requirements
--r requirements.txt
+# Local development tooling.
+#
+# Install the package itself with the extras you need, for example:
+#   pip install -e ".[dev,cli]"
+#   pip install -e ".[all,dev]"
+-r requirements-test.txt
+-r requirements-docs.txt
 
-# Development and testing dependencies
 just==0.8.162
 isort==5.13.2
 black==26.3.1

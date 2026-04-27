@@ -1,0 +1,2 @@
+# Documentation-only dependencies.
+sphinx==7.2.6

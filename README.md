@@ -162,5 +162,6 @@ cd datafog-python
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e ".[all,dev]"
+pip install -r requirements-dev.txt
 pytest tests/
 ```
