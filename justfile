@@ -10,6 +10,9 @@ pip := ".venv/bin/pip"
 default:
     @echo "Available commands:"
     @echo "  just setup         - Set up the development environment"
+    @echo "  just uv-setup      - Set up the development environment with uv"
+    @echo "  just uv-test       - Run tests with uv"
+    @echo "  just uv-build      - Build distributions with uv"
     @echo "  just format        - Format the code"
     @echo "  just lint          - Lint the code"
     @echo "  just test          - Run tests"
@@ -23,6 +26,18 @@ setup:
     python -m venv {{venv_dir}}
     {{pip}} install -e ".[dev,cli]"
     {{pip}} install -r requirements-dev.txt
+
+# Set up the development environment with uv
+uv-setup:
+    uv sync --extra cli --group dev
+
+# Run tests with uv
+uv-test:
+    uv run pytest
+
+# Build distributions with uv
+uv-build:
+    uv build
 
 # Format the code
 format:

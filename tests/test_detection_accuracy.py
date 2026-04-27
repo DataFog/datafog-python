@@ -24,6 +24,20 @@ STRUCTURED_TYPES = {
     "IP_ADDRESS",
     "DATE",
     "ZIP_CODE",
+    "URL",
+    "UUID",
+    "API_KEY",
+    "SECRET",
+    "ACCESS_TOKEN",
+    "PRIVATE_KEY",
+    "PASSWORD",
+    "JWT",
+    "BEARER_TOKEN",
+    "AWS_ACCESS_KEY_ID",
+    "GITHUB_TOKEN",
+    "OPENAI_API_KEY",
+    "SLACK_TOKEN",
+    "STRIPE_KEY",
 }
 
 TYPE_ALIASES = {
@@ -280,7 +294,7 @@ def _canon_type(entity_type: str) -> str:
 
 def _extract_entities(text: str, engine: str) -> list[dict[str, Any]]:
     try:
-        result = scan(text=text, engine=engine)
+        result = scan(text=text, engine=engine, include_text=True)
     except (ImportError, EngineNotAvailable) as exc:
         pytest.skip(f"{engine} engine unavailable in this environment: {exc}")
 
@@ -488,6 +502,9 @@ def test_structured_pii_detection_slow(case: dict[str, Any], engine: str) -> Non
 @pytest.mark.parametrize("engine", FAST_ENGINES)
 def test_negative_cases_fast(case: dict[str, Any], engine: str) -> None:
     _xfail_if_known_limitation(case, engine, "negative")
+    if case["expected_entities"]:
+        _assert_expected_found(case, engine, "negative")
+        return
     actual = _extract_entities(case["input"], engine)
     assert not actual, f"{case['id']} ({engine}) false positives: {actual}"
 
@@ -499,6 +516,9 @@ def test_negative_cases_fast(case: dict[str, Any], engine: str) -> None:
 @pytest.mark.parametrize("engine", SLOW_ENGINES)
 def test_negative_cases_slow(case: dict[str, Any], engine: str) -> None:
     _xfail_if_known_limitation(case, engine, "negative")
+    if case["expected_entities"]:
+        _assert_expected_found(case, engine, "negative")
+        return
     actual = _extract_entities(case["input"], engine)
     assert not actual, f"{case['id']} ({engine}) false positives: {actual}"
 

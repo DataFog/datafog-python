@@ -46,6 +46,7 @@ Scope artifacts:
 * :doc:`v5-product-brief`
 * :doc:`v5-compatibility-matrix`
 * :doc:`v5-cut-line`
+* :doc:`v5-rc1-api-contract`
 
 v5.0.0 must focus on:
 

@@ -37,7 +37,7 @@ def detect_pii(text: str) -> Dict[str, List[str]]:
 
     try:
         # Use engine boundary for canonical scan behavior.
-        scan_result = scan(text=text, engine=REGEX_ENGINE)
+        scan_result = scan(text=text, engine=REGEX_ENGINE, include_text=True)
         pii_dict: Dict[str, List[str]] = {}
         for entity in scan_result.entities:
             if not entity.text.strip():
@@ -81,7 +81,11 @@ def detect_pii(text: str) -> Dict[str, List[str]]:
         ) from e
 
 
-def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> str:
+def anonymize_text(
+    text: str,
+    method: Union[str, AnonymizerType] = "redact",
+    hash_key: str | bytes | None = None,
+) -> str:
     """
     Simple text anonymization using lightweight regex engine.
 
@@ -120,6 +124,7 @@ def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> 
             text=text,
             engine=REGEX_ENGINE,
             strategy=strategy_map[method],
+            hash_key=hash_key,
         )
 
         try:

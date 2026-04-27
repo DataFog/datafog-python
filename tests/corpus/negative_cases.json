@@ -34,7 +34,15 @@
   {
     "id": "uuid-not-ssn",
     "input": "Trace id 550e8400-e29b-41d4-a716-446655440000",
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "type": "UUID",
+        "text": "550e8400-e29b-41d4-a716-446655440000",
+        "start": 9,
+        "end": 45
+      }
+    ],
+    "note": "UUID is P0 in v5; this case remains a negative control for SSN only"
   },
   {
     "id": "math-not-credit-card",
@@ -49,7 +57,15 @@
   {
     "id": "markdown-link",
     "input": "See [RFC 1918](https://example.com/rfc1918)",
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "type": "URL",
+        "text": "https://example.com/rfc1918",
+        "start": 15,
+        "end": 42
+      }
+    ],
+    "note": "URL is P0 in v5; this case remains a negative control for IP only"
   },
   {
     "id": "code-symbol",
@@ -74,6 +90,14 @@
   {
     "id": "url-with-at",
     "input": "https://example.com/@user/profile is a URL path",
-    "expected_entities": []
+    "expected_entities": [
+      {
+        "type": "URL",
+        "text": "https://example.com/@user/profile",
+        "start": 0,
+        "end": 33
+      }
+    ],
+    "note": "URL is P0 in v5; this case remains a negative control for email only"
   }
 ]

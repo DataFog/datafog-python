@@ -9,6 +9,7 @@ from functools import wraps
 from typing import Any, Callable, Iterator, Optional, TypeVar
 
 from .engine import Entity, RedactResult, ScanResult, scan, scan_and_redact
+from .models import TokenSession
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -54,6 +55,8 @@ class Guardrail:
     engine: str = "smart"
     strategy: str = "token"
     on_detect: str = "redact"
+    session: TokenSession | None = None
+    hash_key: str | bytes | None = None
 
     def __post_init__(self) -> None:
         if self.on_detect not in {"redact", "block", "warn"}:
@@ -70,6 +73,8 @@ class Guardrail:
             engine=self.engine,
             entity_types=self.entity_types,
             strategy=self.strategy,
+            session=self.session,
+            hash_key=self.hash_key,
         )
         if not result.entities:
             return result
@@ -86,8 +91,8 @@ class Guardrail:
             )
             return RedactResult(
                 redacted_text=text,
-                mapping={},
                 entities=result.entities,
+                replacements=[],
             )
 
         return result
@@ -140,6 +145,8 @@ def create_guardrail(
     engine: str = "smart",
     strategy: str = "token",
     on_detect: str = "redact",
+    session: TokenSession | None = None,
+    hash_key: str | bytes | None = None,
 ) -> Guardrail:
     """
     Create a reusable guardrail object for wrapping LLM calls.
@@ -149,6 +156,8 @@ def create_guardrail(
         engine=engine,
         strategy=strategy,
         on_detect=on_detect,
+        session=session,
+        hash_key=hash_key,
     )
 
 

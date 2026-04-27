@@ -28,7 +28,29 @@ class RegexAnnotator:
     """
 
     # Labels for PII entities
-    LABELS = ["EMAIL", "PHONE", "SSN", "CREDIT_CARD", "IP_ADDRESS", "DOB", "ZIP"]
+    LABELS = [
+        "EMAIL",
+        "PHONE",
+        "SSN",
+        "CREDIT_CARD",
+        "IP_ADDRESS",
+        "DOB",
+        "ZIP",
+        "URL",
+        "UUID",
+        "API_KEY",
+        "SECRET",
+        "ACCESS_TOKEN",
+        "PRIVATE_KEY",
+        "PASSWORD",
+        "JWT",
+        "BEARER_TOKEN",
+        "AWS_ACCESS_KEY_ID",
+        "GITHUB_TOKEN",
+        "OPENAI_API_KEY",
+        "SLACK_TOKEN",
+        "STRIPE_KEY",
+    ]
 
     def __init__(self):
         # Compile all patterns once at initialization
@@ -175,6 +197,178 @@ class RegexAnnotator:
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
+            "URL": re.compile(
+                r"""
+                (?<![A-Za-z0-9])
+                (?:
+                    https?://[^\s<>"')]+
+                    |
+                    www\.[^\s<>"')]+
+                )
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            "UUID": re.compile(
+                r"""
+                \b
+                [0-9a-f]{8}
+                -
+                [0-9a-f]{4}
+                -
+                [1-5][0-9a-f]{3}
+                -
+                [89ab][0-9a-f]{3}
+                -
+                [0-9a-f]{12}
+                \b
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            "JWT": re.compile(
+                r"""
+                \b
+                eyJ[A-Za-z0-9_-]{10,}
+                \.
+                [A-Za-z0-9_-]{10,}
+                \.
+                [A-Za-z0-9_-]{10,}
+                \b
+                """,
+                re.MULTILINE | re.VERBOSE,
+            ),
+            "BEARER_TOKEN": re.compile(
+                r"""
+                \bBearer
+                \s+
+                (?P<value>[A-Za-z0-9._~+/=-]{20,})
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            "AWS_ACCESS_KEY_ID": re.compile(
+                r"""
+                \b
+                (?:AKIA|ASIA)
+                [0-9A-Z]{16}
+                \b
+                """,
+                re.MULTILINE | re.VERBOSE,
+            ),
+            "GITHUB_TOKEN": re.compile(
+                r"""
+                \b
+                (?:ghp|gho|ghu|ghs|ghr)_
+                [A-Za-z0-9_]{36,255}
+                \b
+                """,
+                re.MULTILINE | re.VERBOSE,
+            ),
+            "OPENAI_API_KEY": re.compile(
+                r"""
+                \b
+                sk-
+                (?:proj-)?
+                [A-Za-z0-9_-]{20,}
+                \b
+                """,
+                re.MULTILINE | re.VERBOSE,
+            ),
+            "SLACK_TOKEN": re.compile(
+                r"""
+                \b
+                xox[baprs]-
+                [A-Za-z0-9-]{10,}
+                \b
+                """,
+                re.MULTILINE | re.VERBOSE,
+            ),
+            "STRIPE_KEY": re.compile(
+                r"""
+                \b
+                (?:sk|pk)_
+                (?:live|test)_
+                [A-Za-z0-9]{16,}
+                \b
+                """,
+                re.MULTILINE | re.VERBOSE,
+            ),
+            "PRIVATE_KEY": re.compile(
+                r"""
+                -----BEGIN\s+
+                (?:
+                    RSA\s+|
+                    EC\s+|
+                    OPENSSH\s+|
+                    DSA\s+
+                )?
+                PRIVATE\s+KEY-----
+                [\s\S]+?
+                -----END\s+
+                (?:
+                    RSA\s+|
+                    EC\s+|
+                    OPENSSH\s+|
+                    DSA\s+
+                )?
+                PRIVATE\s+KEY-----
+                """,
+                re.MULTILINE | re.VERBOSE,
+            ),
+            "API_KEY": re.compile(
+                r"""
+                \b
+                (?:api[_-]?key|secret[_-]?key)
+                \b
+                \s*
+                (?::|=)
+                \s*
+                ["']?
+                (?P<value>[A-Za-z0-9][A-Za-z0-9_.\-]{19,})
+                ["']?
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            "ACCESS_TOKEN": re.compile(
+                r"""
+                \b
+                (?:access[_-]?token|auth[_-]?token|id[_-]?token|refresh[_-]?token)
+                \b
+                \s*
+                (?::|=)
+                \s*
+                ["']?
+                (?P<value>[A-Za-z0-9][A-Za-z0-9_.\-]{19,})
+                ["']?
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            "SECRET": re.compile(
+                r"""
+                \b
+                (?:client[_-]?secret|webhook[_-]?secret|secret)
+                \b
+                \s*
+                (?::|=)
+                \s*
+                ["']?
+                (?P<value>[A-Za-z0-9][A-Za-z0-9_.\-]{15,})
+                ["']?
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            "PASSWORD": re.compile(
+                r"""
+                \b
+                (?:password|passwd|pwd)
+                \b
+                \s*
+                (?::|=)
+                \s*
+                ["']?
+                (?P<value>[^\s"',;]{8,})
+                ["']?
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
         }
 
     @classmethod
@@ -200,7 +394,7 @@ class RegexAnnotator:
         # Process with each pattern
         for label, pattern in self.patterns.items():
             for match in pattern.finditer(text):
-                result[label].append(match.group())
+                result[label].append(self._match_text(match))
 
         return result
 
@@ -225,11 +419,12 @@ class RegexAnnotator:
 
         for label, pattern in self.patterns.items():
             for match in pattern.finditer(text):
+                start, end, match_text = self._match_span(match)
                 span = Span(
                     label=label,
-                    start=match.start(),
-                    end=match.end(),
-                    text=match.group(),
+                    start=start,
+                    end=end,
+                    text=match_text,
                 )
                 spans_by_label[label].append(span)
                 all_spans.append(span)
@@ -239,3 +434,13 @@ class RegexAnnotator:
         }
 
         return regex_result, AnnotationResult(text=text, spans=all_spans)
+
+    @staticmethod
+    def _match_span(match: re.Match) -> Tuple[int, int, str]:
+        if "value" in match.re.groupindex and match.group("value") is not None:
+            return match.start("value"), match.end("value"), match.group("value")
+        return match.start(), match.end(), match.group()
+
+    @classmethod
+    def _match_text(cls, match: re.Match) -> str:
+        return cls._match_span(match)[2]

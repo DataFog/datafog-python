@@ -21,19 +21,20 @@ def test_scan_prompt_returns_entities_without_modifying_text() -> None:
     prompt = "Customer email: jane.doe@company.com"
     result = datafog.scan_prompt(prompt, engine="regex")
 
-    assert result.text == prompt
     assert any(entity.type == "EMAIL" for entity in result.entities)
+    assert all(entity.text is None for entity in result.entities)
+    assert result.input_length == len(prompt)
     assert prompt == "Customer email: jane.doe@company.com"
 
 
-def test_filter_output_returns_redact_result_and_mapping() -> None:
+def test_filter_output_returns_safe_redact_result() -> None:
     output = "SSN: 123-45-6789"
     result = datafog.filter_output(output, engine="regex")
 
     assert result.redacted_text != output
     assert result.entities
-    assert any(key.startswith("[SSN_") for key in result.mapping)
-    assert "123-45-6789" in result.mapping.values()
+    assert result.replacements[0].token.startswith("[SSN_")
+    assert "123-45-6789" not in result.to_safe_json()
 
 
 def test_create_guardrail_as_decorator_redacts_string_output() -> None:
@@ -64,7 +65,7 @@ def test_create_guardrail_warn_mode_warns_and_returns_original() -> None:
 
     assert result.redacted_text == text
     assert result.entities
-    assert result.mapping == {}
+    assert result.replacements == []
 
 
 def test_guardrail_watch_context_manager_tracks_activity() -> None:

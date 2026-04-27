@@ -1,0 +1,178 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datafog"
+dynamic = ["version"]
+description = "Offline PII firewall for AI apps, logs, traces, and datasets"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = "Apache-2.0"
+authors = [
+  { name = "Sid Mohan", email = "sid@datafog.ai" },
+]
+keywords = [
+  "pii",
+  "privacy",
+  "redaction",
+  "llm",
+  "logs",
+  "traces",
+  "security",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Text Processing",
+]
+dependencies = [
+  "pydantic>=2.0,<3.0",
+  "pydantic-settings>=2.0.0",
+  "typing-extensions>=4.0",
+]
+
+[project.urls]
+Homepage = "https://datafog.ai"
+Documentation = "https://docs.datafog.ai"
+Discord = "https://discord.gg/bzDth394R4"
+Twitter = "https://twitter.com/datafoginc"
+GitHub = "https://github.com/datafog/datafog-python"
+
+[project.optional-dependencies]
+nlp = [
+  "spacy>=3.7.0,<4.0",
+]
+nlp-advanced = [
+  "gliner>=0.2.5",
+  "torch>=2.1.0,<2.7",
+  "transformers>=4.20.0",
+  "huggingface-hub>=0.16.0",
+]
+ocr = [
+  "numpy>=1.24.0",
+  "pytesseract>=0.3.0",
+  "Pillow>=12.2.0",
+  "sentencepiece>=0.2.0",
+  "protobuf>=4.0.0",
+]
+distributed = [
+  "pandas>=2.0.0",
+  "numpy>=1.24.0",
+  "pyspark>=3.5.0",
+]
+web = [
+  "fastapi>=0.100.0",
+  "aiohttp>=3.13.4",
+  "certifi>=2025.4.26",
+  "requests>=2.33.0",
+]
+cli = [
+  "typer>=0.12.0",
+]
+crypto = [
+  "cryptography>=46.0.7",
+]
+test = [
+  "pytest>=9.0.3",
+  "pytest-asyncio>=1.3.0",
+  "pytest-cov>=7.1.0",
+]
+docs = [
+  "sphinx==7.2.6",
+]
+benchmark = [
+  "pytest-benchmark>=4.0.0",
+]
+dev = [
+  "pytest>=9.0.3",
+  "pytest-asyncio>=1.3.0",
+  "pytest-cov>=7.1.0",
+  "sphinx==7.2.6",
+  "pytest-benchmark>=4.0.0",
+  "just==0.8.162",
+  "isort==5.13.2",
+  "black==26.3.1",
+  "blacken-docs==1.13.0",
+  "certifi==2025.4.26",
+  "flake8==7.0.0",
+  "prettier==0.0.7",
+  "tox==4.14.2",
+  "mypy==1.9.0",
+  "autoflake==2.2.1",
+  "pre-commit==3.7.0",
+  "ruff==0.3.4",
+  "uv>=0.5.0",
+]
+all = [
+  "spacy>=3.7.0,<4.0",
+  "gliner>=0.2.5",
+  "torch>=2.1.0,<2.7",
+  "transformers>=4.20.0",
+  "huggingface-hub>=0.16.0",
+  "numpy>=1.24.0",
+  "pytesseract>=0.3.0",
+  "Pillow>=12.2.0",
+  "sentencepiece>=0.2.0",
+  "protobuf>=4.0.0",
+  "pandas>=2.0.0",
+  "pyspark>=3.5.0",
+  "fastapi>=0.100.0",
+  "aiohttp>=3.13.4",
+  "certifi>=2025.4.26",
+  "requests>=2.33.0",
+  "typer>=0.12.0",
+  "cryptography>=46.0.7",
+]
+
+[project.scripts]
+datafog = "datafog.client:app"
+
+[tool.setuptools.dynamic]
+version = { attr = "datafog.__about__.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["datafog*"]
+exclude = ["tests", "tests.*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+datafog = ["py.typed"]
+
+[dependency-groups]
+test = [
+  "pytest>=9.0.3",
+  "pytest-asyncio>=1.3.0",
+  "pytest-cov>=7.1.0",
+]
+docs = [
+  "sphinx==7.2.6",
+]
+benchmark = [
+  "pytest-benchmark>=4.0.0",
+]
+dev = [
+  { include-group = "test" },
+  { include-group = "docs" },
+  { include-group = "benchmark" },
+  "just==0.8.162",
+  "isort==5.13.2",
+  "black==26.3.1",
+  "blacken-docs==1.13.0",
+  "certifi==2025.4.26",
+  "flake8==7.0.0",
+  "prettier==0.0.7",
+  "tox==4.14.2",
+  "mypy==1.9.0",
+  "autoflake==2.2.1",
+  "pre-commit==3.7.0",
+  "ruff==0.3.4",
+  "uv>=0.5.0",
+]

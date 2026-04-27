@@ -6,6 +6,8 @@ from datafog.processing.text_processing.regex_annotator import (
     RegexAnnotator,
 )
 
+FAKE_STRIPE_KEY = "sk_live_" + ("a" * 24)
+
 
 # Fixtures for test data
 @pytest.fixture
@@ -40,9 +42,7 @@ def test_regex_annotator_initialization():
     """Test that the RegexAnnotator can be initialized."""
     annotator = RegexAnnotator()
     assert annotator is not None
-    assert (
-        len(annotator.LABELS) == 7
-    )  # EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP
+    assert len(annotator.LABELS) == 21
 
 
 def test_regex_annotator_create_method():
@@ -134,6 +134,103 @@ def test_phone_regex(phone: str, should_match: bool):
         assert (
             phone not in result["PHONE"]
         ), f"Incorrectly detected invalid phone: {phone}"
+
+
+@pytest.mark.parametrize(
+    "label,text,expected",
+    [
+        ("URL", "Visit https://example.com/docs?q=1", "https://example.com/docs?q=1"),
+        (
+            "UUID",
+            "trace_id=123e4567-e89b-12d3-a456-426614174000",
+            "123e4567-e89b-12d3-a456-426614174000",
+        ),
+        (
+            "AWS_ACCESS_KEY_ID",
+            "aws_access_key_id=AKIAIOSFODNN7EXAMPLE",
+            "AKIAIOSFODNN7EXAMPLE",
+        ),
+        (
+            "GITHUB_TOKEN",
+            "github=ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        ),
+        (
+            "OPENAI_API_KEY",
+            "openai=sk-proj-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "sk-proj-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        ),
+        ("SLACK_TOKEN", "slack=xoxb-1234567890-abcdefghi", "xoxb-1234567890-abcdefghi"),
+        (
+            "STRIPE_KEY",
+            f"stripe={FAKE_STRIPE_KEY}",
+            FAKE_STRIPE_KEY,
+        ),
+        (
+            "JWT",
+            (
+                "jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+                "eyJzdWIiOiIxMjM0NTY3ODkwIn0."
+                "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+            ),
+            (
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+                "eyJzdWIiOiIxMjM0NTY3ODkwIn0."
+                "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+            ),
+        ),
+    ],
+)
+def test_p0_secret_and_identifier_regexes(label: str, text: str, expected: str):
+    """Test P0 structured identifiers and provider secret patterns."""
+    annotator = RegexAnnotator()
+    result = annotator.annotate(text)
+
+    assert expected in result[label]
+
+
+@pytest.mark.parametrize(
+    "label,text,expected",
+    [
+        ("API_KEY", "api_key='abc123abc123abc123abc123'", "abc123abc123abc123abc123"),
+        (
+            "ACCESS_TOKEN",
+            "access_token=tok_abc123abc123abc123abc",
+            "tok_abc123abc123abc123abc",
+        ),
+        ("SECRET", "client_secret=sec_abc123abc123abc", "sec_abc123abc123abc"),
+        ("PASSWORD", "password='correct-horse-123'", "correct-horse-123"),
+        (
+            "BEARER_TOKEN",
+            "Authorization: Bearer abc123abc123abc123abc123",
+            "abc123abc123abc123abc123",
+        ),
+    ],
+)
+def test_contextual_secret_regexes_return_value_span(
+    label: str, text: str, expected: str
+):
+    """Contextual secret patterns should return the secret value, not key name."""
+    annotator = RegexAnnotator()
+    result, structured = annotator.annotate_with_spans(text)
+
+    assert expected in result[label]
+    span = next(span for span in structured.spans if span.label == label)
+    assert span.text == expected
+    assert text[span.start : span.end] == expected
+
+
+def test_private_key_regex_detects_pem_block():
+    annotator = RegexAnnotator()
+    private_key = (
+        "-----BEGIN PRIVATE KEY-----\n"
+        "abc123abc123abc123abc123\n"
+        "-----END PRIVATE KEY-----"
+    )
+
+    result = annotator.annotate(f"key={private_key}")
+
+    assert private_key in result["PRIVATE_KEY"]
 
 
 @pytest.mark.parametrize(

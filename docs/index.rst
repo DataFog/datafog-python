@@ -16,6 +16,7 @@ DataFog is an open-source tool for PII detection and anonymization of unstructur
    v5-product-brief
    v5-compatibility-matrix
    v5-cut-line
+   v5-rc1-api-contract
 
 =====================
 Getting Started

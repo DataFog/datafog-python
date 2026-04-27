@@ -27,7 +27,8 @@ def test_top_level_redact_scans_by_default() -> None:
 
     assert result.redacted_text != "Email jane@example.com"
     assert "[EMAIL_1]" in result.redacted_text
-    assert result.mapping
+    assert result.replacements
+    assert all(entity.text is None for entity in result.entities)
     assert not captured
 
 
@@ -47,6 +48,17 @@ def test_top_level_redact_supports_preview_presets() -> None:
     assert "[EMAIL_1]" in result.redacted_text
 
 
+def test_top_level_restore_requires_explicit_session() -> None:
+    session = datafog.TokenSession()
+    result = datafog.redact("Email jane@example.com", session=session)
+
+    assert "[DF_EMAIL_1]" in result.redacted_text
+    assert (
+        datafog.restore(result.redacted_text, session=session)
+        == "Email jane@example.com"
+    )
+
+
 def test_top_level_protect_returns_guardrail() -> None:
     guardrail = datafog.protect(on_detect="redact")
 
@@ -56,6 +68,19 @@ def test_top_level_protect_returns_guardrail() -> None:
 
     assert filtered.redacted_text != "Email jane@example.com"
     assert not captured
+
+
+def test_top_level_protect_accepts_token_session() -> None:
+    session = datafog.TokenSession()
+    guardrail = datafog.protect(engine="regex", session=session)
+
+    filtered = guardrail.filter("Email jane@example.com")
+
+    assert "[DF_EMAIL_1]" in filtered.redacted_text
+    assert (
+        datafog.restore(filtered.redacted_text, session=session)
+        == "Email jane@example.com"
+    )
 
 
 def test_legacy_detect_warns_with_replacement() -> None:

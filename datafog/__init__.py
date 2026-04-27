@@ -15,10 +15,18 @@ from .agent import create_guardrail, filter_output, sanitize, scan_prompt
 
 # Core API functions - always available (lightweight)
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
-from .engine import Entity, RedactResult, ScanResult
 from .engine import redact as _redact_entities
+from .engine import restore as _restore
 from .engine import scan as _scan
 from .engine import scan_and_redact as _scan_and_redact
+from .models import (
+    Entity,
+    RedactResult,
+    Replacement,
+    ScanResult,
+    TokenSession,
+    ValidationResult,
+)
 
 # Essential models - always available
 from .models.common import EntityTypes
@@ -163,6 +171,8 @@ def scan(
     text: str,
     engine: str = "regex",
     entity_types: list[str] | None = None,
+    include_text: bool = False,
+    locale: str = "global",
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
@@ -170,7 +180,13 @@ def scan(
     Defaults to the lightweight regex engine so the core install works without
     optional dependency fallback warnings.
     """
-    return _scan(text=text, engine=engine, entity_types=entity_types)
+    return _scan(
+        text=text,
+        engine=engine,
+        entity_types=entity_types,
+        include_text=include_text,
+        locale=locale,
+    )
 
 
 def redact(
@@ -180,6 +196,9 @@ def redact(
     entity_types: list[str] | None = None,
     strategy: str = "token",
     preset: str | None = None,
+    include_text: bool = False,
+    session: TokenSession | None = None,
+    hash_key: str | bytes | None = None,
 ) -> RedactResult:
     """
     v5-preview redaction entrypoint.
@@ -195,14 +214,30 @@ def redact(
             raise ValueError(f"preset must be one of: {allowed}") from exc
 
     if entities is not None:
-        return _redact_entities(text=text, entities=entities, strategy=strategy)
+        return _redact_entities(
+            text=text,
+            entities=entities,
+            strategy=strategy,
+            include_text=include_text,
+            session=session,
+            hash_key=hash_key,
+        )
 
     return _scan_and_redact(
         text=text,
         engine=engine,
         entity_types=entity_types,
         strategy=strategy,
+        session=session,
+        hash_key=hash_key,
     )
+
+
+def restore(text: str, session: TokenSession) -> str:
+    """
+    Restore reversible tokens from an explicit in-memory session.
+    """
+    return _restore(text=text, session=session)
 
 
 def protect(
@@ -210,6 +245,8 @@ def protect(
     engine: str = "regex",
     strategy: str = "token",
     on_detect: str = "redact",
+    session: TokenSession | None = None,
+    hash_key: str | bytes | None = None,
 ):
     """
     v5-preview guardrail factory.
@@ -219,6 +256,8 @@ def protect(
         engine=engine,
         strategy=strategy,
         on_detect=on_detect,
+        session=session,
+        hash_key=hash_key,
     )
 
 
@@ -367,8 +406,12 @@ __all__ = [
     "Entity",
     "ScanResult",
     "RedactResult",
+    "Replacement",
+    "TokenSession",
+    "ValidationResult",
     "scan",
     "redact",
+    "restore",
     "protect",
     "detect",
     "process",

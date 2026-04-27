@@ -1,6 +1,6 @@
 # Minimal runtime dependencies for local installs.
 #
-# Published package metadata in setup.py is the source of truth. Optional
+# Published package metadata in pyproject.toml is the source of truth. Optional
 # feature dependencies live behind package extras such as nlp, ocr, web, and all.
 pydantic==2.11.4
 pydantic-settings==2.3.4

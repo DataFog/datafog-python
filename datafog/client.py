@@ -6,6 +6,7 @@ Provides CLI commands for scanning images and text using DataFog's OCR and PII d
 
 import asyncio
 import logging
+from pathlib import Path
 from typing import List
 
 import typer
@@ -379,6 +380,12 @@ def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
 def hash_text(
     text: str = typer.Argument(None, help="Text to hash PII"),
     hash_type: HashType = typer.Option(HashType.SHA256, help="Hash algorithm to use"),
+    hash_key_file: Path | None = typer.Option(
+        None,
+        help=(
+            "File containing the HMAC key. DATAFOG_HMAC_KEY is used when omitted."
+        ),
+    ),
 ):
     """
     Choose from SHA256, MD5, or SHA3-256 algorithms to hash detected PII in text.
@@ -393,9 +400,20 @@ def hash_text(
         typer.echo("No text provided to hash.")
         raise typer.Exit(code=1)
 
+    hash_key = hash_key_file.read_text().strip() if hash_key_file is not None else None
+
     # HashType is retained for backward-compatible CLI signature.
     _ = hash_type
-    result = scan_and_redact(text=text, engine="smart", strategy="hash")
+    try:
+        result = scan_and_redact(
+            text=text,
+            engine="smart",
+            strategy="hash",
+            hash_key=hash_key,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
     typer.echo(result.redacted_text)
 
     try:
