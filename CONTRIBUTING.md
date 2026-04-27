@@ -36,6 +36,13 @@ python -m pip install --upgrade pip
 pip install -e ".[dev,cli]"
 ```
 
+For pinned local tooling, install the development requirements after the editable
+package install:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
 For optional NLP or OCR work, install the relevant extras:
 
 ```bash
