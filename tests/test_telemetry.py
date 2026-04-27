@@ -267,6 +267,33 @@ class TestNonBlocking:
 
         assert elapsed < 0.1
 
+    def test_track_function_call_does_not_wait_for_init_metadata(
+        self, monkeypatch, enable_telemetry
+    ):
+        import datafog.telemetry as tel
+
+        init_posted = threading.Event()
+
+        def slow_detect_installed_extras():
+            time.sleep(0.3)
+            return []
+
+        def fake_post_event(event_name, properties):
+            if event_name == "datafog_init":
+                init_posted.set()
+
+        monkeypatch.setattr(
+            tel, "_detect_installed_extras", slow_detect_installed_extras
+        )
+        monkeypatch.setattr(tel, "_post_event", fake_post_event)
+
+        start = time.monotonic()
+        tel.track_function_call("fn", "mod")
+        elapsed = time.monotonic() - start
+
+        assert elapsed < 0.1
+        assert init_posted.wait(1)
+
     def test_network_failure_is_silent(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import track_function_call
 
