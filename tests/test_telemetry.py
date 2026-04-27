@@ -2,6 +2,7 @@
 
 import builtins
 import json
+import sys
 import threading
 import time
 from pathlib import Path
@@ -647,6 +648,43 @@ class TestEdgeCases:
 
         result = _detect_installed_extras()
         assert isinstance(result, list)
+
+    def test_detect_installed_extras_handles_probe_errors(self, monkeypatch):
+        import datafog.telemetry as tel
+
+        optional_modules = {"spacy", "gliner", "pytesseract", "typer", "pyspark"}
+        for module_name in optional_modules:
+            monkeypatch.delitem(sys.modules, module_name, raising=False)
+
+        def broken_find_spec(_module_name):
+            raise ValueError("invalid module state")
+
+        monkeypatch.setattr(tel.importlib.util, "find_spec", broken_find_spec)
+
+        assert tel._detect_installed_extras() == []
+
+    def test_send_init_event_uses_unknown_version_when_about_import_fails(
+        self, monkeypatch
+    ):
+        import datafog.telemetry as tel
+
+        init_posted = threading.Event()
+        captured = {}
+
+        monkeypatch.setitem(sys.modules, "datafog.__about__", None)
+
+        def fake_post_event(event_name, properties):
+            captured["event_name"] = event_name
+            captured["properties"] = properties
+            init_posted.set()
+
+        monkeypatch.setattr(tel, "_post_event", fake_post_event)
+
+        tel._send_init_event()
+
+        assert init_posted.wait(1)
+        assert captured["event_name"] == "datafog_init"
+        assert captured["properties"]["package_version"] == "unknown"
 
     def test_services_init_does_not_require_aiohttp(self):
         """TextService should be importable without aiohttp/PIL (services/__init__.py fix)."""

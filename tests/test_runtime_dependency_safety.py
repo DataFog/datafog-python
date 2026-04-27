@@ -62,6 +62,40 @@ def test_spacy_engine_missing_model_surfaces_download_guidance(
         engine._get_spacy_annotator.cache_clear()
 
 
+def test_spacy_engine_missing_module_surfaces_import_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from datafog import engine
+    from datafog.exceptions import EngineNotAvailable
+
+    module_name = "datafog.processing.text_processing.spacy_pii_annotator"
+    monkeypatch.setitem(sys.modules, module_name, None)
+
+    engine._get_spacy_annotator.cache_clear()
+    try:
+        with pytest.raises(EngineNotAvailable, match="spacy_pii_annotator"):
+            engine.scan("Jane Doe", engine="spacy")
+    finally:
+        engine._get_spacy_annotator.cache_clear()
+
+
+def test_gliner_engine_missing_module_surfaces_import_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from datafog import engine
+    from datafog.exceptions import EngineNotAvailable
+
+    module_name = "datafog.processing.text_processing.gliner_annotator"
+    monkeypatch.setitem(sys.modules, module_name, None)
+
+    engine._get_gliner_annotator.cache_clear()
+    try:
+        with pytest.raises(EngineNotAvailable, match="gliner_annotator"):
+            engine.scan("Jane Doe", engine="gliner")
+    finally:
+        engine._get_gliner_annotator.cache_clear()
+
+
 def test_spacy_helper_does_not_require_rich(monkeypatch: pytest.MonkeyPatch) -> None:
     module_name = "datafog.models.spacy_nlp"
     monkeypatch.delitem(sys.modules, module_name, raising=False)
