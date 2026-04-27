@@ -6,6 +6,7 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import wraps
+from inspect import iscoroutinefunction
 from typing import Any, Callable, Iterator, Optional, TypeVar
 
 from .engine import Entity, RedactResult, ScanResult, scan, scan_and_redact
@@ -109,6 +110,17 @@ class Guardrail:
 
     def __call__(self, fn: F) -> F:
         """Decorator that applies guardrail filtering to string return values."""
+
+        if iscoroutinefunction(fn):
+
+            @wraps(fn)
+            async def async_wrapped(*args: Any, **kwargs: Any) -> Any:
+                output = await fn(*args, **kwargs)
+                if isinstance(output, str):
+                    return self.filter(output).redacted_text
+                return output
+
+            return async_wrapped  # type: ignore[return-value]
 
         @wraps(fn)
         def wrapped(*args: Any, **kwargs: Any) -> Any:

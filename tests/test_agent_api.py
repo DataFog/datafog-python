@@ -49,6 +49,85 @@ def test_create_guardrail_as_decorator_redacts_string_output() -> None:
     assert "admin@example.com" not in filtered
 
 
+def test_protect_decorator_redacts_sync_string_output() -> None:
+    @datafog.protect(engine="regex", on_detect="redact")
+    def fake_llm() -> str:
+        return "Contact: admin@example.com"
+
+    filtered = fake_llm()
+
+    assert "[EMAIL_1]" in filtered
+    assert "admin@example.com" not in filtered
+
+
+@pytest.mark.asyncio
+async def test_protect_decorator_redacts_async_string_output() -> None:
+    @datafog.protect(engine="regex", on_detect="redact")
+    async def fake_llm() -> str:
+        return "Contact: async@example.com"
+
+    filtered = await fake_llm()
+
+    assert "[EMAIL_1]" in filtered
+    assert "async@example.com" not in filtered
+
+
+@pytest.mark.asyncio
+async def test_protect_decorator_async_block_mode_raises() -> None:
+    @datafog.protect(engine="regex", on_detect="block")
+    async def fake_llm() -> str:
+        return "Contact: async-blocked@example.com"
+
+    with pytest.raises(GuardrailBlockedError, match="Guardrail blocked"):
+        await fake_llm()
+
+
+@pytest.mark.asyncio
+async def test_protect_decorator_async_warn_mode_warns() -> None:
+    text = "Contact: async-warn@example.com"
+
+    @datafog.protect(engine="regex", on_detect="warn")
+    async def fake_llm() -> str:
+        return text
+
+    with pytest.warns(UserWarning, match="Guardrail detected"):
+        filtered = await fake_llm()
+
+    assert filtered == text
+
+
+def test_protect_decorator_block_mode_raises() -> None:
+    @datafog.protect(engine="regex", on_detect="block")
+    def fake_llm() -> str:
+        return "Contact: blocked@example.com"
+
+    with pytest.raises(GuardrailBlockedError, match="Guardrail blocked"):
+        fake_llm()
+
+
+def test_protect_decorator_warn_mode_warns_and_returns_original() -> None:
+    text = "Contact: warn-decorator@example.com"
+
+    @datafog.protect(engine="regex", on_detect="warn")
+    def fake_llm() -> str:
+        return text
+
+    with pytest.warns(UserWarning, match="Guardrail detected"):
+        filtered = fake_llm()
+
+    assert filtered == text
+
+
+def test_protect_decorator_leaves_non_string_output_unchanged() -> None:
+    payload = {"message": "Contact admin@example.com"}
+
+    @datafog.protect(engine="regex", on_detect="redact")
+    def fake_tool() -> dict[str, str]:
+        return payload
+
+    assert fake_tool() is payload
+
+
 def test_create_guardrail_block_mode_raises() -> None:
     guard = datafog.create_guardrail(engine="regex", on_detect="block")
 
