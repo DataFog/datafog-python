@@ -95,6 +95,16 @@ across chunk boundaries is still detected. Async streams use
 `datafog.filter_async_stream(...)` with the same privacy-first buffering
 behavior.
 
+### v5 Workflow Examples
+
+Copy-pasteable examples live in [`examples/v5`](examples/v5):
+
+- OpenAI-style prompt, output, and streaming protection
+- FastAPI request payload filtering
+- Python logging filters
+- LangChain-style adapter patterns
+- LlamaIndex-style query engine adapters
+
 ## Engines
 
 Use the engine that matches your accuracy and dependency constraints:
