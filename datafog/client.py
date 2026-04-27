@@ -5,8 +5,10 @@ Provides CLI commands for scanning images and text using DataFog's OCR and PII d
 """
 
 import asyncio
+import csv
 import json
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 import sys
 from typing import Iterable, List
@@ -63,6 +65,36 @@ SEVERITY_ORDER = {
     "high": 3,
     "critical": 4,
 }
+
+
+@dataclass(frozen=True, slots=True)
+class AuditRecord:
+    path: Path
+    line: int
+    record_index: int
+    row: int | None
+    field: str | None
+    text: str
+
+
+@dataclass(frozen=True, slots=True)
+class AuditInputError:
+    path: Path
+    message: str
+    line: int | None = None
+    record_index: int | None = None
+    row: int | None = None
+    field: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "path": str(self.path),
+            "line": self.line,
+            "record_index": self.record_index,
+            "row": self.row,
+            "field": self.field,
+            "message": self.message,
+        }
 
 
 def _entity_dicts(entities: Iterable[Entity], *, include_text: bool = False):
@@ -275,31 +307,162 @@ def _iter_audit_records(path: Path):
         else sorted(item for item in path.rglob("*") if item.is_file())
     )
     for file_path in files:
-        try:
-            for line_number, line in enumerate(
-                file_path.read_text(encoding="utf-8", errors="replace").splitlines(),
-                start=1,
-            ):
-                if file_path.suffix.lower() == ".jsonl":
-                    try:
-                        record = json.loads(line)
-                    except json.JSONDecodeError:
-                        yield file_path, line_number, line_number - 1, None, line
+        suffix = file_path.suffix.lower()
+        if suffix == ".csv":
+            yield from _iter_csv_audit_records(file_path)
+        else:
+            yield from _iter_text_audit_records(file_path, jsonl=suffix == ".jsonl")
+
+
+def _iter_text_audit_records(file_path: Path, *, jsonl: bool):
+    with file_path.open(encoding="utf-8", errors="replace") as handle:
+        for line_number, raw_line in enumerate(handle, start=1):
+            line = raw_line.rstrip("\n\r")
+            record_index = line_number - 1
+            if jsonl:
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    yield AuditInputError(
+                        path=file_path,
+                        line=line_number,
+                        record_index=record_index,
+                        message=(
+                            f"Malformed JSONL at line {line_number}: {exc.msg}. "
+                            "Scanned raw line as text."
+                        ),
+                    )
+                    yield AuditRecord(
+                        path=file_path,
+                        line=line_number,
+                        record_index=record_index,
+                        row=None,
+                        field=None,
+                        text=line,
+                    )
+                    continue
+
+                if isinstance(record, dict):
+                    for field, value in record.items():
+                        if isinstance(value, str):
+                            yield AuditRecord(
+                                path=file_path,
+                                line=line_number,
+                                record_index=record_index,
+                                row=None,
+                                field=str(field),
+                                text=value,
+                            )
+                    continue
+
+            yield AuditRecord(
+                path=file_path,
+                line=line_number,
+                record_index=record_index,
+                row=None,
+                field=None,
+                text=line,
+            )
+
+
+def _iter_csv_audit_records(file_path: Path):
+    try:
+        with file_path.open(encoding="utf-8", errors="replace", newline="") as handle:
+            reader = csv.DictReader(handle)
+            if reader.fieldnames is None:
+                return
+
+            for record_index, row in enumerate(reader):
+                row_number = record_index + 1
+                line_number = reader.line_num
+                for field, value in row.items():
+                    if field is None:
+                        extra_values = [
+                            str(item) for item in value or [] if item is not None
+                        ]
+                        if not extra_values:
+                            continue
+                        yield AuditInputError(
+                            path=file_path,
+                            line=line_number,
+                            record_index=record_index,
+                            row=row_number,
+                            message=(
+                                "CSV row has more columns than the header. "
+                                "Scanned extra values as _extra."
+                            ),
+                        )
+                        yield AuditRecord(
+                            path=file_path,
+                            line=line_number,
+                            record_index=record_index,
+                            row=row_number,
+                            field="_extra",
+                            text=" ".join(extra_values),
+                        )
                         continue
-                    if isinstance(record, dict):
-                        for field, value in record.items():
-                            if isinstance(value, str):
-                                yield (
-                                    file_path,
-                                    line_number,
-                                    line_number - 1,
-                                    str(field),
-                                    value,
-                                )
-                        continue
-                yield file_path, line_number, line_number - 1, None, line
-        except UnicodeDecodeError:
-            continue
+
+                    yield AuditRecord(
+                        path=file_path,
+                        line=line_number,
+                        record_index=record_index,
+                        row=row_number,
+                        field=str(field),
+                        text=value or "",
+                    )
+    except csv.Error as exc:
+        yield AuditInputError(
+            path=file_path,
+            message=f"Malformed CSV: {exc}",
+        )
+
+
+def _audit_summary(
+    entities: Iterable[Entity],
+    *,
+    findings: list[dict[str, object]],
+    files_scanned: int,
+    records_scanned: int,
+    fields_scanned: int,
+) -> dict[str, object]:
+    payload = _summary(
+        entities,
+        files_scanned=files_scanned,
+        records_scanned=records_scanned,
+    )
+    by_file: dict[str, int] = {}
+    by_field: dict[str, int] = {}
+    files_with_findings: set[str] = set()
+    fields_with_findings: set[str] = set()
+    records_with_findings: set[tuple[str, int | None]] = set()
+
+    for finding in findings:
+        path = str(finding["path"])
+        field = finding.get("field")
+        record_index = finding.get("record_index")
+
+        by_file[path] = by_file.get(path, 0) + 1
+        files_with_findings.add(path)
+        records_with_findings.add(
+            (path, record_index if isinstance(record_index, int) else None)
+        )
+
+        if field is not None:
+            field_name = str(field)
+            by_field[field_name] = by_field.get(field_name, 0) + 1
+            fields_with_findings.add(field_name)
+
+    payload.update(
+        {
+            "fields_scanned": fields_scanned,
+            "files_with_findings": len(files_with_findings),
+            "records_with_findings": len(records_with_findings),
+            "fields_with_findings": len(fields_with_findings),
+            "by_file": by_file,
+            "by_field": by_field,
+        }
+    )
+    return payload
 
 
 def _audit_payload(
@@ -312,8 +475,10 @@ def _audit_payload(
     exit_code: int,
     files_scanned: int,
     records_scanned: int,
+    fields_scanned: int,
     all_entities: list[Entity],
     findings: list[dict[str, object]],
+    errors: list[dict[str, object]],
 ) -> dict[str, object]:
     return {
         "schema_version": CLI_SCHEMA_VERSION,
@@ -332,13 +497,15 @@ def _audit_payload(
             include_text=include_text,
             fail_on=fail_on,
         ),
-        "summary": _summary(
+        "summary": _audit_summary(
             all_entities,
+            findings=findings,
             files_scanned=files_scanned,
             records_scanned=records_scanned,
+            fields_scanned=fields_scanned,
         ),
         "findings": findings,
-        "errors": [],
+        "errors": errors,
     }
 
 
@@ -651,20 +818,38 @@ def audit_command(
         file_paths = (
             [path] if path.is_file() else [p for p in path.rglob("*") if p.is_file()]
         )
-        records_scanned = 0
+        records_seen: set[tuple[str, int]] = set()
+        fields_scanned = 0
         all_entities: list[Entity] = []
         findings: list[dict[str, object]] = []
+        errors: list[dict[str, object]] = []
 
-        for (
-            file_path,
-            line_number,
-            record_index,
-            field,
-            record_text,
-        ) in _iter_audit_records(path):
-            records_scanned += 1
+        for audit_item in _iter_audit_records(path):
+            if isinstance(audit_item, AuditInputError):
+                error_payload = audit_item.to_dict()
+                errors.append(error_payload)
+                if jsonl_output:
+                    _emit_json(
+                        {
+                            "schema_version": CLI_RECORD_SCHEMA_VERSION,
+                            "command": "audit",
+                            "path": str(audit_item.path),
+                            "line": audit_item.line,
+                            "record_index": audit_item.record_index,
+                            "row": audit_item.row,
+                            "field": audit_item.field,
+                            "summary": _summary([]),
+                            "entities": [],
+                            "errors": [error_payload],
+                        },
+                        jsonl=True,
+                    )
+                continue
+
+            fields_scanned += 1
+            records_seen.add((str(audit_item.path), audit_item.record_index))
             result = engine_scan(
-                record_text,
+                audit_item.text,
                 engine=engine,
                 include_text=include_text,
                 locale=locale,
@@ -678,10 +863,11 @@ def audit_command(
                         {
                             "schema_version": CLI_RECORD_SCHEMA_VERSION,
                             "command": "audit",
-                            "path": str(file_path),
-                            "line": line_number,
-                            "record_index": record_index,
-                            "field": field,
+                            "path": str(audit_item.path),
+                            "line": audit_item.line,
+                            "record_index": audit_item.record_index,
+                            "row": audit_item.row,
+                            "field": audit_item.field,
                             "summary": record_summary,
                             "entities": _entity_dicts(
                                 result.entities,
@@ -694,10 +880,11 @@ def audit_command(
                 for entity in result.entities:
                     findings.append(
                         {
-                            "path": str(file_path),
-                            "line": line_number,
-                            "record_index": record_index,
-                            "field": field,
+                            "path": str(audit_item.path),
+                            "line": audit_item.line,
+                            "record_index": audit_item.record_index,
+                            "row": audit_item.row,
+                            "field": audit_item.field,
                             "entity": entity.to_dict(
                                 include_text=result.include_text,
                             ),
@@ -709,6 +896,7 @@ def audit_command(
             fail_on_detect=fail_on_detect,
             fail_on=fail_on,
         )
+        records_scanned = len(records_seen)
         fail_policy = fail_on or ("detect" if fail_on_detect else None)
         if jsonl_output:
             if emit_summary:
@@ -716,11 +904,14 @@ def audit_command(
                     {
                         "schema_version": CLI_SUMMARY_SCHEMA_VERSION,
                         "command": "audit",
-                        "summary": _summary(
+                        "summary": _audit_summary(
                             all_entities,
+                            findings=findings,
                             files_scanned=len(file_paths),
                             records_scanned=records_scanned,
+                            fields_scanned=fields_scanned,
                         ),
+                        "errors": errors,
                     },
                     jsonl=True,
                 )
@@ -735,8 +926,10 @@ def audit_command(
                     exit_code=exit_code,
                     files_scanned=len(file_paths),
                     records_scanned=records_scanned,
+                    fields_scanned=fields_scanned,
                     all_entities=all_entities,
                     findings=findings,
+                    errors=errors,
                 )
             )
         else:

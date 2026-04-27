@@ -95,8 +95,14 @@ def test_audit_json_contract_and_fail_on(tmp_path) -> None:
     assert payload["exit_code"] == 1
     assert payload["input"]["source"] == "file"
     assert payload["summary"]["records_scanned"] == 2
+    assert payload["summary"]["fields_scanned"] == 2
+    assert payload["summary"]["files_with_findings"] == 1
+    assert payload["summary"]["records_with_findings"] == 1
+    assert payload["summary"]["by_file"] == {str(log_file): 1}
+    assert payload["summary"]["by_field"] == {}
     assert payload["summary"]["by_type"] == {"EMAIL": 1}
     assert payload["findings"][0]["line"] == 2
+    assert payload["findings"][0]["row"] is None
     assert payload["findings"][0]["entity"]["text"] is None
 
 
@@ -129,6 +135,57 @@ def test_audit_jsonl_contract_and_summary(tmp_path) -> None:
     assert lines[0]["summary"]["entity_count"] == 1
     assert lines[1]["schema_version"] == "datafog.cli.summary.v1"
     assert lines[1]["summary"]["records_scanned"] == 2
+    assert lines[1]["summary"]["fields_scanned"] == 2
+    assert lines[1]["summary"]["by_field"] == {"message": 1}
+
+
+def test_audit_csv_preserves_row_and_field_context(tmp_path) -> None:
+    data_file = tmp_path / "customers.csv"
+    data_file.write_text(
+        "email,notes\nnone,safe\njane@example.com,follow up\n",
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(
+        app,
+        ["audit", str(data_file), "--engine", "regex", "--json"],
+    )
+
+    assert result.exit_code == 0
+    payload = _json(result.stdout)
+    assert payload["summary"]["records_scanned"] == 2
+    assert payload["summary"]["fields_scanned"] == 4
+    assert payload["summary"]["fields_with_findings"] == 1
+    assert payload["summary"]["by_field"] == {"email": 1}
+    assert payload["findings"][0]["line"] == 3
+    assert payload["findings"][0]["row"] == 2
+    assert payload["findings"][0]["record_index"] == 1
+    assert payload["findings"][0]["field"] == "email"
+    assert payload["findings"][0]["entity"]["text"] is None
+
+
+def test_audit_malformed_jsonl_reports_safe_error(tmp_path) -> None:
+    data_file = tmp_path / "records.jsonl"
+    data_file.write_text(
+        '{"message":"safe"}\n{"message":"email jane@example.com"\n',
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(
+        app,
+        ["audit", str(data_file), "--engine", "regex", "--json"],
+    )
+
+    assert result.exit_code == 0
+    payload = _json(result.stdout)
+    assert payload["summary"]["records_scanned"] == 2
+    assert payload["summary"]["fields_scanned"] == 2
+    assert payload["errors"]
+    assert "Malformed JSONL" in payload["errors"][0]["message"]
+    assert "jane@example.com" not in json.dumps(payload["errors"])
+    assert payload["findings"][0]["line"] == 2
+    assert payload["findings"][0]["field"] is None
+    assert payload["findings"][0]["entity"]["text"] is None
 
 
 def test_cli_json_usage_error_exits_two() -> None:

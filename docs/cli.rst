@@ -37,6 +37,46 @@ For record-oriented workflows, use JSONL:
 
    datafog audit ./logs/app.jsonl --jsonl --emit-summary
 
+Dataset Audit Reports
+---------------------
+
+Use ``audit`` on CSV or JSONL datasets to get field-aware summaries without
+printing raw values:
+
+.. code-block:: bash
+
+   datafog audit ./datasets/eval.csv --json --fail-on high
+
+The report includes safe aggregate counts for files, records, fields, entity
+types, and severity:
+
+.. code-block:: json
+
+   {
+     "summary": {
+       "entity_count": 3,
+       "files_scanned": 1,
+       "records_scanned": 50,
+       "fields_scanned": 200,
+       "files_with_findings": 1,
+       "records_with_findings": 2,
+       "fields_with_findings": 2,
+       "by_type": {
+         "EMAIL": 2,
+         "PHONE": 1
+       },
+       "by_field": {
+         "email": 2,
+         "notes": 1
+       }
+     }
+   }
+
+CSV findings include ``line``, one-based data ``row``, zero-based
+``record_index``, and ``field`` context. JSONL findings preserve the source
+line and top-level string field. Entity ``text`` stays ``null`` unless
+``--include-text`` is explicitly requested and policy allows it.
+
 Exit codes:
 
 * ``0``: clean or successful command.
