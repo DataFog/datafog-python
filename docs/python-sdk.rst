@@ -57,6 +57,32 @@ Validators can reject false positives or attach validation metadata:
 Custom recognizers produce normal v5 ``Entity`` objects and therefore work with
 ``scan()``, ``redact()``, policies, CLI-safe serialization, and result models.
 
+v5 Streaming Guardrails
+-----------------------
+
+Use ``filter_stream()`` for model or tool outputs that arrive as text chunks:
+
+.. code-block:: python
+
+   import datafog
+
+   chunks = ["Contact adm", "in@example", ".com"]
+
+   for safe_chunk in datafog.filter_stream(chunks, engine="regex"):
+       print(safe_chunk)
+   # Contact [EMAIL_1]
+
+Async streams use ``filter_async_stream()``:
+
+.. code-block:: python
+
+   async for safe_chunk in datafog.filter_async_stream(stream, engine="regex"):
+       yield safe_chunk
+
+The v5.0 implementation buffers the stream before emitting filtered output.
+That is intentional: emails, access tokens, and provider keys can start in one
+chunk and finish in another, and emitting partial raw chunks would leak PII.
+
 Definitions
 -----------
 .. automodule:: datafog.main

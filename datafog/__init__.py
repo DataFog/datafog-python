@@ -11,7 +11,14 @@ Optional extras available for advanced features:
 import warnings
 
 from .__about__ import __version__
-from .agent import create_guardrail, filter_output, sanitize, scan_prompt
+from .agent import (
+    create_guardrail,
+    filter_async_stream,
+    filter_output,
+    filter_stream,
+    sanitize,
+    scan_prompt,
+)
 
 # Core API functions - always available (lightweight)
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
@@ -460,6 +467,8 @@ __all__ = [
     "sanitize",
     "scan_prompt",
     "filter_output",
+    "filter_stream",
+    "filter_async_stream",
     "create_guardrail",
     "AnnotationResult",
     "AnnotatorRequest",

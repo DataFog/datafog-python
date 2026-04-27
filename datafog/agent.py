@@ -7,7 +7,16 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import wraps
 from inspect import iscoroutinefunction
-from typing import Any, Callable, Iterator, Optional, TypeVar
+from typing import (
+    Any,
+    AsyncIterable,
+    AsyncIterator,
+    Callable,
+    Iterable,
+    Iterator,
+    Optional,
+    TypeVar,
+)
 
 from .engine import Entity, RedactResult, ScanResult, scan, scan_and_redact
 from .models import PolicyInput, RecognizerInput, TokenSession
@@ -108,6 +117,30 @@ class Guardrail:
 
         return result
 
+    def filter_stream(self, chunks: Iterable[str]) -> Iterator[str]:
+        """Filter a sync text stream, preserving entities across chunk boundaries.
+
+        v5.0 buffers the stream before emitting output. This avoids leaking a
+        partial entity that starts in one chunk and ends in another.
+        """
+        parts = self._collect_stream_chunks(chunks)
+        if not parts:
+            return
+        yield self.filter("".join(parts)).redacted_text
+
+    async def filter_async_stream(
+        self,
+        chunks: AsyncIterable[str],
+    ) -> AsyncIterator[str]:
+        """Filter an async text stream, preserving entities across chunk boundaries."""
+        parts: list[str] = []
+        async for chunk in chunks:
+            self._validate_stream_chunk(chunk)
+            parts.append(chunk)
+        if not parts:
+            return
+        yield self.filter("".join(parts)).redacted_text
+
     def __call__(self, fn: F) -> F:
         """Decorator that applies guardrail filtering to string return values."""
 
@@ -137,6 +170,19 @@ class Guardrail:
         watcher = GuardrailWatch(guardrail=self)
         yield watcher
 
+    @classmethod
+    def _collect_stream_chunks(cls, chunks: Iterable[str]) -> list[str]:
+        parts: list[str] = []
+        for chunk in chunks:
+            cls._validate_stream_chunk(chunk)
+            parts.append(chunk)
+        return parts
+
+    @staticmethod
+    def _validate_stream_chunk(chunk: str) -> None:
+        if not isinstance(chunk, str):
+            raise TypeError("stream chunks must be strings")
+
 
 def sanitize(text: str, **kwargs: Any) -> str:
     """
@@ -160,6 +206,32 @@ def filter_output(output: str, **kwargs: Any) -> RedactResult:
     Scan and redact PII from model output before returning to users.
     """
     return scan_and_redact(output, **kwargs)
+
+
+def filter_stream(chunks: Iterable[str], **kwargs: Any) -> Iterator[str]:
+    """
+    Redact a synchronous stream of text chunks.
+
+    This conservative v5.0 implementation buffers chunks before emitting the
+    filtered output so entities split across chunk boundaries are still caught.
+    """
+    guardrail = create_guardrail(**kwargs)
+    yield from guardrail.filter_stream(chunks)
+
+
+async def filter_async_stream(
+    chunks: AsyncIterable[str],
+    **kwargs: Any,
+) -> AsyncIterator[str]:
+    """
+    Redact an asynchronous stream of text chunks.
+
+    This conservative v5.0 implementation buffers chunks before emitting the
+    filtered output so entities split across chunk boundaries are still caught.
+    """
+    guardrail = create_guardrail(**kwargs)
+    async for chunk in guardrail.filter_async_stream(chunks):
+        yield chunk
 
 
 def create_guardrail(
@@ -197,5 +269,7 @@ __all__ = [
     "sanitize",
     "scan_prompt",
     "filter_output",
+    "filter_stream",
+    "filter_async_stream",
     "create_guardrail",
 ]

@@ -78,6 +78,23 @@ print(call_llm())
 # Send to [EMAIL_1]
 ```
 
+### Streaming Outputs
+
+```python
+import datafog
+
+chunks = ["Contact adm", "in@example", ".com"]
+
+for safe_chunk in datafog.filter_stream(chunks, engine="regex"):
+    print(safe_chunk)
+# Contact [EMAIL_1]
+```
+
+The v5.0 streaming filter buffers chunks before emitting output so PII split
+across chunk boundaries is still detected. Async streams use
+`datafog.filter_async_stream(...)` with the same privacy-first buffering
+behavior.
+
 ## Engines
 
 Use the engine that matches your accuracy and dependency constraints:

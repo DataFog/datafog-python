@@ -37,6 +37,78 @@ def test_filter_output_returns_safe_redact_result() -> None:
     assert "123-45-6789" not in result.to_safe_json()
 
 
+def test_filter_stream_redacts_entity_across_chunk_boundaries() -> None:
+    chunks = ["Contact adm", "in@example", ".com for help"]
+
+    filtered = list(datafog.filter_stream(chunks, engine="regex"))
+
+    assert filtered == ["Contact [EMAIL_1] for help"]
+
+
+def test_guardrail_filter_stream_block_mode_raises_after_buffering() -> None:
+    guard = datafog.create_guardrail(engine="regex", on_detect="block")
+    chunks = ["Contact blocked", "@example.com"]
+
+    with pytest.raises(GuardrailBlockedError, match="Guardrail blocked"):
+        list(guard.filter_stream(chunks))
+
+
+def test_guardrail_filter_stream_warn_mode_returns_original() -> None:
+    guard = datafog.create_guardrail(engine="regex", on_detect="warn")
+    chunks = ["Contact warn", "@example.com"]
+
+    with pytest.warns(UserWarning, match="Guardrail detected"):
+        filtered = list(guard.filter_stream(chunks))
+
+    assert filtered == ["Contact warn@example.com"]
+
+
+def test_filter_stream_rejects_non_string_chunks() -> None:
+    chunks = ["ok", b"not text"]
+
+    with pytest.raises(TypeError, match="stream chunks must be strings"):
+        list(datafog.filter_stream(chunks, engine="regex"))  # type: ignore[list-item]
+
+
+@pytest.mark.asyncio
+async def test_filter_async_stream_redacts_entity_across_chunk_boundaries() -> None:
+    async def chunks():
+        for chunk in ["Contact as", "ync@example", ".com"]:
+            yield chunk
+
+    filtered = [
+        chunk async for chunk in datafog.filter_async_stream(chunks(), engine="regex")
+    ]
+
+    assert filtered == ["Contact [EMAIL_1]"]
+
+
+@pytest.mark.asyncio
+async def test_guardrail_filter_async_stream_block_mode_raises() -> None:
+    guard = datafog.create_guardrail(engine="regex", on_detect="block")
+
+    async def chunks():
+        for chunk in ["Contact async-blocked", "@example.com"]:
+            yield chunk
+
+    with pytest.raises(GuardrailBlockedError, match="Guardrail blocked"):
+        [chunk async for chunk in guard.filter_async_stream(chunks())]
+
+
+@pytest.mark.asyncio
+async def test_guardrail_filter_async_stream_warn_mode_returns_original() -> None:
+    guard = datafog.create_guardrail(engine="regex", on_detect="warn")
+
+    async def chunks():
+        for chunk in ["Contact async-warn", "@example.com"]:
+            yield chunk
+
+    with pytest.warns(UserWarning, match="Guardrail detected"):
+        filtered = [chunk async for chunk in guard.filter_async_stream(chunks())]
+
+    assert filtered == ["Contact async-warn@example.com"]
+
+
 def test_create_guardrail_as_decorator_redacts_string_output() -> None:
     guard = datafog.create_guardrail(engine="regex", on_detect="redact")
 
