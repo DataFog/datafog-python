@@ -87,7 +87,7 @@ class GLiNERAnnotator(BaseModel):
         except Exception as e:
             logging.error(f"Failed to load GLiNER model {model_name}: {str(e)}")
             raise RuntimeError(
-                f"GLiNER model '{model_name}' is not available locally. "
+                f"GLiNER model {model_name!r} is not available locally. "
                 "Download it explicitly with: "
                 f"datafog download-model {model_name} --engine gliner"
             ) from e

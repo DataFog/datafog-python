@@ -110,7 +110,7 @@ class DonutProcessor:
                 )
             except OSError as exc:
                 raise RuntimeError(
-                    f"Donut model '{self.model_path}' is not available locally. "
+                    f"Donut model {self.model_path!r} is not available locally. "
                     "Download it explicitly before using Donut OCR, or pass a local "
                     "model path."
                 ) from exc

@@ -13,7 +13,7 @@ from rich.progress import track
 
 from .annotator import AnnotationResult, AnnotatorRequest
 
-DEFAULT_SPACY_MODEL = "en_core_web_sm"
+DEFAULT_SPACY_MODEL = "en_core_web_lg"
 
 
 class SpacyAnnotator:
@@ -33,7 +33,7 @@ class SpacyAnnotator:
             self.nlp = spacy.load(self.model_name)
         except OSError as exc:
             raise ImportError(
-                f"spaCy model '{self.model_name}' is not installed. "
+                f"spaCy model {self.model_name!r} is not installed. "
                 f"Download it explicitly with: datafog download-model {self.model_name} --engine spacy"
             ) from exc
 
@@ -83,7 +83,7 @@ class SpacyAnnotator:
             nlp = spacy.load(model_name)
         except OSError as exc:
             raise ImportError(
-                f"spaCy model '{model_name}' is not installed. "
+                f"spaCy model {model_name!r} is not installed. "
                 f"Download it explicitly with: datafog download-model {model_name} --engine spacy"
             ) from exc
         return [ent for ent in nlp.pipe_labels["ner"]]

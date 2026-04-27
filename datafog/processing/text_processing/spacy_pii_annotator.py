@@ -24,7 +24,7 @@ PII_ANNOTATION_LABELS = [
     "WORK_OF_ART",
 ]
 MAXIMAL_STRING_SIZE = 1000000
-DEFAULT_SPACY_MODEL = "en_core_web_sm"
+DEFAULT_SPACY_MODEL = "en_core_web_lg"
 
 
 class SpacyPIIAnnotator(BaseModel):
@@ -47,7 +47,7 @@ class SpacyPIIAnnotator(BaseModel):
             nlp = spacy.load(model_name)
         except OSError as exc:
             raise ImportError(
-                f"spaCy model '{model_name}' is not installed. "
+                f"spaCy model {model_name!r} is not installed. "
                 f"Download it explicitly with: datafog download-model {model_name} --engine spacy"
             ) from exc
 

@@ -128,7 +128,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[all,test]"
           pip install -r requirements-test.txt
-          pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
+          python -m spacy download en_core_web_lg
           datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
 
       - name: Run tests with segfault protection

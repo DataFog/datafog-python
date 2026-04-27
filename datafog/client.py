@@ -181,7 +181,7 @@ def download_model(
     Download a model for specified engine.
 
     Examples:
-        spaCy: datafog download-model en_core_web_sm --engine spacy
+        spaCy: datafog download-model en_core_web_lg --engine spacy
         GLiNER: datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
     """
     if engine == "spacy":

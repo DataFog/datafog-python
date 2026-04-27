@@ -11,7 +11,7 @@ import importlib
 
 PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
 MAXIMAL_STRING_SIZE = 1000000
-DEFAULT_SPACY_MODEL = "en_core_web_sm"
+DEFAULT_SPACY_MODEL = "en_core_web_lg"
 
 
 def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
