@@ -1,5 +1,6 @@
 """Tests for datafog.telemetry module."""
 
+import builtins
 import json
 import threading
 import time
@@ -565,6 +566,24 @@ class TestEdgeCases:
 
     def test_detect_installed_extras_returns_list(self):
         from datafog.telemetry import _detect_installed_extras
+
+        result = _detect_installed_extras()
+        assert isinstance(result, list)
+
+    def test_detect_installed_extras_does_not_import_optional_modules(
+        self, monkeypatch
+    ):
+        from datafog.telemetry import _detect_installed_extras
+
+        real_import = builtins.__import__
+        optional_modules = {"spacy", "gliner", "pytesseract", "typer", "pyspark"}
+
+        def guarded_import(name, *args, **kwargs):
+            if name.split(".", 1)[0] in optional_modules:
+                raise AssertionError(f"imported optional module {name}")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", guarded_import)
 
         result = _detect_installed_extras()
         assert isinstance(result, list)

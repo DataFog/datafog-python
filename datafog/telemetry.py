@@ -13,9 +13,11 @@ Force telemetry off by setting either environment variable:
 """
 
 import hashlib
+import importlib.util
 import json
 import os
 import platform
+import sys
 import threading
 import time
 import urllib.request
@@ -114,44 +116,28 @@ def _get_duration_bucket(duration_ms: float) -> str:
 
 def _detect_installed_extras() -> list:
     """Probe which optional extras are installed."""
-    extras = []
 
-    try:
-        import spacy  # noqa: F401
+    def _module_available(module_name: str) -> bool:
+        module = sys.modules.get(module_name)
+        if module is not None and getattr(module, "__spec__", None) is None:
+            return True
+        try:
+            return importlib.util.find_spec(module_name) is not None
+        except (ImportError, ValueError):
+            return False
 
-        extras.append("nlp")
-    except ImportError:
-        pass
-
-    try:
-        import gliner  # noqa: F401
-
-        extras.append("nlp-advanced")
-    except ImportError:
-        pass
-
-    try:
-        import pytesseract  # noqa: F401
-
-        extras.append("ocr")
-    except ImportError:
-        pass
-
-    try:
-        import typer  # noqa: F401
-
-        extras.append("cli")
-    except ImportError:
-        pass
-
-    try:
-        import pyspark  # noqa: F401
-
-        extras.append("distributed")
-    except ImportError:
-        pass
-
-    return extras
+    module_to_extra = {
+        "spacy": "nlp",
+        "gliner": "nlp-advanced",
+        "pytesseract": "ocr",
+        "typer": "cli",
+        "pyspark": "distributed",
+    }
+    return [
+        extra
+        for module_name, extra in module_to_extra.items()
+        if _module_available(module_name)
+    ]
 
 
 def _detect_ci() -> bool:
