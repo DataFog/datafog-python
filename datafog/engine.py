@@ -171,17 +171,13 @@ def _gliner_entities(text: str) -> list[Entity]:
 def _get_spacy_annotator():
     try:
         from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
-    except ImportError:
-        return _UnavailableAnnotator(
-            "SpaCy engine requires the nlp extra. Install with: pip install datafog[nlp]"
-        )
+    except ImportError as exc:
+        return _UnavailableAnnotator(str(exc))
 
     try:
         return SpacyPIIAnnotator.create()
-    except ImportError:
-        return _UnavailableAnnotator(
-            "SpaCy engine requires the nlp extra. Install with: pip install datafog[nlp]"
-        )
+    except ImportError as exc:
+        return _UnavailableAnnotator(str(exc))
     except Exception as exc:
         return _UnavailableAnnotator(
             f"SpaCy engine initialization failed: {type(exc).__name__}: {exc}"
@@ -192,19 +188,13 @@ def _get_spacy_annotator():
 def _get_gliner_annotator():
     try:
         from .processing.text_processing.gliner_annotator import GLiNERAnnotator
-    except ImportError:
-        return _UnavailableAnnotator(
-            "GLiNER engine requires the nlp-advanced extra. "
-            "Install with: pip install datafog[nlp-advanced]"
-        )
+    except ImportError as exc:
+        return _UnavailableAnnotator(str(exc))
 
     try:
         annotator = GLiNERAnnotator.create()
-    except ImportError:
-        return _UnavailableAnnotator(
-            "GLiNER engine requires the nlp-advanced extra. "
-            "Install with: pip install datafog[nlp-advanced]"
-        )
+    except ImportError as exc:
+        return _UnavailableAnnotator(str(exc))
     except Exception as exc:
         return _UnavailableAnnotator(
             f"GLiNER engine initialization failed: {type(exc).__name__}: {exc}"

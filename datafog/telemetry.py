@@ -13,9 +13,11 @@ Force telemetry off by setting either environment variable:
 """
 
 import hashlib
+import importlib.util
 import json
 import os
 import platform
+import sys
 import threading
 import time
 import urllib.request
@@ -114,44 +116,28 @@ def _get_duration_bucket(duration_ms: float) -> str:
 
 def _detect_installed_extras() -> list:
     """Probe which optional extras are installed."""
-    extras = []
 
-    try:
-        import spacy  # noqa: F401
+    def _module_available(module_name: str) -> bool:
+        module = sys.modules.get(module_name)
+        if module is not None and getattr(module, "__spec__", None) is None:
+            return True
+        try:
+            return importlib.util.find_spec(module_name) is not None
+        except (ImportError, ValueError):
+            return False
 
-        extras.append("nlp")
-    except ImportError:
-        pass
-
-    try:
-        import gliner  # noqa: F401
-
-        extras.append("nlp-advanced")
-    except ImportError:
-        pass
-
-    try:
-        import pytesseract  # noqa: F401
-
-        extras.append("ocr")
-    except ImportError:
-        pass
-
-    try:
-        import typer  # noqa: F401
-
-        extras.append("cli")
-    except ImportError:
-        pass
-
-    try:
-        import pyspark  # noqa: F401
-
-        extras.append("distributed")
-    except ImportError:
-        pass
-
-    return extras
+    module_to_extra = {
+        "spacy": "nlp",
+        "gliner": "nlp-advanced",
+        "pytesseract": "ocr",
+        "typer": "cli",
+        "pyspark": "distributed",
+    }
+    return [
+        extra
+        for module_name, extra in module_to_extra.items()
+        if _module_available(module_name)
+    ]
 
 
 def _detect_ci() -> bool:
@@ -170,39 +156,69 @@ def _detect_ci() -> bool:
     return any(os.environ.get(v) for v in ci_vars)
 
 
-def _send_event(event_name: str, properties: dict) -> None:
-    """POST event to PostHog /capture/ endpoint in a daemon thread.
+def _post_event(event_name: str, properties: dict) -> None:
+    """POST event to PostHog /capture/ endpoint.
 
-    Fire-and-forget: failures are silently ignored.
+    Fire-and-forget callers run this in daemon threads. Failures are silently
+    ignored so telemetry can never affect SDK behavior.
     """
+    try:
+        payload = json.dumps(
+            {
+                "api_key": _POSTHOG_API_KEY,
+                "event": event_name,
+                "properties": {
+                    "distinct_id": _get_anonymous_id(),
+                    **properties,
+                },
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
+            }
+        ).encode("utf-8")
+
+        req = urllib.request.Request(
+            f"{_POSTHOG_HOST}/capture/",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=5)
+    except Exception:
+        pass
+
+
+def _send_event(event_name: str, properties: dict) -> None:
+    """POST event to PostHog /capture/ endpoint in a daemon thread."""
     if not _is_telemetry_enabled():
         return
 
-    def _post():
+    t = threading.Thread(target=_post_event, args=(event_name, properties), daemon=True)
+    t.start()
+
+
+def _send_init_event() -> None:
+    """Build and send the process init event without blocking API calls."""
+
+    def _post_init():
         try:
-            payload = json.dumps(
-                {
-                    "api_key": _POSTHOG_API_KEY,
-                    "event": event_name,
-                    "properties": {
-                        "distinct_id": _get_anonymous_id(),
-                        **properties,
-                    },
-                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
-                }
-            ).encode("utf-8")
-
-            req = urllib.request.Request(
-                f"{_POSTHOG_HOST}/capture/",
-                data=payload,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-            urllib.request.urlopen(req, timeout=5)
+            from .__about__ import __version__
         except Exception:
-            pass
+            __version__ = "unknown"
 
-    t = threading.Thread(target=_post, daemon=True)
+        uname = platform.uname()
+        _post_event(
+            "datafog_init",
+            {
+                "package_version": __version__,
+                "python_version": platform.python_version(),
+                "os": uname.system,
+                "os_version": uname.release,
+                "arch": uname.machine,
+                "installed_extras": _detect_installed_extras(),
+                "is_ci": _detect_ci(),
+            },
+        )
+
+    t = threading.Thread(target=_post_init, daemon=True)
     t.start()
 
 
@@ -220,24 +236,7 @@ def _ensure_initialized() -> None:
     if not _is_telemetry_enabled():
         return
 
-    try:
-        from .__about__ import __version__
-    except Exception:
-        __version__ = "unknown"
-
-    uname = platform.uname()
-    _send_event(
-        "datafog_init",
-        {
-            "package_version": __version__,
-            "python_version": platform.python_version(),
-            "os": uname.system,
-            "os_version": uname.release,
-            "arch": uname.machine,
-            "installed_extras": _detect_installed_extras(),
-            "is_ci": _detect_ci(),
-        },
-    )
+    _send_init_event()
 
 
 def track_function_call(function_name: str, module: str, **kwargs) -> None:
