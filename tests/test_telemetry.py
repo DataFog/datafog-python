@@ -244,38 +244,64 @@ class TestNonBlocking:
     def test_send_event_returns_immediately(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _send_event
 
-        # Make urlopen block
-        mock_urlopen.side_effect = lambda *a, **k: time.sleep(10)
+        release_network = threading.Event()
 
-        start = time.monotonic()
-        _send_event("test", {"k": "v"})
-        elapsed = time.monotonic() - start
+        def block_until_released(*args, **kwargs):
+            release_network.wait(5)
 
-        # Should return in <100ms even though urlopen blocks for 10s
-        assert elapsed < 0.1
+        mock_urlopen.side_effect = block_until_released
+
+        call_done = threading.Event()
+        caller = threading.Thread(
+            target=lambda: (_send_event("test", {"k": "v"}), call_done.set())
+        )
+
+        try:
+            caller.start()
+            assert call_done.wait(1)
+            assert not release_network.is_set()
+        finally:
+            release_network.set()
+            caller.join(1)
 
     def test_track_function_call_returns_immediately(
         self, mock_urlopen, enable_telemetry
     ):
         from datafog.telemetry import track_function_call
 
-        mock_urlopen.side_effect = lambda *a, **k: time.sleep(10)
+        release_network = threading.Event()
 
-        start = time.monotonic()
-        track_function_call("fn", "mod")
-        elapsed = time.monotonic() - start
+        def block_until_released(*args, **kwargs):
+            release_network.wait(5)
 
-        assert elapsed < 0.1
+        mock_urlopen.side_effect = block_until_released
+
+        call_done = threading.Event()
+        caller = threading.Thread(
+            target=lambda: (track_function_call("fn", "mod"), call_done.set())
+        )
+
+        try:
+            caller.start()
+            assert call_done.wait(1)
+            assert not release_network.is_set()
+        finally:
+            release_network.set()
+            caller.join(1)
 
     def test_track_function_call_does_not_wait_for_init_metadata(
         self, monkeypatch, enable_telemetry
     ):
         import datafog.telemetry as tel
 
+        call_done = threading.Event()
+        detect_started = threading.Event()
+        release_detect = threading.Event()
         init_posted = threading.Event()
 
         def slow_detect_installed_extras():
-            time.sleep(0.3)
+            detect_started.set()
+            release_detect.wait(5)
             return []
 
         def fake_post_event(event_name, properties):
@@ -287,11 +313,18 @@ class TestNonBlocking:
         )
         monkeypatch.setattr(tel, "_post_event", fake_post_event)
 
-        start = time.monotonic()
-        tel.track_function_call("fn", "mod")
-        elapsed = time.monotonic() - start
+        caller = threading.Thread(
+            target=lambda: (tel.track_function_call("fn", "mod"), call_done.set())
+        )
 
-        assert elapsed < 0.1
+        try:
+            caller.start()
+            assert detect_started.wait(1)
+            assert call_done.wait(1)
+        finally:
+            release_detect.set()
+            caller.join(1)
+
         assert init_posted.wait(1)
 
     def test_network_failure_is_silent(self, mock_urlopen, enable_telemetry):
