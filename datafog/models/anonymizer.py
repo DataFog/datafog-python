@@ -7,7 +7,7 @@ import secrets
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from .annotator import AnnotationResult
 from .common import EntityTypes
@@ -34,13 +34,12 @@ class AnonymizerRequest(BaseModel):
 
 
 class AnonymizationResult(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     anonymized_text: str
     anonymized_entities: List[dict] = Field(
         default_factory=list, alias="replaced_entities"
     )
-
-    class Config:
-        populate_by_name = True
 
 
 class Anonymizer(BaseModel):

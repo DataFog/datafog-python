@@ -8,11 +8,17 @@ Optional extras available for advanced features:
 - pip install datafog[all] - for all features
 """
 
+import warnings
+
 from .__about__ import __version__
 from .agent import create_guardrail, filter_output, sanitize, scan_prompt
 
 # Core API functions - always available (lightweight)
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
+from .engine import Entity, RedactResult, ScanResult
+from .engine import redact as _redact_entities
+from .engine import scan as _scan
+from .engine import scan_and_redact as _scan_and_redact
 
 # Essential models - always available
 from .models.common import EntityTypes
@@ -134,6 +140,88 @@ SparkService = _optional_import(
 )
 
 
+_REDACT_PRESETS = {
+    "default": "token",
+    "llm": "token",
+    "mask": "mask",
+    "hash": "hash",
+    "replace": "pseudonymize",
+    "pseudonymize": "pseudonymize",
+}
+
+
+def _warn_v5_replacement(old_api: str, replacement: str) -> None:
+    warnings.warn(
+        f"datafog.{old_api}() is deprecated for v5. Use {replacement} instead. "
+        "This compatibility shim will remain through the v5.x line.",
+        FutureWarning,
+        stacklevel=3,
+    )
+
+
+def scan(
+    text: str,
+    engine: str = "regex",
+    entity_types: list[str] | None = None,
+) -> ScanResult:
+    """
+    v5-preview scan entrypoint.
+
+    Defaults to the lightweight regex engine so the core install works without
+    optional dependency fallback warnings.
+    """
+    return _scan(text=text, engine=engine, entity_types=entity_types)
+
+
+def redact(
+    text: str,
+    entities: list[Entity] | None = None,
+    engine: str = "regex",
+    entity_types: list[str] | None = None,
+    strategy: str = "token",
+    preset: str | None = None,
+) -> RedactResult:
+    """
+    v5-preview redaction entrypoint.
+
+    If entities are provided, redact those spans. Otherwise, scan text first
+    using the selected engine and redact the detected entities.
+    """
+    if preset is not None:
+        try:
+            strategy = _REDACT_PRESETS[preset]
+        except KeyError as exc:
+            allowed = ", ".join(sorted(_REDACT_PRESETS))
+            raise ValueError(f"preset must be one of: {allowed}") from exc
+
+    if entities is not None:
+        return _redact_entities(text=text, entities=entities, strategy=strategy)
+
+    return _scan_and_redact(
+        text=text,
+        engine=engine,
+        entity_types=entity_types,
+        strategy=strategy,
+    )
+
+
+def protect(
+    entity_types: list[str] | None = None,
+    engine: str = "regex",
+    strategy: str = "token",
+    on_detect: str = "redact",
+):
+    """
+    v5-preview guardrail factory.
+    """
+    return create_guardrail(
+        entity_types=entity_types,
+        engine=engine,
+        strategy=strategy,
+        on_detect=on_detect,
+    )
+
+
 # Simple API for core functionality (backward compatibility)
 def detect(text: str) -> list:
     """
@@ -150,6 +238,12 @@ def detect(text: str) -> list:
         >>> detect("Contact john@example.com")
         [{'type': 'EMAIL', 'value': 'john@example.com', 'start': 8, 'end': 24}]
     """
+    _warn_v5_replacement("detect", "datafog.scan()")
+
+    return _detect_impl(text)
+
+
+def _detect_impl(text: str) -> list:
     import time as _time
 
     _start = _time.monotonic()
@@ -217,11 +311,13 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
             'findings': [{'type': 'EMAIL', 'value': 'john@example.com', ...}]
         }
     """
+    _warn_v5_replacement("process", "datafog.scan() or datafog.redact()")
+
     import time as _time
 
     _start = _time.monotonic()
 
-    findings = detect(text)
+    findings = _detect_impl(text)
 
     result = {"original": text, "findings": findings}
 
@@ -268,6 +364,12 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
 # Core exports
 __all__ = [
     "__version__",
+    "Entity",
+    "ScanResult",
+    "RedactResult",
+    "scan",
+    "redact",
+    "protect",
     "detect",
     "process",
     "detect_pii",

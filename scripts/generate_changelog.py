@@ -7,6 +7,16 @@ import subprocess
 from datetime import datetime
 
 
+def get_current_version():
+    """Read the current package version from datafog/__about__.py."""
+    try:
+        with open("datafog/__about__.py") as f:
+            match = re.search(r'^__version__ = "([^"]+)"', f.read(), re.M)
+            return match.group(1) if match else None
+    except OSError:
+        return None
+
+
 def get_latest_tag():
     """Get the latest git tag."""
     try:
@@ -65,6 +75,7 @@ def generate_changelog(beta=False, alpha=False):
     """Generate changelog content."""
     latest_tag = get_latest_tag()
     commits = get_commits_since_tag(latest_tag)
+    current_version = get_current_version()
 
     if not commits:
         return "No changes since last release."
@@ -84,6 +95,32 @@ def generate_changelog(beta=False, alpha=False):
     else:
         changelog = "# What's New\n\n"
         changelog += f"*Released: {datetime.now().strftime('%Y-%m-%d')}*\n\n"
+
+    if not alpha and not beta and current_version == "4.4.0":
+        changelog += "## Python 3.13 Support Scope\n\n"
+        changelog += (
+            "Python 3.13 support is certified for the core SDK and CLI: "
+            "`pip install datafog` and `pip install datafog[cli]`.\n\n"
+        )
+        changelog += (
+            "Optional extras including `nlp`, `nlp-advanced`, `ocr`, "
+            "`distributed`, and `all` are available but not yet certified on "
+            "Python 3.13. They will be validated separately based on user "
+            "demand.\n\n"
+        )
+        changelog += "## v5 Migration Bridge\n\n"
+        changelog += (
+            "This release adds the v5-preview top-level APIs `datafog.scan`, "
+            "`datafog.redact`, and `datafog.protect` while keeping the legacy "
+            "`datafog.detect` and `datafog.process` APIs working with targeted "
+            "migration warnings.\n\n"
+        )
+        changelog += "## Privacy Defaults\n\n"
+        changelog += (
+            "Telemetry is now opt-in. DataFog does not send telemetry unless "
+            "`DATAFOG_TELEMETRY=1` is explicitly set. `DATAFOG_NO_TELEMETRY=1` "
+            "and `DO_NOT_TRACK=1` continue to force telemetry off.\n\n"
+        )
 
     if categories["features"]:
         changelog += "## 🚀 New Features\n"

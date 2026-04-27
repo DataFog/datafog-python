@@ -25,6 +25,10 @@ pip install datafog[nlp-advanced]
 pip install datafog[all]
 ```
 
+Python 3.13 support is certified for the core SDK and CLI. Optional extras such
+as `nlp`, `nlp-advanced`, `ocr`, `distributed`, and `all` are available but not
+yet certified on Python 3.13.
+
 ## Quick Start
 
 ```python
@@ -132,9 +136,15 @@ datafog hash-text "john@example.com"
 
 ## Telemetry
 
-DataFog includes anonymous telemetry by default.
+DataFog telemetry is disabled by default.
 
-To opt out:
+To opt in:
+
+```bash
+export DATAFOG_TELEMETRY=1
+```
+
+To force telemetry off:
 
 ```bash
 export DATAFOG_NO_TELEMETRY=1
