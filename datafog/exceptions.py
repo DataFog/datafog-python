@@ -70,6 +70,13 @@ class EngineNotAvailable(DataFogException):
         super().__init__(message, status_code=None)
 
 
+class PolicyViolationError(DataFogException):
+    """Raised when policy action blocks detected PII."""
+
+    def __init__(self, message: str):
+        super().__init__(message, status_code=None)
+
+
 def raise_for_status_code(status_code: int, error_message: str):
     """
     Raise the appropriate exception based on the status code.

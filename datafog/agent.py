@@ -9,7 +9,7 @@ from functools import wraps
 from typing import Any, Callable, Iterator, Optional, TypeVar
 
 from .engine import Entity, RedactResult, ScanResult, scan, scan_and_redact
-from .models import TokenSession
+from .models import PolicyInput, TokenSession
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -53,10 +53,11 @@ class Guardrail:
 
     entity_types: Optional[list[str]] = None
     engine: str = "smart"
-    strategy: str = "token"
+    strategy: str | None = "token"
     on_detect: str = "redact"
     session: TokenSession | None = None
     hash_key: str | bytes | None = None
+    policy: PolicyInput = None
 
     def __post_init__(self) -> None:
         if self.on_detect not in {"redact", "block", "warn"}:
@@ -75,6 +76,7 @@ class Guardrail:
             strategy=self.strategy,
             session=self.session,
             hash_key=self.hash_key,
+            policy=self.policy,
         )
         if not result.entities:
             return result
@@ -143,10 +145,11 @@ def filter_output(output: str, **kwargs: Any) -> RedactResult:
 def create_guardrail(
     entity_types: Optional[list[str]] = None,
     engine: str = "smart",
-    strategy: str = "token",
+    strategy: str | None = "token",
     on_detect: str = "redact",
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
+    policy: PolicyInput = None,
 ) -> Guardrail:
     """
     Create a reusable guardrail object for wrapping LLM calls.
@@ -158,6 +161,7 @@ def create_guardrail(
         on_detect=on_detect,
         session=session,
         hash_key=hash_key,
+        policy=policy,
     )
 
 

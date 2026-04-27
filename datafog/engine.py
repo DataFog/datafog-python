@@ -10,8 +10,17 @@ from dataclasses import dataclass, replace
 from functools import lru_cache
 from typing import Optional
 
-from .exceptions import EngineNotAvailable
-from .models import Entity, RedactResult, Replacement, ScanResult, TokenSession
+from .exceptions import EngineNotAvailable, PolicyViolationError
+from .models import (
+    Entity,
+    PolicyInput,
+    RedactResult,
+    RedactionPolicy,
+    Replacement,
+    ScanResult,
+    TokenSession,
+)
+from .models.policy import effective_include_text, get_policy
 from .processing.text_processing.regex_annotator import RegexAnnotator
 
 CANONICAL_TYPE_MAP = {
@@ -314,6 +323,14 @@ def _filter_entity_types(
     return [entity for entity in entities if entity.type in allowed]
 
 
+def _filter_policy(entities: list[Entity], policy: RedactionPolicy) -> list[Entity]:
+    return [
+        entity
+        for entity in entities
+        if policy.allows_entity(entity.type, entity.confidence)
+    ]
+
+
 def _needs_ner(entity_types: Optional[list[str]]) -> bool:
     if entity_types is None:
         return True
@@ -328,6 +345,7 @@ def scan(
     include_text: bool = False,
     locale: str = "global",
     policy_name: str | None = None,
+    policy: PolicyInput = None,
 ) -> ScanResult:
     """Scan text for PII entities."""
     if not isinstance(text, str):
@@ -336,16 +354,31 @@ def scan(
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
 
+    resolved_policy = get_policy(policy)
+    include_text = effective_include_text(include_text, resolved_policy)
+    effective_locale = (
+        resolved_policy.locale
+        if locale == "global" and resolved_policy.locale != "global"
+        else locale
+    )
+    effective_policy_name = policy_name or resolved_policy.name
+
     regex_entities = _regex_entities(text)
 
     if engine == "regex":
-        filtered = _filter_entity_types(regex_entities, entity_types)
+        filtered = _filter_policy(
+            _filter_entity_types(regex_entities, entity_types),
+            resolved_policy,
+        )
         return ScanResult(
-            entities=_with_text_mode(_dedupe_entities(filtered), include_text=include_text),
+            entities=_with_text_mode(
+                _dedupe_entities(filtered),
+                include_text=include_text,
+            ),
             input_length=len(text),
             engine="regex",
-            locale=locale,
-            policy_name=policy_name,
+            locale=effective_locale,
+            policy_name=effective_policy_name,
             include_text=include_text,
         )
 
@@ -406,14 +439,17 @@ def scan(
                     stacklevel=2,
                 )
 
-    filtered = _filter_entity_types(combined, entity_types)
+    filtered = _filter_policy(
+        _filter_entity_types(combined, entity_types),
+        resolved_policy,
+    )
     deduped = _dedupe_entities(filtered)
     return ScanResult(
         entities=_with_text_mode(deduped, include_text=include_text),
         input_length=len(text),
         engine="+".join(sorted(engines_used)),
-        locale=locale,
-        policy_name=policy_name,
+        locale=effective_locale,
+        policy_name=effective_policy_name,
         include_text=include_text,
     )
 
@@ -421,22 +457,43 @@ def scan(
 def redact(
     text: str,
     entities: list[Entity],
-    strategy: str = "token",
+    strategy: str | None = None,
     policy_name: str | None = None,
     include_text: bool = False,
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
+    policy: PolicyInput = None,
 ) -> RedactResult:
     """Redact PII entities from text."""
     if not isinstance(text, str):
         raise TypeError("text must be a string")
-    strategy = _normalize_strategy(strategy)
-    if strategy not in {"token", "mask", "hmac", "pseudonymize"}:
+
+    resolved_policy = get_policy(policy)
+    include_text = effective_include_text(include_text, resolved_policy)
+    base_strategy = _normalize_strategy(strategy or resolved_policy.default_action)
+    if base_strategy not in {
+        "token",
+        "mask",
+        "hmac",
+        "pseudonymize",
+        "drop",
+        "block",
+        "warn",
+    }:
         raise ValueError(
-            "strategy must be one of: token, mask, hmac, hash, pseudonymize"
+            "strategy must be one of: token, mask, hmac, hash, pseudonymize, drop, block, warn"
         )
 
-    resolved_hash_key = _resolve_hmac_key(hash_key) if strategy == "hmac" else None
+    resolved_hash_key: bytes | None = None
+
+    def _get_resolved_hash_key() -> bytes:
+        nonlocal resolved_hash_key
+        if resolved_hash_key is None:
+            resolved_hash_key = _resolve_hmac_key(hash_key)
+        return resolved_hash_key
+
+    if base_strategy == "hmac":
+        _get_resolved_hash_key()
 
     counters: dict[str, int] = {}
     pseudonym_by_value: dict[tuple[str, str], str] = {}
@@ -445,6 +502,7 @@ def redact(
         entity
         for entity in entities
         if 0 <= entity.start < entity.end <= len(text)
+        and resolved_policy.allows_entity(entity.type, entity.confidence)
     ]
     sorted_entities = sorted(valid_entities, key=lambda e: (e.start, e.end))
 
@@ -463,14 +521,27 @@ def redact(
 
     for entity_index, entity in enumerate(selected_entities):
         original = text[entity.start : entity.end]
-        if strategy == "mask":
+        entity_policy = resolved_policy.policy_for(entity.type)
+        action = _normalize_strategy(
+            entity_policy.action
+            if entity_policy is not None and entity_policy.action is not None
+            else base_strategy
+        )
+
+        if action == "block":
+            raise PolicyViolationError(
+                f"Policy {resolved_policy.name!r} blocked {entity.type} detection."
+            )
+
+        if action == "mask":
             replacement = "*" * max(len(original), 1)
-            action = "mask"
-        elif strategy == "hmac":
-            assert resolved_hash_key is not None
-            replacement = _hmac_token(entity.type, original, resolved_hash_key)
-            action = "hmac"
-        elif strategy == "pseudonymize":
+            replacement_metadata = replacement
+            replacement_action = "mask"
+        elif action == "hmac":
+            replacement = _hmac_token(entity.type, original, _get_resolved_hash_key())
+            replacement_metadata = replacement
+            replacement_action = "hmac"
+        elif action == "pseudonymize":
             key = (entity.type, original)
             if key not in pseudonym_by_value:
                 counters[entity.type] = counters.get(entity.type, 0) + 1
@@ -478,14 +549,28 @@ def redact(
                     f"[{entity.type}_PSEUDO_{counters[entity.type]}]"
                 )
             replacement = pseudonym_by_value[key]
-            action = "token"
+            replacement_metadata = replacement
+            replacement_action = "token"
+        elif action == "drop":
+            replacement = ""
+            replacement_metadata = ""
+            replacement_action = "drop"
+        elif action == "warn":
+            replacement = original
+            replacement_metadata = None
+            replacement_action = "warn"
         else:  # token
+            if resolved_policy.mapping_mode == "session" and session is None:
+                raise ValueError(
+                    "Policy mapping_mode='session' requires an explicit TokenSession."
+                )
             if session is not None:
                 replacement = session._token_for(entity.type, original)
             else:
                 counters[entity.type] = counters.get(entity.type, 0) + 1
                 replacement = f"[{entity.type}_{counters[entity.type]}]"
-            action = "token"
+            replacement_metadata = replacement
+            replacement_action = "token"
 
         unchanged = text[source_cursor : entity.start]
         output_parts.append(unchanged)
@@ -499,12 +584,12 @@ def redact(
         replacements.append(
             Replacement(
                 entity_index=entity_index,
-                action=action,
+                action=replacement_action,
                 original_start=entity.start,
                 original_end=entity.end,
                 replacement_start=replacement_start,
                 replacement_end=replacement_end,
-                replacement=replacement,
+                replacement=replacement_metadata,
                 token=replacement if replacement.startswith("[") else None,
             )
         )
@@ -516,7 +601,7 @@ def redact(
         redacted_text=redacted_text,
         entities=_with_text_mode(selected_entities, include_text=include_text),
         replacements=replacements,
-        policy_name=policy_name,
+        policy_name=policy_name or resolved_policy.name,
         session_id=session.session_id if session is not None else None,
     )
 
@@ -534,11 +619,12 @@ def scan_and_redact(
     text: str,
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
-    strategy: str = "token",
+    strategy: str | None = None,
     locale: str = "global",
     policy_name: str | None = None,
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
+    policy: PolicyInput = None,
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""
     scan_result = scan(
@@ -548,6 +634,7 @@ def scan_and_redact(
         include_text=False,
         locale=locale,
         policy_name=policy_name,
+        policy=policy,
     )
     return redact(
         text=text,
@@ -556,4 +643,5 @@ def scan_and_redact(
         policy_name=policy_name,
         session=session,
         hash_key=hash_key,
+        policy=policy,
     )

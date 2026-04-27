@@ -1,3 +1,11 @@
+from .policy import (
+    EntityPolicy,
+    MappingMode,
+    PolicyAction,
+    PolicyInput,
+    RawTextMode,
+    RedactionPolicy,
+)
 from .results import (
     Entity,
     RedactResult,
@@ -11,7 +19,13 @@ from .results import (
 
 __all__ = [
     "Entity",
+    "EntityPolicy",
+    "MappingMode",
+    "PolicyAction",
+    "PolicyInput",
+    "RawTextMode",
     "RedactResult",
+    "RedactionPolicy",
     "Replacement",
     "ScanResult",
     "Severity",

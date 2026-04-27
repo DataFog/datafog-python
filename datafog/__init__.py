@@ -21,7 +21,10 @@ from .engine import scan as _scan
 from .engine import scan_and_redact as _scan_and_redact
 from .models import (
     Entity,
+    EntityPolicy,
+    PolicyInput,
     RedactResult,
+    RedactionPolicy,
     Replacement,
     ScanResult,
     TokenSession,
@@ -173,6 +176,8 @@ def scan(
     entity_types: list[str] | None = None,
     include_text: bool = False,
     locale: str = "global",
+    policy: PolicyInput = None,
+    preset: str | None = None,
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
@@ -186,6 +191,7 @@ def scan(
         entity_types=entity_types,
         include_text=include_text,
         locale=locale,
+        policy=preset or policy,
     )
 
 
@@ -194,11 +200,12 @@ def redact(
     entities: list[Entity] | None = None,
     engine: str = "regex",
     entity_types: list[str] | None = None,
-    strategy: str = "token",
+    strategy: str | None = None,
     preset: str | None = None,
     include_text: bool = False,
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
+    policy: PolicyInput = None,
 ) -> RedactResult:
     """
     v5-preview redaction entrypoint.
@@ -206,12 +213,14 @@ def redact(
     If entities are provided, redact those spans. Otherwise, scan text first
     using the selected engine and redact the detected entities.
     """
-    if preset is not None:
+    policy_preset = preset
+    if preset is not None and preset in _REDACT_PRESETS and preset != "llm":
         try:
             strategy = _REDACT_PRESETS[preset]
         except KeyError as exc:
             allowed = ", ".join(sorted(_REDACT_PRESETS))
             raise ValueError(f"preset must be one of: {allowed}") from exc
+        policy_preset = None
 
     if entities is not None:
         return _redact_entities(
@@ -221,6 +230,7 @@ def redact(
             include_text=include_text,
             session=session,
             hash_key=hash_key,
+            policy=policy_preset or policy,
         )
 
     return _scan_and_redact(
@@ -230,6 +240,7 @@ def redact(
         strategy=strategy,
         session=session,
         hash_key=hash_key,
+        policy=policy_preset or policy,
     )
 
 
@@ -243,10 +254,12 @@ def restore(text: str, session: TokenSession) -> str:
 def protect(
     entity_types: list[str] | None = None,
     engine: str = "regex",
-    strategy: str = "token",
+    strategy: str | None = None,
     on_detect: str = "redact",
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
+    policy: PolicyInput = None,
+    preset: str | None = None,
 ):
     """
     v5-preview guardrail factory.
@@ -258,6 +271,7 @@ def protect(
         on_detect=on_detect,
         session=session,
         hash_key=hash_key,
+        policy=preset or policy,
     )
 
 
@@ -404,8 +418,11 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
 __all__ = [
     "__version__",
     "Entity",
+    "EntityPolicy",
+    "PolicyInput",
     "ScanResult",
     "RedactResult",
+    "RedactionPolicy",
     "Replacement",
     "TokenSession",
     "ValidationResult",
