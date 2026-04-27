@@ -9,6 +9,11 @@ from datafog.exceptions import EngineNotAvailable
 from datafog.models import TokenSession
 
 
+def _fake_body(length: int) -> str:
+    base = "A1b2C3d4E5f6G7h8J9k0LmNoPqRsTuVwXyZ"
+    return (base * ((length // len(base)) + 1))[:length]
+
+
 def test_scan_regex_detects_structured_entities() -> None:
     result = scan("Email john@example.com and SSN 123-45-6789", engine="regex")
 
@@ -49,6 +54,51 @@ def test_scan_detects_p0_secret_patterns() -> None:
     assert by_type["OPENAI_API_KEY"].severity == "critical"
     assert by_type["UUID"].severity == "medium"
     assert by_type["OPENAI_API_KEY"].text is None
+
+
+def test_scan_detects_major_ai_provider_keys() -> None:
+    text = " ".join(
+        [
+            "anthropic=" + "sk-ant-api03-" + _fake_body(48),
+            "google=" + "AIza" + _fake_body(35),
+            "HF_TOKEN=" + "hf_" + _fake_body(32),
+            "COHERE_API_KEY=" + _fake_body(28),
+            "MISTRAL_API_KEY=" + _fake_body(28),
+            "GROQ_API_KEY=" + "gsk_" + _fake_body(32),
+            "TOGETHER_API_KEY=" + _fake_body(28),
+            "PERPLEXITY_API_KEY=" + "pplx-" + _fake_body(32),
+            "XAI_API_KEY=" + _fake_body(28),
+            "AZURE_OPENAI_API_KEY=" + _fake_body(28),
+        ]
+    )
+
+    result = scan(text, engine="regex")
+
+    entity_types = {entity.type for entity in result.entities}
+    assert {
+        "ANTHROPIC_API_KEY",
+        "GOOGLE_API_KEY",
+        "HUGGINGFACE_TOKEN",
+        "COHERE_API_KEY",
+        "MISTRAL_API_KEY",
+        "GROQ_API_KEY",
+        "TOGETHER_API_KEY",
+        "PERPLEXITY_API_KEY",
+        "XAI_API_KEY",
+        "AZURE_OPENAI_API_KEY",
+    } <= entity_types
+    assert all(entity.severity == "critical" for entity in result.entities)
+    assert all(entity.text is None for entity in result.entities)
+
+
+def test_scan_distinguishes_contextual_dob_from_generic_date() -> None:
+    result = scan("DOB: 03/15/1989. Deployed 2024-01-31.", engine="regex")
+
+    entity_types = {entity.type for entity in result.entities}
+    assert "DATE_OF_BIRTH" in entity_types
+    assert "DATE" in entity_types
+    dob = next(entity for entity in result.entities if entity.type == "DATE_OF_BIRTH")
+    assert dob.severity == "high"
 
 
 def test_scan_invalid_engine_raises_value_error() -> None:

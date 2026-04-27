@@ -9,6 +9,11 @@ from datafog.processing.text_processing.regex_annotator import (
 FAKE_STRIPE_KEY = "sk_live_" + ("a" * 24)
 
 
+def _fake_body(length: int) -> str:
+    base = "A1b2C3d4E5f6G7h8J9k0LmNoPqRsTuVwXyZ"
+    return (base * ((length // len(base)) + 1))[:length]
+
+
 # Fixtures for test data
 @pytest.fixture
 def sample_text():
@@ -42,7 +47,7 @@ def test_regex_annotator_initialization():
     """Test that the RegexAnnotator can be initialized."""
     annotator = RegexAnnotator()
     assert annotator is not None
-    assert len(annotator.LABELS) == 21
+    assert set(annotator.LABELS) == set(annotator.patterns)
 
 
 def test_regex_annotator_create_method():
@@ -152,13 +157,38 @@ def test_phone_regex(phone: str, should_match: bool):
         ),
         (
             "GITHUB_TOKEN",
-            "github=ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "github=" + "ghp_" + _fake_body(36),
+            "ghp_" + _fake_body(36),
         ),
         (
             "OPENAI_API_KEY",
-            "openai=sk-proj-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "sk-proj-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "openai=" + "sk-proj-" + _fake_body(32),
+            "sk-proj-" + _fake_body(32),
+        ),
+        (
+            "ANTHROPIC_API_KEY",
+            "anthropic=" + "sk-ant-api03-" + _fake_body(48),
+            "sk-ant-api03-" + _fake_body(48),
+        ),
+        (
+            "GOOGLE_API_KEY",
+            "google=" + "AIza" + _fake_body(35),
+            "AIza" + _fake_body(35),
+        ),
+        (
+            "HUGGINGFACE_TOKEN",
+            "hf_token=" + "hf_" + _fake_body(32),
+            "hf_" + _fake_body(32),
+        ),
+        (
+            "GROQ_API_KEY",
+            "groq=" + "gsk_" + _fake_body(32),
+            "gsk_" + _fake_body(32),
+        ),
+        (
+            "PERPLEXITY_API_KEY",
+            "pplx=" + "pplx-" + _fake_body(32),
+            "pplx-" + _fake_body(32),
         ),
         ("SLACK_TOKEN", "slack=xoxb-1234567890-abcdefghi", "xoxb-1234567890-abcdefghi"),
         (
@@ -205,6 +235,16 @@ def test_p0_secret_and_identifier_regexes(label: str, text: str, expected: str):
             "Authorization: Bearer abc123abc123abc123abc123",
             "abc123abc123abc123abc123",
         ),
+        ("COHERE_API_KEY", "COHERE_API_KEY='" + _fake_body(28) + "'", _fake_body(28)),
+        ("MISTRAL_API_KEY", "MISTRAL_API_KEY=" + _fake_body(28), _fake_body(28)),
+        ("TOGETHER_API_KEY", "TOGETHER_API_KEY=" + _fake_body(28), _fake_body(28)),
+        ("XAI_API_KEY", "XAI_API_KEY=" + _fake_body(28), _fake_body(28)),
+        (
+            "AZURE_OPENAI_API_KEY",
+            "AZURE_OPENAI_API_KEY=" + _fake_body(28),
+            _fake_body(28),
+        ),
+        ("GOOGLE_API_KEY", "GEMINI_API_KEY='" + _fake_body(28) + "'", _fake_body(28)),
     ],
 )
 def test_contextual_secret_regexes_return_value_span(
@@ -231,6 +271,23 @@ def test_private_key_regex_detects_pem_block():
     result = annotator.annotate(f"key={private_key}")
 
     assert private_key in result["PRIVATE_KEY"]
+
+
+def test_structural_validators_reject_common_false_positives():
+    annotator = RegexAnnotator()
+    text = (
+        "bad_email=not..valid@example.com "
+        "bad_card=4111111111111112 "
+        "bad_jwt=eyJnotreally.abc.def "
+        "api_key='your_api_key'"
+    )
+
+    result = annotator.annotate(text)
+
+    assert result["EMAIL"] == []
+    assert result["CREDIT_CARD"] == []
+    assert result["JWT"] == []
+    assert result["API_KEY"] == []
 
 
 @pytest.mark.parametrize(

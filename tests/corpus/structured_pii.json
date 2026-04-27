@@ -529,7 +529,7 @@
     "input": "DOB 03/15/1989 recorded.",
     "expected_entities": [
       {
-        "type": "DATE",
+        "type": "DATE_OF_BIRTH",
         "text": "03/15/1989",
         "start": 4,
         "end": 14

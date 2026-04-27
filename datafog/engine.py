@@ -38,7 +38,6 @@ CANONICAL_TYPE_MAP = {
     "PHONE_NUMBER": "PHONE",
     "SOCIAL_SECURITY_NUMBER": "SSN",
     "CREDIT_CARD_NUMBER": "CREDIT_CARD",
-    "DATE_OF_BIRTH": "DATE",
 }
 
 ALL_ENTITY_TYPES = {
@@ -47,6 +46,7 @@ ALL_ENTITY_TYPES = {
     "SSN",
     "CREDIT_CARD",
     "IP_ADDRESS",
+    "DATE_OF_BIRTH",
     "DATE",
     "ZIP_CODE",
     "URL",
@@ -61,6 +61,16 @@ ALL_ENTITY_TYPES = {
     "AWS_ACCESS_KEY_ID",
     "GITHUB_TOKEN",
     "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "GOOGLE_API_KEY",
+    "HUGGINGFACE_TOKEN",
+    "COHERE_API_KEY",
+    "MISTRAL_API_KEY",
+    "GROQ_API_KEY",
+    "TOGETHER_API_KEY",
+    "PERPLEXITY_API_KEY",
+    "XAI_API_KEY",
+    "AZURE_OPENAI_API_KEY",
     "SLACK_TOKEN",
     "STRIPE_KEY",
     "PERSON",
@@ -92,11 +102,22 @@ DEFAULT_SEVERITY = {
     "AWS_ACCESS_KEY_ID": "critical",
     "GITHUB_TOKEN": "critical",
     "OPENAI_API_KEY": "critical",
+    "ANTHROPIC_API_KEY": "critical",
+    "GOOGLE_API_KEY": "critical",
+    "HUGGINGFACE_TOKEN": "critical",
+    "COHERE_API_KEY": "critical",
+    "MISTRAL_API_KEY": "critical",
+    "GROQ_API_KEY": "critical",
+    "TOGETHER_API_KEY": "critical",
+    "PERPLEXITY_API_KEY": "critical",
+    "XAI_API_KEY": "critical",
+    "AZURE_OPENAI_API_KEY": "critical",
     "SLACK_TOKEN": "critical",
     "STRIPE_KEY": "critical",
     "EMAIL": "high",
     "PHONE": "high",
     "IP_ADDRESS": "high",
+    "DATE_OF_BIRTH": "high",
     "URL": "medium",
     "UUID": "medium",
     "DATE": "low",
@@ -241,8 +262,15 @@ def _regex_entities(text: str) -> list[Entity]:
     annotator = RegexAnnotator()
     _, structured = annotator.annotate_with_spans(text)
     entities: list[Entity] = []
+    contextual_dob_spans = {
+        (span.start, span.end)
+        for span in structured.spans
+        if span.label == "DATE_OF_BIRTH"
+    }
     for span in structured.spans:
         if not span.text.strip():
+            continue
+        if span.label == "DOB" and (span.start, span.end) in contextual_dob_spans:
             continue
         entities.append(
             _make_entity(

@@ -10,7 +10,7 @@
         "end": 21
       },
       {
-        "type": "DATE",
+        "type": "DATE_OF_BIRTH",
         "text": "03/15/1989",
         "start": 27,
         "end": 37
@@ -364,7 +364,7 @@
         "end": 22
       },
       {
-        "type": "DATE",
+        "type": "DATE_OF_BIRTH",
         "text": "March 15, 1989",
         "start": 28,
         "end": 42

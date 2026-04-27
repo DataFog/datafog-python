@@ -22,6 +22,7 @@ STRUCTURED_TYPES = {
     "SSN",
     "CREDIT_CARD",
     "IP_ADDRESS",
+    "DATE_OF_BIRTH",
     "DATE",
     "ZIP_CODE",
     "URL",
@@ -36,6 +37,16 @@ STRUCTURED_TYPES = {
     "AWS_ACCESS_KEY_ID",
     "GITHUB_TOKEN",
     "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "GOOGLE_API_KEY",
+    "HUGGINGFACE_TOKEN",
+    "COHERE_API_KEY",
+    "MISTRAL_API_KEY",
+    "GROQ_API_KEY",
+    "TOGETHER_API_KEY",
+    "PERPLEXITY_API_KEY",
+    "XAI_API_KEY",
+    "AZURE_OPENAI_API_KEY",
     "SLACK_TOKEN",
     "STRIPE_KEY",
 }
@@ -51,7 +62,6 @@ TYPE_ALIASES = {
     "PHONE_NUMBER": "PHONE",
     "SOCIAL_SECURITY_NUMBER": "SSN",
     "CREDIT_CARD_NUMBER": "CREDIT_CARD",
-    "DATE_OF_BIRTH": "DATE",
 }
 
 ALL_ENGINES = ["regex", "spacy", "gliner", "smart"]

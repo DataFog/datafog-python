@@ -387,8 +387,24 @@ P0 provider-specific patterns if easy:
 * ``AWS_ACCESS_KEY_ID``
 * ``GITHUB_TOKEN``
 * ``OPENAI_API_KEY``
+* ``ANTHROPIC_API_KEY``
+* ``GOOGLE_API_KEY``
+* ``HUGGINGFACE_TOKEN``
+* ``COHERE_API_KEY``
+* ``MISTRAL_API_KEY``
+* ``GROQ_API_KEY``
+* ``TOGETHER_API_KEY``
+* ``PERPLEXITY_API_KEY``
+* ``XAI_API_KEY``
+* ``AZURE_OPENAI_API_KEY``
 * ``SLACK_TOKEN``
 * ``STRIPE_KEY``
+
+Provider-specific recognizers should prefer exact public prefixes when the
+provider documents or exposes a stable prefix. Otherwise they should detect
+common environment variable and config key names, such as
+``ANTHROPIC_API_KEY`` or ``GEMINI_API_KEY``, without pretending the underlying
+secret format is stable.
 
 PERSON, ORGANIZATION, LOCATION, and ADDRESS are optional advanced/NLP scope,
 not part of the v5.0 core guarantee.
