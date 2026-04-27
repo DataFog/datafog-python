@@ -238,6 +238,7 @@ def redact(
         engine=engine,
         entity_types=entity_types,
         strategy=strategy,
+        include_text=include_text,
         session=session,
         hash_key=hash_key,
         policy=policy_preset or policy,

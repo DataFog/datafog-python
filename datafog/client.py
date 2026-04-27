@@ -5,15 +5,19 @@ Provides CLI commands for scanning images and text using DataFog's OCR and PII d
 """
 
 import asyncio
+import json
 import logging
 from pathlib import Path
-from typing import List
+import sys
+from typing import Iterable, List
 
 import typer
 
 from .config import OperationType, get_config
+from .engine import scan as engine_scan
 from .engine import scan_and_redact
 from .main import DataFog
+from .models import Entity, RedactResult, ScanResult
 from .models.anonymizer import HashType
 
 try:
@@ -43,6 +47,740 @@ except ImportError:
 
 
 app = typer.Typer()
+
+CLI_SCHEMA_VERSION = "datafog.cli.v1"
+CLI_RECORD_SCHEMA_VERSION = "datafog.cli.record.v1"
+CLI_SUMMARY_SCHEMA_VERSION = "datafog.cli.summary.v1"
+
+EXIT_OK = 0
+EXIT_DETECTED = 1
+EXIT_USAGE = 2
+EXIT_PROCESSING = 3
+
+SEVERITY_ORDER = {
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "critical": 4,
+}
+
+
+def _entity_dicts(entities: Iterable[Entity], *, include_text: bool = False):
+    return [entity.to_dict(include_text=include_text) for entity in entities]
+
+
+def _summary(
+    entities: Iterable[Entity],
+    *,
+    replacement_count: int | None = None,
+    files_scanned: int | None = None,
+    records_scanned: int | None = None,
+) -> dict[str, object]:
+    entity_list = list(entities)
+    by_type: dict[str, int] = {}
+    by_severity: dict[str, int] = {}
+    highest_severity: str | None = None
+
+    for entity in entity_list:
+        by_type[entity.type] = by_type.get(entity.type, 0) + 1
+        by_severity[entity.severity] = by_severity.get(entity.severity, 0) + 1
+        if highest_severity is None or (
+            SEVERITY_ORDER[entity.severity] > SEVERITY_ORDER[highest_severity]
+        ):
+            highest_severity = entity.severity
+
+    payload: dict[str, object] = {
+        "entity_count": len(entity_list),
+        "by_type": by_type,
+        "by_severity": by_severity,
+        "highest_severity": highest_severity,
+    }
+    if replacement_count is not None:
+        payload["replacement_count"] = replacement_count
+    if files_scanned is not None:
+        payload["files_scanned"] = files_scanned
+    if records_scanned is not None:
+        payload["records_scanned"] = records_scanned
+    return payload
+
+
+def _input_metadata(
+    *,
+    source: str,
+    text: str | None = None,
+    path: Path | None = None,
+    records: int | None = None,
+    file_count: int | None = None,
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "source": source,
+        "path": str(path) if path is not None else None,
+        "records": records,
+    }
+    if text is not None:
+        payload["bytes"] = len(text.encode("utf-8"))
+    if file_count is not None:
+        payload["file_count"] = file_count
+    return payload
+
+
+def _policy_metadata(
+    *,
+    preset: str,
+    locale: str,
+    include_text: bool,
+    fail_on: str | None = None,
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "preset": preset,
+        "locale": locale,
+        "include_text": include_text,
+    }
+    if fail_on is not None:
+        payload["fail_on"] = fail_on
+    return payload
+
+
+def _emit_json(payload: dict[str, object], *, jsonl: bool = False) -> None:
+    typer.echo(json.dumps(payload, separators=(",", ":") if jsonl else None))
+
+
+def _fail_on_matches(
+    entities: Iterable[Entity],
+    *,
+    fail_on_detect: bool = False,
+    fail_on: str | None = None,
+) -> bool:
+    entity_list = list(entities)
+    if fail_on_detect:
+        return bool(entity_list)
+    if fail_on is None:
+        return False
+
+    normalized = fail_on.lower().strip()
+    if normalized in {"detect", "any"}:
+        return bool(entity_list)
+    if normalized not in SEVERITY_ORDER:
+        allowed = ", ".join(["detect", *SEVERITY_ORDER])
+        raise ValueError(f"--fail-on must be one of: {allowed}")
+    threshold = SEVERITY_ORDER[normalized]
+    return any(SEVERITY_ORDER[entity.severity] >= threshold for entity in entity_list)
+
+
+def _exit_for_findings(
+    entities: Iterable[Entity],
+    *,
+    fail_on_detect: bool = False,
+    fail_on: str | None = None,
+) -> int:
+    return (
+        EXIT_DETECTED
+        if _fail_on_matches(
+            entities,
+            fail_on_detect=fail_on_detect,
+            fail_on=fail_on,
+        )
+        else EXIT_OK
+    )
+
+
+def _read_cli_text(text: str | None, path: Path | None) -> tuple[str, str, Path | None]:
+    if text is not None:
+        return text, "argument", None
+    if path is not None:
+        return path.read_text(encoding="utf-8"), "file", path
+    if not sys.stdin.isatty():
+        stdin_text = sys.stdin.read()
+        if stdin_text:
+            return stdin_text, "stdin", None
+    raise ValueError("Provide text, --file, or stdin.")
+
+
+def _scan_payload(
+    result: ScanResult,
+    *,
+    source: str,
+    text: str,
+    path: Path | None,
+    preset: str,
+    fail_on: str | None,
+    exit_code: int | None = None,
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema_version": CLI_SCHEMA_VERSION,
+        "command": "scan",
+        "ok": True,
+        "input": _input_metadata(source=source, text=text, path=path, records=None),
+        "policy": _policy_metadata(
+            preset=preset,
+            locale=result.locale,
+            include_text=result.include_text,
+            fail_on=fail_on,
+        ),
+        "summary": _summary(result.entities),
+        "entities": _entity_dicts(result.entities, include_text=result.include_text),
+        "errors": [],
+    }
+    if exit_code is not None:
+        payload["exit_code"] = exit_code
+    return payload
+
+
+def _redact_payload(
+    result: RedactResult,
+    *,
+    source: str,
+    text: str,
+    path: Path | None,
+    preset: str,
+    locale: str,
+    include_text: bool,
+    fail_on: str | None,
+    exit_code: int | None = None,
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema_version": CLI_SCHEMA_VERSION,
+        "command": "redact",
+        "ok": True,
+        "input": _input_metadata(source=source, text=text, path=path, records=None),
+        "policy": _policy_metadata(
+            preset=preset,
+            locale=locale,
+            include_text=include_text,
+            fail_on=fail_on,
+        ),
+        "summary": _summary(
+            result.entities,
+            replacement_count=len(result.replacements),
+        ),
+        "redacted_text": result.redacted_text,
+        "entities": _entity_dicts(result.entities, include_text=include_text),
+        "replacements": [replacement.to_dict() for replacement in result.replacements],
+        "session": {
+            "session_id": result.session_id,
+            "reversible": result.session_id is not None,
+            "mapping_count": 0,
+        },
+        "errors": [],
+    }
+    if exit_code is not None:
+        payload["exit_code"] = exit_code
+    return payload
+
+
+def _iter_audit_records(path: Path):
+    files = (
+        [path]
+        if path.is_file()
+        else sorted(item for item in path.rglob("*") if item.is_file())
+    )
+    for file_path in files:
+        try:
+            for line_number, line in enumerate(
+                file_path.read_text(encoding="utf-8", errors="replace").splitlines(),
+                start=1,
+            ):
+                if file_path.suffix.lower() == ".jsonl":
+                    try:
+                        record = json.loads(line)
+                    except json.JSONDecodeError:
+                        yield file_path, line_number, line_number - 1, None, line
+                        continue
+                    if isinstance(record, dict):
+                        for field, value in record.items():
+                            if isinstance(value, str):
+                                yield (
+                                    file_path,
+                                    line_number,
+                                    line_number - 1,
+                                    str(field),
+                                    value,
+                                )
+                        continue
+                yield file_path, line_number, line_number - 1, None, line
+        except UnicodeDecodeError:
+            continue
+
+
+def _audit_payload(
+    *,
+    path: Path,
+    preset: str,
+    locale: str,
+    include_text: bool,
+    fail_on: str | None,
+    exit_code: int,
+    files_scanned: int,
+    records_scanned: int,
+    all_entities: list[Entity],
+    findings: list[dict[str, object]],
+) -> dict[str, object]:
+    return {
+        "schema_version": CLI_SCHEMA_VERSION,
+        "command": "audit",
+        "ok": True,
+        "exit_code": exit_code,
+        "input": _input_metadata(
+            source="directory" if path.is_dir() else "file",
+            path=path,
+            file_count=files_scanned,
+            records=records_scanned,
+        ),
+        "policy": _policy_metadata(
+            preset=preset,
+            locale=locale,
+            include_text=include_text,
+            fail_on=fail_on,
+        ),
+        "summary": _summary(
+            all_entities,
+            files_scanned=files_scanned,
+            records_scanned=records_scanned,
+        ),
+        "findings": findings,
+        "errors": [],
+    }
+
+
+@app.command("scan")
+def scan_command(
+    text: str | None = typer.Argument(None, help="Text to scan"),
+    file: Path | None = typer.Option(None, "--file", "-f", help="File to scan"),
+    preset: str = typer.Option("default", "--preset", help="Policy preset"),
+    engine: str = typer.Option("regex", "--engine", help="Detection engine"),
+    locale: str = typer.Option("global", "--locale", help="Locale policy"),
+    include_text: bool = typer.Option(
+        False,
+        "--include-text",
+        help="Include raw matched text when policy allows it",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit datafog.cli.v1 JSON",
+    ),
+    jsonl_output: bool = typer.Option(
+        False,
+        "--jsonl",
+        help="Emit one datafog.cli.record.v1 JSON object",
+    ),
+    fail_on: str | None = typer.Option(
+        None,
+        "--fail-on",
+        help="Exit 1 when findings meet severity: low, medium, high, critical, detect",
+    ),
+    fail_on_detect: bool = typer.Option(
+        False,
+        "--fail-on-detect",
+        help="Exit 1 when any entity is detected",
+    ),
+):
+    """Scan text with the v5 CLI contract."""
+    try:
+        input_text, source, input_path = _read_cli_text(text, file)
+        result = engine_scan(
+            input_text,
+            engine=engine,
+            include_text=include_text,
+            locale=locale,
+            policy=preset,
+        )
+        exit_code = _exit_for_findings(
+            result.entities,
+            fail_on_detect=fail_on_detect,
+            fail_on=fail_on,
+        )
+        if jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_RECORD_SCHEMA_VERSION,
+                    "command": "scan",
+                    "path": str(input_path) if input_path is not None else None,
+                    "record_index": 0,
+                    "summary": _summary(result.entities),
+                    "entities": _entity_dicts(
+                        result.entities,
+                        include_text=result.include_text,
+                    ),
+                    "errors": [],
+                },
+                jsonl=True,
+            )
+        elif json_output:
+            _emit_json(
+                _scan_payload(
+                    result,
+                    source=source,
+                    text=input_text,
+                    path=input_path,
+                    preset=preset,
+                    fail_on=fail_on or ("detect" if fail_on_detect else None),
+                    exit_code=exit_code,
+                )
+            )
+        else:
+            typer.echo(f"Found {len(result.entities)} entities.")
+            for entity in result.entities:
+                typer.echo(
+                    f"{entity.type} {entity.start}:{entity.end} "
+                    f"{entity.severity} {entity.detector}"
+                )
+        raise typer.Exit(code=exit_code)
+    except typer.Exit:
+        raise
+    except ValueError as exc:
+        if json_output or jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_SCHEMA_VERSION,
+                    "command": "scan",
+                    "ok": False,
+                    "input": {},
+                    "policy": {"preset": preset, "locale": locale},
+                    "summary": {},
+                    "errors": [{"message": str(exc)}],
+                },
+                jsonl=jsonl_output,
+            )
+        else:
+            typer.echo(str(exc), err=True)
+        raise typer.Exit(code=EXIT_USAGE) from exc
+    except Exception as exc:
+        if json_output or jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_SCHEMA_VERSION,
+                    "command": "scan",
+                    "ok": False,
+                    "input": {},
+                    "policy": {"preset": preset, "locale": locale},
+                    "summary": {},
+                    "errors": [{"message": str(exc)}],
+                },
+                jsonl=jsonl_output,
+            )
+        else:
+            typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=EXIT_PROCESSING) from exc
+
+
+@app.command("redact")
+def redact_command(
+    text: str | None = typer.Argument(None, help="Text to redact"),
+    file: Path | None = typer.Option(None, "--file", "-f", help="File to redact"),
+    preset: str = typer.Option("llm", "--preset", help="Policy preset"),
+    engine: str = typer.Option("regex", "--engine", help="Detection engine"),
+    locale: str = typer.Option("global", "--locale", help="Locale policy"),
+    include_text: bool = typer.Option(
+        False,
+        "--include-text",
+        help="Include raw matched text when policy allows it",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit datafog.cli.v1 JSON",
+    ),
+    jsonl_output: bool = typer.Option(
+        False,
+        "--jsonl",
+        help="Emit one datafog.cli.record.v1 JSON object",
+    ),
+    fail_on: str | None = typer.Option(
+        None,
+        "--fail-on",
+        help="Exit 1 when findings meet severity: low, medium, high, critical, detect",
+    ),
+    fail_on_detect: bool = typer.Option(
+        False,
+        "--fail-on-detect",
+        help="Exit 1 when any entity is detected",
+    ),
+    hash_key_file: Path | None = typer.Option(
+        None,
+        "--hash-key-file",
+        help="File containing the HMAC key for hmac/hash policies",
+    ),
+):
+    """Redact text with the v5 CLI contract."""
+    try:
+        input_text, source, input_path = _read_cli_text(text, file)
+        hash_key = (
+            hash_key_file.read_text(encoding="utf-8").strip()
+            if hash_key_file is not None
+            else None
+        )
+        result = scan_and_redact(
+            text=input_text,
+            engine=engine,
+            locale=locale,
+            include_text=include_text,
+            policy=preset,
+            hash_key=hash_key,
+        )
+        effective_include_text = any(
+            entity.text is not None for entity in result.entities
+        )
+        exit_code = _exit_for_findings(
+            result.entities,
+            fail_on_detect=fail_on_detect,
+            fail_on=fail_on,
+        )
+        if jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_RECORD_SCHEMA_VERSION,
+                    "command": "redact",
+                    "path": str(input_path) if input_path is not None else None,
+                    "record_index": 0,
+                    "summary": _summary(
+                        result.entities,
+                        replacement_count=len(result.replacements),
+                    ),
+                    "redacted_text": result.redacted_text,
+                    "entities": _entity_dicts(
+                        result.entities,
+                        include_text=effective_include_text,
+                    ),
+                    "replacements": [
+                        replacement.to_dict() for replacement in result.replacements
+                    ],
+                    "errors": [],
+                },
+                jsonl=True,
+            )
+        elif json_output:
+            _emit_json(
+                _redact_payload(
+                    result,
+                    source=source,
+                    text=input_text,
+                    path=input_path,
+                    preset=preset,
+                    locale=locale,
+                    include_text=effective_include_text,
+                    fail_on=fail_on or ("detect" if fail_on_detect else None),
+                    exit_code=exit_code,
+                )
+            )
+        else:
+            typer.echo(result.redacted_text)
+        raise typer.Exit(code=exit_code)
+    except typer.Exit:
+        raise
+    except ValueError as exc:
+        if json_output or jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_SCHEMA_VERSION,
+                    "command": "redact",
+                    "ok": False,
+                    "input": {},
+                    "policy": {"preset": preset, "locale": locale},
+                    "summary": {},
+                    "errors": [{"message": str(exc)}],
+                },
+                jsonl=jsonl_output,
+            )
+        else:
+            typer.echo(str(exc), err=True)
+        raise typer.Exit(code=EXIT_USAGE) from exc
+    except Exception as exc:
+        if json_output or jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_SCHEMA_VERSION,
+                    "command": "redact",
+                    "ok": False,
+                    "input": {},
+                    "policy": {"preset": preset, "locale": locale},
+                    "summary": {},
+                    "errors": [{"message": str(exc)}],
+                },
+                jsonl=jsonl_output,
+            )
+        else:
+            typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=EXIT_PROCESSING) from exc
+
+
+@app.command("audit")
+def audit_command(
+    path: Path = typer.Argument(..., help="File or directory to audit"),
+    preset: str = typer.Option("logs", "--preset", help="Policy preset"),
+    engine: str = typer.Option("regex", "--engine", help="Detection engine"),
+    locale: str = typer.Option("global", "--locale", help="Locale policy"),
+    include_text: bool = typer.Option(
+        False,
+        "--include-text",
+        help="Include raw matched text when policy allows it",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit datafog.cli.v1 JSON",
+    ),
+    jsonl_output: bool = typer.Option(
+        False,
+        "--jsonl",
+        help="Emit datafog.cli.record.v1 JSON lines",
+    ),
+    emit_summary: bool = typer.Option(
+        False,
+        "--emit-summary",
+        help="Emit a final datafog.cli.summary.v1 JSONL record",
+    ),
+    fail_on: str | None = typer.Option(
+        None,
+        "--fail-on",
+        help="Exit 1 when findings meet severity: low, medium, high, critical, detect",
+    ),
+    fail_on_detect: bool = typer.Option(
+        False,
+        "--fail-on-detect",
+        help="Exit 1 when any entity is detected",
+    ),
+):
+    """Audit files or directories with the v5 CLI contract."""
+    try:
+        if not path.exists():
+            raise ValueError(f"Path does not exist: {path}")
+        if not path.is_file() and not path.is_dir():
+            raise ValueError(f"Path must be a file or directory: {path}")
+
+        file_paths = (
+            [path] if path.is_file() else [p for p in path.rglob("*") if p.is_file()]
+        )
+        records_scanned = 0
+        all_entities: list[Entity] = []
+        findings: list[dict[str, object]] = []
+
+        for (
+            file_path,
+            line_number,
+            record_index,
+            field,
+            record_text,
+        ) in _iter_audit_records(path):
+            records_scanned += 1
+            result = engine_scan(
+                record_text,
+                engine=engine,
+                include_text=include_text,
+                locale=locale,
+                policy=preset,
+            )
+            all_entities.extend(result.entities)
+            if result.entities:
+                record_summary = _summary(result.entities)
+                if jsonl_output:
+                    _emit_json(
+                        {
+                            "schema_version": CLI_RECORD_SCHEMA_VERSION,
+                            "command": "audit",
+                            "path": str(file_path),
+                            "line": line_number,
+                            "record_index": record_index,
+                            "field": field,
+                            "summary": record_summary,
+                            "entities": _entity_dicts(
+                                result.entities,
+                                include_text=result.include_text,
+                            ),
+                            "errors": [],
+                        },
+                        jsonl=True,
+                    )
+                for entity in result.entities:
+                    findings.append(
+                        {
+                            "path": str(file_path),
+                            "line": line_number,
+                            "record_index": record_index,
+                            "field": field,
+                            "entity": entity.to_dict(
+                                include_text=result.include_text,
+                            ),
+                        }
+                    )
+
+        exit_code = _exit_for_findings(
+            all_entities,
+            fail_on_detect=fail_on_detect,
+            fail_on=fail_on,
+        )
+        fail_policy = fail_on or ("detect" if fail_on_detect else None)
+        if jsonl_output:
+            if emit_summary:
+                _emit_json(
+                    {
+                        "schema_version": CLI_SUMMARY_SCHEMA_VERSION,
+                        "command": "audit",
+                        "summary": _summary(
+                            all_entities,
+                            files_scanned=len(file_paths),
+                            records_scanned=records_scanned,
+                        ),
+                    },
+                    jsonl=True,
+                )
+        elif json_output:
+            _emit_json(
+                _audit_payload(
+                    path=path,
+                    preset=preset,
+                    locale=locale,
+                    include_text=include_text,
+                    fail_on=fail_policy,
+                    exit_code=exit_code,
+                    files_scanned=len(file_paths),
+                    records_scanned=records_scanned,
+                    all_entities=all_entities,
+                    findings=findings,
+                )
+            )
+        else:
+            typer.echo(
+                f"Scanned {len(file_paths)} files and {records_scanned} records; "
+                f"found {len(all_entities)} entities."
+            )
+        raise typer.Exit(code=exit_code)
+    except typer.Exit:
+        raise
+    except ValueError as exc:
+        if json_output or jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_SCHEMA_VERSION,
+                    "command": "audit",
+                    "ok": False,
+                    "input": {"path": str(path)},
+                    "policy": {"preset": preset, "locale": locale},
+                    "summary": {},
+                    "errors": [{"message": str(exc)}],
+                },
+                jsonl=jsonl_output,
+            )
+        else:
+            typer.echo(str(exc), err=True)
+        raise typer.Exit(code=EXIT_USAGE) from exc
+    except Exception as exc:
+        if json_output or jsonl_output:
+            _emit_json(
+                {
+                    "schema_version": CLI_SCHEMA_VERSION,
+                    "command": "audit",
+                    "ok": False,
+                    "input": {"path": str(path)},
+                    "policy": {"preset": preset, "locale": locale},
+                    "summary": {},
+                    "errors": [{"message": str(exc)}],
+                },
+                jsonl=jsonl_output,
+            )
+        else:
+            typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=EXIT_PROCESSING) from exc
 
 
 @app.command()
@@ -382,9 +1120,7 @@ def hash_text(
     hash_type: HashType = typer.Option(HashType.SHA256, help="Hash algorithm to use"),
     hash_key_file: Path | None = typer.Option(
         None,
-        help=(
-            "File containing the HMAC key. DATAFOG_HMAC_KEY is used when omitted."
-        ),
+        help=("File containing the HMAC key. DATAFOG_HMAC_KEY is used when omitted."),
     ),
 ):
     """
