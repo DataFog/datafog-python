@@ -1,5 +1,4 @@
 import sys
-from unittest.mock import patch
 
 from datafog.services.image_service import ImageService
 
@@ -46,21 +45,5 @@ def test_lazy_import_mechanism():
     # Verify that the extract_text_from_image method exists
     assert hasattr(processor, "extract_text_from_image")
 
-    # Mock importlib.import_module to prevent actual imports
-    with patch("importlib.import_module") as mock_import:
-        # Set up the mock to return a dummy module
-        mock_import.return_value = type("DummyModule", (), {})
-
-        # Mock the ensure_installed method to prevent actual installation
-        with patch.object(processor, "ensure_installed"):
-            # Try to call extract_text_from_image which should trigger imports
-            try:
-                # We don't actually need to run it asynchronously for this test
-                # Just call the method directly to see if it tries to import
-                processor.ensure_installed("torch")
-            except Exception:
-                # Ignore any exceptions
-                pass
-
-            # Verify ensure_installed was called
-            assert processor.ensure_installed.called
+    # Runtime package installation helpers should not exist on the processor.
+    assert not hasattr(processor, "ensure_installed")

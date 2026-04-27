@@ -60,13 +60,14 @@ jobs:
         if: matrix.install-profile == 'nlp'
         run: |
           pip install -e ".[test,cli,nlp]" -r requirements-test.txt
-          python -m spacy download en_core_web_sm
+          python -m spacy download en_core_web_lg
 
       - name: Install dependencies (nlp-advanced)
         if: matrix.install-profile == 'nlp-advanced'
         run: |
           pip install -e ".[test,cli,nlp,nlp-advanced]" -r requirements-test.txt
-          python -m spacy download en_core_web_sm
+          python -m spacy download en_core_web_lg
+          datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
 
       - name: Run tests (core)
         if: matrix.install-profile == 'core'

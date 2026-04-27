@@ -45,6 +45,7 @@ ocr_deps = [
 distributed_deps = [
     "pandas>=2.0.0",
     "numpy>=1.24.0",
+    "pyspark>=3.5.0",
 ]
 
 web_deps = [

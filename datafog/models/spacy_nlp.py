@@ -13,6 +13,8 @@ from rich.progress import track
 
 from .annotator import AnnotationResult, AnnotatorRequest
 
+DEFAULT_SPACY_MODEL = "en_core_web_lg"
+
 
 class SpacyAnnotator:
     """
@@ -22,14 +24,18 @@ class SpacyAnnotator:
     Supports various NLP tasks including entity recognition and model management.
     """
 
-    def __init__(self, model_name: str = "en_core_web_lg"):
+    def __init__(self, model_name: str = DEFAULT_SPACY_MODEL):
         self.model_name = model_name
         self.nlp = None
 
     def load_model(self):
-        if not spacy.util.is_package(self.model_name):
-            spacy.cli.download(self.model_name)
-        self.nlp = spacy.load(self.model_name)
+        try:
+            self.nlp = spacy.load(self.model_name)
+        except OSError as exc:
+            raise ImportError(
+                f"spaCy model {self.model_name!r} is not installed. "
+                f"Download it explicitly with: datafog download-model {self.model_name} --engine spacy"
+            ) from exc
 
     def annotate_text(self, text: str, language: str = "en") -> List[AnnotationResult]:
         if not self.nlp:
@@ -72,6 +78,12 @@ class SpacyAnnotator:
         return spacy.util.get_installed_models()
 
     @staticmethod
-    def list_entities() -> List[str]:
-        nlp = spacy.load("en_core_web_lg")
+    def list_entities(model_name: str = DEFAULT_SPACY_MODEL) -> List[str]:
+        try:
+            nlp = spacy.load(model_name)
+        except OSError as exc:
+            raise ImportError(
+                f"spaCy model {model_name!r} is not installed. "
+                f"Download it explicitly with: datafog download-model {model_name} --engine spacy"
+            ) from exc
         return [ent for ent in nlp.pipe_labels["ner"]]
