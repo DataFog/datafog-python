@@ -25,10 +25,18 @@ from .models import (
     PolicyInput,
     RedactResult,
     RedactionPolicy,
+    RecognizerInput,
+    RegexRecognizer,
     Replacement,
     ScanResult,
     TokenSession,
     ValidationResult,
+)
+from .recognizers import (
+    clear_recognizers,
+    list_recognizers,
+    register_recognizer,
+    register_regex_recognizer,
 )
 
 # Essential models - always available
@@ -178,6 +186,7 @@ def scan(
     locale: str = "global",
     policy: PolicyInput = None,
     preset: str | None = None,
+    recognizers: list[RecognizerInput] | None = None,
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
@@ -192,6 +201,7 @@ def scan(
         include_text=include_text,
         locale=locale,
         policy=preset or policy,
+        recognizers=recognizers,
     )
 
 
@@ -206,6 +216,7 @@ def redact(
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
     policy: PolicyInput = None,
+    recognizers: list[RecognizerInput] | None = None,
 ) -> RedactResult:
     """
     v5-preview redaction entrypoint.
@@ -242,6 +253,7 @@ def redact(
         session=session,
         hash_key=hash_key,
         policy=policy_preset or policy,
+        recognizers=recognizers,
     )
 
 
@@ -261,6 +273,7 @@ def protect(
     hash_key: str | bytes | None = None,
     policy: PolicyInput = None,
     preset: str | None = None,
+    recognizers: list[RecognizerInput] | None = None,
 ):
     """
     v5-preview guardrail factory.
@@ -273,6 +286,7 @@ def protect(
         session=session,
         hash_key=hash_key,
         policy=preset or policy,
+        recognizers=recognizers,
     )
 
 
@@ -424,9 +438,15 @@ __all__ = [
     "ScanResult",
     "RedactResult",
     "RedactionPolicy",
+    "RecognizerInput",
+    "RegexRecognizer",
     "Replacement",
     "TokenSession",
     "ValidationResult",
+    "clear_recognizers",
+    "list_recognizers",
+    "register_recognizer",
+    "register_regex_recognizer",
     "scan",
     "redact",
     "restore",

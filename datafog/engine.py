@@ -16,11 +16,15 @@ from .models import (
     PolicyInput,
     RedactResult,
     RedactionPolicy,
+    RecognizerInput,
+    RegexRecognizer,
     Replacement,
     ScanResult,
     TokenSession,
+    ValidationResult,
 )
 from .models.policy import effective_include_text, get_policy
+from .recognizers import get_active_recognizers
 from .processing.text_processing.regex_annotator import RegexAnnotator
 
 CANONICAL_TYPE_MAP = {
@@ -127,6 +131,8 @@ def _make_entity(
     end: int,
     confidence: float,
     engine: str,
+    detector: str | None = None,
+    validation: ValidationResult | None = None,
 ) -> Entity:
     canonical_type = _canonical_type(entity_type)
     return Entity(
@@ -135,7 +141,8 @@ def _make_entity(
         end=end,
         confidence=confidence,
         severity=_entity_severity(canonical_type),  # type: ignore[arg-type]
-        detector=_detector_name(engine, canonical_type),
+        detector=detector or _detector_name(engine, canonical_type),
+        validation=validation,
         text=text,
     )
 
@@ -250,6 +257,64 @@ def _regex_entities(text: str) -> list[Entity]:
     return entities
 
 
+_INVALID_VALIDATION_STATUSES = {"invalid", "checksum_failed", "parse_failed"}
+
+
+def _custom_validation(
+    recognizer_name: str,
+    validator_result: bool | ValidationResult,
+) -> ValidationResult | None:
+    if isinstance(validator_result, ValidationResult):
+        if validator_result.status in _INVALID_VALIDATION_STATUSES:
+            return None
+        return validator_result
+    if validator_result is False:
+        return None
+    return ValidationResult(validator=recognizer_name, status="valid")
+
+
+def _custom_entities(
+    text: str,
+    recognizers: tuple[RegexRecognizer, ...],
+) -> list[Entity]:
+    entities: list[Entity] = []
+    for recognizer in recognizers:
+        for match in recognizer.pattern.finditer(text):
+            groupdict = match.groupdict()
+            if "value" in groupdict and groupdict["value"] is not None:
+                start, end = match.span("value")
+                value = match.group("value")
+            else:
+                start, end = match.span(0)
+                value = match.group(0)
+
+            if start < 0 or end <= start or not value.strip():
+                continue
+
+            validation = None
+            if recognizer.validator is not None:
+                validation = _custom_validation(
+                    recognizer.name,
+                    recognizer.validator(value),
+                )
+                if validation is None:
+                    continue
+
+            entities.append(
+                _make_entity(
+                    entity_type=recognizer.entity_type,
+                    text=value,
+                    start=start,
+                    end=end,
+                    confidence=recognizer.confidence,
+                    engine="custom",
+                    detector=recognizer.detector,
+                    validation=validation,
+                )
+            )
+    return entities
+
+
 def _spacy_entities(text: str) -> list[Entity]:
     annotator = _get_spacy_annotator()
     if isinstance(annotator, _UnavailableAnnotator):
@@ -346,6 +411,7 @@ def scan(
     locale: str = "global",
     policy_name: str | None = None,
     policy: PolicyInput = None,
+    recognizers: Optional[list[RecognizerInput]] = None,
 ) -> ScanResult:
     """Scan text for PII entities."""
     if not isinstance(text, str):
@@ -363,11 +429,16 @@ def scan(
     )
     effective_policy_name = policy_name or resolved_policy.name
 
+    active_recognizers = get_active_recognizers(recognizers)
+    custom_entities = _custom_entities(text, active_recognizers)
     regex_entities = _regex_entities(text)
+    engines_used = {"regex"}
+    if active_recognizers:
+        engines_used.add("custom")
 
     if engine == "regex":
         filtered = _filter_policy(
-            _filter_entity_types(regex_entities, entity_types),
+            _filter_entity_types(regex_entities + custom_entities, entity_types),
             resolved_policy,
         )
         return ScanResult(
@@ -376,14 +447,13 @@ def scan(
                 include_text=include_text,
             ),
             input_length=len(text),
-            engine="regex",
+            engine="+".join(sorted(engines_used)),
             locale=effective_locale,
             policy_name=effective_policy_name,
             include_text=include_text,
         )
 
-    combined: list[Entity] = list(regex_entities)
-    engines_used = {"regex"}
+    combined: list[Entity] = list(regex_entities + custom_entities)
 
     if engine == "spacy" and _needs_ner(entity_types):
         try:
@@ -626,6 +696,7 @@ def scan_and_redact(
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
     policy: PolicyInput = None,
+    recognizers: Optional[list[RecognizerInput]] = None,
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""
     scan_result = scan(
@@ -636,6 +707,7 @@ def scan_and_redact(
         locale=locale,
         policy_name=policy_name,
         policy=policy,
+        recognizers=recognizers,
     )
     return redact(
         text=text,

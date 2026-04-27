@@ -6,6 +6,7 @@ from .policy import (
     RawTextMode,
     RedactionPolicy,
 )
+from .recognizers import RecognizerInput, RecognizerValidator, RegexRecognizer
 from .results import (
     Entity,
     RedactResult,
@@ -26,6 +27,9 @@ __all__ = [
     "RawTextMode",
     "RedactResult",
     "RedactionPolicy",
+    "RecognizerInput",
+    "RecognizerValidator",
+    "RegexRecognizer",
     "Replacement",
     "ScanResult",
     "Severity",

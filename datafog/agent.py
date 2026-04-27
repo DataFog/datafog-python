@@ -9,7 +9,7 @@ from functools import wraps
 from typing import Any, Callable, Iterator, Optional, TypeVar
 
 from .engine import Entity, RedactResult, ScanResult, scan, scan_and_redact
-from .models import PolicyInput, TokenSession
+from .models import PolicyInput, RecognizerInput, TokenSession
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -32,6 +32,7 @@ class GuardrailWatch:
             text=text,
             engine=self.guardrail.engine,
             entity_types=self.guardrail.entity_types,
+            recognizers=self.guardrail.recognizers,
         )
         if result.entities:
             self.detections += len(result.entities)
@@ -58,6 +59,7 @@ class Guardrail:
     session: TokenSession | None = None
     hash_key: str | bytes | None = None
     policy: PolicyInput = None
+    recognizers: Optional[list[RecognizerInput]] = None
 
     def __post_init__(self) -> None:
         if self.on_detect not in {"redact", "block", "warn"}:
@@ -65,7 +67,12 @@ class Guardrail:
 
     def scan(self, text: str) -> ScanResult:
         """Scan a text value for entities."""
-        return scan(text=text, engine=self.engine, entity_types=self.entity_types)
+        return scan(
+            text=text,
+            engine=self.engine,
+            entity_types=self.entity_types,
+            recognizers=self.recognizers,
+        )
 
     def filter(self, text: str) -> RedactResult:
         """Scan then enforce configured behavior."""
@@ -77,6 +84,7 @@ class Guardrail:
             session=self.session,
             hash_key=self.hash_key,
             policy=self.policy,
+            recognizers=self.recognizers,
         )
         if not result.entities:
             return result
@@ -150,6 +158,7 @@ def create_guardrail(
     session: TokenSession | None = None,
     hash_key: str | bytes | None = None,
     policy: PolicyInput = None,
+    recognizers: Optional[list[RecognizerInput]] = None,
 ) -> Guardrail:
     """
     Create a reusable guardrail object for wrapping LLM calls.
@@ -162,6 +171,7 @@ def create_guardrail(
         session=session,
         hash_key=hash_key,
         policy=policy,
+        recognizers=recognizers,
     )
 
 
