@@ -1,4 +1,6 @@
+import importlib
 import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -37,6 +39,42 @@ def test_spacy_pii_missing_model_requires_explicit_download(
 
     with pytest.raises(ImportError, match="Download it explicitly"):
         SpacyPIIAnnotator.create()
+
+
+def test_spacy_engine_missing_model_surfaces_download_guidance(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeSpacy:
+        @staticmethod
+        def load(_model_name):
+            raise OSError("model not installed")
+
+    monkeypatch.setitem(sys.modules, "spacy", FakeSpacy())
+
+    from datafog import engine
+    from datafog.exceptions import EngineNotAvailable
+
+    engine._get_spacy_annotator.cache_clear()
+    try:
+        with pytest.raises(EngineNotAvailable, match="Download it explicitly"):
+            engine.scan("Jane Doe", engine="spacy")
+    finally:
+        engine._get_spacy_annotator.cache_clear()
+
+
+def test_spacy_helper_does_not_require_rich(monkeypatch: pytest.MonkeyPatch) -> None:
+    module_name = "datafog.models.spacy_nlp"
+    monkeypatch.delitem(sys.modules, module_name, raising=False)
+
+    fake_spacy = types.ModuleType("spacy")
+    fake_spacy.load = lambda _model_name: None
+    fake_spacy.cli = types.SimpleNamespace(download=lambda _model_name: None)
+    fake_spacy.util = types.SimpleNamespace(get_installed_models=lambda: [])
+    monkeypatch.setitem(sys.modules, "spacy", fake_spacy)
+
+    module = importlib.import_module(module_name)
+
+    assert module.SpacyAnnotator is not None
 
 
 def test_spark_missing_dependency_requires_explicit_install(

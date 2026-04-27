@@ -9,7 +9,6 @@ from typing import List
 from uuid import uuid4
 
 import spacy
-from rich.progress import track
 
 from .annotator import AnnotationResult, AnnotatorRequest
 
@@ -53,7 +52,7 @@ class SpacyAnnotator:
         )
         doc = self.nlp(annotator_request.text)
         results = []
-        for ent in track(doc.ents, description="Processing entities"):
+        for ent in doc.ents:
             result = AnnotationResult(
                 start=ent.start_char,
                 end=ent.end_char,

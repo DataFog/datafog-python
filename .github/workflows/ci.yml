@@ -154,6 +154,47 @@ jobs:
           flags: ${{ matrix.install-profile }}-py${{ matrix.python-version }}
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  profile-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        install-profile:
+          - core
+          - cli
+          - nlp
+          - nlp-advanced
+          - ocr
+          - distributed
+          - web
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install dependencies (core)
+        if: matrix.install-profile == 'core'
+        run: |
+          pip install -e ".[test]"
+
+      - name: Install dependencies (profile)
+        if: matrix.install-profile != 'core'
+        run: |
+          pip install -e ".[test,${{ matrix.install-profile }}]"
+
+      - name: Run install profile smoke test
+        env:
+          DATAFOG_INSTALL_PROFILE: ${{ matrix.install-profile }}
+        run: |
+          pytest tests/test_install_profiles.py -q
+
   wheel-size:
     runs-on: ubuntu-latest
     steps:

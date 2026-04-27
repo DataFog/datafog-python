@@ -36,6 +36,7 @@ nlp_advanced_deps = [
 ]
 
 ocr_deps = [
+    "numpy>=1.24.0",
     "pytesseract>=0.3.0",
     "Pillow>=12.2.0",
     "sentencepiece>=0.2.0",
@@ -51,6 +52,7 @@ distributed_deps = [
 web_deps = [
     "fastapi>=0.100.0",
     "aiohttp>=3.13.4",
+    "certifi>=2025.4.26",
     "requests>=2.33.0",
 ]
 
