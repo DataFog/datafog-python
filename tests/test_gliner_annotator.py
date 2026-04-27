@@ -53,7 +53,8 @@ class TestGLiNERAnnotatorWithDependencies:
         assert "person" in annotator.entity_types
         assert "email" in annotator.entity_types
         mock_gliner_class.from_pretrained.assert_called_with(
-            "urchade/gliner_multi_pii-v1"
+            "urchade/gliner_multi_pii-v1",
+            local_files_only=True,
         )
 
     def test_gliner_annotator_custom_model(self, mock_gliner_module):
@@ -69,7 +70,10 @@ class TestGLiNERAnnotatorWithDependencies:
 
         assert annotator.model_name == "urchade/gliner_base"
         assert annotator.entity_types == custom_entities
-        mock_gliner_class.from_pretrained.assert_called_with("urchade/gliner_base")
+        mock_gliner_class.from_pretrained.assert_called_with(
+            "urchade/gliner_base",
+            local_files_only=True,
+        )
 
     def test_gliner_annotate_text(self, mock_gliner_module):
         """Test GLiNER text annotation."""
@@ -353,23 +357,29 @@ class TestTextServiceGLiNERIntegration:
 
             elif engine in ["spacy", "auto"]:
                 # Mock spaCy dependencies
-                with patch(
-                    "datafog.processing.text_processing.spacy_pii_annotator.SpacyPIIAnnotator"
-                ):
-                    from datafog.services.text_service import TextService
+                from datafog.services.text_service import TextService
 
-                    service = TextService(engine=engine)
-                    assert service.engine == engine
+                with patch.object(TextService, "_ensure_spacy_available"):
+                    with patch.object(
+                        TextService,
+                        "_create_spacy_annotator",
+                        return_value=Mock(),
+                    ):
+                        service = TextService(engine=engine)
+                        assert service.engine == engine
 
             elif engine in ["gliner", "smart"]:
                 # Mock GLiNER dependencies
-                with patch(
-                    "datafog.processing.text_processing.gliner_annotator.GLiNERAnnotator"
-                ):
-                    from datafog.services.text_service import TextService
+                from datafog.services.text_service import TextService
 
-                    service = TextService(engine=engine)
-                    assert service.engine == engine
+                with patch.object(TextService, "_ensure_gliner_available"):
+                    with patch.object(
+                        TextService,
+                        "_create_gliner_annotator",
+                        return_value=Mock(),
+                    ):
+                        service = TextService(engine=engine)
+                        assert service.engine == engine
 
     def test_text_service_invalid_engine(self):
         """Test that invalid engines raise AssertionError."""
@@ -445,7 +455,7 @@ class TestCLIGLiNERIntegration:
         # Capture stdout
         captured_output = io.StringIO()
 
-        with patch("datafog.models.spacy_nlp.SpacyAnnotator.download_model"):
+        with patch("datafog.client.SpacyAnnotator.download_model"):
             with patch("sys.stdout", captured_output):
                 with patch("typer.echo") as mock_echo:
                     try:

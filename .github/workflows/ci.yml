@@ -67,6 +67,7 @@ jobs:
         run: |
           pip install -e ".[test,cli,nlp,nlp-advanced]" -r requirements-test.txt
           python -m spacy download en_core_web_sm
+          datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
 
       - name: Run tests (core)
         if: matrix.install-profile == 'core'

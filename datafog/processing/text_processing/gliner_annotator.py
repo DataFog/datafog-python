@@ -79,14 +79,18 @@ class GLiNERAnnotator(BaseModel):
 
         try:
             # Load the GLiNER model
-            model = GLiNER.from_pretrained(model_name)
+            model = GLiNER.from_pretrained(model_name, local_files_only=True)
             logging.info(f"Successfully loaded GLiNER model: {model_name}")
 
             return cls(model=model, entity_types=entity_types, model_name=model_name)
 
         except Exception as e:
             logging.error(f"Failed to load GLiNER model {model_name}: {str(e)}")
-            raise
+            raise RuntimeError(
+                f"GLiNER model '{model_name}' is not available locally. "
+                "Download it explicitly with: "
+                f"datafog download-model {model_name} --engine gliner"
+            ) from e
 
     def annotate(self, text: str) -> Dict[str, List[str]]:
         """

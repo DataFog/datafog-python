@@ -24,39 +24,34 @@ PII_ANNOTATION_LABELS = [
     "WORK_OF_ART",
 ]
 MAXIMAL_STRING_SIZE = 1000000
+DEFAULT_SPACY_MODEL = "en_core_web_sm"
 
 
 class SpacyPIIAnnotator(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     nlp: Any
+    model_name: str = DEFAULT_SPACY_MODEL
 
     @classmethod
-    def create(cls) -> "SpacyPIIAnnotator":
-        import spacy
+    def create(cls, model_name: str = DEFAULT_SPACY_MODEL) -> "SpacyPIIAnnotator":
+        try:
+            import spacy
+        except ImportError as exc:
+            raise ImportError(
+                "SpaCy engine requires the nlp extra. "
+                "Install with: pip install datafog[nlp]"
+            ) from exc
 
         try:
-            nlp = spacy.load("en_core_web_lg")
-        except OSError:
-            import subprocess
-            import sys
+            nlp = spacy.load(model_name)
+        except OSError as exc:
+            raise ImportError(
+                f"spaCy model '{model_name}' is not installed. "
+                f"Download it explicitly with: datafog download-model {model_name} --engine spacy"
+            ) from exc
 
-            interpreter_location = sys.executable
-            subprocess.run(
-                [
-                    interpreter_location,
-                    "-m",
-                    "pip",
-                    "install",
-                    "--no-deps",
-                    "--no-cache-dir",
-                    "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl",
-                ],
-                check=True,
-            )
-            nlp = spacy.load("en_core_web_lg")
-
-        return cls(nlp=nlp)
+        return cls(nlp=nlp, model_name=model_name)
 
     def annotate(self, text: str) -> Dict[str, List[str]]:
         try:
