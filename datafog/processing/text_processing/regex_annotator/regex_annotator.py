@@ -198,7 +198,7 @@ class RegexAnnotator:
                 DE
                 [\s-]?
                 \d{9}
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -210,16 +210,16 @@ class RegexAnnotator:
                 \d{2}
                 (?:\s?\d{4}){4}
                 \s?\d{2}
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # German Tax ID (Steuer-ID) - 11 digits
             "DE_TAX_ID": re.compile(
                 r"""
-                (?<!\d)
+                (?<![A-Za-z0-9])
                 (?:\d{11}|\d{2}\s?\d{3}\s?\d{3}\s?\d{3})
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -235,20 +235,20 @@ class RegexAnnotator:
                 [A-Z]
                 \s?
                 \d{3}
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
             # German phone number - requires +49 or 0049 country code
             "DE_PHONE": re.compile(
                 r"""
-                (?<!\d)
+                (?<![A-Za-z0-9])
                 (?:\+49|0049)
                 [\s\-]?
                 (?:\(0\)\s?)?
                 \d{2,5}
                 (?:[\s\-]?\d{2,8}){1,3}
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -258,7 +258,7 @@ class RegexAnnotator:
                 (?<![A-Za-z0-9])
                 (?:PLZ|DE|D)
                 \d{5}
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -268,7 +268,7 @@ class RegexAnnotator:
                 (?<![A-Za-z0-9])
                 [A-Z]
                 \d{8}
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -278,7 +278,7 @@ class RegexAnnotator:
                 (?<![A-Za-z0-9])
                 AT
                 \d{7}
-                (?!\d)
+                (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
