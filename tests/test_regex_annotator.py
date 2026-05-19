@@ -41,8 +41,8 @@ def test_regex_annotator_initialization():
     annotator = RegexAnnotator()
     assert annotator is not None
     assert (
-        len(annotator.LABELS) == 15
-    )  # Base + German structured labels
+        len(annotator.LABELS) == 14
+    )  # Base + German structured labels (without DE_PHONE)
 
 
 def test_regex_annotator_create_method():

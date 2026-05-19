@@ -783,24 +783,6 @@
     ]
   },
   {
-    "id": "de-phone-country-code",
-    "input": "Hotline +49 30 12345678 erreichbar.",
-    "expected_entities": [
-      {
-        "type": "DE_PHONE",
-        "text": "+49 30 12345678",
-        "start": 8,
-        "end": 23
-      },
-      {
-        "type": "PHONE",
-        "text": "+49 30 12345678",
-        "start": 8,
-        "end": 23
-      }
-    ]
-  },
-  {
     "id": "de-postal-code-prefixed",
     "input": "PLZ10115 Berlin.",
     "expected_entities": [

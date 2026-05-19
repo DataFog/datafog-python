@@ -210,7 +210,7 @@ def get_supported_entities() -> List[str]:
     Example:
         >>> entities = get_supported_entities()
         >>> print(entities)
-        ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DE_VAT_ID', 'DE_IBAN', 'DE_TAX_ID', 'DE_SOCIAL_SECURITY_NUMBER', 'DE_PHONE', 'DE_POSTAL_CODE', 'DE_PASSPORT_NUMBER', 'DE_RESIDENCE_PERMIT_NUMBER', 'DATE', 'ZIP_CODE']
+        ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DE_VAT_ID', 'DE_IBAN', 'DE_TAX_ID', 'DE_SOCIAL_SECURITY_NUMBER', 'DE_POSTAL_CODE', 'DE_PASSPORT_NUMBER', 'DE_RESIDENCE_PERMIT_NUMBER', 'DATE', 'ZIP_CODE']
     """
     result = [
         "EMAIL",
@@ -222,7 +222,6 @@ def get_supported_entities() -> List[str]:
         "DE_IBAN",
         "DE_TAX_ID",
         "DE_SOCIAL_SECURITY_NUMBER",
-        "DE_PHONE",
         "DE_POSTAL_CODE",
         "DE_PASSPORT_NUMBER",
         "DE_RESIDENCE_PERMIT_NUMBER",

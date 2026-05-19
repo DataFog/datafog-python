@@ -27,16 +27,6 @@ from datafog.processing.text_processing.regex_annotator import RegexAnnotator
             "65 150804 A123",
         ),
         (
-            "DE_PHONE",
-            "Hotline +49 30 12345678 erreichbar.",
-            "+49 30 12345678",
-        ),
-        (
-            "DE_PHONE",
-            "Hotline 0049 30 12345678 erreichbar.",
-            "0049 30 12345678",
-        ),
-        (
             "DE_POSTAL_CODE",
             "PLZ10115 Berlin.",
             "PLZ10115",
@@ -77,7 +67,6 @@ def test_de_regex_positive_cases(label: str, text: str, expected: str) -> None:
             "DE_SOCIAL_SECURITY_NUMBER",
             "Rentenversicherungsnummer 65150804AA23 liegt vor.",
         ),
-        ("DE_PHONE", "Hotline 030 12345678 erreichbar."),
         ("DE_POSTAL_CODE", "10115 Berlin."),
         ("DE_PASSPORT_NUMBER", "Passnummer 12345678 wurde geprueft."),
         (

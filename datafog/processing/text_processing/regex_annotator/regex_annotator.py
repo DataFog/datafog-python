@@ -40,7 +40,6 @@ class RegexAnnotator:
         "DE_IBAN",
         "DE_TAX_ID",
         "DE_SOCIAL_SECURITY_NUMBER",
-        "DE_PHONE",
         "DE_POSTAL_CODE",
         "DE_PASSPORT_NUMBER",
         "DE_RESIDENCE_PERMIT_NUMBER",
@@ -235,19 +234,6 @@ class RegexAnnotator:
                 [A-Z]
                 \s?
                 \d{3}
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
-            # German phone number - requires +49 or 0049 country code
-            "DE_PHONE": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                (?:\+49|0049)
-                [\s\-]?
-                (?:\(0\)\s?)?
-                \d{2,5}
-                (?:[\s\-]?\d{2,8}){1,3}
                 (?![A-Za-z0-9])
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
