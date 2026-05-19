@@ -733,5 +733,107 @@
         "end": 5
       }
     ]
+  },
+  {
+    "id": "de-vat-id-simple",
+    "input": "VAT number: DE123456789 for invoices.",
+    "expected_entities": [
+      {
+        "type": "DE_VAT_ID",
+        "text": "DE123456789",
+        "start": 12,
+        "end": 23
+      }
+    ]
+  },
+  {
+    "id": "de-iban-formatted",
+    "input": "IBAN: DE89 3704 0044 0532 0130 00 for payments.",
+    "expected_entities": [
+      {
+        "type": "DE_IBAN",
+        "text": "DE89 3704 0044 0532 0130 00",
+        "start": 6,
+        "end": 33
+      }
+    ]
+  },
+  {
+    "id": "de-tax-id-simple",
+    "input": "Steuer-ID 12345678901 liegt vor.",
+    "expected_entities": [
+      {
+        "type": "DE_TAX_ID",
+        "text": "12345678901",
+        "start": 10,
+        "end": 21
+      }
+    ]
+  },
+  {
+    "id": "de-social-security-number",
+    "input": "Rentenversicherungsnummer 65150804A123 liegt vor.",
+    "expected_entities": [
+      {
+        "type": "DE_SOCIAL_SECURITY_NUMBER",
+        "text": "65150804A123",
+        "start": 26,
+        "end": 38
+      }
+    ]
+  },
+  {
+    "id": "de-phone-country-code",
+    "input": "Hotline +49 30 12345678 erreichbar.",
+    "expected_entities": [
+      {
+        "type": "DE_PHONE",
+        "text": "+49 30 12345678",
+        "start": 8,
+        "end": 23
+      },
+      {
+        "type": "PHONE",
+        "text": "+49 30 12345678",
+        "start": 8,
+        "end": 23
+      }
+    ]
+  },
+  {
+    "id": "de-postal-code-prefixed",
+    "input": "PLZ10115 Berlin.",
+    "expected_entities": [
+      {
+        "type": "DE_POSTAL_CODE",
+        "text": "PLZ10115",
+        "start": 0,
+        "end": 8
+      }
+    ]
+  },
+  {
+    "id": "de-passport-number",
+    "input": "Passnummer C12345678 wurde geprueft.",
+    "expected_entities": [
+      {
+        "type": "DE_PASSPORT_NUMBER",
+        "text": "C12345678",
+        "start": 11,
+        "end": 20
+      }
+    ]
+  },
+  {
+    "id": "de-residence-permit-number",
+    "input": "Aufenthaltstitel AT1234567 gueltig.",
+    "expected_entities": [
+      {
+        "type": "DE_RESIDENCE_PERMIT_NUMBER",
+        "text": "AT1234567",
+        "start": 17,
+        "end": 26
+      }
+    ]
   }
 ]

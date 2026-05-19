@@ -41,8 +41,8 @@ def test_regex_annotator_initialization():
     annotator = RegexAnnotator()
     assert annotator is not None
     assert (
-        len(annotator.LABELS) == 7
-    )  # EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP
+        len(annotator.LABELS) == 15
+    )  # Base + German structured labels
 
 
 def test_regex_annotator_create_method():
