@@ -7,6 +7,26 @@ from datafog.processing.text_processing.regex_annotator import RegexAnnotator
     "label,text,expected",
     [
         (
+            "DE_VAT_ID",
+            "USt-IdNr DE 123456789 ist gesetzt.",
+            "DE 123456789",
+        ),
+        (
+            "DE_VAT_ID",
+            "USt-IdNr DE-123456789 liegt vor.",
+            "DE-123456789",
+        ),
+        (
+            "DE_IBAN",
+            "IBAN DE44500105175407324931 ist gueltig.",
+            "DE44500105175407324931",
+        ),
+        (
+            "DE_IBAN",
+            "IBAN DE44 5001 0517 5407 3249 31 ist gueltig.",
+            "DE44 5001 0517 5407 3249 31",
+        ),
+        (
             "DE_TAX_ID",
             "Steuer-ID 12345678901 liegt vor.",
             "12345678901",
@@ -57,6 +77,10 @@ def test_de_regex_positive_cases(label: str, text: str, expected: str) -> None:
 @pytest.mark.parametrize(
     "label,text",
     [
+        ("DE_VAT_ID", "USt-IdNr DE12345678 liegt vor."),
+        ("DE_VAT_ID", "USt-IdNr DE1234567890 liegt vor."),
+        ("DE_IBAN", "IBAN DE4450010517540732493 ist gueltig."),
+        ("DE_IBAN", "IBAN DE44 5001 0517 5407 3249 3X ist gueltig."),
         ("DE_TAX_ID", "Steuer-ID 1234567890 liegt vor."),
         ("DE_TAX_ID", "Steuer-ID 123456789012 liegt vor."),
         (

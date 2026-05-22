@@ -40,9 +40,23 @@ def test_regex_annotator_initialization():
     """Test that the RegexAnnotator can be initialized."""
     annotator = RegexAnnotator()
     assert annotator is not None
-    assert (
-        len(annotator.LABELS) == 14
-    )  # Base + German structured labels (without DE_PHONE)
+    required_labels = {
+        "EMAIL",
+        "PHONE",
+        "SSN",
+        "CREDIT_CARD",
+        "IP_ADDRESS",
+        "DOB",
+        "ZIP",
+        "DE_VAT_ID",
+        "DE_IBAN",
+        "DE_TAX_ID",
+        "DE_SOCIAL_SECURITY_NUMBER",
+        "DE_POSTAL_CODE",
+        "DE_PASSPORT_NUMBER",
+        "DE_RESIDENCE_PERMIT_NUMBER",
+    }
+    assert required_labels.issubset(set(annotator.LABELS))
 
 
 def test_regex_annotator_create_method():
