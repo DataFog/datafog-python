@@ -9,6 +9,7 @@ from typing import Dict, List, Union
 
 from datafog.engine import scan, scan_and_redact
 from datafog.models.anonymizer import AnonymizerType
+from datafog.processing.text_processing.regex_annotator import RegexAnnotator
 
 # Engine types as constants
 REGEX_ENGINE = "regex"
@@ -16,7 +17,10 @@ SPACY_ENGINE = "spacy"
 AUTO_ENGINE = "auto"
 
 
-def detect_pii(text: str) -> Dict[str, List[str]]:
+def detect_pii(
+    text: str,
+    locales: List[str] | None = None,
+) -> Dict[str, List[str]]:
     """
     Simple PII detection using lightweight regex engine.
 
@@ -37,7 +41,7 @@ def detect_pii(text: str) -> Dict[str, List[str]]:
 
     try:
         # Use engine boundary for canonical scan behavior.
-        scan_result = scan(text=text, engine=REGEX_ENGINE)
+        scan_result = scan(text=text, engine=REGEX_ENGINE, locales=locales)
         pii_dict: Dict[str, List[str]] = {}
         for entity in scan_result.entities:
             if not entity.text.strip():
@@ -81,7 +85,11 @@ def detect_pii(text: str) -> Dict[str, List[str]]:
         ) from e
 
 
-def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> str:
+def anonymize_text(
+    text: str,
+    method: Union[str, AnonymizerType] = "redact",
+    locales: List[str] | None = None,
+) -> str:
     """
     Simple text anonymization using lightweight regex engine.
 
@@ -120,6 +128,7 @@ def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> 
             text=text,
             engine=REGEX_ENGINE,
             strategy=strategy_map[method],
+            locales=locales,
         )
 
         try:
@@ -155,7 +164,9 @@ def anonymize_text(text: str, method: Union[str, AnonymizerType] = "redact") -> 
 
 
 def scan_text(
-    text: str, return_entities: bool = False
+    text: str,
+    return_entities: bool = False,
+    locales: List[str] | None = None,
 ) -> Union[bool, Dict[str, List[str]]]:
     """
     Quick scan to check if text contains any PII.
@@ -180,7 +191,7 @@ def scan_text(
 
     _start = _time.monotonic()
 
-    entities = detect_pii(text)
+    entities = detect_pii(text, locales=locales)
 
     result = entities if return_entities else len(entities) > 0
 
@@ -200,7 +211,7 @@ def scan_text(
     return result
 
 
-def get_supported_entities() -> List[str]:
+def get_supported_entities(locales: List[str] | None = None) -> List[str]:
     """
     Get list of PII entity types supported by the regex engine.
 
@@ -210,17 +221,15 @@ def get_supported_entities() -> List[str]:
     Example:
         >>> entities = get_supported_entities()
         >>> print(entities)
-        ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DOB', 'ZIP']
+        ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DE_VAT_ID', 'DE_IBAN', 'DATE', 'ZIP_CODE']
     """
-    result = [
-        "EMAIL",
-        "PHONE",
-        "SSN",
-        "CREDIT_CARD",
-        "IP_ADDRESS",
-        "DATE",
-        "ZIP_CODE",
-    ]
+    annotator = RegexAnnotator(locales=locales)
+    legacy_map = {"DOB": "DATE", "ZIP": "ZIP_CODE"}
+    result = []
+    for label in annotator.active_labels:
+        canonical = legacy_map.get(label, label)
+        if canonical not in result:
+            result.append(canonical)
 
     try:
         from datafog.telemetry import track_function_call

@@ -19,6 +19,17 @@ for existing users, but they are optional:
 Spark/distributed workflows are Python SDK surfaces rather than first-path CLI
 commands. Install ``datafog[distributed]`` when using ``SparkService``.
 
+German locale support
+---------------------
+
+German VAT IDs and German IBANs are detected by the default regex path. Broader
+German identifiers are opt-in through ``--locale de`` on the core text commands:
+
+.. code-block:: bash
+
+   datafog scan-text "Steuer-ID 12345678901" --locale de
+   datafog redact-text "Passnummer C12345678" --locale de
+
 Definitions
 -----------
 .. automodule:: datafog.client

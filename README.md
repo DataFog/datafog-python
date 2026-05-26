@@ -76,6 +76,25 @@ print(datafog.sanitize("Card: 4111-1111-1111-1111", engine="regex"))
 # Card: [CREDIT_CARD_1]
 ```
 
+## German Structured PII
+
+German VAT IDs and German IBANs are detected by the default regex path because
+their country-code structure is specific enough for default-on screening.
+Broader German identifiers are available with explicit locale selection or
+explicit entity-type filtering.
+
+```python
+import datafog
+
+text = "Steuer-ID 12345678901 liegt vor."
+
+print(datafog.scan(text, engine="regex").entities)
+# []
+
+print(datafog.scan(text, engine="regex", locales=["de"]).entities)
+# [Entity(type='DE_TAX_ID', text='12345678901', ...)]
+```
+
 ### Guardrails
 
 ```python
@@ -98,7 +117,8 @@ Use the engine that matches your accuracy and dependency constraints:
 
 - `regex`:
   - Fastest and always available.
-  - Best for structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DATE`, `ZIP_CODE`.
+  - Best for structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DE_VAT_ID`, `DE_IBAN`, `DATE`, `ZIP_CODE`.
+  - Use `locales=["de"]` for broader German structured IDs such as `DE_TAX_ID`, `DE_POSTAL_CODE`, and passport or residence permit numbers.
 - `spacy`:
   - Requires `pip install datafog[nlp]`.
   - Useful for unstructured entities like person and organization names.
@@ -169,6 +189,9 @@ datafog replace-text "john@example.com"
 
 # Hash detected entities
 datafog hash-text "john@example.com"
+
+# Enable broader German regex identifiers
+datafog redact-text "Steuer-ID 12345678901" --locale de
 ```
 
 ## Telemetry

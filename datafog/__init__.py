@@ -152,6 +152,7 @@ def scan(
     text: str,
     engine: str = "regex",
     entity_types: list[str] | None = None,
+    locales: list[str] | None = None,
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
@@ -159,7 +160,7 @@ def scan(
     Defaults to the lightweight regex engine so the core install works without
     optional dependency fallback warnings.
     """
-    return _scan(text=text, engine=engine, entity_types=entity_types)
+    return _scan(text=text, engine=engine, entity_types=entity_types, locales=locales)
 
 
 def redact(
@@ -169,6 +170,7 @@ def redact(
     entity_types: list[str] | None = None,
     strategy: str = "token",
     preset: str | None = None,
+    locales: list[str] | None = None,
 ) -> RedactResult:
     """
     v5-preview redaction entrypoint.
@@ -191,6 +193,7 @@ def redact(
         engine=engine,
         entity_types=entity_types,
         strategy=strategy,
+        locales=locales,
     )
 
 
@@ -199,6 +202,7 @@ def protect(
     engine: str = "regex",
     strategy: str = "token",
     on_detect: str = "redact",
+    locales: list[str] | None = None,
 ):
     """
     v5-preview guardrail factory.
@@ -208,6 +212,7 @@ def protect(
         engine=engine,
         strategy=strategy,
         on_detect=on_detect,
+        locales=locales,
     )
 
 

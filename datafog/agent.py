@@ -27,11 +27,7 @@ class GuardrailWatch:
 
     def scan(self, text: str) -> ScanResult:
         """Scan text and increment detection counters."""
-        result = scan(
-            text=text,
-            engine=self.guardrail.engine,
-            entity_types=self.guardrail.entity_types,
-        )
+        result = self.guardrail.scan(text)
         if result.entities:
             self.detections += len(result.entities)
         return result
@@ -51,6 +47,7 @@ class Guardrail:
     """Reusable text guardrail for wrapping LLM prompts and outputs."""
 
     entity_types: Optional[list[str]] = None
+    locales: Optional[list[str]] = None
     engine: str = "regex"
     strategy: str = "token"
     on_detect: str = "redact"
@@ -61,7 +58,12 @@ class Guardrail:
 
     def scan(self, text: str) -> ScanResult:
         """Scan a text value for entities."""
-        return scan(text=text, engine=self.engine, entity_types=self.entity_types)
+        return scan(
+            text=text,
+            engine=self.engine,
+            entity_types=self.entity_types,
+            locales=self.locales,
+        )
 
     def filter(self, text: str) -> RedactResult:
         """Scan then enforce configured behavior."""
@@ -70,6 +72,7 @@ class Guardrail:
             engine=self.engine,
             entity_types=self.entity_types,
             strategy=self.strategy,
+            locales=self.locales,
         )
         if not result.entities:
             return result
@@ -137,6 +140,7 @@ def filter_output(output: str, engine: str = "regex", **kwargs: Any) -> RedactRe
 
 def create_guardrail(
     entity_types: Optional[list[str]] = None,
+    locales: Optional[list[str]] = None,
     engine: str = "regex",
     strategy: str = "token",
     on_detect: str = "redact",
@@ -146,6 +150,7 @@ def create_guardrail(
     """
     return Guardrail(
         entity_types=entity_types,
+        locales=locales,
         engine=engine,
         strategy=strategy,
         on_detect=on_detect,

@@ -43,6 +43,7 @@ class TextService:
         text_chunk_length: int = 1000,
         engine: str = "regex",
         gliner_model: str = "urchade/gliner_multi_pii-v1",
+        locales: List[str] | None = None,
     ):
         """
         Initialize the TextService with specified chunk length and annotation engine.
@@ -56,6 +57,8 @@ class TextService:
                 - "auto": Try RegexAnnotator first and fall back to SpacyPIIAnnotator if no entities found
                 - "smart": Try RegexAnnotator → GLiNER → SpaCy cascade (requires nlp-advanced extra)
             gliner_model: GLiNER model name to use when engine is "gliner" or "smart"
+            locales: Optional locale tags for regex detection. Use ["de"] to enable
+                broader German structured identifiers.
 
         Raises:
             AssertionError: If an invalid engine type is provided
@@ -65,6 +68,7 @@ class TextService:
         self.engine = engine
         self.text_chunk_length = text_chunk_length
         self.gliner_model = gliner_model
+        self.locales = locales
 
         # Lazy initialization - annotators created only when needed
         self._regex_annotator = None
@@ -102,7 +106,7 @@ class TextService:
                 RegexAnnotator,
             )
 
-            self._regex_annotator = RegexAnnotator()
+            self._regex_annotator = RegexAnnotator(locales=self.locales)
         return self._regex_annotator
 
     @property

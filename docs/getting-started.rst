@@ -80,6 +80,34 @@ Agent-oriented helpers use the same lightweight text path:
    safe_output = datafog.filter_output(output, engine="regex")
    print(safe_output.redacted_text)
 
+German Structured PII
+=====================
+
+The core regex engine includes German VAT IDs and German IBANs by default
+because they carry strong country-code structure:
+
+.. code-block:: python
+
+   import datafog
+
+   result = datafog.scan("USt-IdNr DE 123456789", engine="regex")
+   print([(entity.type, entity.text) for entity in result.entities])
+
+Broader German identifiers such as ``DE_TAX_ID``,
+``DE_SOCIAL_SECURITY_NUMBER``, ``DE_POSTAL_CODE``,
+``DE_PASSPORT_NUMBER``, and ``DE_RESIDENCE_PERMIT_NUMBER`` require explicit
+German locale selection or explicit ``entity_types`` filtering. This keeps
+ordinary ticket, SKU, order, and invoice IDs from becoming default-on false
+positives.
+
+.. code-block:: python
+
+   text = "Steuer-ID 12345678901 liegt vor."
+
+   print(datafog.scan(text, engine="regex").entities)
+   print(datafog.scan(text, engine="regex", locales=["de"]).entities)
+   print(datafog.scan(text, engine="regex", entity_types=["DE_TAX_ID"]).entities)
+
 CLI Usage
 =========
 
@@ -91,6 +119,7 @@ The CLI core path is text-first:
    datafog redact-text "Contact jane@example.com"
    datafog replace-text "Contact jane@example.com"
    datafog hash-text "Contact jane@example.com"
+   datafog redact-text "Steuer-ID 12345678901" --locale de
 
 Image commands are optional. Install ``datafog[ocr]`` for local OCR and
 ``datafog[web,ocr]`` when the CLI needs to download image inputs.

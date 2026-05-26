@@ -22,6 +22,8 @@ STRUCTURED_TYPES = {
     "SSN",
     "CREDIT_CARD",
     "IP_ADDRESS",
+    "DE_VAT_ID",
+    "DE_IBAN",
     "DATE",
     "ZIP_CODE",
 }
