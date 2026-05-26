@@ -66,6 +66,20 @@ def test_regex_annotator_create_method():
     assert isinstance(annotator, RegexAnnotator)
 
 
+def test_de_labels_inactive_without_locale():
+    """German DE_ labels should be inactive unless locales include 'de'."""
+    annotator = RegexAnnotator()
+    result = annotator.annotate("Passnummer C12345678 wurde geprueft.")
+    assert not result["DE_PASSPORT_NUMBER"]
+
+
+def test_de_labels_active_with_locale():
+    """German DE_ labels should activate when locales include 'de'."""
+    annotator = RegexAnnotator(locales=["de"])
+    result = annotator.annotate("Passnummer C12345678 wurde geprueft.")
+    assert "C12345678" in result["DE_PASSPORT_NUMBER"]
+
+
 def test_empty_text_annotation():
     """Test that annotating empty text returns empty results."""
     annotator = RegexAnnotator()

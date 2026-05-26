@@ -138,8 +138,8 @@ def _entities_from_dict(
     return entities
 
 
-def _regex_entities(text: str) -> list[Entity]:
-    annotator = RegexAnnotator()
+def _regex_entities(text: str, locales: Optional[list[str]] = None) -> list[Entity]:
+    annotator = RegexAnnotator(locales=locales)
     _, structured = annotator.annotate_with_spans(text)
     entities: list[Entity] = []
     for span in structured.spans:
@@ -242,6 +242,7 @@ def scan(
     text: str,
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
+    locales: Optional[list[str]] = None,
 ) -> ScanResult:
     """Scan text for PII entities."""
     if not isinstance(text, str):
@@ -250,7 +251,7 @@ def scan(
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
 
-    regex_entities = _regex_entities(text)
+    regex_entities = _regex_entities(text, locales=locales)
 
     if engine == "regex":
         filtered = _filter_entity_types(regex_entities, entity_types)
@@ -384,8 +385,11 @@ def scan_and_redact(
     text: str,
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
+    locales: Optional[list[str]] = None,
     strategy: str = "token",
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""
-    scan_result = scan(text=text, engine=engine, entity_types=entity_types)
+    scan_result = scan(
+        text=text, engine=engine, entity_types=entity_types, locales=locales
+    )
     return redact(text=text, entities=scan_result.entities, strategy=strategy)

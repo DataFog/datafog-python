@@ -4,7 +4,7 @@ Provides synchronous and asynchronous methods for annotating text with personall
 """
 
 import asyncio
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from datafog.processing.text_processing.regex_annotator.regex_annotator import (
     RegexAnnotator,
@@ -22,7 +22,12 @@ class TextService:
     and combining annotations from multiple chunks.
     """
 
-    def __init__(self, text_chunk_length: int = 1000, engine: str = "auto"):
+    def __init__(
+        self,
+        text_chunk_length: int = 1000,
+        engine: str = "auto",
+        locales: Optional[List[str]] = None,
+    ):
         """
         Initialize the TextService with specified chunk length and annotation engine.
 
@@ -32,6 +37,7 @@ class TextService:
                 - "regex": Use only the RegexAnnotator for pattern-based entity detection
                 - "spacy": Use only the SpacyPIIAnnotator for NLP-based entity detection
                 - "auto": (Default) Try RegexAnnotator first and fall back to SpacyPIIAnnotator if no entities are found
+            locales: Optional list of locale codes that enable locale-specific regex labels
 
         Raises:
             AssertionError: If an invalid engine type is provided
@@ -39,8 +45,9 @@ class TextService:
         assert engine in {"regex", "spacy", "auto"}, "Invalid engine"
         self.engine = engine
         self.spacy_annotator = SpacyPIIAnnotator.create()
-        self.regex_annotator = RegexAnnotator()
+        self.regex_annotator = RegexAnnotator(locales=locales)
         self.text_chunk_length = text_chunk_length
+        self.locales = locales
 
     def _chunk_text(self, text: str) -> List[str]:
         """Split the text into chunks of specified length."""

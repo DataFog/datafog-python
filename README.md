@@ -95,6 +95,24 @@ Use the engine that matches your accuracy and dependency constraints:
   - Cascades regex with optional NER engines.
   - If optional deps are missing, it degrades gracefully and warns.
 
+### Locale-specific regex patterns
+
+German regex patterns (DE_*) are locale-specific and disabled by default to avoid
+false positives on non-German text. Enable them explicitly via `locales`:
+
+```python
+import datafog
+
+result = datafog.scan(
+    "Steuer-ID 12345678903",
+    engine="regex",
+    locales=["de"],
+)
+print(result.entities)
+```
+
+German DE_* patterns also include checksum/context validation to reduce noise.
+
 ## Backward-Compatible APIs
 
 The existing public API remains available.

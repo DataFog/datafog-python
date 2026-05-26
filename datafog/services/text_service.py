@@ -7,7 +7,7 @@ and batch processing. SpaCy integration available as optional extra.
 
 import asyncio
 import warnings
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
     from datafog.processing.text_processing.regex_annotator.regex_annotator import Span
@@ -43,6 +43,7 @@ class TextService:
         text_chunk_length: int = 1000,
         engine: str = "regex",
         gliner_model: str = "urchade/gliner_multi_pii-v1",
+        locales: Optional[List[str]] = None,
     ):
         """
         Initialize the TextService with specified chunk length and annotation engine.
@@ -56,6 +57,7 @@ class TextService:
                 - "auto": Try RegexAnnotator first and fall back to SpacyPIIAnnotator if no entities found
                 - "smart": Try RegexAnnotator → GLiNER → SpaCy cascade (requires nlp-advanced extra)
             gliner_model: GLiNER model name to use when engine is "gliner" or "smart"
+            locales: Optional list of locale codes that enable locale-specific regex labels
 
         Raises:
             AssertionError: If an invalid engine type is provided
@@ -65,6 +67,7 @@ class TextService:
         self.engine = engine
         self.text_chunk_length = text_chunk_length
         self.gliner_model = gliner_model
+        self.locales = locales
 
         # Lazy initialization - annotators created only when needed
         self._regex_annotator = None
@@ -90,6 +93,7 @@ class TextService:
                 engine=engine,
                 text_chunk_length=text_chunk_length,
                 gliner_model=gliner_model if engine in ("gliner", "smart") else None,
+                locales=locales,
             )
         except Exception:
             pass
@@ -102,7 +106,7 @@ class TextService:
                 RegexAnnotator,
             )
 
-            self._regex_annotator = RegexAnnotator()
+            self._regex_annotator = RegexAnnotator(locales=self.locales)
         return self._regex_annotator
 
     @property

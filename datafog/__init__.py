@@ -163,6 +163,7 @@ def scan(
     text: str,
     engine: str = "regex",
     entity_types: list[str] | None = None,
+    locales: list[str] | None = None,
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
@@ -170,7 +171,9 @@ def scan(
     Defaults to the lightweight regex engine so the core install works without
     optional dependency fallback warnings.
     """
-    return _scan(text=text, engine=engine, entity_types=entity_types)
+    return _scan(
+        text=text, engine=engine, entity_types=entity_types, locales=locales
+    )
 
 
 def redact(
@@ -178,6 +181,7 @@ def redact(
     entities: list[Entity] | None = None,
     engine: str = "regex",
     entity_types: list[str] | None = None,
+    locales: list[str] | None = None,
     strategy: str = "token",
     preset: str | None = None,
 ) -> RedactResult:
@@ -201,6 +205,7 @@ def redact(
         text=text,
         engine=engine,
         entity_types=entity_types,
+        locales=locales,
         strategy=strategy,
     )
 
@@ -223,7 +228,7 @@ def protect(
 
 
 # Simple API for core functionality (backward compatibility)
-def detect(text: str) -> list:
+def detect(text: str, locales: list[str] | None = None) -> list:
     """
     Detect PII in text using regex patterns.
 
@@ -240,16 +245,16 @@ def detect(text: str) -> list:
     """
     _warn_v5_replacement("detect", "datafog.scan()")
 
-    return _detect_impl(text)
+    return _detect_impl(text, locales=locales)
 
 
-def _detect_impl(text: str) -> list:
+def _detect_impl(text: str, locales: list[str] | None = None) -> list:
     import time as _time
 
     _start = _time.monotonic()
 
     _lazy_import_regex_annotator()
-    annotator = RegexAnnotator()
+    annotator = RegexAnnotator(locales=locales)
     # Use the structured output to get proper positions
     _, result = annotator.annotate_with_spans(text)
 
@@ -290,7 +295,12 @@ def _detect_impl(text: str) -> list:
     return entities
 
 
-def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
+def process(
+    text: str,
+    anonymize: bool = False,
+    method: str = "redact",
+    locales: list[str] | None = None,
+) -> dict:
     """
     Process text to detect and optionally anonymize PII.
 
@@ -317,7 +327,7 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
 
     _start = _time.monotonic()
 
-    findings = _detect_impl(text)
+    findings = _detect_impl(text, locales=locales)
 
     result = {"original": text, "findings": findings}
 

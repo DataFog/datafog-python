@@ -3,6 +3,32 @@ import pytest
 from datafog.processing.text_processing.regex_annotator import RegexAnnotator
 
 
+def _de_tax_id_check_digit(digits10: str) -> int:
+    product = 10
+    for ch in digits10:
+        sum_ = (int(ch) + product) % 10
+        if sum_ == 0:
+            sum_ = 10
+        product = (sum_ * 2) % 11
+    return (11 - product) % 10
+
+
+def _make_de_tax_id(digits10: str) -> str:
+    return digits10 + str(_de_tax_id_check_digit(digits10))
+
+
+def _format_de_tax_id_spaced(digits11: str) -> str:
+    return f"{digits11[:2]} {digits11[2:5]} {digits11[5:8]} {digits11[8:]}"
+
+
+VALID_DE_TAX_ID = _make_de_tax_id("1234567890")
+VALID_DE_TAX_ID_SPACED = _format_de_tax_id_spaced(VALID_DE_TAX_ID)
+INVALID_DE_TAX_ID = (
+    VALID_DE_TAX_ID[:-1]
+    + str((int(VALID_DE_TAX_ID[-1]) + 1) % 10)
+)
+
+
 @pytest.mark.parametrize(
     "label,text,expected",
     [
@@ -28,13 +54,13 @@ from datafog.processing.text_processing.regex_annotator import RegexAnnotator
         ),
         (
             "DE_TAX_ID",
-            "Steuer-ID 12345678901 liegt vor.",
-            "12345678901",
+            f"Steuer-ID {VALID_DE_TAX_ID} liegt vor.",
+            VALID_DE_TAX_ID,
         ),
         (
             "DE_TAX_ID",
-            "Steuer-ID 12 345 678 901 ist gesetzt.",
-            "12 345 678 901",
+            f"Steuer-ID {VALID_DE_TAX_ID_SPACED} ist gesetzt.",
+            VALID_DE_TAX_ID_SPACED,
         ),
         (
             "DE_SOCIAL_SECURITY_NUMBER",
@@ -53,8 +79,8 @@ from datafog.processing.text_processing.regex_annotator import RegexAnnotator
         ),
         (
             "DE_POSTAL_CODE",
-            "DE10115 Berlin.",
-            "DE10115",
+            "PLZ 10115 Berlin.",
+            "PLZ 10115",
         ),
         (
             "DE_PASSPORT_NUMBER",
@@ -69,7 +95,7 @@ from datafog.processing.text_processing.regex_annotator import RegexAnnotator
     ],
 )
 def test_de_regex_positive_cases(label: str, text: str, expected: str) -> None:
-    annotator = RegexAnnotator()
+    annotator = RegexAnnotator(locales=["de"])
     result = annotator.annotate(text)
     assert expected in result[label]
 
@@ -83,6 +109,9 @@ def test_de_regex_positive_cases(label: str, text: str, expected: str) -> None:
         ("DE_IBAN", "IBAN DE44 5001 0517 5407 3249 3X ist gueltig."),
         ("DE_TAX_ID", "Steuer-ID 1234567890 liegt vor."),
         ("DE_TAX_ID", "Steuer-ID 123456789012 liegt vor."),
+        ("DE_TAX_ID", f"Steuer-ID {INVALID_DE_TAX_ID} liegt vor."),
+        ("DE_TAX_ID", "Steuer-ID 12345678901 liegt vor."),
+        ("DE_TAX_ID", "Steuer-ID 01234567890 liegt vor."),
         (
             "DE_SOCIAL_SECURITY_NUMBER",
             "Rentenversicherungsnummer 65150804123 liegt vor.",
@@ -92,14 +121,23 @@ def test_de_regex_positive_cases(label: str, text: str, expected: str) -> None:
             "Rentenversicherungsnummer 65150804AA23 liegt vor.",
         ),
         ("DE_POSTAL_CODE", "10115 Berlin."),
+        ("DE_POSTAL_CODE", "D12345"),
+        ("DE_POSTAL_CODE", "DE12345"),
+        ("DE_POSTAL_CODE", "DE10115 Berlin."),
+        ("DE_POSTAL_CODE", "D10115 Berlin."),
         ("DE_PASSPORT_NUMBER", "Passnummer 12345678 wurde geprueft."),
+        ("DE_PASSPORT_NUMBER", "Bestellung A12345678 liegt vor."),
         (
             "DE_RESIDENCE_PERMIT_NUMBER",
             "Aufenthaltstitel AT12345678 gueltig.",
         ),
+        (
+            "DE_RESIDENCE_PERMIT_NUMBER",
+            "AT1234567 ohne Kontext.",
+        ),
     ],
 )
 def test_de_regex_negative_cases(label: str, text: str) -> None:
-    annotator = RegexAnnotator()
+    annotator = RegexAnnotator(locales=["de"])
     result = annotator.annotate(text)
     assert not result[label]

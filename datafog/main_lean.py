@@ -10,7 +10,7 @@ These classes provide the core PII detection functionality without heavy depende
 
 import json
 import logging
-from typing import List
+from typing import List, Optional
 
 from .config import OperationType
 from .models.anonymizer import Anonymizer, AnonymizerType, HashType
@@ -38,8 +38,10 @@ class DataFog:
         operations: List[OperationType] = [OperationType.SCAN],
         hash_type: HashType = HashType.SHA256,
         anonymizer_type: AnonymizerType = AnonymizerType.REPLACE,
+        locales: Optional[List[str]] = None,
     ):
-        self.regex_annotator = RegexAnnotator()
+        self.regex_annotator = RegexAnnotator(locales=locales)
+        self.locales = locales
         self.operations: List[OperationType] = operations
         self.anonymizer = Anonymizer(
             hash_type=hash_type, anonymizer_type=anonymizer_type
@@ -161,8 +163,9 @@ class TextPIIAnnotator:
         regex_annotator: RegexAnnotator instance for text annotation.
     """
 
-    def __init__(self):
-        self.regex_annotator = RegexAnnotator()
+    def __init__(self, locales: Optional[List[str]] = None):
+        self.regex_annotator = RegexAnnotator(locales=locales)
+        self.locales = locales
 
     def run(self, text, output_path=None):
         """

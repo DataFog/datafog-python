@@ -6,7 +6,7 @@ and batch processing. SpaCy integration available as optional extra.
 """
 
 import asyncio
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from datafog.processing.text_processing.regex_annotator.regex_annotator import (
     RegexAnnotator,
@@ -26,7 +26,12 @@ class TextService:
     pip install datafog[nlp]
     """
 
-    def __init__(self, text_chunk_length: int = 1000, engine: str = "regex"):
+    def __init__(
+        self,
+        text_chunk_length: int = 1000,
+        engine: str = "regex",
+        locales: Optional[List[str]] = None,
+    ):
         """
         Initialize the TextService with specified chunk length and annotation engine.
 
@@ -36,6 +41,7 @@ class TextService:
                 - "regex": (Default) Use RegexAnnotator for fast pattern-based entity detection
                 - "spacy": Use SpacyPIIAnnotator for NLP-based entity detection (requires nlp extra)
                 - "auto": Try RegexAnnotator first and fall back to SpacyPIIAnnotator if no entities found
+            locales: Optional list of locale codes that enable locale-specific regex labels
 
         Raises:
             AssertionError: If an invalid engine type is provided
@@ -43,8 +49,9 @@ class TextService:
         """
         assert engine in {"regex", "spacy", "auto"}, "Invalid engine"
         self.engine = engine
-        self.regex_annotator = RegexAnnotator()
+        self.regex_annotator = RegexAnnotator(locales=locales)
         self.text_chunk_length = text_chunk_length
+        self.locales = locales
 
         # Only initialize spacy if needed and available
         self.spacy_annotator = None

@@ -79,7 +79,7 @@ SparkService = _optional_import(
 
 
 # Simple API for core functionality
-def detect(text: str) -> list:
+def detect(text: str, locales: list[str] | None = None) -> list:
     """
     Detect PII in text using regex patterns.
 
@@ -94,7 +94,7 @@ def detect(text: str) -> list:
         >>> detect("Contact john@example.com")
         [{'type': 'EMAIL', 'value': 'john@example.com', 'start': 8, 'end': 24}]
     """
-    annotator = RegexAnnotator()
+    annotator = RegexAnnotator(locales=locales)
     result = annotator.annotate(text)
 
     # Convert to simple format
@@ -113,7 +113,12 @@ def detect(text: str) -> list:
     return entities
 
 
-def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
+def process(
+    text: str,
+    anonymize: bool = False,
+    method: str = "redact",
+    locales: list[str] | None = None,
+) -> dict:
     """
     Process text to detect and optionally anonymize PII.
 
@@ -134,7 +139,7 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
             'findings': [{'type': 'EMAIL', 'value': 'john@example.com', ...}]
         }
     """
-    findings = detect(text)
+    findings = detect(text, locales=locales)
 
     result = {"original": text, "findings": findings}
 
