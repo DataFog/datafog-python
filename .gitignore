@@ -24,6 +24,7 @@ error_log.txt
 # Environment
 .env
 .venv
+.venv*/
 venv/
 env/
 examples/venv/
@@ -58,14 +59,14 @@ docs/*
 !docs/conf.py
 !docs/Makefile
 !docs/make.bat
+!docs/agents/
+!docs/agents/**
 !docs/audit/
 !docs/audit/**
 
 # Keep all directories but ignore their contents
 */**/__pycache__/
 
-# Keep all files but ignore their contents
-Claude.md
 notes/benchmarking_notes.md
 Roadmap.md
 notes/*

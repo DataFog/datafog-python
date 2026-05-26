@@ -3,13 +3,18 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import re
+from pathlib import Path
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "DataFog"
 copyright = "2024, DataFog Inc."
 author = "Sid Mohan"
-release = "v4.1.1"
+_version_file = Path(__file__).resolve().parents[1] / "datafog" / "__about__.py"
+_version_match = re.search(r'^__version__ = "([^"]+)"', _version_file.read_text(), re.M)
+release = f"v{_version_match.group(1)}" if _version_match else "v0.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

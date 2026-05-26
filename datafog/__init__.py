@@ -61,24 +61,6 @@ def _lazy_import_regex_annotator():
         globals()["RegexAnnotator"] = RegexAnnotator
 
 
-# Optional imports with graceful fallback
-try:
-    from .client import app
-except ImportError:
-    app = None
-
-try:
-    from .main import DataFog, TextPIIAnnotator
-except ImportError:
-    DataFog = None
-    TextPIIAnnotator = None
-
-try:
-    from .services.text_service import TextService
-except ImportError:
-    TextService = None
-
-
 def __getattr__(name: str):
     """Handle lazy imports for better lightweight performance."""
     # Lazy import core models when first accessed
@@ -98,46 +80,53 @@ def __getattr__(name: str):
         _lazy_import_regex_annotator()
         return globals()[name]
 
+    elif name in _LAZY_EXPORTS:
+        module_path, attr_name, extra_name = _LAZY_EXPORTS[name]
+        try:
+            module = __import__(module_path, fromlist=[attr_name])
+            value = getattr(module, attr_name)
+        except ImportError:
+            if extra_name is None:
+                value = None
+            else:
+
+                def _missing_dependency(*args, **kwargs):
+                    raise ImportError(
+                        f"{name} requires additional dependencies. "
+                        f"Install with: pip install datafog[{extra_name}]"
+                    )
+
+                value = _missing_dependency
+
+        globals()[name] = value
+        return value
+
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-# Optional heavy features - only import if dependencies available
-def _optional_import(name, module_path, extra_name):
-    """Helper to import optional modules with helpful error messages."""
-    try:
-        module = __import__(module_path, fromlist=[name])
-        return getattr(module, name)
-    except ImportError:
-
-        def _missing_dependency(*args, **kwargs):
-            raise ImportError(
-                f"{name} requires additional dependencies. "
-                f"Install with: pip install datafog[{extra_name}]"
-            )
-
-        return _missing_dependency
-
-
-# OCR/Image processing - requires 'ocr' extra
-DonutProcessor = _optional_import(
-    "DonutProcessor", "datafog.processing.image_processing.donut_processor", "ocr"
-)
-PytesseractProcessor = _optional_import(
-    "PytesseractProcessor",
-    "datafog.processing.image_processing.pytesseract_processor",
-    "ocr",
-)
-ImageService = _optional_import("ImageService", "datafog.services.image_service", "ocr")
-
-# NLP processing - requires 'nlp' extra
-SpacyPIIAnnotator = _optional_import(
-    "SpacyPIIAnnotator", "datafog.processing.text_processing.spacy_pii_annotator", "nlp"
-)
-
-# Distributed processing - requires 'distributed' extra
-SparkService = _optional_import(
-    "SparkService", "datafog.services.spark_service", "distributed"
-)
+_LAZY_EXPORTS = {
+    "app": ("datafog.client", "app", None),
+    "DataFog": ("datafog.main", "DataFog", None),
+    "TextPIIAnnotator": ("datafog.main", "TextPIIAnnotator", None),
+    "TextService": ("datafog.services.text_service", "TextService", None),
+    "DonutProcessor": (
+        "datafog.processing.image_processing.donut_processor",
+        "DonutProcessor",
+        "ocr",
+    ),
+    "PytesseractProcessor": (
+        "datafog.processing.image_processing.pytesseract_processor",
+        "PytesseractProcessor",
+        "ocr",
+    ),
+    "ImageService": ("datafog.services.image_service", "ImageService", "ocr"),
+    "SpacyPIIAnnotator": (
+        "datafog.processing.text_processing.spacy_pii_annotator",
+        "SpacyPIIAnnotator",
+        "nlp",
+    ),
+    "SparkService": ("datafog.services.spark_service", "SparkService", "distributed"),
+}
 
 
 _REDACT_PRESETS = {
