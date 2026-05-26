@@ -9,6 +9,14 @@ It provides:
 - A simple agent-oriented API for LLM applications
 - Backward-compatible `DataFog` and `TextService` classes
 
+## 4.5 Focus
+
+DataFog 4.5 is focused on lightweight text PII screening: a small core install,
+fast regex-based scan/redact helpers, explicit optional extras, and a clearer
+path toward future middleware use cases. Dedicated Sentry, OpenTelemetry,
+logging-framework, and cloud DLP adapters are future-facing work and are not
+part of the 4.5 release.
+
 ## Installation
 
 ```bash
