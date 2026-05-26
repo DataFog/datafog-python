@@ -51,7 +51,7 @@ class Guardrail:
     """Reusable text guardrail for wrapping LLM prompts and outputs."""
 
     entity_types: Optional[list[str]] = None
-    engine: str = "smart"
+    engine: str = "regex"
     strategy: str = "token"
     on_detect: str = "redact"
 
@@ -111,33 +111,33 @@ class Guardrail:
         yield watcher
 
 
-def sanitize(text: str, **kwargs: Any) -> str:
+def sanitize(text: str, engine: str = "regex", **kwargs: Any) -> str:
     """
     One-liner PII removal.
 
     Returns the redacted text only.
     """
-    result = scan_and_redact(text=text, **kwargs)
+    result = scan_and_redact(text=text, engine=engine, **kwargs)
     return result.redacted_text
 
 
-def scan_prompt(prompt: str, **kwargs: Any) -> ScanResult:
+def scan_prompt(prompt: str, engine: str = "regex", **kwargs: Any) -> ScanResult:
     """
     Scan an LLM prompt for PII without modifying the input text.
     """
-    return scan(prompt, **kwargs)
+    return scan(prompt, engine=engine, **kwargs)
 
 
-def filter_output(output: str, **kwargs: Any) -> RedactResult:
+def filter_output(output: str, engine: str = "regex", **kwargs: Any) -> RedactResult:
     """
     Scan and redact PII from model output before returning to users.
     """
-    return scan_and_redact(output, **kwargs)
+    return scan_and_redact(output, engine=engine, **kwargs)
 
 
 def create_guardrail(
     entity_types: Optional[list[str]] = None,
-    engine: str = "smart",
+    engine: str = "regex",
     strategy: str = "token",
     on_detect: str = "redact",
 ) -> Guardrail:
