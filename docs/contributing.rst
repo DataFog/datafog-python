@@ -165,6 +165,14 @@ or install behavior:
    DATAFOG_INSTALL_PROFILE=distributed python -m pytest tests/test_install_profiles.py -q
    DATAFOG_INSTALL_PROFILE=web python -m pytest tests/test_install_profiles.py -q
 
+Live Modules
+============
+
+Use :doc:`live-module-map` before changing core package structure. It lists the
+live 4.5 modules for each concept and the historical ``*_lean`` and
+``*_original`` files that are kept only as non-live compatibility/audit
+artifacts.
+
 4.5 Release Flow
 ================
 

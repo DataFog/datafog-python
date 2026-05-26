@@ -1,4 +1,10 @@
-"""
+"""Historical shadow package export module.
+
+This file is not the live DataFog 4.5 package export surface. Use
+``datafog/__init__.py`` for current package exports, lazy optional imports,
+top-level helpers, and compatibility shims. This snapshot remains importable
+only as historical reference until legacy cleanup can remove it safely.
+
 DataFog: Lightning-fast PII detection and anonymization library.
 
 Core package provides regex-based PII detection with 190x performance advantage.

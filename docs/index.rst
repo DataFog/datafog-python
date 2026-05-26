@@ -41,6 +41,7 @@ Contributing
    :caption: Contributing
 
    contributing
+   live-module-map
 
 Planning And History
 ====================

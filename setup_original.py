@@ -1,5 +1,8 @@
 from setuptools import find_packages, setup
 
+# Historical shadow packaging snapshot. The live DataFog 4.5 packaging input is
+# setup.py. Do not use this file for builds, releases, or dependency changes.
+
 # Read README for the long description
 with open("README.md", "r") as f:
     long_description = f.read()

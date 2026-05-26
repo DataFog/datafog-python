@@ -17,6 +17,10 @@ Release Planning
    v5-compatibility-matrix
    v5-cut-line
 
+Additional planning artifacts:
+
+* :download:`v5 model selection requirements <v5-model-requirements.md>`
+
 Audit Artifacts
 ===============
 
