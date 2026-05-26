@@ -122,6 +122,43 @@ def generate_changelog(beta=False, alpha=False):
             "and `DO_NOT_TRACK=1` continue to force telemetry off.\n\n"
         )
 
+    if not alpha and not beta and current_version == "4.5.0":
+        changelog += "## 4.5 Release Focus\n\n"
+        changelog += (
+            "DataFog 4.5.0 is a focused release for lightweight text PII "
+            "screening. The core install remains dependency-light while the "
+            "text APIs, CLI, guardrail helpers, German structured PII coverage, "
+            "optional-profile docs, and Python 3.13 compatibility story become "
+            "clearer and easier to verify.\n\n"
+        )
+        changelog += "## German Structured PII\n\n"
+        changelog += (
+            "German VAT IDs and German IBANs are detected by default in the "
+            "regex engine. Broader German identifiers such as tax IDs, postal "
+            "codes, passport numbers, residence permit numbers, and pension "
+            'insurance numbers require `locales=["de"]` or explicit entity '
+            "selection.\n\n"
+        )
+        changelog += "## Python 3.13 Optional Profiles\n\n"
+        changelog += (
+            "Python 3.13 is certified for the core SDK, CLI, `nlp`, "
+            "`nlp-advanced`, and `ocr` install profiles. Donut OCR still "
+            "requires a model already available locally. `distributed` and "
+            "`all` are not newly certified on Python 3.13 in 4.5.0.\n\n"
+        )
+        changelog += "## Optional OCR And Spark Surfaces\n\n"
+        changelog += (
+            "OCR and Spark remain supported optional surfaces. They are not "
+            "deprecated, but their broader overhaul is deferred beyond 4.5.0 "
+            "so the core package can stay tight and text-first.\n\n"
+        )
+        changelog += "## Telemetry Defaults\n\n"
+        changelog += (
+            "Telemetry remains disabled unless `DATAFOG_TELEMETRY=1` is set. "
+            "`DATAFOG_NO_TELEMETRY=1` and `DO_NOT_TRACK=1` continue to force "
+            "telemetry off.\n\n"
+        )
+
     if categories["features"]:
         changelog += "## 🚀 New Features\n"
         for commit in categories["features"]:

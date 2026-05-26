@@ -41,6 +41,7 @@ Contributing
    :caption: Contributing
 
    contributing
+   v45-release-readiness
    live-module-map
 
 Planning And History

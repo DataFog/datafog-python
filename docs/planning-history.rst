@@ -13,6 +13,7 @@ Release Planning
    :maxdepth: 1
 
    v44-bridge-release
+   v45-release-readiness
    v5-product-brief
    v5-compatibility-matrix
    v5-cut-line

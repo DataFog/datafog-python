@@ -191,8 +191,8 @@ The release flow for 4.5 is:
    lightweight text screening thesis.
 4. Validate optional Python 3.13 profiles before claiming support beyond core
    SDK and CLI.
-5. Prepare release readiness: changelog/release notes, package checks, docs
-   build, CI state, and version alignment.
+5. Prepare release readiness with :doc:`v45-release-readiness`: changelog and
+   release notes, package checks, docs build, CI state, and version alignment.
 6. Bump or override the final stable release to ``4.5.0`` only during the
    release-readiness and stable-release path.
 

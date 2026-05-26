@@ -1,5 +1,70 @@
 # ChangeLog
 
+## [Unreleased]
+
+### `datafog-python` [4.5.0]
+
+#### Release Thesis
+
+- Frames 4.5.0 as a focused, lightweight text PII screening release rather
+  than a v5 package overhaul.
+- Keeps the first path centered on core install, regex scanning/redaction,
+  CLI text commands, and agent-oriented guardrail helpers.
+- Defers dedicated Sentry, OpenTelemetry, logging-framework, and cloud DLP
+  middleware adapters to v5 planning.
+
+#### Core Text PII Screening
+
+- Clarifies the live top-level APIs: `scan`, `redact`, `protect`,
+  `scan_prompt`, `filter_output`, `sanitize`, and guardrail helpers.
+- Documents the current module map so users and contributors can distinguish
+  live 4.5 modules from historical compatibility and audit artifacts.
+- Preserves backward-compatible `DataFog` and `TextService` entry points.
+
+#### German Structured PII
+
+- Adds regex-only German structured PII support without adding core
+  dependencies.
+- Detects German VAT IDs and German IBANs by default because their country-code
+  structure is precise enough for default screening.
+- Enables broader German identifiers only through `locales=["de"]` or explicit
+  entity selection, including German tax IDs, pension insurance numbers,
+  postal codes, passport numbers, and residence permit numbers.
+
+#### Optional Profiles And Python 3.13
+
+- Certifies Python 3.13 support for the core SDK, CLI, `nlp`, `nlp-advanced`,
+  and `ocr` install profiles.
+- Adds CI coverage for Python 3.13 `nlp` and `nlp-advanced` test profiles plus
+  3.13 smoke checks for `nlp`, `nlp-advanced`, and `ocr`.
+- Documents Donut OCR as requiring a local model before runtime use.
+- Leaves `distributed` and `all` outside the new Python 3.13 certification
+  claim for 4.5.0.
+
+#### Optional OCR And Spark Surfaces
+
+- Documents OCR and Spark as supported optional surfaces, not deprecated
+  features and not the main 4.5 adoption path.
+- Keeps local OCR behind `datafog[ocr]`, URL image inputs behind
+  `datafog[web,ocr]`, Donut behind `datafog[nlp-advanced,ocr]`, and Spark
+  behind `datafog[distributed]`.
+
+#### Telemetry And Privacy
+
+- Documents telemetry behavior without changing defaults.
+- Telemetry remains disabled unless `DATAFOG_TELEMETRY=1` is set.
+- `DATAFOG_NO_TELEMETRY=1` and `DO_NOT_TRACK=1` continue to force telemetry
+  off for tests, CI, and privacy-sensitive environments.
+
+#### Release Readiness
+
+- Adds a 4.5 release-readiness checklist covering docs build, formatting,
+  core no-network checks, install-profile smoke checks, German regex tests,
+  broad non-slow tests, package build checks, and final CI status.
+- Clarifies the version alignment path: the development package remains
+  `4.4.0a5` until stable release promotion, and the final stable release should
+  publish as `4.5.0`.
+
 ## [2026-02-13]
 
 ### `datafog-python` [4.3.0]

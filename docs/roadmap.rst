@@ -24,9 +24,10 @@ v4.4.0 should focus on:
 * Targeted deprecation warnings with no warnings on import.
 * Migration docs and release notes that announce the v5 path.
 
-Scope artifact:
+Scope artifacts:
 
 * :doc:`v44-bridge-release`
+* :doc:`v45-release-readiness`
 
 v5.0.0 - Offline PII Firewall for AI Apps
 -----------------------------------------
