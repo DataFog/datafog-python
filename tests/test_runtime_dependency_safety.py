@@ -1,9 +1,25 @@
 import importlib
+import os
+import subprocess
 import sys
 import types
 from pathlib import Path
 
 import pytest
+
+
+def _run_isolated_python(script: str) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(Path.cwd())
+    env["DATAFOG_NO_TELEMETRY"] = "1"
+    env["DO_NOT_TRACK"] = "1"
+    return subprocess.run(
+        [sys.executable, "-c", script],
+        check=True,
+        env=env,
+        text=True,
+        capture_output=True,
+    )
 
 
 def test_runtime_code_does_not_install_packages() -> None:
@@ -23,6 +39,43 @@ def test_runtime_code_does_not_install_packages() -> None:
                 offenders.append(f"{path}: {snippet}")
 
     assert offenders == []
+
+
+def test_ocr_and_spark_public_services_do_not_require_optional_imports() -> None:
+    _run_isolated_python(
+        """
+import importlib.abc
+import sys
+
+blocked = {
+    "aiohttp",
+    "certifi",
+    "PIL",
+    "pyspark",
+    "pytesseract",
+    "torch",
+    "transformers",
+}
+
+class BlockOptionalImports(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split(".", 1)[0] in blocked:
+            raise AssertionError(f"optional dependency imported: {fullname}")
+        return None
+
+sys.meta_path.insert(0, BlockOptionalImports())
+
+import datafog
+from datafog.services import ImageService, SparkService, TextService
+
+assert datafog.scan("Email jane@example.com").entities
+assert ImageService is not None
+assert SparkService is not None
+assert TextService is not None
+assert datafog.ImageService is ImageService
+assert datafog.SparkService is SparkService
+"""
+    )
 
 
 def test_spacy_pii_missing_model_requires_explicit_download(

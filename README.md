@@ -21,6 +21,12 @@ pip install datafog[nlp]
 # Add GLiNER + spaCy support
 pip install datafog[nlp-advanced]
 
+# Add local OCR support
+pip install datafog[ocr]
+
+# Add Spark/distributed support
+pip install datafog[distributed]
+
 # Everything
 pip install datafog[all]
 ```
@@ -94,6 +100,29 @@ Use the engine that matches your accuracy and dependency constraints:
 - `smart`:
   - Cascades regex with optional NER engines.
   - If optional deps are missing, it degrades gracefully and warns.
+
+## Optional OCR And Spark Surfaces
+
+DataFog 4.5 keeps the main package story centered on lightweight text PII
+screening. OCR and Spark remain supported optional surfaces for users who
+already rely on them, but they are not required for the core import, default
+scan/redact helpers, or guardrail helpers.
+
+- OCR:
+  - Install `datafog[ocr]` for local image OCR helpers.
+  - URL-based image downloading also needs `datafog[web,ocr]`.
+  - Tesseract usage requires the system `tesseract` binary.
+  - Donut OCR requires `datafog[nlp-advanced,ocr]` and a model already available
+    locally.
+- Spark:
+  - Install `datafog[distributed]` for `SparkService`.
+  - Spark PII UDF helpers also require `datafog[nlp]` and an installed spaCy
+    model.
+  - A Java runtime is required by PySpark.
+
+OCR and Spark are not deprecated. Their broader API and packaging overhaul is
+deferred; the 4.5 goal is to keep them explicit, documented, and isolated from
+the lightweight core path.
 
 ## Backward-Compatible APIs
 

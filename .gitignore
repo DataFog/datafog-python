@@ -59,6 +59,7 @@ docs/*
 !docs/conf.py
 !docs/Makefile
 !docs/make.bat
+!docs/optional-surfaces.rst
 !docs/agents/
 !docs/agents/**
 !docs/audit/

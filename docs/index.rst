@@ -2,7 +2,9 @@
 DataFog Documentation
 =====================
 
-DataFog is an open-source tool for PII detection and anonymization of unstructured data. This documentation covers the CLI and Python SDK.
+DataFog is an open-source tool for lightweight text PII detection and
+anonymization. The core install focuses on fast regex-based scanning and
+redaction, with optional extras for NLP, OCR, and Spark-style workflows.
 
 .. toctree::
    :maxdepth: 2
@@ -10,6 +12,7 @@ DataFog is an open-source tool for PII detection and anonymization of unstructur
    important-concepts
    cli
    python-sdk
+   optional-surfaces
    definitions
    roadmap
    v44-bridge-release
@@ -24,13 +27,14 @@ Getting Started
 Installation
 ------------
 
-Install DataFog via pip:
+Install the lightweight text screening core via pip:
 
 .. code-block:: bash
 
     pip install datafog
 
-This installs the latest stable version with CLI support.
+Optional extras such as ``nlp``, ``nlp-advanced``, ``ocr``, ``distributed``,
+and ``web`` are installed only when you need those surfaces.
 
 ---------------------
 CLI Usage
@@ -48,19 +52,21 @@ Scan text for PII:
 
     datafog scan-text "Your text here"
 
-Extract text from image:
+Image/OCR commands are optional. Local OCR requires ``datafog[ocr]``; URL-based
+image downloading requires ``datafog[web,ocr]``.
 
 .. code-block:: bash
 
     datafog scan-image "path/to/image.png" --operations extract
 
-Scan for PII in image:
+Scan for PII in image text:
 
 .. code-block:: bash
 
     datafog scan-image "path/to/image.png" --operations scan
 
-For more information on the CLI, see :doc:`cli`.
+For more information on optional OCR and Spark surfaces, see
+:doc:`optional-surfaces`.
 
 ---------------------
 Python SDK Usage
@@ -71,22 +77,14 @@ Scan text for PII:
 .. code-block:: python
 
    
-   import requests
-   from datafog import DataFog
+   import datafog
 
-   # For text annotation
-   client = DataFog(operations="scan")
+   text = "Contact jane@example.com or call 415-555-1212"
+   result = datafog.scan(text, engine="regex")
+   print(result.entities)
+   print(datafog.redact(text, engine="regex").redacted_text)
 
-   # Fetch sample medical record
-   doc_url = "https://gist.githubusercontent.com/sidmohan0/b43b72693226422bac5f083c941ecfdb/raw/b819affb51796204d59987893f89dee18428ed5d/note1.txt"
-   response = requests.get(doc_url)
-   text_lines = [line for line in response.text.splitlines() if line.strip()]
-
-   # Run annotation
-   annotations = client.run_text_pipeline_sync(str_list=text_lines)
-   print(annotations)
-    
-Scan image for PII:
+Run OCR and then scan extracted text only when the OCR extra is installed:
 
 .. code-block:: python
 
