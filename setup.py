@@ -25,6 +25,7 @@ core_deps = [
 
 # Optional heavy dependencies
 nlp_deps = [
+    "click>=8.0,<9.0",
     "spacy>=3.7.0,<4.0",
 ]
 
@@ -57,6 +58,7 @@ web_deps = [
 ]
 
 cli_deps = [
+    "click>=8.0,<9.0",
     "typer>=0.12.0",
     "pydantic-settings>=2.0.0",
 ]
