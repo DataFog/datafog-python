@@ -33,6 +33,15 @@ Reference
 
    definitions
 
+Contributing
+============
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contributing
+
+   contributing
+
 Planning And History
 ====================
 
