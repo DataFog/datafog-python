@@ -23,9 +23,10 @@ Python Environments
 ===================
 
 DataFog currently declares support for Python ``>=3.10,<3.14``. The CI matrix
-tests core installs on Python 3.10, 3.11, 3.12, and 3.13. Optional NLP and
-NLP-advanced profiles are tested on Python 3.10, 3.11, and 3.12; Python 3.13
-optional-profile validation is tracked separately for 4.5.
+tests core, NLP, and NLP-advanced installs on Python 3.10, 3.11, 3.12, and
+3.13. OCR profile smoke checks also run on Python 3.13 with system Tesseract
+installed. Distributed and all-profile Python 3.13 validation remain outside
+the 4.5 support claim.
 
 Create one virtual environment per Python version when you need to compare
 profiles locally:
@@ -162,6 +163,7 @@ or install behavior:
    DATAFOG_INSTALL_PROFILE=nlp python -m pytest tests/test_install_profiles.py -q
    DATAFOG_INSTALL_PROFILE=nlp-advanced python -m pytest tests/test_install_profiles.py -q
    DATAFOG_INSTALL_PROFILE=ocr python -m pytest tests/test_install_profiles.py -q
+   DATAFOG_INSTALL_PROFILE=ocr DATAFOG_REQUIRE_TESSERACT=1 python -m pytest tests/test_install_profiles.py -q
    DATAFOG_INSTALL_PROFILE=distributed python -m pytest tests/test_install_profiles.py -q
    DATAFOG_INSTALL_PROFILE=web python -m pytest tests/test_install_profiles.py -q
 

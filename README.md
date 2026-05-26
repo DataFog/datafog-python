@@ -39,9 +39,10 @@ pip install datafog[distributed]
 pip install datafog[all]
 ```
 
-Python 3.13 support is certified for the core SDK and CLI. Optional extras such
-as `nlp`, `nlp-advanced`, `ocr`, `distributed`, and `all` are available but not
-yet certified on Python 3.13.
+Python 3.13 support is certified for the core SDK, CLI, `nlp`,
+`nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
+that is available locally before runtime use. `distributed` and `all` are not
+newly certified on Python 3.13 in the 4.5 line.
 
 ## Quick Start
 
@@ -140,6 +141,8 @@ scan/redact helpers, or guardrail helpers.
   - Install `datafog[ocr]` for local image OCR helpers.
   - URL-based image downloading also needs `datafog[web,ocr]`.
   - Tesseract usage requires the system `tesseract` binary.
+  - Python 3.13 is validated for the OCR install profile, Pillow,
+    pytesseract, and system Tesseract smoke checks.
   - Donut OCR requires `datafog[nlp-advanced,ocr]` and a model already available
     locally.
 - Spark:

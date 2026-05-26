@@ -47,6 +47,8 @@ Notes:
 
 * Tesseract usage requires the system ``tesseract`` binary in addition to the
   Python extra.
+* Python 3.13 is validated for the OCR install profile, Pillow, pytesseract,
+  and system Tesseract smoke checks.
 * Donut OCR requires a model that is already available locally. DataFog should
   not download models implicitly during normal runtime usage.
 * OCR is not deprecated. A broader OCR API and packaging overhaul is deferred
@@ -107,3 +109,35 @@ The repository includes tests that block optional dependency imports while
 importing ``datafog`` and running the default text helpers. These checks verify
 that OCR, Spark, NLP, model-loading, and web dependencies are not required for
 the core path.
+
+Python 3.13 optional-profile status
+-----------------------------------
+
+DataFog 4.5 validates Python 3.13 beyond the core/CLI path for the optional
+profiles that currently have compatible wheels in the tested dependency set.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Profile
+     - Python 3.13 status
+     - Notes
+   * - ``nlp``
+     - Supported
+     - spaCy imports and the profile smoke test pass on Python 3.13.
+   * - ``nlp-advanced``
+     - Supported
+     - GLiNER, torch, transformers, and onnxruntime import successfully on
+       Python 3.13.
+   * - ``ocr``
+     - Supported
+     - Pillow, pytesseract, and the system Tesseract bridge validate on Python
+       3.13 when the ``tesseract`` binary is installed.
+   * - ``nlp-advanced,ocr``
+     - Supported with local model requirement
+     - Donut dependencies import on Python 3.13; runtime OCR still requires the
+       configured Donut model to be present locally.
+   * - ``distributed`` and ``all``
+     - Not newly certified in 4.5
+     - Keep using Python 3.10-3.12 for distributed/all-profile validation until
+       Spark and the full optional surface are audited separately.

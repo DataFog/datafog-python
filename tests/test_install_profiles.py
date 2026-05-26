@@ -55,6 +55,8 @@ def test_install_profile_import_surface() -> None:
         assert DonutProcessor is not None
         assert ImageService is not None
         assert PytesseractProcessor is not None
+        if os.environ.get("DATAFOG_REQUIRE_TESSERACT"):
+            assert pytesseract.get_tesseract_version()
     elif profile == "distributed":
         from datafog.processing.spark_processing import pyspark_udfs
         from datafog.services.spark_service import SparkService
