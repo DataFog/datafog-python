@@ -6,7 +6,7 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Iterator, Optional, TypeVar
+from typing import Any, Callable, Iterable, Iterator, Optional, TypeVar
 
 from .engine import Entity, RedactResult, ScanResult, scan, scan_and_redact
 
@@ -31,6 +31,7 @@ class GuardrailWatch:
             text=text,
             engine=self.guardrail.engine,
             entity_types=self.guardrail.entity_types,
+            locales=self.guardrail.locales,
         )
         if result.entities:
             self.detections += len(result.entities)
@@ -54,6 +55,7 @@ class Guardrail:
     engine: str = "smart"
     strategy: str = "token"
     on_detect: str = "redact"
+    locales: Optional[Iterable[str] | str] = None
 
     def __post_init__(self) -> None:
         if self.on_detect not in {"redact", "block", "warn"}:
@@ -61,7 +63,12 @@ class Guardrail:
 
     def scan(self, text: str) -> ScanResult:
         """Scan a text value for entities."""
-        return scan(text=text, engine=self.engine, entity_types=self.entity_types)
+        return scan(
+            text=text,
+            engine=self.engine,
+            entity_types=self.entity_types,
+            locales=self.locales,
+        )
 
     def filter(self, text: str) -> RedactResult:
         """Scan then enforce configured behavior."""
@@ -69,6 +76,7 @@ class Guardrail:
             text=text,
             engine=self.engine,
             entity_types=self.entity_types,
+            locales=self.locales,
             strategy=self.strategy,
         )
         if not result.entities:
@@ -140,6 +148,7 @@ def create_guardrail(
     engine: str = "smart",
     strategy: str = "token",
     on_detect: str = "redact",
+    locales: Optional[Iterable[str] | str] = None,
 ) -> Guardrail:
     """
     Create a reusable guardrail object for wrapping LLM calls.
@@ -149,6 +158,7 @@ def create_guardrail(
         engine=engine,
         strategy=strategy,
         on_detect=on_detect,
+        locales=locales,
     )
 
 

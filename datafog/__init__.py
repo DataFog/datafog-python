@@ -163,7 +163,7 @@ def scan(
     text: str,
     engine: str = "regex",
     entity_types: list[str] | None = None,
-    locales: list[str] | None = None,
+    locales: list[str] | str | None = None,
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
@@ -181,7 +181,7 @@ def redact(
     entities: list[Entity] | None = None,
     engine: str = "regex",
     entity_types: list[str] | None = None,
-    locales: list[str] | None = None,
+    locales: list[str] | str | None = None,
     strategy: str = "token",
     preset: str | None = None,
 ) -> RedactResult:
@@ -215,6 +215,7 @@ def protect(
     engine: str = "regex",
     strategy: str = "token",
     on_detect: str = "redact",
+    locales: list[str] | str | None = None,
 ):
     """
     v5-preview guardrail factory.
@@ -224,11 +225,12 @@ def protect(
         engine=engine,
         strategy=strategy,
         on_detect=on_detect,
+        locales=locales,
     )
 
 
 # Simple API for core functionality (backward compatibility)
-def detect(text: str, locales: list[str] | None = None) -> list:
+def detect(text: str, locales: list[str] | str | None = None) -> list:
     """
     Detect PII in text using regex patterns.
 
@@ -248,7 +250,7 @@ def detect(text: str, locales: list[str] | None = None) -> list:
     return _detect_impl(text, locales=locales)
 
 
-def _detect_impl(text: str, locales: list[str] | None = None) -> list:
+def _detect_impl(text: str, locales: list[str] | str | None = None) -> list:
     import time as _time
 
     _start = _time.monotonic()
@@ -299,7 +301,7 @@ def process(
     text: str,
     anonymize: bool = False,
     method: str = "redact",
-    locales: list[str] | None = None,
+    locales: list[str] | str | None = None,
 ) -> dict:
     """
     Process text to detect and optionally anonymize PII.

@@ -6,7 +6,7 @@ import hashlib
 import warnings
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Optional
+from typing import Iterable, Optional
 
 from .exceptions import EngineNotAvailable
 from .processing.text_processing.regex_annotator import RegexAnnotator
@@ -138,7 +138,9 @@ def _entities_from_dict(
     return entities
 
 
-def _regex_entities(text: str, locales: Optional[list[str]] = None) -> list[Entity]:
+def _regex_entities(
+    text: str, locales: Optional[Iterable[str] | str] = None
+) -> list[Entity]:
     annotator = RegexAnnotator(locales=locales)
     _, structured = annotator.annotate_with_spans(text)
     entities: list[Entity] = []
@@ -242,7 +244,7 @@ def scan(
     text: str,
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
-    locales: Optional[list[str]] = None,
+    locales: Optional[Iterable[str] | str] = None,
 ) -> ScanResult:
     """Scan text for PII entities."""
     if not isinstance(text, str):
@@ -385,7 +387,7 @@ def scan_and_redact(
     text: str,
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
-    locales: Optional[list[str]] = None,
+    locales: Optional[Iterable[str] | str] = None,
     strategy: str = "token",
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""

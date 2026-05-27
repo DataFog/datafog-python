@@ -67,6 +67,16 @@ def test_create_guardrail_warn_mode_warns_and_returns_original() -> None:
     assert result.mapping == {}
 
 
+def test_create_guardrail_with_locales_enables_de_patterns() -> None:
+    guard = datafog.create_guardrail(engine="regex", locales=["de"])
+
+    result = guard.filter("Steuer-ID 12 345 678 903 liegt vor.")
+
+    assert result.redacted_text != "Steuer-ID 12 345 678 903 liegt vor."
+    assert any(entity.type == "DE_TAX_ID" for entity in result.entities)
+    assert "[DE_TAX_ID_1]" in result.redacted_text
+
+
 def test_guardrail_watch_context_manager_tracks_activity() -> None:
     guard = datafog.create_guardrail(engine="regex")
 

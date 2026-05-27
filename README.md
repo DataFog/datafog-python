@@ -111,7 +111,7 @@ result = datafog.scan(
 print(result.entities)
 ```
 
-German DE_* patterns also include checksum/context validation to reduce noise.
+Some German DE_* patterns include additional checksum or context validation to reduce noise (for example, `DE_TAX_ID` and `DE_RESIDENCE_PERMIT_NUMBER`).
 
 ## Backward-Compatible APIs
 
