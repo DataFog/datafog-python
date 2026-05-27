@@ -3,26 +3,8 @@ import pytest
 from datafog.processing.text_processing.regex_annotator import RegexAnnotator
 
 
-def _de_tax_id_check_digit(digits10: str) -> int:
-    product = 10
-    for ch in digits10:
-        sum_ = (int(ch) + product) % 10
-        if sum_ == 0:
-            sum_ = 10
-        product = (sum_ * 2) % 11
-    return (11 - product) % 10
-
-
-def _make_de_tax_id(digits10: str) -> str:
-    return digits10 + str(_de_tax_id_check_digit(digits10))
-
-
-def _format_de_tax_id_spaced(digits11: str) -> str:
-    return f"{digits11[:2]} {digits11[2:5]} {digits11[5:8]} {digits11[8:]}"
-
-
-VALID_DE_TAX_ID = _make_de_tax_id("1234567890")
-VALID_DE_TAX_ID_SPACED = _format_de_tax_id_spaced(VALID_DE_TAX_ID)
+VALID_DE_TAX_ID = "12345678903"
+VALID_DE_TAX_ID_SPACED = "12 345 678 903"
 INVALID_DE_TAX_ID = (
     VALID_DE_TAX_ID[:-1]
     + str((int(VALID_DE_TAX_ID[-1]) + 1) % 10)

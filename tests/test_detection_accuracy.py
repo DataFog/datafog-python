@@ -286,10 +286,11 @@ def _canon_type(entity_type: str) -> str:
 
 
 def _extract_entities(
-    text: str, engine: str, locales: Iterable[str] | None = None
+    text: str, engine: str, locales: Iterable[str] | str | None = None
 ) -> list[dict[str, Any]]:
     try:
-        result = scan(text=text, engine=engine, locales=list(locales or []))
+        locale_values = [locales] if isinstance(locales, str) else list(locales or [])
+        result = scan(text=text, engine=engine, locales=locale_values)
     except (ImportError, EngineNotAvailable) as exc:
         pytest.skip(f"{engine} engine unavailable in this environment: {exc}")
 

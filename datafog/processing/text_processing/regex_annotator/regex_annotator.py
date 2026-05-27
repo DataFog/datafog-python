@@ -54,7 +54,9 @@ class RegexAnnotator:
         ],
     }
 
-    LABELS = BASE_LABELS + LOCALE_LABELS["de"]
+    LABELS = BASE_LABELS + [
+        label for locale_labels in LOCALE_LABELS.values() for label in locale_labels
+    ]
 
     _DE_PASSPORT_PREFIXES = "CFGHJKLMNPRTVWXYZ"
     _DE_RESIDENCE_CONTEXT_RE = re.compile(
@@ -242,86 +244,92 @@ class RegexAnnotator:
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
-            # German VAT ID (USt-IdNr) - DE followed by 9 digits
-            "DE_VAT_ID": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                DE
-                [\s-]?
-                \d{9}
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
-            # German IBAN - DE followed by 20 digits (often grouped)
-            "DE_IBAN": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                DE
-                \d{2}
-                (?:\s?\d{4}){4}
-                \s?\d{2}
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
-            # German Tax ID (Steuer-ID) - 11 digits
-            "DE_TAX_ID": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                (?:[1-9]\d{10}|[1-9]\d\s?\d{3}\s?\d{3}\s?\d{3})
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
-            # German Social Security Number (Rentenversicherungsnummer)
-            # Format: 2 digits + 6 digits (DOB) + 1 letter + 3 digits
-            "DE_SOCIAL_SECURITY_NUMBER": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                \d{2}
-                \s?
-                \d{6}
-                \s?
-                [A-Z]
-                \s?
-                \d{3}
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
-            # German postal code - PLZ prefix followed by 5 digits
-            "DE_POSTAL_CODE": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                PLZ
-                (?:\s*:\s*|\s+)?
-                \d{5}
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
-            # German passport number - 1 letter followed by 8 digits
-            "DE_PASSPORT_NUMBER": re.compile(
-                rf"""
-                (?<![A-Za-z0-9])
-                [{self._DE_PASSPORT_PREFIXES}]
-                \d{{8}}
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
-            # German residence permit number - AT followed by 7 digits (context validated)
-            "DE_RESIDENCE_PERMIT_NUMBER": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                AT
-                \d{7}
-                (?![A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
         }
+
+        if "de" in self.locales:
+            patterns.update(
+                {
+                    # German VAT ID (USt-IdNr) - DE followed by 9 digits
+                    "DE_VAT_ID": re.compile(
+                        r"""
+                        (?<![A-Za-z0-9])
+                        DE
+                        [\s-]?
+                        \d{9}
+                        (?![A-Za-z0-9])
+                        """,
+                        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+                    ),
+                    # German IBAN - DE followed by 20 digits (often grouped)
+                    "DE_IBAN": re.compile(
+                        r"""
+                        (?<![A-Za-z0-9])
+                        DE
+                        \d{2}
+                        (?:\s?\d{4}){4}
+                        \s?\d{2}
+                        (?![A-Za-z0-9])
+                        """,
+                        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+                    ),
+                    # German Tax ID (Steuer-ID) - 11 digits
+                    "DE_TAX_ID": re.compile(
+                        r"""
+                        (?<![A-Za-z0-9])
+                        (?:[1-9]\d{10}|[1-9]\d\s?\d{3}\s?\d{3}\s?\d{3})
+                        (?![A-Za-z0-9])
+                        """,
+                        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+                    ),
+                    # German Social Security Number (Rentenversicherungsnummer)
+                    # Format: 2 digits + 6 digits (DOB) + 1 letter + 3 digits
+                    "DE_SOCIAL_SECURITY_NUMBER": re.compile(
+                        r"""
+                        (?<![A-Za-z0-9])
+                        \d{2}
+                        \s?
+                        \d{6}
+                        \s?
+                        [A-Z]
+                        \s?
+                        \d{3}
+                        (?![A-Za-z0-9])
+                        """,
+                        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+                    ),
+                    # German postal code - PLZ prefix followed by 5 digits
+                    "DE_POSTAL_CODE": re.compile(
+                        r"""
+                        (?<![A-Za-z0-9])
+                        PLZ
+                        (?:\s*:\s*|\s+)?
+                        \d{5}
+                        (?![A-Za-z0-9])
+                        """,
+                        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+                    ),
+                    # German passport number - 1 letter followed by 8 digits
+                    "DE_PASSPORT_NUMBER": re.compile(
+                        rf"""
+                        (?<![A-Za-z0-9])
+                        [{self._DE_PASSPORT_PREFIXES}]
+                        \d{{8}}
+                        (?![A-Za-z0-9])
+                        """,
+                        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+                    ),
+                    # German residence permit number - AT followed by 7 digits (context validated)
+                    "DE_RESIDENCE_PERMIT_NUMBER": re.compile(
+                        r"""
+                        (?<![A-Za-z0-9])
+                        AT
+                        \d{7}
+                        (?![A-Za-z0-9])
+                        """,
+                        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+                    ),
+                }
+            )
 
         return {
             label: pattern

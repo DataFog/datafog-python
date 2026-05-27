@@ -5,7 +5,7 @@ This module provides simple, lightweight functions for PII detection and anonymi
 without requiring heavy dependencies like spaCy or PyTorch.
 """
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 from datafog.engine import scan, scan_and_redact
 from datafog.models.anonymizer import AnonymizerType
@@ -16,7 +16,9 @@ SPACY_ENGINE = "spacy"
 AUTO_ENGINE = "auto"
 
 
-def detect_pii(text: str, locales: Optional[List[str]] = None) -> Dict[str, List[str]]:
+def detect_pii(
+    text: str, locales: Optional[Iterable[str] | str] = None
+) -> Dict[str, List[str]]:
     """
     Simple PII detection using lightweight regex engine.
 
@@ -85,7 +87,7 @@ def detect_pii(text: str, locales: Optional[List[str]] = None) -> Dict[str, List
 def anonymize_text(
     text: str,
     method: Union[str, AnonymizerType] = "redact",
-    locales: Optional[List[str]] = None,
+    locales: Optional[Iterable[str] | str] = None,
 ) -> str:
     """
     Simple text anonymization using lightweight regex engine.
@@ -162,7 +164,9 @@ def anonymize_text(
 
 
 def scan_text(
-    text: str, return_entities: bool = False, locales: Optional[List[str]] = None
+    text: str,
+    return_entities: bool = False,
+    locales: Optional[Iterable[str] | str] = None,
 ) -> Union[bool, Dict[str, List[str]]]:
     """
     Quick scan to check if text contains any PII.
@@ -208,7 +212,7 @@ def scan_text(
     return result
 
 
-def get_supported_entities(locales: Optional[List[str]] = None) -> List[str]:
+def get_supported_entities(locales: Optional[Iterable[str] | str] = None) -> List[str]:
     """
     Get list of PII entity types supported by the regex engine.
 
