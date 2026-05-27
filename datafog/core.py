@@ -9,6 +9,7 @@ from typing import Dict, Iterable, List, Optional, Union
 
 from datafog.engine import scan, scan_and_redact
 from datafog.models.anonymizer import AnonymizerType
+from datafog.processing.text_processing.regex_annotator import RegexAnnotator
 
 # Engine types as constants
 REGEX_ENGINE = "regex"
@@ -246,16 +247,8 @@ def get_supported_entities(locales: Optional[Iterable[str] | str] = None) -> Lis
         "DE_RESIDENCE_PERMIT_NUMBER",
     ]
 
-    if not locales:
-        result = base
-    else:
-        locale_values = [locales] if isinstance(locales, str) else locales
-        normalized = {
-            value.strip().lower()
-            for value in locale_values
-            if isinstance(value, str) and value.strip()
-        }
-        result = base + de_labels if "de" in normalized else base
+    normalized_locales = RegexAnnotator._normalize_locales(locales)
+    result = base + de_labels if "de" in normalized_locales else base
 
     try:
         from datafog.telemetry import track_function_call

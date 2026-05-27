@@ -138,10 +138,20 @@ def _entities_from_dict(
     return entities
 
 
+def _normalize_regex_locales(locales: Optional[Iterable[str] | str]) -> tuple[str, ...]:
+    normalized = RegexAnnotator._normalize_locales(locales)
+    return tuple(sorted(normalized))
+
+
+@lru_cache(maxsize=None)
+def _get_regex_annotator(locales_key: tuple[str, ...]) -> RegexAnnotator:
+    return RegexAnnotator(locales=locales_key)
+
+
 def _regex_entities(
     text: str, locales: Optional[Iterable[str] | str] = None
 ) -> list[Entity]:
-    annotator = RegexAnnotator(locales=locales)
+    annotator = _get_regex_annotator(_normalize_regex_locales(locales))
     _, structured = annotator.annotate_with_spans(text)
     entities: list[Entity] = []
     for span in structured.spans:

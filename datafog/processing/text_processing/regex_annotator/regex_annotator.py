@@ -64,7 +64,7 @@ class RegexAnnotator:
         re.IGNORECASE,
     )
 
-    def __init__(self, locales: Optional[Iterable[str]] = None):
+    def __init__(self, locales: Optional[Iterable[str] | str] = None):
         self.locales = self._normalize_locales(locales)
         self.active_labels = self._labels_for_locales(self.locales)
 
@@ -73,7 +73,7 @@ class RegexAnnotator:
         self.validators = self._build_validators()
 
     @staticmethod
-    def _normalize_locales(locales: Optional[Iterable[str]]) -> Set[str]:
+    def _normalize_locales(locales: Optional[Iterable[str] | str]) -> Set[str]:
         if locales is None:
             return set()
         if isinstance(locales, str):
@@ -88,7 +88,9 @@ class RegexAnnotator:
         return normalized
 
     @classmethod
-    def labels_for_locales(cls, locales: Optional[Iterable[str]] = None) -> List[str]:
+    def labels_for_locales(
+        cls, locales: Optional[Iterable[str] | str] = None
+    ) -> List[str]:
         normalized = cls._normalize_locales(locales)
         return cls._labels_for_locales(normalized)
 
