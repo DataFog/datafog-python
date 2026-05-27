@@ -3,9 +3,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import datafog
-from datafog.engine import scan_and_redact
-
 
 def _run_isolated_python(script: str) -> subprocess.CompletedProcess[str]:
     env = dict(os.environ)
@@ -47,6 +44,9 @@ assert "415-555-1212" not in redact_result.redacted_text
 
 
 def test_redact_positional_strategy_remains_compatible() -> None:
+    import datafog
+    from datafog.engine import scan_and_redact
+
     public_result = datafog.redact(
         "Email jane@example.com",
         None,
