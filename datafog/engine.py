@@ -387,8 +387,8 @@ def scan_and_redact(
     text: str,
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
-    locales: Optional[Iterable[str] | str] = None,
     strategy: str = "token",
+    locales: Optional[Iterable[str] | str] = None,
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""
     scan_result = scan(

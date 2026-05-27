@@ -181,9 +181,9 @@ def redact(
     entities: list[Entity] | None = None,
     engine: str = "regex",
     entity_types: list[str] | None = None,
-    locales: list[str] | str | None = None,
     strategy: str = "token",
     preset: str | None = None,
+    locales: list[str] | str | None = None,
 ) -> RedactResult:
     """
     v5-preview redaction entrypoint.
