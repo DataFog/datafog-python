@@ -83,22 +83,21 @@ Agent-oriented helpers use the same lightweight text path:
 German Structured PII
 =====================
 
-The core regex engine includes German VAT IDs and German IBANs by default
-because they carry strong country-code structure:
+German structured PII is country-specific and opt-in, including German VAT IDs
+and German IBANs:
 
 .. code-block:: python
 
    import datafog
 
-   result = datafog.scan("USt-IdNr DE 123456789", engine="regex")
+   result = datafog.scan("USt-IdNr DE 123456789", engine="regex", locales=["de"])
    print([(entity.type, entity.text) for entity in result.entities])
 
-Broader German identifiers such as ``DE_TAX_ID``,
-``DE_SOCIAL_SECURITY_NUMBER``, ``DE_POSTAL_CODE``,
-``DE_PASSPORT_NUMBER``, and ``DE_RESIDENCE_PERMIT_NUMBER`` require explicit
-German locale selection or explicit ``entity_types`` filtering. This keeps
-ordinary ticket, SKU, order, and invoice IDs from becoming default-on false
-positives.
+German identifiers such as ``DE_VAT_ID``, ``DE_IBAN``, ``DE_TAX_ID``,
+``DE_SOCIAL_SECURITY_NUMBER``, ``DE_POSTAL_CODE``, ``DE_PASSPORT_NUMBER``, and
+``DE_RESIDENCE_PERMIT_NUMBER`` require explicit German locale selection or
+explicit ``entity_types`` filtering. This keeps ordinary ticket, SKU, order,
+and invoice IDs from becoming default-on false positives.
 
 .. code-block:: python
 

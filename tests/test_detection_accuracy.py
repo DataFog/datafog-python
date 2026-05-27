@@ -280,9 +280,11 @@ def _canon_type(entity_type: str) -> str:
     return TYPE_ALIASES.get(raw, raw)
 
 
-def _extract_entities(text: str, engine: str) -> list[dict[str, Any]]:
+def _extract_entities(
+    text: str, engine: str, locales: list[str] | None = None
+) -> list[dict[str, Any]]:
     try:
-        result = scan(text=text, engine=engine)
+        result = scan(text=text, engine=engine, locales=locales)
     except (ImportError, EngineNotAvailable) as exc:
         pytest.skip(f"{engine} engine unavailable in this environment: {exc}")
 
@@ -347,7 +349,7 @@ def _assert_expected_found(
     case: dict[str, Any], engine: str, corpus_kind: str
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     text = case["input"]
-    actual = _extract_entities(text, engine)
+    actual = _extract_entities(text, engine, locales=case.get("locales"))
     expected = _required_expected(case["expected_entities"], engine, corpus_kind)
 
     for exp in expected:
@@ -403,7 +405,9 @@ def _compute_metrics(
     for engine in engines:
         for corpus_kind, cases in corpora:
             for case in cases:
-                actual = _extract_entities(case["input"], engine)
+                actual = _extract_entities(
+                    case["input"], engine, locales=case.get("locales")
+                )
                 expected = _required_expected(
                     case["expected_entities"], engine, corpus_kind
                 )
@@ -490,7 +494,7 @@ def test_structured_pii_detection_slow(case: dict[str, Any], engine: str) -> Non
 @pytest.mark.parametrize("engine", FAST_ENGINES)
 def test_negative_cases_fast(case: dict[str, Any], engine: str) -> None:
     _xfail_if_known_limitation(case, engine, "negative")
-    actual = _extract_entities(case["input"], engine)
+    actual = _extract_entities(case["input"], engine, locales=case.get("locales"))
     assert not actual, f"{case['id']} ({engine}) false positives: {actual}"
 
 
@@ -501,7 +505,7 @@ def test_negative_cases_fast(case: dict[str, Any], engine: str) -> None:
 @pytest.mark.parametrize("engine", SLOW_ENGINES)
 def test_negative_cases_slow(case: dict[str, Any], engine: str) -> None:
     _xfail_if_known_limitation(case, engine, "negative")
-    actual = _extract_entities(case["input"], engine)
+    actual = _extract_entities(case["input"], engine, locales=case.get("locales"))
     assert not actual, f"{case['id']} ({engine}) false positives: {actual}"
 
 

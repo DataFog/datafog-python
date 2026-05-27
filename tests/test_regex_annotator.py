@@ -41,8 +41,12 @@ def test_regex_annotator_initialization():
     annotator = RegexAnnotator()
     assert annotator is not None
     assert set(RegexAnnotator.BASE_LABELS).issubset(annotator.LABELS)
-    assert {"DE_VAT_ID", "DE_IBAN"}.issubset(annotator.active_labels)
-    assert "DE_TAX_ID" not in annotator.active_labels
+    assert all(
+        label not in annotator.active_labels for label in RegexAnnotator.GERMAN_LABELS
+    )
+
+    german_annotator = RegexAnnotator(locales=["de"])
+    assert set(RegexAnnotator.GERMAN_LABELS).issubset(german_annotator.active_labels)
 
 
 def test_regex_annotator_create_method():
