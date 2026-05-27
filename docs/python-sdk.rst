@@ -31,11 +31,11 @@ German locale coverage
 ----------------------
 
 DataFog 4.5 includes regex-only German structured PII support without adding
-dependencies. German VAT IDs and German IBANs are active in the default regex
-path. Broader German-only identifiers are opt-in because their raw shapes are
-common in ordinary product, ticket, invoice, and order data.
+dependencies. German-only identifiers are opt-in because their raw shapes are
+country-specific or common in ordinary product, ticket, invoice, and order
+data.
 
-Use ``locales=["de"]`` to enable the broader German set:
+Use ``locales=["de"]`` to enable the German set:
 
 .. code-block:: python
 
@@ -55,10 +55,9 @@ You can also request one German entity type directly:
        entity_types=["DE_TAX_ID"],
    )
 
-The opt-in German set currently covers ``DE_TAX_ID``,
-``DE_SOCIAL_SECURITY_NUMBER``, ``DE_POSTAL_CODE``,
-``DE_PASSPORT_NUMBER``, and ``DE_RESIDENCE_PERMIT_NUMBER``. The default set
-also covers ``DE_VAT_ID`` and ``DE_IBAN``.
+The opt-in German set currently covers ``DE_VAT_ID``, ``DE_IBAN``,
+``DE_TAX_ID``, ``DE_SOCIAL_SECURITY_NUMBER``, ``DE_POSTAL_CODE``,
+``DE_PASSPORT_NUMBER``, and ``DE_RESIDENCE_PERMIT_NUMBER``.
 
 Optional services
 -----------------

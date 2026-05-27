@@ -221,7 +221,7 @@ def get_supported_entities(locales: List[str] | None = None) -> List[str]:
     Example:
         >>> entities = get_supported_entities()
         >>> print(entities)
-        ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DE_VAT_ID', 'DE_IBAN', 'DATE', 'ZIP_CODE']
+        ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DATE', 'ZIP_CODE']
     """
     annotator = RegexAnnotator(locales=locales)
     legacy_map = {"DOB": "DATE", "ZIP": "ZIP_CODE"}

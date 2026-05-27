@@ -24,12 +24,17 @@ from datafog.services.text_service import TextService
         ),
     ],
 )
-def test_high_specificity_german_regex_default_cases(
+def test_german_regex_cases_require_german_locale_or_explicit_entity_type(
     label: str, text: str, expected: str
 ) -> None:
-    annotator = RegexAnnotator()
-    result = annotator.annotate(text)
-    assert expected in result[label]
+    default_result = RegexAnnotator().annotate(text)
+    assert expected not in default_result[label]
+
+    german_result = RegexAnnotator(locales=["de"]).annotate(text)
+    assert expected in german_result[label]
+
+    explicit_result = RegexAnnotator(enabled_labels=[label]).annotate(text)
+    assert expected in explicit_result[label]
 
 
 @pytest.mark.parametrize(
@@ -118,25 +123,39 @@ def test_redaction_and_service_locale_support() -> None:
     assert service_result["DE_PASSPORT_NUMBER"] == ["C12345678"]
 
 
-def test_german_vat_redaction_suppresses_inner_generic_ssn_match() -> None:
-    text = "USt-IdNr DE123456789 ist gesetzt."
-
+@pytest.mark.parametrize(
+    "text,vat_text",
+    [
+        ("USt-IdNr DE123456789 ist gesetzt.", "DE123456789"),
+        ("USt-IdNr DE 123456789 ist gesetzt.", "DE 123456789"),
+        ("USt-IdNr DE-123456789 ist gesetzt.", "DE-123456789"),
+    ],
+)
+def test_german_vat_redaction_suppresses_inner_generic_ssn_match(
+    text: str, vat_text: str
+) -> None:
     scan_result = scan(text, engine="regex")
-    assert [(entity.type, entity.text) for entity in scan_result.entities] == [
-        ("DE_VAT_ID", "DE123456789")
+    assert scan_result.entities == []
+
+    locale_scan_result = scan(text, engine="regex", locales=["de"])
+    assert [(entity.type, entity.text) for entity in locale_scan_result.entities] == [
+        ("DE_VAT_ID", vat_text)
     ]
 
-    redaction = scan_and_redact(text, engine="regex")
-    assert redaction.redacted_text == "USt-IdNr [DE_VAT_ID_1] ist gesetzt."
+    default_redaction = scan_and_redact(text, engine="regex")
+    assert default_redaction.redacted_text == text
+
+    redaction = scan_and_redact(text, engine="regex", locales=["de"])
+    assert redaction.redacted_text == text.replace(vat_text, "[DE_VAT_ID_1]")
 
 
 def test_top_level_helpers_and_supported_entities_respect_locale() -> None:
     default_entities = get_supported_entities()
-    assert "DE_VAT_ID" in default_entities
-    assert "DE_IBAN" in default_entities
-    assert "DE_TAX_ID" not in default_entities
+    assert all(not entity.startswith("DE_") for entity in default_entities)
 
     german_entities = get_supported_entities(locales=["de"])
+    assert "DE_VAT_ID" in german_entities
+    assert "DE_IBAN" in german_entities
     assert "DE_TAX_ID" in german_entities
     assert "DE_RESIDENCE_PERMIT_NUMBER" in german_entities
 

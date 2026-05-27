@@ -22,8 +22,8 @@ commands. Install ``datafog[distributed]`` when using ``SparkService``.
 German locale support
 ---------------------
 
-German VAT IDs and German IBANs are detected by the default regex path. Broader
-German identifiers are opt-in through ``--locale de`` on the core text commands:
+German structured PII is opt-in through ``--locale de`` on the core text
+commands:
 
 .. code-block:: bash
 

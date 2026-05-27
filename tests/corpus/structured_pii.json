@@ -735,8 +735,9 @@
     ]
   },
   {
-    "id": "de-vat-id-default",
+    "id": "de-vat-id-locale",
     "input": "USt-IdNr DE 123456789 ist gesetzt.",
+    "locales": ["de"],
     "expected_entities": [
       {
         "type": "DE_VAT_ID",
@@ -747,8 +748,9 @@
     ]
   },
   {
-    "id": "de-iban-default",
+    "id": "de-iban-locale",
     "input": "IBAN DE44 5001 0517 5407 3249 31 ist gueltig.",
+    "locales": ["de"],
     "expected_entities": [
       {
         "type": "DE_IBAN",

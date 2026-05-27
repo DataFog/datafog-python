@@ -58,7 +58,7 @@ class TextService:
                 - "smart": Try RegexAnnotator → GLiNER → SpaCy cascade (requires nlp-advanced extra)
             gliner_model: GLiNER model name to use when engine is "gliner" or "smart"
             locales: Optional locale tags for regex detection. Use ["de"] to enable
-                broader German structured identifiers.
+                German structured identifiers.
 
         Raises:
             AssertionError: If an invalid engine type is provided

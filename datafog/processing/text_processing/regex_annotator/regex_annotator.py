@@ -38,9 +38,8 @@ class RegexAnnotator:
         "DE_PASSPORT_NUMBER",
         "DE_RESIDENCE_PERMIT_NUMBER",
     ]
-    DEFAULT_LOCALIZED_LABELS = ["DE_VAT_ID", "DE_IBAN"]
     LABELS = BASE_LABELS + GERMAN_LABELS
-    DEFAULT_LABELS = BASE_LABELS + DEFAULT_LOCALIZED_LABELS
+    DEFAULT_LABELS = BASE_LABELS
     SUPPORTED_LOCALES = {"de", "de-de", "de_de"}
     LOCALE_LABELS = {
         "de": GERMAN_LABELS,
@@ -103,13 +102,18 @@ class RegexAnnotator:
             # Supports dashed and no-dash formats.
             "SSN": re.compile(
                 r"""
-                (?<!\d)
                 (?:
+                    (?<!\d)
                     (?!000|666)\d{3}-(?!00)\d{2}-(?!0000)\d{4}
+                    (?!\d)
                     |
+                    (?<![A-Za-z0-9])
+                    (?<!DE)
+                    (?<!DE\s)
+                    (?<!DE-)
                     (?!000|666)\d{3}(?!00)\d{2}(?!0000)\d{4}
+                    (?![A-Za-z0-9])
                 )
-                (?!\d)
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
