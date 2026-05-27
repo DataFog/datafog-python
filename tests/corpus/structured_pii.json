@@ -736,6 +736,7 @@
   },
   {
     "id": "de-vat-id-simple",
+    "locales": ["de"],
     "input": "VAT number: DE123456789 for invoices.",
     "expected_entities": [
       {
@@ -748,6 +749,7 @@
   },
   {
     "id": "de-iban-formatted",
+    "locales": ["de"],
     "input": "IBAN: DE89 3704 0044 0532 0130 00 for payments.",
     "expected_entities": [
       {
@@ -760,11 +762,12 @@
   },
   {
     "id": "de-tax-id-simple",
-    "input": "Steuer-ID 12345678901 liegt vor.",
+    "locales": ["de"],
+    "input": "Steuer-ID 12345678903 liegt vor.",
     "expected_entities": [
       {
         "type": "DE_TAX_ID",
-        "text": "12345678901",
+        "text": "12345678903",
         "start": 10,
         "end": 21
       }
@@ -772,6 +775,7 @@
   },
   {
     "id": "de-social-security-number",
+    "locales": ["de"],
     "input": "Rentenversicherungsnummer 65150804A123 liegt vor.",
     "expected_entities": [
       {
@@ -784,6 +788,7 @@
   },
   {
     "id": "de-postal-code-prefixed",
+    "locales": ["de"],
     "input": "PLZ10115 Berlin.",
     "expected_entities": [
       {
@@ -796,6 +801,7 @@
   },
   {
     "id": "de-passport-number",
+    "locales": ["de"],
     "input": "Passnummer C12345678 wurde geprueft.",
     "expected_entities": [
       {
@@ -808,6 +814,7 @@
   },
   {
     "id": "de-residence-permit-number",
+    "locales": ["de"],
     "input": "Aufenthaltstitel AT1234567 gueltig.",
     "expected_entities": [
       {
