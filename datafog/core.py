@@ -237,18 +237,13 @@ def get_supported_entities(locales: Optional[Iterable[str] | str] = None) -> Lis
         "ZIP_CODE",
     ]
 
-    de_labels = [
-        "DE_VAT_ID",
-        "DE_IBAN",
-        "DE_TAX_ID",
-        "DE_SOCIAL_SECURITY_NUMBER",
-        "DE_POSTAL_CODE",
-        "DE_PASSPORT_NUMBER",
-        "DE_RESIDENCE_PERMIT_NUMBER",
-    ]
-
     normalized_locales = RegexAnnotator._normalize_locales(locales)
-    result = base + de_labels if "de" in normalized_locales else base
+    locale_labels = [
+        label
+        for locale in normalized_locales
+        for label in RegexAnnotator.LOCALE_LABELS.get(locale, [])
+    ]
+    result = base + locale_labels if locale_labels else base
 
     try:
         from datafog.telemetry import track_function_call

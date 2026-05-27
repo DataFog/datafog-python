@@ -140,10 +140,11 @@ def _entities_from_dict(
 
 def _normalize_regex_locales(locales: Optional[Iterable[str] | str]) -> tuple[str, ...]:
     normalized = RegexAnnotator._normalize_locales(locales)
-    return tuple(sorted(normalized))
+    supported_locales = set(RegexAnnotator.LOCALE_LABELS)
+    return tuple(sorted(normalized & supported_locales))
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=32)
 def _get_regex_annotator(locales_key: tuple[str, ...]) -> RegexAnnotator:
     return RegexAnnotator(locales=locales_key)
 
