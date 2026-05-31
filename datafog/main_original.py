@@ -1,4 +1,11 @@
-"""
+"""Historical shadow main module.
+
+This file is not the live DataFog 4.5 ``DataFog`` implementation. Use
+``datafog/main.py`` for the current backward-compatible class and use the
+optional OCR/Spark service modules directly when those surfaces are needed.
+This original full-featured snapshot remains importable for legacy tests until
+cleanup can remove it safely.
+
 Main module for DataFog.
 
 This module contains the core classes for DataFog:

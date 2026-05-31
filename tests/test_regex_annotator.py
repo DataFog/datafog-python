@@ -40,9 +40,13 @@ def test_regex_annotator_initialization():
     """Test that the RegexAnnotator can be initialized."""
     annotator = RegexAnnotator()
     assert annotator is not None
-    assert (
-        len(annotator.LABELS) == 7
-    )  # EMAIL, PHONE, SSN, CREDIT_CARD, IP_ADDRESS, DOB, ZIP
+    assert set(RegexAnnotator.BASE_LABELS).issubset(annotator.LABELS)
+    assert all(
+        label not in annotator.active_labels for label in RegexAnnotator.GERMAN_LABELS
+    )
+
+    german_annotator = RegexAnnotator(locales=["de"])
+    assert set(RegexAnnotator.GERMAN_LABELS).issubset(german_annotator.active_labels)
 
 
 def test_regex_annotator_create_method():

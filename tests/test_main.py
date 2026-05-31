@@ -29,7 +29,8 @@ except ImportError:
     ImageService = None
     TextService = None
 
-# Try to import the full-featured DataFog for integration tests
+# Keep historical main_original importable while legacy tests still cover it.
+# New behavior belongs in datafog.main.DataFog.
 try:
     from datafog.main_original import DataFog as FullDataFog
 

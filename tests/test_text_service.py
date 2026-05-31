@@ -2,7 +2,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-# Test the full-featured TextService from text_service_original
+# Legacy coverage for the historical shadow TextService. New behavior belongs
+# in datafog.services.text_service.
 from datafog.services.text_service_original import TextService
 
 

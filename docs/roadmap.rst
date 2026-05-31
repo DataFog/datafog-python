@@ -24,9 +24,10 @@ v4.4.0 should focus on:
 * Targeted deprecation warnings with no warnings on import.
 * Migration docs and release notes that announce the v5 path.
 
-Scope artifact:
+Scope artifacts:
 
 * :doc:`v44-bridge-release`
+* :doc:`v45-release-readiness`
 
 v5.0.0 - Offline PII Firewall for AI Apps
 -----------------------------------------
@@ -134,13 +135,29 @@ All features will remain backward compatible with the lightweight architecture.
 
 4.5.0
 ------
-Version ``4.5.0`` will introduce:
+Version ``4.5.0`` is a focus release for lightweight text PII screening. It
+should make the core package easier to install, reason about, test, and use
+before larger v5 middleware work.
 
-* **Enterprise features** in dedicated extras
-* **Advanced analytics** for PII detection patterns
-* **Multi-language support** for international PII types
-* **Cloud integration** helpers for AWS, GCP, Azure
-* **Performance monitoring** and metrics collection
+4.5.0 should focus on:
 
-The lightweight core will remain unchanged, ensuring existing
-integrations continue to work without modification.
+* Core text scanning, redaction, and guardrail helpers that stay dependency
+  light by default.
+* Clear install-profile documentation for core, NLP, OCR, Spark, CLI, and web
+  surfaces.
+* OCR and Spark as supported optional surfaces, not the main 4.5 adoption path.
+* Documentation cleanup so users and contributors can find the current package
+  story without reading historical planning material first.
+* German PII regex support if the external PR passes review and does not
+  compromise core precision.
+
+Deferred beyond 4.5.0:
+
+* Full middleware adapters for Sentry, OpenTelemetry, logging frameworks, or
+  cloud DLP services.
+* OCR architecture overhaul.
+* Spark architecture overhaul.
+* Enterprise dashboards and analytics.
+
+The lightweight core remains the first path; optional surfaces should stay
+explicit and isolated from default import, scan, redact, and guardrail usage.

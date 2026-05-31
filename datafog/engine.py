@@ -31,6 +31,13 @@ ALL_ENTITY_TYPES = {
     "SSN",
     "CREDIT_CARD",
     "IP_ADDRESS",
+    "DE_VAT_ID",
+    "DE_IBAN",
+    "DE_TAX_ID",
+    "DE_SOCIAL_SECURITY_NUMBER",
+    "DE_POSTAL_CODE",
+    "DE_PASSPORT_NUMBER",
+    "DE_RESIDENCE_PERMIT_NUMBER",
     "DATE",
     "ZIP_CODE",
     "PERSON",
@@ -40,6 +47,20 @@ ALL_ENTITY_TYPES = {
 }
 
 NER_ENTITY_TYPES = {"PERSON", "ORGANIZATION", "LOCATION", "ADDRESS"}
+
+ENTITY_TYPE_PRIORITY = {
+    "DE_IBAN": 100,
+    "DE_VAT_ID": 100,
+    "DE_TAX_ID": 100,
+    "DE_SOCIAL_SECURITY_NUMBER": 100,
+    "DE_POSTAL_CODE": 100,
+    "DE_PASSPORT_NUMBER": 100,
+    "DE_RESIDENCE_PERMIT_NUMBER": 100,
+    "CREDIT_CARD": 90,
+    "IP_ADDRESS": 80,
+    "SSN": 70,
+    "PHONE": 60,
+}
 
 
 @dataclass(frozen=True)
@@ -131,8 +152,40 @@ def _entities_from_dict(
     return entities
 
 
-def _regex_entities(text: str) -> list[Entity]:
-    annotator = RegexAnnotator()
+def _entity_length(entity: Entity) -> int:
+    return max(entity.end - entity.start, 0)
+
+
+def _entities_overlap(left: Entity, right: Entity) -> bool:
+    if left.start < 0 or right.start < 0:
+        return False
+    return left.start < right.end and right.start < left.end
+
+
+def _suppress_overlapping_entities(entities: list[Entity]) -> list[Entity]:
+    selected: list[Entity] = []
+    for entity in sorted(
+        entities,
+        key=lambda item: (
+            -_entity_length(item),
+            -ENTITY_TYPE_PRIORITY.get(item.type, 0),
+            item.start,
+            item.end,
+            item.type,
+        ),
+    ):
+        if any(_entities_overlap(entity, kept) for kept in selected):
+            continue
+        selected.append(entity)
+    return sorted(selected, key=lambda item: (item.start, item.end, item.type))
+
+
+def _regex_entities(
+    text: str,
+    entity_types: Optional[list[str]] = None,
+    locales: Optional[list[str]] = None,
+) -> list[Entity]:
+    annotator = RegexAnnotator(locales=locales, enabled_labels=entity_types)
     _, structured = annotator.annotate_with_spans(text)
     entities: list[Entity] = []
     for span in structured.spans:
@@ -148,7 +201,7 @@ def _regex_entities(text: str) -> list[Entity]:
                 engine="regex",
             )
         )
-    return entities
+    return _suppress_overlapping_entities(entities)
 
 
 def _spacy_entities(text: str) -> list[Entity]:
@@ -235,6 +288,7 @@ def scan(
     text: str,
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
+    locales: Optional[list[str]] = None,
 ) -> ScanResult:
     """Scan text for PII entities."""
     if not isinstance(text, str):
@@ -243,7 +297,11 @@ def scan(
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
 
-    regex_entities = _regex_entities(text)
+    regex_entities = _regex_entities(
+        text,
+        entity_types=entity_types,
+        locales=locales,
+    )
 
     if engine == "regex":
         filtered = _filter_entity_types(regex_entities, entity_types)
@@ -378,7 +436,13 @@ def scan_and_redact(
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
     strategy: str = "token",
+    locales: Optional[list[str]] = None,
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""
-    scan_result = scan(text=text, engine=engine, entity_types=entity_types)
+    scan_result = scan(
+        text=text,
+        engine=engine,
+        entity_types=entity_types,
+        locales=locales,
+    )
     return redact(text=text, entities=scan_result.entities, strategy=strategy)

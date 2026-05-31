@@ -63,6 +63,19 @@ def test_core_defaults_do_not_initialize_optional_engines(monkeypatch) -> None:
     guarded = guardrail.filter("Email jane@example.com")
     assert guarded.redacted_text == "Email [EMAIL_1]"
 
+    sanitized = datafog.sanitize("Email jane@example.com")
+    assert sanitized == "Email [EMAIL_1]"
+
+    prompt_result = datafog.scan_prompt("Email jane@example.com")
+    assert [entity.type for entity in prompt_result.entities] == ["EMAIL"]
+
+    output_result = datafog.filter_output("Email jane@example.com")
+    assert output_result.redacted_text == "Email [EMAIL_1]"
+
+    agent_guardrail = datafog.create_guardrail()
+    agent_guarded = agent_guardrail.filter("Email jane@example.com")
+    assert agent_guarded.redacted_text == "Email [EMAIL_1]"
+
 
 def test_import_probes_do_not_load_optional_models() -> None:
     _run_isolated_python(
@@ -92,5 +105,44 @@ sys.modules["gliner"] = gliner
 import datafog
 
 assert datafog.scan("Email jane@example.com").entities
+"""
+    )
+
+
+def test_core_path_does_not_import_optional_dependency_modules() -> None:
+    _run_isolated_python(
+        """
+import importlib.abc
+import sys
+
+blocked = {
+    "aiohttp",
+    "certifi",
+    "gliner",
+    "PIL",
+    "pyspark",
+    "pytesseract",
+    "spacy",
+    "torch",
+    "transformers",
+}
+
+class BlockOptionalImports(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split(".", 1)[0] in blocked:
+            raise AssertionError(f"optional dependency imported: {fullname}")
+        return None
+
+sys.meta_path.insert(0, BlockOptionalImports())
+
+import datafog
+
+assert datafog.scan("Email jane@example.com").entities
+assert datafog.redact("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
+assert datafog.protect().filter("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
+assert datafog.sanitize("Email jane@example.com") == "Email [EMAIL_1]"
+assert datafog.scan_prompt("Email jane@example.com").entities
+assert datafog.filter_output("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
+assert datafog.create_guardrail().filter("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
 """
     )

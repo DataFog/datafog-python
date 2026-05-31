@@ -9,6 +9,14 @@ It provides:
 - A simple agent-oriented API for LLM applications
 - Backward-compatible `DataFog` and `TextService` classes
 
+## 4.5 Focus
+
+DataFog 4.5 is focused on lightweight text PII screening: a small core install,
+fast regex-based scan/redact helpers, explicit optional extras, and a clearer
+path toward future middleware use cases. Dedicated Sentry, OpenTelemetry,
+logging-framework, and cloud DLP adapters are future-facing work and are not
+part of the 4.5 release.
+
 ## Installation
 
 ```bash
@@ -21,13 +29,20 @@ pip install datafog[nlp]
 # Add GLiNER + spaCy support
 pip install datafog[nlp-advanced]
 
+# Add local OCR support
+pip install datafog[ocr]
+
+# Add Spark/distributed support
+pip install datafog[distributed]
+
 # Everything
 pip install datafog[all]
 ```
 
-Python 3.13 support is certified for the core SDK and CLI. Optional extras such
-as `nlp`, `nlp-advanced`, `ocr`, `distributed`, and `all` are available but not
-yet certified on Python 3.13.
+Python 3.13 support is certified for the core SDK, CLI, `nlp`,
+`nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
+that is available locally before runtime use. `distributed` and `all` are not
+newly certified on Python 3.13 in the 4.5 line.
 
 ## Quick Start
 
@@ -62,6 +77,24 @@ print(datafog.sanitize("Card: 4111-1111-1111-1111", engine="regex"))
 # Card: [CREDIT_CARD_1]
 ```
 
+## German Structured PII
+
+German structured PII is country-specific and opt-in. Use explicit locale
+selection or entity-type filtering when you want German VAT IDs, German IBANs,
+tax IDs, postal codes, passports, or residence permits.
+
+```python
+import datafog
+
+text = "Steuer-ID 12345678901 liegt vor."
+
+print(datafog.scan(text, engine="regex").entities)
+# []
+
+print(datafog.scan(text, engine="regex", locales=["de"]).entities)
+# [Entity(type='DE_TAX_ID', text='12345678901', ...)]
+```
+
 ### Guardrails
 
 ```python
@@ -84,7 +117,8 @@ Use the engine that matches your accuracy and dependency constraints:
 
 - `regex`:
   - Fastest and always available.
-  - Best for structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DATE`, `ZIP_CODE`.
+  - Best for default structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DATE`, `ZIP_CODE`.
+  - Use `locales=["de"]` for German structured IDs such as `DE_VAT_ID`, `DE_IBAN`, `DE_TAX_ID`, `DE_POSTAL_CODE`, and passport or residence permit numbers.
 - `spacy`:
   - Requires `pip install datafog[nlp]`.
   - Useful for unstructured entities like person and organization names.
@@ -94,6 +128,31 @@ Use the engine that matches your accuracy and dependency constraints:
 - `smart`:
   - Cascades regex with optional NER engines.
   - If optional deps are missing, it degrades gracefully and warns.
+
+## Optional OCR And Spark Surfaces
+
+DataFog 4.5 keeps the main package story centered on lightweight text PII
+screening. OCR and Spark remain supported optional surfaces for users who
+already rely on them, but they are not required for the core import, default
+scan/redact helpers, or guardrail helpers.
+
+- OCR:
+  - Install `datafog[ocr]` for local image OCR helpers.
+  - URL-based image downloading also needs `datafog[web,ocr]`.
+  - Tesseract usage requires the system `tesseract` binary.
+  - Python 3.13 is validated for the OCR install profile, Pillow,
+    pytesseract, and system Tesseract smoke checks.
+  - Donut OCR requires `datafog[nlp-advanced,ocr]` and a model already available
+    locally.
+- Spark:
+  - Install `datafog[distributed]` for `SparkService`.
+  - Spark PII UDF helpers also require `datafog[nlp]` and an installed spaCy
+    model.
+  - A Java runtime is required by PySpark.
+
+OCR and Spark are not deprecated. Their broader API and packaging overhaul is
+deferred; the 4.5 goal is to keep them explicit, documented, and isolated from
+the lightweight core path.
 
 ## Backward-Compatible APIs
 
@@ -132,6 +191,9 @@ datafog replace-text "john@example.com"
 
 # Hash detected entities
 datafog hash-text "john@example.com"
+
+# Enable German regex identifiers
+datafog redact-text "Steuer-ID 12345678901" --locale de
 ```
 
 ## Telemetry

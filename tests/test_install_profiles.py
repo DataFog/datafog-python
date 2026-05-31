@@ -17,10 +17,13 @@ def test_install_profile_import_surface() -> None:
         assert datafog.scan("Email jane@example.com").entities
         assert datafog.redact("Email jane@example.com").redacted_text
     elif profile == "cli":
+        import click  # noqa: F401
+
         from datafog.client import app
 
         assert app is not None
     elif profile == "nlp":
+        import click  # noqa: F401
         import spacy  # noqa: F401
 
         from datafog.models.spacy_nlp import SpacyAnnotator
@@ -52,6 +55,8 @@ def test_install_profile_import_surface() -> None:
         assert DonutProcessor is not None
         assert ImageService is not None
         assert PytesseractProcessor is not None
+        if os.environ.get("DATAFOG_REQUIRE_TESSERACT"):
+            assert pytesseract.get_tesseract_version()
     elif profile == "distributed":
         from datafog.processing.spark_processing import pyspark_udfs
         from datafog.services.spark_service import SparkService

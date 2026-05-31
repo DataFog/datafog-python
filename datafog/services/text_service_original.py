@@ -1,4 +1,11 @@
-"""Text processing service for PII annotation.
+"""Historical shadow text service module.
+
+This file is not the live DataFog 4.5 text service. Use
+``datafog/services/text_service.py`` for the current regex, spaCy, GLiNER,
+auto, and smart engine boundary. This original snapshot remains importable for
+legacy tests until cleanup can remove it safely.
+
+Text processing service for PII annotation.
 
 Provides synchronous and asynchronous methods for annotating text with personally identifiable information (PII) using SpaCy or regex patterns. Supports chunking long texts and batch processing.
 """
