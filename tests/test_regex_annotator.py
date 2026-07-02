@@ -371,3 +371,18 @@ def test_annotation_result_format():
 
     assert len(ssn_spans) >= 1
     assert ssn_spans[0].text == "123-45-6789"
+
+
+def test_ssn_detection_keeps_v44_behavior_for_country_prefixed_digits():
+    """Regression guard: bare nine-digit runs after a country prefix must
+    still match SSN when no locale is configured (v4.4.0 parity). The
+    DE_VAT_ID overlap is resolved by engine-level span suppression only
+    when German locale support is active, never by weakening the base
+    SSN pattern."""
+    annotator = RegexAnnotator()
+    for text in (
+        "Reference DE 123456789 was issued.",
+        "Reference DE-123456789 was issued.",
+        "Reference DE123456789 was issued.",
+    ):
+        assert annotator.annotate(text)["SSN"] == ["123456789"], text

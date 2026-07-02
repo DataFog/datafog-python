@@ -53,7 +53,7 @@ class RegexAnnotator:
         enabled_labels: Iterable[str] | None = None,
     ):
         self.locales = self._normalize_locales(locales)
-        self.active_labels = self._resolve_active_labels(enabled_labels)
+        self.active_labels = self.active_labels_for(self.locales, enabled_labels)
 
         # Compile all patterns once at initialization
         all_patterns: Dict[str, Pattern] = {
@@ -100,20 +100,19 @@ class RegexAnnotator:
             ),
             # SSN pattern - U.S. Social Security Number
             # Supports dashed and no-dash formats.
+            # Note: overlaps with locale-gated labels (e.g. the nine-digit run
+            # inside a DE_VAT_ID) are resolved by the engine's span-overlap
+            # suppression, not here, so default (EN) detection keeps v4.4.0
+            # behavior even when German labels are active.
             "SSN": re.compile(
                 r"""
+                (?<!\d)
                 (?:
-                    (?<!\d)
                     (?!000|666)\d{3}-(?!00)\d{2}-(?!0000)\d{4}
-                    (?!\d)
                     |
-                    (?<![A-Za-z0-9])
-                    (?<!DE)
-                    (?<!DE\s)
-                    (?<!DE-)
                     (?!000|666)\d{3}(?!00)\d{2}(?!0000)\d{4}
-                    (?![A-Za-z0-9])
                 )
+                (?!\d)
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -347,13 +346,19 @@ class RegexAnnotator:
             normalized.append(value)
         return tuple(dict.fromkeys(normalized))
 
-    def _resolve_active_labels(self, enabled_labels: Iterable[str] | None) -> list[str]:
-        active = set(self.DEFAULT_LABELS)
-        for locale in self.locales:
-            active.update(self.LOCALE_LABELS[locale])
+    @classmethod
+    def active_labels_for(
+        cls,
+        locales: str | Iterable[str] | None = None,
+        enabled_labels: Iterable[str] | None = None,
+    ) -> list[str]:
+        """Resolve the labels active for the given locales and explicit labels."""
+        active = set(cls.DEFAULT_LABELS)
+        for locale in cls._normalize_locales(locales):
+            active.update(cls.LOCALE_LABELS[locale])
         if enabled_labels is not None:
             active.update(label.strip().upper() for label in enabled_labels)
-        return [label for label in self.LABELS if label in active]
+        return [label for label in cls.LABELS if label in active]
 
     @staticmethod
     def _match_text(match: Match[str]) -> str:
