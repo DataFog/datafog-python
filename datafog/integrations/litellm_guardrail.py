@@ -46,11 +46,22 @@ VALID_FAIL_POLICIES = {"open", "closed"}
 logger = logging.getLogger(__name__)
 
 
-def _redact_text(text: str, entity_types: list[str]) -> tuple[str, dict[str, int]]:
+def _redact_text(
+    text: str,
+    entity_types: list[str],
+    allowlist: list[str] | None = None,
+    allowlist_patterns: list[str] | None = None,
+) -> tuple[str, dict[str, int]]:
     """Redact ``text``; return (redacted_text, counts per entity type)."""
     import datafog
 
-    result = datafog.redact(text, engine="regex", entity_types=entity_types)
+    result = datafog.redact(
+        text,
+        engine="regex",
+        entity_types=entity_types,
+        allowlist=allowlist,
+        allowlist_patterns=allowlist_patterns,
+    )
     counts: dict[str, int] = {}
     for entity in result.entities:
         counts[entity.type] = counts.get(entity.type, 0) + 1
@@ -69,6 +80,8 @@ class DataFogGuardrail(CustomGuardrail):
         action: str = "redact",
         entity_types: Optional[list[str]] = None,
         fail_policy: str = "open",
+        allowlist: Optional[list[str]] = None,
+        allowlist_patterns: Optional[list[str]] = None,
         **kwargs: Any,
     ) -> None:
         if action not in VALID_ACTIONS:
@@ -80,13 +93,17 @@ class DataFogGuardrail(CustomGuardrail):
         self.action = action
         self.entity_types = entity_types or DEFAULT_ENTITY_TYPES
         self.fail_policy = fail_policy
+        self.allowlist = allowlist
+        self.allowlist_patterns = allowlist_patterns
         super().__init__(**kwargs)
 
     def _process_content(self, content: Any) -> tuple[Any, dict[str, int]]:
         """Redact a message content value (str or list of content parts)."""
         counts: dict[str, int] = {}
         if isinstance(content, str):
-            redacted, counts = _redact_text(content, self.entity_types)
+            redacted, counts = _redact_text(
+                content, self.entity_types, self.allowlist, self.allowlist_patterns
+            )
             return redacted, counts
         if isinstance(content, list):
             new_parts = []
@@ -94,7 +111,10 @@ class DataFogGuardrail(CustomGuardrail):
             for part in content:
                 if isinstance(part, dict) and isinstance(part.get("text"), str):
                     redacted, part_counts = _redact_text(
-                        part["text"], self.entity_types
+                        part["text"],
+                        self.entity_types,
+                        self.allowlist,
+                        self.allowlist_patterns,
                     )
                     new_parts.append({**part, "text": redacted})
                     for etype, n in part_counts.items():
@@ -160,9 +180,8 @@ class DataFogGuardrail(CustomGuardrail):
         if not total_counts:
             return data
 
-        self._record_guardrail_logging(data, total_counts)
-
         if self.action == "block":
+            self._record_guardrail_logging(data, total_counts)
             # HTTPException(400) is one of the exception types litellm's
             # _is_guardrail_intervention recognizes, so the block is
             # classified as a policy intervention (not a backend failure)
@@ -178,7 +197,9 @@ class DataFogGuardrail(CustomGuardrail):
                 },
             )
 
-        return {**data, "messages": new_messages}
+        new_data = {**data, "messages": new_messages}
+        self._record_guardrail_logging(new_data, total_counts)
+        return new_data
 
     def _record_guardrail_logging(
         self, data: dict, total_counts: dict[str, int]
@@ -188,9 +209,7 @@ class DataFogGuardrail(CustomGuardrail):
             self.add_standard_logging_guardrail_information_to_request_data(
                 guardrail_json_response=_summary(total_counts),
                 request_data=data,
-                guardrail_status=(
-                    "guardrail_intervened" if self.action == "block" else "success"
-                ),
+                guardrail_status="guardrail_intervened",
                 masked_entity_count=dict(total_counts),
             )
         except Exception:  # noqa: BLE001 — observability must never break traffic
@@ -217,7 +236,12 @@ class DataFogGuardrail(CustomGuardrail):
             for choice in choices:
                 message = getattr(choice, "message", None)
                 if message is not None and isinstance(message.content, str):
-                    redacted, counts = _redact_text(message.content, self.entity_types)
+                    redacted, counts = _redact_text(
+                        message.content,
+                        self.entity_types,
+                        self.allowlist,
+                        self.allowlist_patterns,
+                    )
                     if counts:
                         message.content = redacted
                 elif message is not None and message.content is not None:

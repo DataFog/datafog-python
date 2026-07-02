@@ -2,6 +2,41 @@
 
 ## [2026-07-02]
 
+### `datafog-python` [4.7.0]
+
+#### Added
+
+- **Allowlist support** on `scan()` and `redact()`: `allowlist=[...]` exempts
+  exact entity texts (your own support address, documentation placeholders);
+  `allowlist_patterns=[...]` exempts entities whose full text matches a regex
+  (e.g. `^\d{10}$` so unix timestamps stop matching as phone numbers).
+  Matching is deliberately strict: case-sensitive, no Unicode normalization,
+  exact/fullmatch only — a partial match never suppresses a finding.
+  Threaded through both agent adapters: `DATAFOG_HOOK_ALLOWLIST` /
+  `DATAFOG_HOOK_ALLOWLIST_PATTERNS` environment variables for the Claude
+  Code hook, `allowlist` / `allowlist_patterns` parameters for the LiteLLM
+  guardrail. Patterns are operator configuration — treat them like code and
+  never accept them from end users; patterns with nested quantifiers are
+  rejected at configuration time (catastrophic-backtracking guard), pattern
+  length is capped at 512 characters, and entities longer than 512
+  characters skip pattern matching fail-safe (the finding is kept).
+- **Presidio-compatible entity aliases**: `EMAIL_ADDRESS` and `US_SSN` are
+  accepted as input aliases for `EMAIL` and `SSN` (joining the existing
+  `PHONE_NUMBER` alias), so Presidio configurations migrate without renames.
+- **`py.typed` marker**: the package now advertises its inline type
+  annotations to type checkers (PEP 561).
+
+#### Changed
+
+- **LiteLLM guardrail observability**: redaction events are now recorded
+  with `guardrail_status="guardrail_intervened"` (previously `"success"`),
+  so compliance dashboards flag redactions as interventions. Guardrail
+  logging metadata is attached to the request dict actually returned in
+  redact mode, fixing dropped observability records for requests arriving
+  without a pre-existing `metadata` key.
+- Documentation: corrected the engine entity-type list — the scan API
+  returns `DATE` and `ZIP_CODE`; `DOB` and `ZIP` are accepted input aliases.
+
 ### `datafog-python` [4.6.0]
 
 #### Added
