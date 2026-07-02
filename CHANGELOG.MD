@@ -2,6 +2,34 @@
 
 ## [2026-07-02]
 
+### `datafog-python` [4.6.0]
+
+#### Added
+
+- **Claude Code hook adapter** (`datafog-hook` console script,
+  `datafog/integrations/claude_code.py`): an offline PII firewall for
+  agent tool calls. `PreToolUse` gates egress tools (Bash, WebFetch,
+  Write/Edit, MCP tools) with `ask` or `deny` decisions when tool input
+  contains PII; `UserPromptSubmit` and `PostToolUse` inject non-blocking
+  warnings. Core-only dependencies, ~70ms per invocation including
+  process startup, fail-open by design, and findings are reported as
+  entity-type counts only — matched values are never echoed. See
+  `examples/claude_code_hook/` for setup, recommended `deny`
+  configuration (survives `--dangerously-skip-permissions`), and
+  documented limitations.
+- **LiteLLM guardrail adapter**
+  (`datafog.integrations.litellm_guardrail.DataFogGuardrail`): redact or
+  block PII at the gateway for any LiteLLM-proxied provider. `pre_call`
+  rewrites request messages in place (`[EMAIL_1]`-style tokens) before
+  egress or rejects with HTTP 400; `post_call` redacts model responses.
+  Configurable `fail_policy` (`open`/`closed`) and entity types;
+  in-process at ~31µs per request — no sidecar service. See
+  `examples/litellm_guardrail/`.
+
+Both adapters default to the high-precision entity set (`EMAIL`, `PHONE`,
+`CREDIT_CARD`, `SSN`); noisier types (`IP_ADDRESS`, `DOB`, `ZIP`) are
+opt-in. No changes to the core library or its dependencies.
+
 ### `datafog-python` [4.5.0]
 
 #### Behavior Changes Since 4.4.0
