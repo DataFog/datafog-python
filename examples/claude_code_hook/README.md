@@ -21,14 +21,14 @@ Then add the hook to `~/.claude/settings.json` (all projects) or
       {
         "matcher": "Bash|WebFetch|WebSearch|Write|Edit|mcp__.*",
         "hooks": [
-          {"type": "command", "command": "datafog-hook", "timeout": 10}
+          { "type": "command", "command": "datafog-hook", "timeout": 10 }
         ]
       }
     ],
     "UserPromptSubmit": [
       {
         "hooks": [
-          {"type": "command", "command": "datafog-hook", "timeout": 10}
+          { "type": "command", "command": "datafog-hook", "timeout": 10 }
         ]
       }
     ],
@@ -36,7 +36,7 @@ Then add the hook to `~/.claude/settings.json` (all projects) or
       {
         "matcher": "Read|Bash|WebFetch|mcp__.*",
         "hooks": [
-          {"type": "command", "command": "datafog-hook", "timeout": 10}
+          { "type": "command", "command": "datafog-hook", "timeout": 10 }
         ]
       }
     ]
@@ -52,11 +52,11 @@ card number — the call is intercepted before it runs:
 
 ## What each hook does
 
-| Event | Behavior |
-|---|---|
-| `PreToolUse` | Gates the tool call. Default `ask` shows you what was found; `deny` blocks and tells Claude to redact and retry. |
-| `UserPromptSubmit` | Non-blocking. Warns Claude your prompt contains PII so it avoids repeating it into files, code, or logs. |
-| `PostToolUse` | Non-blocking. Warns when a tool result (file read, API response) carries PII into the conversation. |
+| Event              | Behavior                                                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `PreToolUse`       | Gates the tool call. Default `ask` shows you what was found; `deny` blocks and tells Claude to redact and retry. |
+| `UserPromptSubmit` | Non-blocking. Warns Claude your prompt contains PII so it avoids repeating it into files, code, or logs.         |
+| `PostToolUse`      | Non-blocking. Warns when a tool result (file read, API response) carries PII into the conversation.              |
 
 ## Configuration
 
@@ -69,11 +69,16 @@ Environment variables (set in `settings.json` `env` or your shell):
   relaxed (exactly when you most need a firewall), use `deny`:
 
   ```json
-  {"type": "command", "command": "DATAFOG_HOOK_ACTION=deny datafog-hook", "timeout": 10}
+  {
+    "type": "command",
+    "command": "DATAFOG_HOOK_ACTION=deny datafog-hook",
+    "timeout": 10
+  }
   ```
 
   In `deny` mode the tool call is hard-blocked before it executes, the
   model is told what was found, and it self-corrects by redacting.
+
 - `DATAFOG_HOOK_ENTITIES` — comma-separated entity types. Default:
   `EMAIL,PHONE,CREDIT_CARD,SSN`. Noisier types (`IP_ADDRESS`, `DOB`, `ZIP`)
   are available but opt-in — version strings, dates, and 5-digit numbers are
@@ -93,12 +98,12 @@ That's what the `Write|Edit|Bash|mcp__.*` gates cover: the moment PII is
 tool input and the firewall fires — before the write, before the network
 call.
 
-What this does *not* cover: PII you hand the agent directly (a bank
+What this does _not_ cover: PII you hand the agent directly (a bank
 statement, a log file). By the time anything local can scan it, it is
 already in the session context, already sent to the model API, and already
 in your local transcript files. The hook warns the model so it avoids
 repeating those values, but the inbound event itself is not preventable at
-the hook layer — redact *before* sharing (`datafog redact` on a copy) if
+the hook layer — redact _before_ sharing (`datafog redact` on a copy) if
 the model provider must not see the data.
 
 ## Limitations
