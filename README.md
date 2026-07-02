@@ -20,8 +20,15 @@ values never echoed into logs or transcripts:
 - **Claude Code hook** (`datafog-hook`): gates agent tool calls (shell
   commands, web requests, file writes, MCP tools) and warns the model when
   prompts or tool results carry PII. ~70ms per invocation including process
-  startup. Setup and limitations: [examples/claude_code_hook/](examples/claude_code_hook/),
-  or install via the [Claude Code plugin](https://github.com/DataFog/datafog-claude-plugin).
+  startup. Easiest install is the
+  [Claude Code plugin](https://github.com/DataFog/datafog-claude-plugin):
+
+  ```
+  /plugin marketplace add DataFog/datafog-claude-plugin
+  /plugin install datafog@datafog
+  ```
+
+  Manual hook setup and limitations: [examples/claude_code_hook/](examples/claude_code_hook/).
 - **LiteLLM guardrail** (`DataFogGuardrail`): redacts or blocks PII in
   requests and responses at the gateway, for any LiteLLM-proxied provider.
   In-process (~31µs per request), no sidecar service. Setup:
