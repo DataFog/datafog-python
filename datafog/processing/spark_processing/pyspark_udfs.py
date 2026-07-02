@@ -2,17 +2,16 @@
 PySpark UDFs for PII annotation and related utilities.
 
 This module provides functions for PII (Personally Identifiable Information) annotation
-using SpaCy models in a PySpark environment. It includes utilities for installing
-dependencies, creating and broadcasting PII annotator UDFs, and performing PII annotation
-on text data.
+using SpaCy models in a PySpark environment. It includes utilities for validating
+dependencies, creating and broadcasting PII annotator UDFs, and performing PII
+annotation on text data.
 """
 
 import importlib
-import subprocess
-import sys
 
 PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
 MAXIMAL_STRING_SIZE = 1000000
+DEFAULT_SPACY_MODEL = "en_core_web_lg"
 
 
 def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
@@ -45,7 +44,7 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
 
 
 def broadcast_pii_annotator_udf(
-    spark_session=None, spacy_model: str = "en_core_web_lg"
+    spark_session=None, spacy_model: str = DEFAULT_SPACY_MODEL
 ):
     """Broadcast PII annotator across Spark cluster and create UDF"""
     ensure_installed("pyspark")
@@ -69,5 +68,14 @@ def broadcast_pii_annotator_udf(
 def ensure_installed(package_name):
     try:
         importlib.import_module(package_name)
-    except ImportError:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    except ImportError as exc:
+        if package_name == "pyspark":
+            extra = "distributed"
+        elif package_name == "spacy":
+            extra = "nlp"
+        else:
+            extra = "all"
+        raise ImportError(
+            f"{package_name} is required for Spark PII UDF support. "
+            f"Install with: pip install datafog[{extra}]"
+        ) from exc

@@ -21,8 +21,8 @@ default:
 # Set up the development environment
 setup:
     python -m venv {{venv_dir}}
-    {{pip}} install -e ".[dev]"
-    {{pip}} install isort black blacken-docs flake8 tox coverage pytest pytest-cov
+    {{pip}} install -e ".[dev,cli]"
+    {{pip}} install -r requirements-dev.txt
 
 # Format the code
 format:

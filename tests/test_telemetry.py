@@ -1,6 +1,8 @@
 """Tests for datafog.telemetry module."""
 
+import builtins
 import json
+import sys
 import threading
 import time
 from pathlib import Path
@@ -243,28 +245,88 @@ class TestNonBlocking:
     def test_send_event_returns_immediately(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import _send_event
 
-        # Make urlopen block
-        mock_urlopen.side_effect = lambda *a, **k: time.sleep(10)
+        release_network = threading.Event()
 
-        start = time.monotonic()
-        _send_event("test", {"k": "v"})
-        elapsed = time.monotonic() - start
+        def block_until_released(*args, **kwargs):
+            release_network.wait(5)
 
-        # Should return in <100ms even though urlopen blocks for 10s
-        assert elapsed < 0.1
+        mock_urlopen.side_effect = block_until_released
+
+        call_done = threading.Event()
+        caller = threading.Thread(
+            target=lambda: (_send_event("test", {"k": "v"}), call_done.set())
+        )
+
+        try:
+            caller.start()
+            assert call_done.wait(1)
+            assert not release_network.is_set()
+        finally:
+            release_network.set()
+            caller.join(1)
 
     def test_track_function_call_returns_immediately(
         self, mock_urlopen, enable_telemetry
     ):
         from datafog.telemetry import track_function_call
 
-        mock_urlopen.side_effect = lambda *a, **k: time.sleep(10)
+        release_network = threading.Event()
 
-        start = time.monotonic()
-        track_function_call("fn", "mod")
-        elapsed = time.monotonic() - start
+        def block_until_released(*args, **kwargs):
+            release_network.wait(5)
 
-        assert elapsed < 0.1
+        mock_urlopen.side_effect = block_until_released
+
+        call_done = threading.Event()
+        caller = threading.Thread(
+            target=lambda: (track_function_call("fn", "mod"), call_done.set())
+        )
+
+        try:
+            caller.start()
+            assert call_done.wait(1)
+            assert not release_network.is_set()
+        finally:
+            release_network.set()
+            caller.join(1)
+
+    def test_track_function_call_does_not_wait_for_init_metadata(
+        self, monkeypatch, enable_telemetry
+    ):
+        import datafog.telemetry as tel
+
+        call_done = threading.Event()
+        detect_started = threading.Event()
+        release_detect = threading.Event()
+        init_posted = threading.Event()
+
+        def slow_detect_installed_extras():
+            detect_started.set()
+            release_detect.wait(5)
+            return []
+
+        def fake_post_event(event_name, properties):
+            if event_name == "datafog_init":
+                init_posted.set()
+
+        monkeypatch.setattr(
+            tel, "_detect_installed_extras", slow_detect_installed_extras
+        )
+        monkeypatch.setattr(tel, "_post_event", fake_post_event)
+
+        caller = threading.Thread(
+            target=lambda: (tel.track_function_call("fn", "mod"), call_done.set())
+        )
+
+        try:
+            caller.start()
+            assert detect_started.wait(1)
+            assert call_done.wait(1)
+        finally:
+            release_detect.set()
+            caller.join(1)
+
+        assert init_posted.wait(1)
 
     def test_network_failure_is_silent(self, mock_urlopen, enable_telemetry):
         from datafog.telemetry import track_function_call
@@ -568,6 +630,61 @@ class TestEdgeCases:
 
         result = _detect_installed_extras()
         assert isinstance(result, list)
+
+    def test_detect_installed_extras_does_not_import_optional_modules(
+        self, monkeypatch
+    ):
+        from datafog.telemetry import _detect_installed_extras
+
+        real_import = builtins.__import__
+        optional_modules = {"spacy", "gliner", "pytesseract", "typer", "pyspark"}
+
+        def guarded_import(name, *args, **kwargs):
+            if name.split(".", 1)[0] in optional_modules:
+                raise AssertionError(f"imported optional module {name}")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", guarded_import)
+
+        result = _detect_installed_extras()
+        assert isinstance(result, list)
+
+    def test_detect_installed_extras_handles_probe_errors(self, monkeypatch):
+        import datafog.telemetry as tel
+
+        optional_modules = {"spacy", "gliner", "pytesseract", "typer", "pyspark"}
+        for module_name in optional_modules:
+            monkeypatch.delitem(sys.modules, module_name, raising=False)
+
+        def broken_find_spec(_module_name):
+            raise ValueError("invalid module state")
+
+        monkeypatch.setattr(tel.importlib.util, "find_spec", broken_find_spec)
+
+        assert tel._detect_installed_extras() == []
+
+    def test_send_init_event_uses_unknown_version_when_about_import_fails(
+        self, monkeypatch
+    ):
+        import datafog.telemetry as tel
+
+        init_posted = threading.Event()
+        captured = {}
+
+        monkeypatch.setitem(sys.modules, "datafog.__about__", None)
+
+        def fake_post_event(event_name, properties):
+            captured["event_name"] = event_name
+            captured["properties"] = properties
+            init_posted.set()
+
+        monkeypatch.setattr(tel, "_post_event", fake_post_event)
+
+        tel._send_init_event()
+
+        assert init_posted.wait(1)
+        assert captured["event_name"] == "datafog_init"
+        assert captured["properties"]["package_version"] == "unknown"
 
     def test_services_init_does_not_require_aiohttp(self):
         """TextService should be importable without aiohttp/PIL (services/__init__.py fix)."""

@@ -61,11 +61,11 @@ jobs:
             BRANCH="dev"
           fi
 
-          echo "release_type=$TYPE" >> $GITHUB_OUTPUT
-          echo "target_branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "release_type=$TYPE" >> "$GITHUB_OUTPUT"
+          echo "target_branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "Release type: $TYPE from $BRANCH"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ steps.resolve.outputs.target_branch }}
@@ -86,15 +86,15 @@ jobs:
           if [ -z "$LAST_TAG" ]; then
             COMMIT_COUNT=$(git rev-list --count --since="7 days ago" HEAD)
           else
-            COMMIT_COUNT=$(git rev-list --count ${LAST_TAG}..HEAD)
+            COMMIT_COUNT=$(git rev-list --count "${LAST_TAG}..HEAD")
           fi
 
           echo "Commits since ${LAST_TAG:-'(none)'}: $COMMIT_COUNT"
 
           if [ "$COMMIT_COUNT" -gt 0 ] || [ "${{ inputs.force_build }}" = "true" ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "No changes detected, skipping release"
           fi
 
@@ -107,13 +107,13 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ needs.determine-release.outputs.target_branch }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -126,9 +126,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[all,dev]"
-          pip install -r requirements-dev.txt
-          pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
+          pip install -e ".[all,test]"
+          pip install -r requirements-test.txt
+          python -m spacy download en_core_web_lg
+          datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
 
       - name: Run tests with segfault protection
         run: |
@@ -144,13 +145,13 @@ jobs:
     if: needs.determine-release.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ needs.determine-release.outputs.target_branch }}
 
       - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
           cache: "pip"
@@ -158,8 +159,7 @@ jobs:
       - name: Install core + CLI dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov coverage
-          pip install -e ".[dev,cli]"
+          pip install -e ".[test,cli]" -r requirements-test.txt
 
       - name: Run Python 3.13 core + CLI tests
         run: |
@@ -177,14 +177,14 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ needs.determine-release.outputs.target_branch }}
           token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -241,7 +241,7 @@ jobs:
             VERSION="$BASE"
           fi
 
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Publishing version: $VERSION"
 
           sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" datafog/__about__.py
@@ -322,7 +322,7 @@ jobs:
     if: needs.determine-release.outputs.release_type != 'stable' && inputs.dry_run != true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Prune old alpha releases (keep 7)
         if: needs.determine-release.outputs.release_type == 'alpha'

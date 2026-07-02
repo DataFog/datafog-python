@@ -1,0 +1,3 @@
+# Benchmark-only dependencies.
+-r requirements-test.txt
+pytest-benchmark==4.0.0

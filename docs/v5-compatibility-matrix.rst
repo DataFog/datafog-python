@@ -134,6 +134,8 @@ Compatibility Matrix
      - Parallel historical implementations.
      - Remove or make private after migration path.
      - Consolidate around the v5 core and delete duplicate runtime surfaces.
+       In 4.5 these files are marked as non-live shadow modules; removal is
+       deferred until legacy tests are migrated or intentionally dropped.
 
 Warning Policy
 --------------

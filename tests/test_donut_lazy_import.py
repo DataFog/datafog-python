@@ -1,24 +1,36 @@
+import os
+import subprocess
 import sys
-from unittest.mock import patch
+from pathlib import Path
 
-from datafog.services.image_service import ImageService
+
+def _run_isolated_python(script: str) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(Path.cwd())
+    env["DATAFOG_NO_TELEMETRY"] = "1"
+    env["DO_NOT_TRACK"] = "1"
+    return subprocess.run(
+        [sys.executable, "-c", script],
+        check=True,
+        env=env,
+        text=True,
+        capture_output=True,
+    )
 
 
 def test_no_torch_import_when_donut_disabled():
     """Test that torch is not imported when use_donut is False"""
-    # Remove torch and transformers from sys.modules if they're already imported
-    if "torch" in sys.modules:
-        del sys.modules["torch"]
-    if "transformers" in sys.modules:
-        del sys.modules["transformers"]
+    _run_isolated_python(
+        """
+import sys
+from datafog.services.image_service import ImageService
 
-    # Create ImageService with use_donut=False
-    # The variable is used indirectly by creating the service which affects sys.modules
-    _ = ImageService(use_donut=False, use_tesseract=True)
+_ = ImageService(use_donut=False, use_tesseract=True)
 
-    # Verify that torch and transformers were not imported
-    assert "torch" not in sys.modules
-    assert "transformers" not in sys.modules
+assert "torch" not in sys.modules
+assert "transformers" not in sys.modules
+"""
+    )
 
 
 def test_lazy_import_mechanism():
@@ -27,40 +39,16 @@ def test_lazy_import_mechanism():
     # to use lazy imports. We don't need to actually test the imports themselves,
     # just that the structure is correct.
 
-    # First, ensure torch and transformers are not in sys.modules
-    if "torch" in sys.modules:
-        del sys.modules["torch"]
-    if "transformers" in sys.modules:
-        del sys.modules["transformers"]
+    _run_isolated_python(
+        """
+import sys
+from datafog.processing.image_processing.donut_processor import DonutProcessor
 
-    # Import the DonutProcessor directly
-    from datafog.processing.image_processing.donut_processor import DonutProcessor
+processor = DonutProcessor()
 
-    # Create a processor instance
-    processor = DonutProcessor()
-
-    # Verify that torch and transformers were not imported just by creating the processor
-    assert "torch" not in sys.modules
-    assert "transformers" not in sys.modules
-
-    # Verify that the extract_text_from_image method exists
-    assert hasattr(processor, "extract_text_from_image")
-
-    # Mock importlib.import_module to prevent actual imports
-    with patch("importlib.import_module") as mock_import:
-        # Set up the mock to return a dummy module
-        mock_import.return_value = type("DummyModule", (), {})
-
-        # Mock the ensure_installed method to prevent actual installation
-        with patch.object(processor, "ensure_installed"):
-            # Try to call extract_text_from_image which should trigger imports
-            try:
-                # We don't actually need to run it asynchronously for this test
-                # Just call the method directly to see if it tries to import
-                processor.ensure_installed("torch")
-            except Exception:
-                # Ignore any exceptions
-                pass
-
-            # Verify ensure_installed was called
-            assert processor.ensure_installed.called
+assert "torch" not in sys.modules
+assert "transformers" not in sys.modules
+assert hasattr(processor, "extract_text_from_image")
+assert not hasattr(processor, "ensure_installed")
+"""
+    )
