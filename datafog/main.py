@@ -184,7 +184,10 @@ class DataFog:
         _start = _time.monotonic()
 
         scan_result = scan(text=text, engine="regex", locales=self.locales)
-        result = {label: [] for label in RegexAnnotator.LABELS}
+        # Only pre-populate keys for labels active under the configured
+        # locales so the default output shape matches v4.4.0 (no DE_* keys
+        # unless German locale support is enabled).
+        result = {label: [] for label in RegexAnnotator.active_labels_for(self.locales)}
         legacy_map = {"DATE": "DOB", "ZIP_CODE": "ZIP"}
         for entity in scan_result.entities:
             label = legacy_map.get(entity.type, entity.type)

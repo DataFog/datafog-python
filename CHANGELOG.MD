@@ -1,8 +1,26 @@
 # ChangeLog
 
-## [Unreleased]
+## [2026-07-02]
 
 ### `datafog-python` [4.5.0]
+
+#### Behavior Changes Since 4.4.0
+
+- Agent guardrail helpers (`sanitize`, `scan_prompt`, `filter_output`,
+  `create_guardrail`, and the `Guardrail` class) now default to
+  `engine="regex"` instead of `engine="smart"`, matching the top-level
+  `scan`/`redact`/`protect` defaults. This keeps the core install from
+  probing optional NLP dependencies, but means NER-backed entities
+  (PERSON, ORGANIZATION, LOCATION) are no longer detected by these
+  helpers unless requested. **Migration:** pass `engine="smart"` to
+  restore the 4.4.0 behavior (requires `datafog[nlp]` or
+  `datafog[nlp-advanced]`).
+- `DataFog.detect()` / `DataFog.scan_text()` result dictionaries now
+  contain keys only for the labels active under the configured locales:
+  the seven base labels by default, plus the `DE_*` labels when
+  constructed with `locales=["de"]`.
+- Supported Python versions are `>=3.10,<3.14`. Python 3.14 is not yet
+  certified and is intentionally excluded from this release.
 
 #### Release Thesis
 
@@ -25,11 +43,15 @@
 
 - Adds regex-only German structured PII support without adding core
   dependencies.
-- Detects German VAT IDs and German IBANs by default because their country-code
-  structure is precise enough for default screening.
-- Enables broader German identifiers only through `locales=["de"]` or explicit
-  entity selection, including German tax IDs, pension insurance numbers,
-  postal codes, passport numbers, and residence permit numbers.
+- All German identifiers are locale-gated: they activate only through
+  `locales=["de"]` or explicit entity selection. This covers German VAT
+  IDs, IBANs, tax IDs, pension insurance numbers, postal codes, passport
+  numbers, and residence permit numbers. Default (no-locale) detection
+  behavior is unchanged from 4.4.0.
+- When German locale support is active, overlapping matches (e.g. the
+  nine-digit run inside a VAT ID also matching the generic SSN pattern)
+  are resolved by engine-level span-overlap suppression in favor of the
+  more specific German label.
 
 #### Optional Profiles And Python 3.13
 
@@ -61,9 +83,9 @@
 - Adds a 4.5 release-readiness checklist covering docs build, formatting,
   core no-network checks, install-profile smoke checks, German regex tests,
   broad non-slow tests, package build checks, and final CI status.
-- Clarifies the version alignment path: the development package remains
-  `4.4.0a5` until stable release promotion, and the final stable release should
-  publish as `4.5.0`.
+- Clarifies the version alignment path: development prereleases publish as
+  `4.5.0aN`/`4.5.0bN` from `dev`, and the stable release publishes as
+  `4.5.0` via the Release workflow's `stable` dispatch from `main`.
 
 ## [2026-02-13]
 

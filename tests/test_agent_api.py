@@ -2,10 +2,22 @@
 
 from __future__ import annotations
 
+import inspect
+
 import pytest
 
 import datafog
-from datafog.agent import GuardrailBlockedError
+from datafog.agent import Guardrail, GuardrailBlockedError
+
+
+def test_agent_helpers_default_to_regex_engine() -> None:
+    """4.5 lean-core contract: guardrail helpers stay on the regex path
+    unless an engine is explicitly requested (changed from "smart" in 4.5.0;
+    see CHANGELOG behavior changes)."""
+    assert Guardrail().engine == "regex"
+    assert datafog.create_guardrail().engine == "regex"
+    for helper in (datafog.sanitize, datafog.scan_prompt, datafog.filter_output):
+        assert inspect.signature(helper).parameters["engine"].default == "regex"
 
 
 def test_sanitize_redacts_structured_pii() -> None:

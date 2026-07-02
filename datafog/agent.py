@@ -44,7 +44,12 @@ class GuardrailWatch:
 
 @dataclass
 class Guardrail:
-    """Reusable text guardrail for wrapping LLM prompts and outputs."""
+    """Reusable text guardrail for wrapping LLM prompts and outputs.
+
+    Defaults to the lightweight regex engine (changed from "smart" in 4.5.0)
+    so the core install never probes optional NLP dependencies; pass
+    ``engine="smart"`` to restore NER-backed detection.
+    """
 
     entity_types: Optional[list[str]] = None
     locales: Optional[list[str]] = None
@@ -119,6 +124,10 @@ def sanitize(text: str, engine: str = "regex", **kwargs: Any) -> str:
     One-liner PII removal.
 
     Returns the redacted text only.
+
+    Uses the lightweight regex engine by default (changed from "smart" in
+    4.5.0); pass ``engine="smart"`` for NER-backed detection, which requires
+    the optional NLP extras.
     """
     result = scan_and_redact(text=text, engine=engine, **kwargs)
     return result.redacted_text
@@ -127,6 +136,9 @@ def sanitize(text: str, engine: str = "regex", **kwargs: Any) -> str:
 def scan_prompt(prompt: str, engine: str = "regex", **kwargs: Any) -> ScanResult:
     """
     Scan an LLM prompt for PII without modifying the input text.
+
+    Uses the lightweight regex engine by default (changed from "smart" in
+    4.5.0); pass ``engine="smart"`` for NER-backed detection.
     """
     return scan(prompt, engine=engine, **kwargs)
 
@@ -134,6 +146,9 @@ def scan_prompt(prompt: str, engine: str = "regex", **kwargs: Any) -> ScanResult
 def filter_output(output: str, engine: str = "regex", **kwargs: Any) -> RedactResult:
     """
     Scan and redact PII from model output before returning to users.
+
+    Uses the lightweight regex engine by default (changed from "smart" in
+    4.5.0); pass ``engine="smart"`` for NER-backed detection.
     """
     return scan_and_redact(output, engine=engine, **kwargs)
 

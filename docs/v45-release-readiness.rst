@@ -47,10 +47,13 @@ Use this framing for the GitHub release notes and package announcement:
 
 Call out these user-facing points:
 
-* German VAT IDs and German IBANs are detected by default in the regex engine.
-* Broader German identifiers such as tax IDs, postal codes, passport numbers,
-  residence permit numbers, and pension insurance numbers require
-  ``locales=["de"]`` or explicit entity selection.
+* German structured identifiers — VAT IDs, IBANs, tax IDs, postal codes,
+  passport numbers, residence permit numbers, and pension insurance numbers —
+  are locale-gated and require ``locales=["de"]`` or explicit entity
+  selection. Default (no-locale) detection behavior is unchanged from 4.4.0.
+* Guardrail helpers (``sanitize``, ``scan_prompt``, ``filter_output``,
+  ``create_guardrail``) now default to the regex engine; pass
+  ``engine="smart"`` to restore 4.4.0's NER-backed helper behavior.
 * OCR and Spark remain supported optional surfaces. They are not deprecated,
   but their broader overhaul is deferred beyond 4.5.
 * Telemetry remains disabled unless ``DATAFOG_TELEMETRY=1`` is set.
