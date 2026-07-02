@@ -120,6 +120,7 @@ setup(
     entry_points={
         "console_scripts": [
             "datafog=datafog.client:app [cli]",  # Requires cli extra
+            "datafog-hook=datafog.integrations.claude_code:main",  # Core only
         ],
     },
     classifiers=[
