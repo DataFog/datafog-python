@@ -281,11 +281,35 @@ def _filter_entity_types(
     return [entity for entity in entities if entity.type in allowed]
 
 
+# Python's re module backtracks; a quantified group containing another
+# quantifier (e.g. ``(a+)+``) can take exponential time on adversarial
+# input, and entity text can be attacker-influenced (LLM messages, tool
+# output). Reject that construct outright rather than matching under it.
+_NESTED_QUANTIFIER = re.compile(
+    r"\((?:[^()\\]|\\.)*(?<!\\)[+*}](?:[^()\\]|\\.)*\)\s*[+*{]"
+)
+MAX_ALLOWLIST_PATTERN_LENGTH = 512
+# Entities longer than this skip pattern matching (fail-safe: the finding
+# is kept, never suppressed) so match time stays bounded.
+MAX_PATTERN_SUBJECT_LENGTH = 512
+
+
 def _compile_allowlist_patterns(
     allowlist_patterns: Optional[list[str]],
 ) -> list["re.Pattern[str]"]:
     compiled = []
     for raw in allowlist_patterns or []:
+        if len(raw) > MAX_ALLOWLIST_PATTERN_LENGTH:
+            raise ValueError(
+                "allowlist_patterns entries must be at most "
+                f"{MAX_ALLOWLIST_PATTERN_LENGTH} characters"
+            )
+        if _NESTED_QUANTIFIER.search(raw):
+            raise ValueError(
+                "allowlist_patterns contains a quantified group with a nested "
+                f"quantifier ({raw!r}), which risks catastrophic backtracking; "
+                "rewrite the pattern without nesting quantifiers"
+            )
         try:
             compiled.append(re.compile(raw))
         except re.error as exc:
@@ -302,8 +326,12 @@ def _apply_allowlist(
 ) -> list[Entity]:
     """Drop entities whose exact text is allowlisted.
 
-    Exact values match the full entity text; patterns must fullmatch it,
-    so a partial match never suppresses a finding.
+    Matching semantics, deliberately strict for a security boundary:
+    exact values are case-sensitive with no Unicode normalization, and
+    patterns must fullmatch the entity text, so a partial match never
+    suppresses a finding. Allowlist entries and patterns are operator
+    configuration; treat them like code and never accept them from end
+    users.
     """
     if not allowlist and not allowlist_patterns:
         return entities
@@ -313,7 +341,11 @@ def _apply_allowlist(
         entity
         for entity in entities
         if entity.text not in exact
-        and not any(pattern.fullmatch(entity.text) for pattern in patterns)
+        and not any(
+            pattern.fullmatch(entity.text)
+            for pattern in patterns
+            if len(entity.text) <= MAX_PATTERN_SUBJECT_LENGTH
+        )
     ]
 
 

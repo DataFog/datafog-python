@@ -23,9 +23,7 @@ class TestExactAllowlist:
         assert [e.text for e in result.entities] == [EMAIL]
 
     def test_allowlist_is_exact_not_substring(self):
-        result = datafog.scan(
-            f"mail {EMAIL}", engine="regex", allowlist=["jane.doe"]
-        )
+        result = datafog.scan(f"mail {EMAIL}", engine="regex", allowlist=["jane.doe"])
         assert [e.text for e in result.entities] == [EMAIL]
 
     def test_empty_allowlist_is_noop(self):
@@ -76,6 +74,47 @@ class TestPatternAllowlist:
         assert result.entities == []
 
 
+class TestReDoSGuards:
+    def test_catastrophic_pattern_rejected(self):
+        with pytest.raises(ValueError, match="catastrophic backtracking"):
+            datafog.scan("text", engine="regex", allowlist_patterns=[r"(a+)+$"])
+
+    def test_nested_star_rejected(self):
+        with pytest.raises(ValueError, match="catastrophic backtracking"):
+            datafog.scan("text", engine="regex", allowlist_patterns=[r"(.*)*"])
+
+    def test_overlong_pattern_rejected(self):
+        with pytest.raises(ValueError, match="at most"):
+            datafog.scan("text", engine="regex", allowlist_patterns=["a" * 513])
+
+    def test_benign_quantified_group_still_allowed(self):
+        result = datafog.scan(
+            f"mail {EMAIL}",
+            engine="regex",
+            allowlist_patterns=[r"(abc)+", r".*@example\.com"],
+        )
+        assert result.entities == []  # broad pattern suppresses, no rejection
+
+
+class TestEnginePaths:
+    def test_smart_engine_applies_allowlist(self):
+        import warnings as _warnings
+
+        with _warnings.catch_warnings():
+            _warnings.simplefilter("ignore")
+            result = datafog.scan(f"mail {EMAIL}", engine="smart", allowlist=[EMAIL])
+        assert result.entities == []
+
+    def test_redact_rejects_allowlist_with_explicit_entities(self):
+        scanned = datafog.scan(f"mail {EMAIL}", engine="regex")
+        with pytest.raises(ValueError, match="cannot be combined"):
+            datafog.redact(
+                f"mail {EMAIL}",
+                entities=scanned.entities,
+                allowlist=[EMAIL],
+            )
+
+
 class TestPresidioAliases:
     def test_email_address_alias(self):
         result = datafog.scan(
@@ -85,9 +124,7 @@ class TestPresidioAliases:
 
     def test_us_ssn_alias(self):
         ssn = "856-45-" "6789"
-        result = datafog.scan(
-            f"ssn {ssn}", engine="regex", entity_types=["US_SSN"]
-        )
+        result = datafog.scan(f"ssn {ssn}", engine="regex", entity_types=["US_SSN"])
         assert [e.type for e in result.entities] == ["SSN"]
 
 

@@ -197,10 +197,9 @@ class DataFogGuardrail(CustomGuardrail):
                 },
             )
 
-        self._record_guardrail_logging(
-            new_data_final := {**data, "messages": new_messages}, total_counts
-        )
-        return new_data_final
+        new_data = {**data, "messages": new_messages}
+        self._record_guardrail_logging(new_data, total_counts)
+        return new_data
 
     def _record_guardrail_logging(
         self, data: dict, total_counts: dict[str, int]
