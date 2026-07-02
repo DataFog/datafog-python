@@ -69,4 +69,5 @@ docs/*
 */**/__pycache__/
 
 notes/benchmarking_notes.md
+Roadmap.md
 notes/*
