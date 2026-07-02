@@ -36,6 +36,7 @@ repos:
         exclude: |
           (?x)^(
             .venv|
+            docs/audit/.*|
             .*\.github/workflows/.*\.ya?ml$
           )$
 

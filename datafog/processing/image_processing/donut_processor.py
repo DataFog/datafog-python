@@ -6,14 +6,10 @@ for document understanding tasks, particularly OCR and information extraction
 from images of documents.
 """
 
-import importlib
-import importlib.util
 import json
 import logging
 import os
 import re
-import subprocess
-import sys
 from typing import TYPE_CHECKING, Any
 
 from .image_downloader import ImageDownloader
@@ -43,13 +39,12 @@ class DonutProcessor:
         self.model_path = model_path
         self.downloader = ImageDownloader()
 
-    def ensure_installed(self, package_name):
-        try:
-            importlib.import_module(package_name)
-        except ImportError:
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", package_name]
-            )
+    @staticmethod
+    def _missing_dependency_message(package_name: str) -> str:
+        return (
+            f"Donut OCR requires {package_name}. "
+            "Install with: pip install datafog[nlp-advanced,ocr]"
+        )
 
     def preprocess_image(self, image: "Image.Image") -> Any:
         import numpy as np
@@ -86,40 +81,40 @@ class DonutProcessor:
                 "PYTEST_DONUT=yes is set, running actual OCR in test environment"
             )
 
-        # Only import torch and transformers when actually needed and not in test environment
         try:
-            # Check if torch is available before trying to import it
-            try:
-                # Try to find the module without importing it
-                spec = importlib.util.find_spec("torch")
-                if spec is None:
-                    # If we're in a test that somehow bypassed the IN_TEST_ENV check,
-                    # still return a mock result instead of failing
-                    logging.warning("torch module not found, returning mock result")
-                    return json.dumps({"text": "Mock OCR text (torch not available)"})
-
-                # Ensure dependencies are installed
-                self.ensure_installed("torch")
-                self.ensure_installed("transformers")
-            except ImportError:
-                # If importlib.util is not available, fall back to direct try/except
-                pass
-
-            # Import dependencies only when needed
             try:
                 import torch
+            except ImportError as exc:
+                raise ImportError(self._missing_dependency_message("torch")) from exc
+
+            try:
                 from transformers import DonutProcessor as TransformersDonutProcessor
                 from transformers import VisionEncoderDecoderModel
             except ImportError as e:
-                logging.warning(f"Import error: {e}, returning mock result")
-                return json.dumps({"text": f"Mock OCR text (import error: {e})"})
+                raise ImportError(
+                    self._missing_dependency_message("transformers")
+                ) from e
 
             # Preprocess the image
             image_np = self.preprocess_image(image)
 
             # Initialize model components
-            processor = TransformersDonutProcessor.from_pretrained(self.model_path)
-            model = VisionEncoderDecoderModel.from_pretrained(self.model_path)
+            try:
+                processor = TransformersDonutProcessor.from_pretrained(
+                    self.model_path,
+                    local_files_only=True,
+                )
+                model = VisionEncoderDecoderModel.from_pretrained(
+                    self.model_path,
+                    local_files_only=True,
+                )
+            except OSError as exc:
+                raise RuntimeError(
+                    f"Donut model {self.model_path!r} is not available locally. "
+                    "Download it explicitly before using Donut OCR, or pass a local "
+                    "model path."
+                ) from exc
+
             device = "cuda" if torch.cuda.is_available() else "cpu"
             model.to(device)
             model.eval()
@@ -153,6 +148,8 @@ class DonutProcessor:
             result = processor.token2json(sequence)
             return json.dumps(result)
 
+        except (ImportError, RuntimeError):
+            raise
         except Exception as e:
             logging.error(f"Error in extract_text_from_image: {e}")
             # Return a placeholder in case of error

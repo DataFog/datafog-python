@@ -1,3 +1,12 @@
+"""Historical shadow package export module.
+
+This file is not the live DataFog 4.5 package export surface. Use
+``datafog/__init__.py`` for current package exports, lazy optional imports,
+top-level helpers, and compatibility shims. This eager-export snapshot remains
+importable only as historical reference until legacy cleanup can remove it
+safely.
+"""
+
 from .__about__ import __version__
 from .client import app
 from .config import OperationType, get_config

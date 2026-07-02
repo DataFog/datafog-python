@@ -27,6 +27,11 @@ pushes except for explicit emergency maintenance.
 
 ## Local Development
 
+The current contributor runbook for DataFog 4.5 lives in
+[`docs/contributing.rst`](docs/contributing.rst). It includes supported Python
+versions, install profiles, focused and broad test commands, docs-build
+verification, and the 4.5 release-flow boundary.
+
 ```bash
 git clone https://github.com/datafog/datafog-python
 cd datafog-python
@@ -36,17 +41,40 @@ python -m pip install --upgrade pip
 pip install -e ".[dev,cli]"
 ```
 
-For optional NLP or OCR work, install the relevant extras:
+For pinned local tooling, install the development requirements after the editable
+package install:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+For optional NLP, OCR, or distributed work, install the relevant extras:
 
 ```bash
 pip install -e ".[dev,cli,nlp]"
 pip install -e ".[dev,cli,nlp,nlp-advanced]"
+pip install -e ".[dev,cli,ocr]"
+pip install -e ".[dev,cli,distributed]"
 pip install -e ".[all,dev]"
 ```
 
 ## Tests
 
-Run the core test suite before opening a pull request:
+Run focused tests for the area you changed before opening a pull request. For
+core import and dependency-boundary work, use:
+
+```bash
+DATAFOG_NO_TELEMETRY=1 DO_NOT_TRACK=1 \
+  pytest tests/test_runtime_dependency_safety.py tests/test_no_network_core.py -q
+```
+
+For broader local confidence, run the non-slow suite:
+
+```bash
+pytest -m "not slow" -q
+```
+
+To mimic the core CI profile, run:
 
 ```bash
 pytest tests/ -m "not slow" \
@@ -61,8 +89,11 @@ Run the focused test file for the area you changed whenever possible. For
 documentation-only changes, build the docs:
 
 ```bash
-sphinx-build -b html docs docs/_build/html
+python -m sphinx -b html docs docs/_build/html
 ```
+
+See [`docs/contributing.rst`](docs/contributing.rst) for optional-profile smoke
+commands and release-prep checks.
 
 ## Pull Request Checklist
 

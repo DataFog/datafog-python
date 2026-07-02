@@ -6,7 +6,7 @@ Provides CLI commands for scanning images and text using DataFog's OCR and PII d
 
 import asyncio
 import logging
-from typing import List
+from typing import List, Optional
 
 import typer
 
@@ -104,6 +104,11 @@ def scan_text(
         None, help="List of texts to extract text from"
     ),
     operations: str = typer.Option("scan", help="Operation to perform"),
+    locale: Optional[List[str]] = typer.Option(
+        None,
+        "--locale",
+        help="Regex locale to enable, for example de.",
+    ),
 ):
     """
     Scan texts for PII.
@@ -123,7 +128,7 @@ def scan_text(
     logging.basicConfig(level=logging.INFO)
     # Convert comma-separated string operations to a list of OperationType objects
     operation_list = [OperationType(op.strip()) for op in operations.split(",")]
-    text_client = DataFog(operations=operation_list)
+    text_client = DataFog(operations=operation_list, locales=locale)
     try:
         results = text_client.run_text_pipeline_sync(str_list=str_list)
         typer.echo(f"Text Pipeline Results: {results}")
@@ -181,7 +186,7 @@ def download_model(
     Download a model for specified engine.
 
     Examples:
-        spaCy: datafog download-model en_core_web_sm --engine spacy
+        spaCy: datafog download-model en_core_web_lg --engine spacy
         GLiNER: datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
     """
     if engine == "spacy":
@@ -316,7 +321,14 @@ def list_entities():
 
 
 @app.command()
-def redact_text(text: str = typer.Argument(None, help="Text to redact")):
+def redact_text(
+    text: str = typer.Argument(None, help="Text to redact"),
+    locale: Optional[List[str]] = typer.Option(
+        None,
+        "--locale",
+        help="Regex locale to enable, for example de.",
+    ),
+):
     """
     Redact PII in text.
 
@@ -329,7 +341,12 @@ def redact_text(text: str = typer.Argument(None, help="Text to redact")):
         typer.echo("No text provided to redact.")
         raise typer.Exit(code=1)
 
-    result = scan_and_redact(text=text, engine="smart", strategy="token")
+    result = scan_and_redact(
+        text=text,
+        engine="smart",
+        strategy="token",
+        locales=locale,
+    )
     typer.echo(result.redacted_text)
 
     try:
@@ -346,7 +363,14 @@ def redact_text(text: str = typer.Argument(None, help="Text to redact")):
 
 
 @app.command()
-def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
+def replace_text(
+    text: str = typer.Argument(None, help="Text to replace PII"),
+    locale: Optional[List[str]] = typer.Option(
+        None,
+        "--locale",
+        help="Regex locale to enable, for example de.",
+    ),
+):
     """
     Replace PII in text with anonymized values.
 
@@ -359,7 +383,12 @@ def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
         typer.echo("No text provided to replace PII.")
         raise typer.Exit(code=1)
 
-    result = scan_and_redact(text=text, engine="smart", strategy="pseudonymize")
+    result = scan_and_redact(
+        text=text,
+        engine="smart",
+        strategy="pseudonymize",
+        locales=locale,
+    )
     typer.echo(result.redacted_text)
 
     try:
@@ -379,6 +408,11 @@ def replace_text(text: str = typer.Argument(None, help="Text to replace PII")):
 def hash_text(
     text: str = typer.Argument(None, help="Text to hash PII"),
     hash_type: HashType = typer.Option(HashType.SHA256, help="Hash algorithm to use"),
+    locale: Optional[List[str]] = typer.Option(
+        None,
+        "--locale",
+        help="Regex locale to enable, for example de.",
+    ),
 ):
     """
     Choose from SHA256, MD5, or SHA3-256 algorithms to hash detected PII in text.
@@ -395,7 +429,12 @@ def hash_text(
 
     # HashType is retained for backward-compatible CLI signature.
     _ = hash_type
-    result = scan_and_redact(text=text, engine="smart", strategy="hash")
+    result = scan_and_redact(
+        text=text,
+        engine="smart",
+        strategy="hash",
+        locales=locale,
+    )
     typer.echo(result.redacted_text)
 
     try:

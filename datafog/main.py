@@ -39,8 +39,10 @@ class DataFog:
         operations: List[OperationType] = [OperationType.SCAN],
         hash_type: HashType = HashType.SHA256,
         anonymizer_type: AnonymizerType = AnonymizerType.REPLACE,
+        locales: List[str] | None = None,
     ):
-        self.regex_annotator = RegexAnnotator()
+        self.locales = locales
+        self.regex_annotator = RegexAnnotator(locales=locales)
         normalized_ops: List[OperationType] = []
         for op in operations:
             if isinstance(op, OperationType):
@@ -181,8 +183,11 @@ class DataFog:
 
         _start = _time.monotonic()
 
-        scan_result = scan(text=text, engine="regex")
-        result = {label: [] for label in RegexAnnotator.LABELS}
+        scan_result = scan(text=text, engine="regex", locales=self.locales)
+        # Only pre-populate keys for labels active under the configured
+        # locales so the default output shape matches v4.4.0 (no DE_* keys
+        # unless German locale support is enabled).
+        result = {label: [] for label in RegexAnnotator.active_labels_for(self.locales)}
         legacy_map = {"DATE": "DOB", "ZIP_CODE": "ZIP"}
         for entity in scan_result.entities:
             label = legacy_map.get(entity.type, entity.type)
@@ -246,6 +251,7 @@ class DataFog:
                 text=text,
                 engine="regex",
                 strategy=strategy,
+                locales=self.locales,
             )
             result["anonymized"] = redact_result.redacted_text
 
@@ -288,8 +294,8 @@ class TextPIIAnnotator:
         regex_annotator: RegexAnnotator instance for text annotation.
     """
 
-    def __init__(self):
-        self.regex_annotator = RegexAnnotator()
+    def __init__(self, locales: List[str] | None = None):
+        self.regex_annotator = RegexAnnotator(locales=locales)
 
     def run(self, text, output_path=None):
         """

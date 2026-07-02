@@ -24,64 +24,85 @@ core_deps = [
 ]
 
 # Optional heavy dependencies
+nlp_deps = [
+    "click>=8.0,<9.0",
+    "spacy>=3.7.0,<4.0",
+]
+
+nlp_advanced_deps = [
+    "gliner>=0.2.5",
+    "torch>=2.1.0,<2.7",
+    "transformers>=4.20.0",
+    "huggingface-hub>=0.16.0",
+]
+
+ocr_deps = [
+    "numpy>=1.24.0",
+    "pytesseract>=0.3.0",
+    "Pillow>=12.2.0",
+    "sentencepiece>=0.2.0",
+    "protobuf>=4.0.0",
+]
+
+distributed_deps = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "pyspark>=3.5.0",
+]
+
+web_deps = [
+    "fastapi>=0.100.0",
+    "aiohttp>=3.13.4",
+    "certifi>=2025.4.26",
+    "requests>=2.33.0",
+]
+
+cli_deps = [
+    "click>=8.0,<9.0",
+    "typer>=0.12.0",
+    "pydantic-settings>=2.0.0",
+]
+
+crypto_deps = [
+    "cryptography>=46.0.7",
+]
+
+test_deps = [
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.1.0",
+]
+
+docs_deps = [
+    "sphinx>=7.2.6",
+]
+
+benchmark_deps = [
+    "pytest-benchmark>=4.0.0",
+]
+
 extras_require = {
-    "nlp": [
-        "spacy>=3.7.0,<4.0",
-    ],
-    "nlp-advanced": [
-        "gliner>=0.2.5",
-        "torch>=2.1.0,<2.7",
-        "transformers>=4.20.0",
-        "huggingface-hub>=0.16.0",
-    ],
-    "ocr": [
-        "pytesseract>=0.3.0",
-        "Pillow>=10.0.0",
-        "sentencepiece>=0.2.0",
-        "protobuf>=4.0.0",
-    ],
-    "distributed": [
-        "pandas>=2.0.0",
-        "numpy>=1.24.0",
-    ],
-    "web": [
-        "fastapi>=0.100.0",
-        "aiohttp>=3.8.0",
-        "requests>=2.30.0",
-    ],
-    "cli": [
-        "typer>=0.12.0",
-        "pydantic-settings>=2.0.0",
-    ],
-    "crypto": [
-        "cryptography>=40.0.0",
-    ],
-    "dev": [
-        "pytest>=7.0.0",
-        "pytest-asyncio>=0.21.0",
-        "pytest-cov>=4.0.0",
-        "sphinx>=7.0.0",
-    ],
+    "nlp": nlp_deps,
+    "nlp-advanced": nlp_advanced_deps,
+    "ocr": ocr_deps,
+    "distributed": distributed_deps,
+    "web": web_deps,
+    "cli": cli_deps,
+    "crypto": crypto_deps,
+    "test": test_deps,
+    "docs": docs_deps,
+    "benchmark": benchmark_deps,
+    "dev": test_deps + docs_deps,
     # Convenience bundles
-    "all": [
-        "spacy>=3.7.0,<4.0",
-        "gliner>=0.2.5",
-        "torch>=2.1.0,<2.7",
-        "transformers>=4.20.0",
-        "huggingface-hub>=0.16.0",
-        "pytesseract>=0.3.0",
-        "Pillow>=10.0.0",
-        "sentencepiece>=0.2.0",
-        "protobuf>=4.0.0",
-        "pandas>=2.0.0",
-        "numpy>=1.24.0",
-        "fastapi>=0.100.0",
-        "aiohttp>=3.8.0",
-        "requests>=2.30.0",
-        "typer>=0.12.0",
-        "pydantic-settings>=2.0.0",
-        "cryptography>=40.0.0",
-    ],
+    "all": (
+        nlp_deps
+        + nlp_advanced_deps
+        + ocr_deps
+        + distributed_deps
+        + web_deps
+        + cli_deps
+        + crypto_deps
+    ),
 }
 
 setup(

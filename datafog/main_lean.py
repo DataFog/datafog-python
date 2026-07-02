@@ -1,4 +1,10 @@
-"""
+"""Historical shadow main module.
+
+This file is not the live DataFog 4.5 ``DataFog`` implementation. Use
+``datafog/main.py`` for the current backward-compatible class and text/OCR
+compatibility methods. This lean snapshot remains importable only as historical
+reference until legacy cleanup can remove it safely.
+
 Lean main module for DataFog core functionality.
 
 This module contains the lightweight core classes for DataFog:

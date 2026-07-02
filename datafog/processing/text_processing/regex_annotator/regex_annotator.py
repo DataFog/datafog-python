@@ -1,5 +1,6 @@
 import re
-from typing import Dict, List, Pattern, Tuple
+from collections.abc import Iterable
+from typing import Dict, List, Match, Pattern, Tuple
 
 from pydantic import BaseModel
 
@@ -27,12 +28,35 @@ class RegexAnnotator:
     performance, targeting ≤ 20 µs / kB on a MacBook M-series.
     """
 
-    # Labels for PII entities
-    LABELS = ["EMAIL", "PHONE", "SSN", "CREDIT_CARD", "IP_ADDRESS", "DOB", "ZIP"]
+    BASE_LABELS = ["EMAIL", "PHONE", "SSN", "CREDIT_CARD", "IP_ADDRESS", "DOB", "ZIP"]
+    GERMAN_LABELS = [
+        "DE_VAT_ID",
+        "DE_IBAN",
+        "DE_TAX_ID",
+        "DE_SOCIAL_SECURITY_NUMBER",
+        "DE_POSTAL_CODE",
+        "DE_PASSPORT_NUMBER",
+        "DE_RESIDENCE_PERMIT_NUMBER",
+    ]
+    LABELS = BASE_LABELS + GERMAN_LABELS
+    DEFAULT_LABELS = BASE_LABELS
+    SUPPORTED_LOCALES = {"de", "de-de", "de_de"}
+    LOCALE_LABELS = {
+        "de": GERMAN_LABELS,
+        "de-de": GERMAN_LABELS,
+        "de_de": GERMAN_LABELS,
+    }
 
-    def __init__(self):
+    def __init__(
+        self,
+        locales: str | Iterable[str] | None = None,
+        enabled_labels: Iterable[str] | None = None,
+    ):
+        self.locales = self._normalize_locales(locales)
+        self.active_labels = self.active_labels_for(self.locales, enabled_labels)
+
         # Compile all patterns once at initialization
-        self.patterns: Dict[str, Pattern] = {
+        all_patterns: Dict[str, Pattern] = {
             # Email pattern - RFC 5322 subset
             # Intentionally permissive to favor false positives over false negatives
             # Allows for multiple dots, special characters in local part, and subdomains
@@ -76,6 +100,10 @@ class RegexAnnotator:
             ),
             # SSN pattern - U.S. Social Security Number
             # Supports dashed and no-dash formats.
+            # Note: overlaps with locale-gated labels (e.g. the nine-digit run
+            # inside a DE_VAT_ID) are resolved by the engine's span-overlap
+            # suppression, not here, so default (EN) detection keeps v4.4.0
+            # behavior even when German labels are active.
             "SSN": re.compile(
                 r"""
                 (?<!\d)
@@ -175,12 +203,177 @@ class RegexAnnotator:
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
+            # German VAT ID (USt-IdNr) - DE followed by 9 digits.
+            "DE_VAT_ID": re.compile(
+                r"""
+                (?<![A-Za-z0-9])
+                DE
+                [\s-]?
+                \d{9}
+                (?![A-Za-z0-9])
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            # German IBAN - DE followed by 20 digits, often grouped.
+            "DE_IBAN": re.compile(
+                r"""
+                (?<![A-Za-z0-9])
+                DE
+                \d{2}
+                (?:\s?\d{4}){4}
+                \s?\d{2}
+                (?![A-Za-z0-9])
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            # German Tax ID (Steuer-ID) - context required to avoid generic IDs.
+            "DE_TAX_ID": re.compile(
+                r"""
+                (?:
+                    Steuer[\s-]?ID |
+                    Steueridentifikationsnummer |
+                    Identifikationsnummer |
+                    IdNr\.? |
+                    Tax[\s-]?ID
+                )
+                \s*[:#-]?\s*
+                (?P<value>
+                    (?<![A-Za-z0-9])
+                    (?:\d{11}|\d{2}\s?\d{3}\s?\d{3}\s?\d{3})
+                    (?![A-Za-z0-9])
+                )
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            # German pension insurance number (Rentenversicherungsnummer).
+            "DE_SOCIAL_SECURITY_NUMBER": re.compile(
+                r"""
+                (?:
+                    Rentenversicherungsnummer |
+                    Sozialversicherungsnummer |
+                    RVNR |
+                    SVNR
+                )
+                \s*[:#-]?\s*
+                (?P<value>
+                    (?<![A-Za-z0-9])
+                    \d{2}
+                    \s?
+                    \d{6}
+                    \s?
+                    [A-Z]
+                    \s?
+                    \d{3}
+                    (?![A-Za-z0-9])
+                )
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            # German postal code with an explicit German/PLZ prefix.
+            "DE_POSTAL_CODE": re.compile(
+                r"""
+                (?<![A-Za-z0-9])
+                (?P<value>
+                    (?:
+                        PLZ[\s:-]? |
+                        DE[\s-] |
+                        D[\s-]
+                    )
+                    \d{5}
+                )
+                (?![A-Za-z0-9])
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            # German passport number - context required; bare A12345678 is too broad.
+            "DE_PASSPORT_NUMBER": re.compile(
+                r"""
+                (?:
+                    Passnummer |
+                    Reisepass(?:nummer)? |
+                    Passport(?:\s+No\.?|\s+Number)?
+                )
+                \s*[:#-]?\s*
+                (?P<value>
+                    (?<![A-Za-z0-9])
+                    [A-Z]
+                    \d{8}
+                    (?![A-Za-z0-9])
+                )
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+            # German residence permit number - context required; AT IDs are common.
+            "DE_RESIDENCE_PERMIT_NUMBER": re.compile(
+                r"""
+                (?:
+                    Aufenthaltstitel |
+                    Aufenthaltserlaubnis |
+                    Residence\s+Permit |
+                    eAT
+                )
+                \s*[:#-]?\s*
+                (?P<value>
+                    (?<![A-Za-z0-9])
+                    AT
+                    \d{7}
+                    (?![A-Za-z0-9])
+                )
+                """,
+                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            ),
+        }
+        self.patterns = {
+            label: pattern
+            for label, pattern in all_patterns.items()
+            if label in self.active_labels
         }
 
     @classmethod
-    def create(cls) -> "RegexAnnotator":
+    def _normalize_locales(cls, locales: str | Iterable[str] | None) -> tuple[str, ...]:
+        if locales is None:
+            return ()
+        if isinstance(locales, str):
+            locales = [locales]
+        normalized = []
+        for locale in locales:
+            value = locale.strip().lower()
+            if not value:
+                continue
+            if value not in cls.SUPPORTED_LOCALES:
+                allowed = ", ".join(sorted(cls.SUPPORTED_LOCALES))
+                raise ValueError(f"locale must be one of: {allowed}")
+            normalized.append(value)
+        return tuple(dict.fromkeys(normalized))
+
+    @classmethod
+    def active_labels_for(
+        cls,
+        locales: str | Iterable[str] | None = None,
+        enabled_labels: Iterable[str] | None = None,
+    ) -> list[str]:
+        """Resolve the labels active for the given locales and explicit labels."""
+        active = set(cls.DEFAULT_LABELS)
+        for locale in cls._normalize_locales(locales):
+            active.update(cls.LOCALE_LABELS[locale])
+        if enabled_labels is not None:
+            active.update(label.strip().upper() for label in enabled_labels)
+        return [label for label in cls.LABELS if label in active]
+
+    @staticmethod
+    def _match_text(match: Match[str]) -> str:
+        return match.groupdict().get("value") or match.group()
+
+    @staticmethod
+    def _match_span(match: Match[str]) -> tuple[int, int]:
+        if "value" in match.groupdict() and match.group("value") is not None:
+            return match.start("value"), match.end("value")
+        return match.start(), match.end()
+
+    @classmethod
+    def create(cls, **kwargs) -> "RegexAnnotator":
         """Factory method to create a new RegexAnnotator instance."""
-        return cls()
+        return cls(**kwargs)
 
     def annotate(self, text: str) -> Dict[str, List[str]]:
         """Annotate text with PII entities using regex patterns.
@@ -200,7 +393,7 @@ class RegexAnnotator:
         # Process with each pattern
         for label, pattern in self.patterns.items():
             for match in pattern.finditer(text):
-                result[label].append(match.group())
+                result[label].append(self._match_text(match))
 
         return result
 
@@ -225,11 +418,12 @@ class RegexAnnotator:
 
         for label, pattern in self.patterns.items():
             for match in pattern.finditer(text):
+                start, end = self._match_span(match)
                 span = Span(
                     label=label,
-                    start=match.start(),
-                    end=match.end(),
-                    text=match.group(),
+                    start=start,
+                    end=end,
+                    text=self._match_text(match),
                 )
                 spans_by_label[label].append(span)
                 all_spans.append(span)

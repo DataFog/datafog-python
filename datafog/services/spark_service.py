@@ -1,14 +1,12 @@
 """
 Spark service for data processing and analysis.
 
-Provides a wrapper around PySpark functionality, including session creation,
-JSON reading, and package management.
+Provides a wrapper around PySpark functionality, including session creation and
+JSON reading.
 """
 
 import importlib
 import os
-import subprocess
-import sys
 from typing import List
 
 
@@ -16,14 +14,13 @@ class SparkService:
     """
     Manages Spark operations and dependencies.
 
-    Initializes a Spark session, handles imports, and provides methods for
-    data reading and package installation.
+    Initializes a Spark session, handles imports, and provides methods for data
+    reading.
     """
 
     def __init__(self, master=None):
         self.master = master
 
-        # Ensure pyspark is installed first
         self.ensure_installed("pyspark")
 
         # Now import necessary modules after ensuring pyspark is installed
@@ -84,16 +81,8 @@ class SparkService:
     def ensure_installed(self, package_name):
         try:
             importlib.import_module(package_name)
-        except ImportError:
-            print(f"Installing {package_name}...")
-            try:
-                subprocess.check_call(
-                    [sys.executable, "-m", "pip", "install", package_name]
-                )
-                print(f"{package_name} installed successfully.")
-            except subprocess.CalledProcessError as e:
-                print(f"Failed to install {package_name}: {e}")
-                raise ImportError(
-                    f"Could not install {package_name}. "
-                    f"Please install it manually with 'pip install {package_name}'."
-                )
+        except ImportError as exc:
+            raise ImportError(
+                f"{package_name} is required for Spark support. "
+                "Install with: pip install datafog[distributed]"
+            ) from exc
