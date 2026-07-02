@@ -29,13 +29,19 @@ values never echoed into logs or transcripts:
   ```
 
   Manual hook setup and limitations: [examples/claude_code_hook/](examples/claude_code_hook/).
+
 - **LiteLLM guardrail** (`DataFogGuardrail`): redacts or blocks PII in
   requests and responses at the gateway, for any LiteLLM-proxied provider.
   In-process (~31µs per request), no sidecar service. Setup:
   [examples/litellm_guardrail/](examples/litellm_guardrail/).
 
 Both default to the high-precision entity set (`EMAIL`, `PHONE`,
-`CREDIT_CARD`, `SSN`); noisier types are opt-in.
+`CREDIT_CARD`, `SSN`); noisier types are opt-in. Known-safe values can be
+exempted with an allowlist: `scan(text, allowlist=[...])` for exact values,
+`allowlist_patterns=[...]` for full-match regexes (e.g. `^\d{10}$` to stop
+unix timestamps matching as phone numbers) — available in both adapters and
+the API. Presidio-style entity names (`EMAIL_ADDRESS`, `PHONE_NUMBER`,
+`US_SSN`) are accepted as aliases for easy migration.
 
 ## Installation
 
@@ -137,7 +143,7 @@ Use the engine that matches your accuracy and dependency constraints:
 
 - `regex`:
   - Fastest and always available.
-  - Best for default structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DOB`, `ZIP`.
+  - Best for default structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DATE`, `ZIP_CODE` (`DOB` and `ZIP` are accepted as input aliases).
   - Use `locales=["de"]` for German structured IDs such as `DE_VAT_ID`, `DE_IBAN`, `DE_TAX_ID`, `DE_POSTAL_CODE`, and passport or residence permit numbers.
 - `spacy`:
   - Requires `pip install datafog[nlp]`.

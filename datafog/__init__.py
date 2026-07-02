@@ -153,14 +153,28 @@ def scan(
     engine: str = "regex",
     entity_types: list[str] | None = None,
     locales: list[str] | None = None,
+    allowlist: list[str] | None = None,
+    allowlist_patterns: list[str] | None = None,
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
 
     Defaults to the lightweight regex engine so the core install works without
     optional dependency fallback warnings.
+
+    ``allowlist`` exempts exact entity texts (your own support address, doc
+    placeholders); ``allowlist_patterns`` exempts entities whose full text
+    matches a regex (e.g. ``^\\d{10}$`` so unix timestamps stop matching as
+    phone numbers).
     """
-    return _scan(text=text, engine=engine, entity_types=entity_types, locales=locales)
+    return _scan(
+        text=text,
+        engine=engine,
+        entity_types=entity_types,
+        locales=locales,
+        allowlist=allowlist,
+        allowlist_patterns=allowlist_patterns,
+    )
 
 
 def redact(
@@ -171,12 +185,17 @@ def redact(
     strategy: str = "token",
     preset: str | None = None,
     locales: list[str] | None = None,
+    allowlist: list[str] | None = None,
+    allowlist_patterns: list[str] | None = None,
 ) -> RedactResult:
     """
     v5-preview redaction entrypoint.
 
     If entities are provided, redact those spans. Otherwise, scan text first
-    using the selected engine and redact the detected entities.
+    using the selected engine and redact the detected entities. ``allowlist``
+    and ``allowlist_patterns`` exempt findings from redaction (exact text and
+    full-text regex match respectively); they apply to the scan path and are
+    rejected when explicit ``entities`` are supplied.
     """
     if preset is not None:
         try:
@@ -186,6 +205,11 @@ def redact(
             raise ValueError(f"preset must be one of: {allowed}") from exc
 
     if entities is not None:
+        if allowlist or allowlist_patterns:
+            raise ValueError(
+                "allowlist/allowlist_patterns cannot be combined with explicit "
+                "entities; filter the entities before calling redact"
+            )
         return _redact_entities(text=text, entities=entities, strategy=strategy)
 
     return _scan_and_redact(
@@ -194,6 +218,8 @@ def redact(
         entity_types=entity_types,
         strategy=strategy,
         locales=locales,
+        allowlist=allowlist,
+        allowlist_patterns=allowlist_patterns,
     )
 
 

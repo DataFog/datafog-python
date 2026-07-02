@@ -72,6 +72,36 @@ class TestPreToolUse:
         _, stdout = run(payload, env={"DATAFOG_HOOK_ENTITIES": "IP_ADDRESS"})
         assert "IP_ADDRESS" in _decision(stdout)["permissionDecisionReason"]
 
+    def test_allowlist_env_exempts_exact_value(self):
+        own_email = "sid@" "example.com"
+        payload = _pre_tool_use("Bash", {"command": f"echo {own_email}"})
+        code, stdout = run(payload, env={"DATAFOG_HOOK_ALLOWLIST": own_email})
+        assert code == 0
+        assert stdout == ""
+
+    def test_allowlist_pattern_env_exempts_timestamps(self):
+        # Ten-digit numeric IDs and unix timestamps match the PHONE pattern;
+        # the pattern allowlist silences that class of false positive.
+        payload = _pre_tool_use("Bash", {"command": "echo created 17830" "25668"})
+        code, stdout = run(
+            payload, env={"DATAFOG_HOOK_ALLOWLIST_PATTERNS": r"^\d{10}$"}
+        )
+        assert code == 0
+        assert stdout == ""
+
+    def test_allowlist_does_not_exempt_other_values(self):
+        own_email = "sid@" "example.com"
+        other = "jane.doe@" "example.com"
+        payload = _pre_tool_use("Bash", {"command": f"echo {other}"})
+        _, stdout = run(payload, env={"DATAFOG_HOOK_ALLOWLIST": own_email})
+        assert "EMAIL" in _decision(stdout)["permissionDecisionReason"]
+
+    def test_invalid_allowlist_pattern_fails_open(self):
+        payload = _pre_tool_use("Bash", {"command": "echo jane.doe@" "example.com"})
+        code, stdout = run(payload, env={"DATAFOG_HOOK_ALLOWLIST_PATTERNS": "("})
+        assert code != 2  # fail-open, never blocking
+        assert stdout == ""
+
 
 class TestUserPromptSubmit:
     def test_pii_in_prompt_adds_context_warning(self):

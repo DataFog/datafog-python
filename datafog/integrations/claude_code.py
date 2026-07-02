@@ -16,6 +16,11 @@ Configuration (environment variables):
 - ``DATAFOG_HOOK_ENTITIES``: comma-separated entity types to detect.
   Defaults to the high-precision set; noisy-in-code types (IP_ADDRESS,
   DOB, ZIP) must be opted into.
+- ``DATAFOG_HOOK_ALLOWLIST``: comma-separated exact values to exempt
+  (your own support address, documentation placeholders).
+- ``DATAFOG_HOOK_ALLOWLIST_PATTERNS``: comma-separated regexes; findings
+  whose full text matches are exempt (note: a pattern containing a comma
+  cannot be expressed here).
 
 Failure policy: fail open. A hook bug must never brick a Claude Code
 session, so any unexpected error exits non-blocking with no output.
@@ -59,6 +64,11 @@ def _action(env: Mapping[str, str]) -> str:
     return action if action in VALID_ACTIONS else "ask"
 
 
+def _csv_env(env: Mapping[str, str], name: str) -> list[str]:
+    raw = env.get(name, "")
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
 def _iter_strings(value: Any) -> Iterator[str]:
     """Yield every string embedded in a JSON-like structure.
 
@@ -76,7 +86,12 @@ def _iter_strings(value: Any) -> Iterator[str]:
             stack.extend(current)
 
 
-def _scan_findings(value: Any, entity_types: list[str]) -> dict[str, int]:
+def _scan_findings(
+    value: Any,
+    entity_types: list[str],
+    allowlist: list[str] | None = None,
+    allowlist_patterns: list[str] | None = None,
+) -> dict[str, int]:
     """Scan all strings in ``value``; return counts per entity type."""
     import datafog
 
@@ -87,7 +102,13 @@ def _scan_findings(value: Any, entity_types: list[str]) -> dict[str, int]:
             break
         chunk = text[: min(MAX_SCAN_CHARS, total_budget)]
         total_budget -= len(chunk)
-        result = datafog.scan(chunk, engine="regex", entity_types=entity_types)
+        result = datafog.scan(
+            chunk,
+            engine="regex",
+            entity_types=entity_types,
+            allowlist=allowlist or None,
+            allowlist_patterns=allowlist_patterns or None,
+        )
         for entity in result.entities:
             counts[entity.type] = counts.get(entity.type, 0) + 1
     return counts
@@ -104,7 +125,12 @@ def _emit(event: str, fields: dict[str, Any]) -> str:
 
 
 def _handle_pre_tool_use(payload: dict, env: Mapping[str, str]) -> str:
-    counts = _scan_findings(payload.get("tool_input"), _entity_types(env))
+    counts = _scan_findings(
+        payload.get("tool_input"),
+        _entity_types(env),
+        allowlist=_csv_env(env, "DATAFOG_HOOK_ALLOWLIST"),
+        allowlist_patterns=_csv_env(env, "DATAFOG_HOOK_ALLOWLIST_PATTERNS"),
+    )
     if not counts:
         return ""
     tool = payload.get("tool_name", "tool")
@@ -119,7 +145,12 @@ def _handle_pre_tool_use(payload: dict, env: Mapping[str, str]) -> str:
 
 
 def _handle_user_prompt_submit(payload: dict, env: Mapping[str, str]) -> str:
-    counts = _scan_findings(payload.get("prompt"), _entity_types(env))
+    counts = _scan_findings(
+        payload.get("prompt"),
+        _entity_types(env),
+        allowlist=_csv_env(env, "DATAFOG_HOOK_ALLOWLIST"),
+        allowlist_patterns=_csv_env(env, "DATAFOG_HOOK_ALLOWLIST_PATTERNS"),
+    )
     if not counts:
         return ""
     context = (
@@ -130,7 +161,12 @@ def _handle_user_prompt_submit(payload: dict, env: Mapping[str, str]) -> str:
 
 
 def _handle_post_tool_use(payload: dict, env: Mapping[str, str]) -> str:
-    counts = _scan_findings(payload.get("tool_response"), _entity_types(env))
+    counts = _scan_findings(
+        payload.get("tool_response"),
+        _entity_types(env),
+        allowlist=_csv_env(env, "DATAFOG_HOOK_ALLOWLIST"),
+        allowlist_patterns=_csv_env(env, "DATAFOG_HOOK_ALLOWLIST_PATTERNS"),
+    )
     if not counts:
         return ""
     tool = payload.get("tool_name", "tool")

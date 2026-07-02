@@ -262,6 +262,20 @@ class TestFailPolicy:
                 call_type="completion",
             )
 
+    async def test_allowlist_exempts_configured_values(self):
+        own = "sid@" "example.com"
+        other = "jane.doe@" "example.com"
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii", allowlist=[own])
+        data = await guardrail.async_pre_call_hook(
+            user_api_key_dict=None,
+            cache=None,
+            data=_chat_data(f"contact {own} or {other}"),
+            call_type="completion",
+        )
+        content = data["messages"][0]["content"]
+        assert own in content
+        assert other not in content
+
     async def test_invalid_config_rejected(self):
         with pytest.raises(ValueError):
             DataFogGuardrail(guardrail_name="datafog-pii", action="explode")
