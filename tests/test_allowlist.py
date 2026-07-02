@@ -87,6 +87,37 @@ class TestReDoSGuards:
         with pytest.raises(ValueError, match="at most"):
             datafog.scan("text", engine="regex", allowlist_patterns=["a" * 513])
 
+    def test_overlong_entity_text_skips_patterns_but_is_kept(self):
+        # Fail-safe: an entity too long to pattern-match safely must still
+        # be reported, never silently suppressed.
+        from datafog.engine import Entity, _apply_allowlist
+
+        long_entity = Entity(
+            type="EMAIL",
+            text="a" * 600,
+            start=0,
+            end=600,
+            confidence=1.0,
+            engine="regex",
+        )
+        kept = _apply_allowlist([long_entity], None, [r".*"])
+        assert kept == [long_entity]
+
+    def test_overlong_entity_text_still_matches_exact_allowlist(self):
+        # The subject-length cap only bounds regex matching; exact string
+        # comparison is O(n) and still applies.
+        from datafog.engine import Entity, _apply_allowlist
+
+        long_entity = Entity(
+            type="EMAIL",
+            text="a" * 600,
+            start=0,
+            end=600,
+            confidence=1.0,
+            engine="regex",
+        )
+        assert _apply_allowlist([long_entity], ["a" * 600], None) == []
+
     def test_benign_quantified_group_still_allowed(self):
         result = datafog.scan(
             f"mail {EMAIL}",
