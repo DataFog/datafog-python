@@ -5,17 +5,30 @@ DataFog is a Python library for detecting and redacting personally identifiable 
 It provides:
 
 - Fast structured PII detection via regex
+- An offline PII firewall for AI agents: a Claude Code hook and a LiteLLM
+  gateway guardrail (new in 4.6)
 - Optional NER support via spaCy and GLiNER
 - A simple agent-oriented API for LLM applications
 - Backward-compatible `DataFog` and `TextService` classes
 
-## 4.5 Focus
+## Agent & Gateway Firewall (4.6)
 
-DataFog 4.5 is focused on lightweight text PII screening: a small core install,
-fast regex-based scan/redact helpers, explicit optional extras, and a clearer
-path toward future middleware use cases. Dedicated Sentry, OpenTelemetry,
-logging-framework, and cloud DLP adapters are future-facing work and are not
-part of the 4.5 release.
+DataFog 4.6 adds two ready-made enforcement points that catch PII at the
+moment it would leave your machine — offline, in microseconds, with matched
+values never echoed into logs or transcripts:
+
+- **Claude Code hook** (`datafog-hook`): gates agent tool calls (shell
+  commands, web requests, file writes, MCP tools) and warns the model when
+  prompts or tool results carry PII. ~70ms per invocation including process
+  startup. Setup and limitations: [examples/claude_code_hook/](examples/claude_code_hook/),
+  or install via the [Claude Code plugin](https://github.com/DataFog/datafog-claude-plugin).
+- **LiteLLM guardrail** (`DataFogGuardrail`): redacts or blocks PII in
+  requests and responses at the gateway, for any LiteLLM-proxied provider.
+  In-process (~31µs per request), no sidecar service. Setup:
+  [examples/litellm_guardrail/](examples/litellm_guardrail/).
+
+Both default to the high-precision entity set (`EMAIL`, `PHONE`,
+`CREDIT_CARD`, `SSN`); noisier types are opt-in.
 
 ## Installation
 
@@ -42,7 +55,7 @@ pip install datafog[all]
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
 `nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
 that is available locally before runtime use. `distributed` and `all` are not
-newly certified on Python 3.13 in the 4.5 line.
+newly certified on Python 3.13 in the 4.x line.
 
 ## Quick Start
 
@@ -117,7 +130,7 @@ Use the engine that matches your accuracy and dependency constraints:
 
 - `regex`:
   - Fastest and always available.
-  - Best for default structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DATE`, `ZIP_CODE`.
+  - Best for default structured entities: `EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `IP_ADDRESS`, `DOB`, `ZIP`.
   - Use `locales=["de"]` for German structured IDs such as `DE_VAT_ID`, `DE_IBAN`, `DE_TAX_ID`, `DE_POSTAL_CODE`, and passport or residence permit numbers.
 - `spacy`:
   - Requires `pip install datafog[nlp]`.
@@ -131,7 +144,7 @@ Use the engine that matches your accuracy and dependency constraints:
 
 ## Optional OCR And Spark Surfaces
 
-DataFog 4.5 keeps the main package story centered on lightweight text PII
+The 4.x line keeps the main package story centered on lightweight text PII
 screening. OCR and Spark remain supported optional surfaces for users who
 already rely on them, but they are not required for the core import, default
 scan/redact helpers, or guardrail helpers.
@@ -151,7 +164,7 @@ scan/redact helpers, or guardrail helpers.
   - A Java runtime is required by PySpark.
 
 OCR and Spark are not deprecated. Their broader API and packaging overhaul is
-deferred; the 4.5 goal is to keep them explicit, documented, and isolated from
+deferred; the 4.x goal is to keep them explicit, documented, and isolated from
 the lightweight core path.
 
 ## Backward-Compatible APIs
