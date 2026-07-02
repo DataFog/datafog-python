@@ -114,6 +114,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests", "tests.*"]),
+    package_data={"datafog": ["py.typed"]},
     install_requires=core_deps,
     extras_require=extras_require,
     python_requires=">=3.10,<3.14",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import warnings
 from dataclasses import dataclass
 from functools import lru_cache
@@ -23,6 +24,9 @@ CANONICAL_TYPE_MAP = {
     "SOCIAL_SECURITY_NUMBER": "SSN",
     "CREDIT_CARD_NUMBER": "CREDIT_CARD",
     "DATE_OF_BIRTH": "DATE",
+    # Presidio-compatible aliases, so configs migrate without renames.
+    "EMAIL_ADDRESS": "EMAIL",
+    "US_SSN": "SSN",
 }
 
 ALL_ENTITY_TYPES = {
@@ -277,6 +281,42 @@ def _filter_entity_types(
     return [entity for entity in entities if entity.type in allowed]
 
 
+def _compile_allowlist_patterns(
+    allowlist_patterns: Optional[list[str]],
+) -> list["re.Pattern[str]"]:
+    compiled = []
+    for raw in allowlist_patterns or []:
+        try:
+            compiled.append(re.compile(raw))
+        except re.error as exc:
+            raise ValueError(
+                f"allowlist_patterns contains an invalid regex: {raw!r} ({exc})"
+            ) from None
+    return compiled
+
+
+def _apply_allowlist(
+    entities: list[Entity],
+    allowlist: Optional[list[str]],
+    allowlist_patterns: Optional[list[str]],
+) -> list[Entity]:
+    """Drop entities whose exact text is allowlisted.
+
+    Exact values match the full entity text; patterns must fullmatch it,
+    so a partial match never suppresses a finding.
+    """
+    if not allowlist and not allowlist_patterns:
+        return entities
+    exact = set(allowlist or [])
+    patterns = _compile_allowlist_patterns(allowlist_patterns)
+    return [
+        entity
+        for entity in entities
+        if entity.text not in exact
+        and not any(pattern.fullmatch(entity.text) for pattern in patterns)
+    ]
+
+
 def _needs_ner(entity_types: Optional[list[str]]) -> bool:
     if entity_types is None:
         return True
@@ -289,13 +329,24 @@ def scan(
     engine: str = "smart",
     entity_types: Optional[list[str]] = None,
     locales: Optional[list[str]] = None,
+    allowlist: Optional[list[str]] = None,
+    allowlist_patterns: Optional[list[str]] = None,
 ) -> ScanResult:
-    """Scan text for PII entities."""
+    """Scan text for PII entities.
+
+    ``allowlist`` exempts exact entity texts (e.g. your own support email);
+    ``allowlist_patterns`` exempts entities whose full text matches a regex
+    (e.g. ``^\\d{10}$`` to stop unix timestamps matching as phone numbers).
+    """
     if not isinstance(text, str):
         raise TypeError("text must be a string")
 
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
+
+    # Validate patterns up front so config errors fail fast even when the
+    # text contains no entities.
+    _compile_allowlist_patterns(allowlist_patterns)
 
     regex_entities = _regex_entities(
         text,
@@ -305,6 +356,7 @@ def scan(
 
     if engine == "regex":
         filtered = _filter_entity_types(regex_entities, entity_types)
+        filtered = _apply_allowlist(filtered, allowlist, allowlist_patterns)
         return ScanResult(
             entities=_dedupe_entities(filtered), text=text, engine_used="regex"
         )
@@ -367,6 +419,7 @@ def scan(
                 )
 
     filtered = _filter_entity_types(combined, entity_types)
+    filtered = _apply_allowlist(filtered, allowlist, allowlist_patterns)
     deduped = _dedupe_entities(filtered)
     return ScanResult(
         entities=deduped,
@@ -437,6 +490,8 @@ def scan_and_redact(
     entity_types: Optional[list[str]] = None,
     strategy: str = "token",
     locales: Optional[list[str]] = None,
+    allowlist: Optional[list[str]] = None,
+    allowlist_patterns: Optional[list[str]] = None,
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""
     scan_result = scan(
@@ -444,5 +499,7 @@ def scan_and_redact(
         engine=engine,
         entity_types=entity_types,
         locales=locales,
+        allowlist=allowlist,
+        allowlist_patterns=allowlist_patterns,
     )
     return redact(text=text, entities=scan_result.entities, strategy=strategy)
