@@ -58,6 +58,7 @@ jobs:
         if: matrix.install-profile == 'nlp-advanced'
         run: |
           pip install -e ".[test,cli,nlp,nlp-advanced]" -r requirements-test.txt
+          pip install "litellm>=1.90,<2"  # exercises the LiteLLM guardrail adapter tests
           python -m spacy download en_core_web_lg
           datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
 

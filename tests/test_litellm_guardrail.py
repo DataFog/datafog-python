@@ -10,8 +10,7 @@ import pytest
 
 litellm = pytest.importorskip("litellm")
 
-from datafog.integrations.litellm_guardrail import \
-    DataFogGuardrail  # noqa: E402
+from datafog.integrations.litellm_guardrail import DataFogGuardrail  # noqa: E402
 
 EMAIL = "jane.doe@" "acme.com"
 CARD = "4242 4242 " "4242 4242"
@@ -168,7 +167,7 @@ class TestFailPolicy:
             "datafog.integrations.litellm_guardrail._redact_text",
             lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")),
         )
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError, match="fail_policy is 'closed'"):
             await guardrail.async_pre_call_hook(
                 user_api_key_dict=None,
                 cache=None,

@@ -10,8 +10,8 @@ guardrails:
   - guardrail_name: "datafog-pii"
     litellm_params:
       guardrail: datafog.integrations.litellm_guardrail.DataFogGuardrail
-      mode: ["pre_call", "post_call"]  # requests AND responses; a bare "pre_call" scans requests only
+      mode: ["pre_call", "post_call"] # requests AND responses; a bare "pre_call" scans requests only
       default_on: true
-      action: "redact"        # "redact" replaces PII with [TYPE_N] tokens; "block" rejects
-      fail_policy: "open"     # "closed" rejects traffic if the scan engine errors
+      action: "redact" # "redact" replaces PII with [TYPE_N] tokens; "block" rejects
+      fail_policy: "open" # "closed" rejects traffic if the scan engine errors
       # entity_types: ["EMAIL", "PHONE", "CREDIT_CARD", "SSN"]  # defaults shown

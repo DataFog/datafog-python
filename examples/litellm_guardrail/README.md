@@ -5,12 +5,12 @@ proxy — offline, in-process, microseconds per scan.
 
 ## Why this over the Presidio guardrail
 
-| | DataFog | Presidio integration |
-|---|---|---|
-| Deployment | in-process, `pip install datafog litellm` | separate sidecar service |
-| Extra dependencies | pydantic only | spaCy + models |
-| Latency per scan | microseconds | tens of milliseconds + network hop |
-| Network calls | none | HTTP to the sidecar |
+|                    | DataFog                                   | Presidio integration               |
+| ------------------ | ----------------------------------------- | ---------------------------------- |
+| Deployment         | in-process, `pip install datafog litellm` | separate sidecar service           |
+| Extra dependencies | pydantic only                             | spaCy + models                     |
+| Latency per scan   | microseconds                              | tens of milliseconds + network hop |
+| Network calls      | none                                      | HTTP to the sidecar                |
 
 ## Install
 
@@ -29,7 +29,7 @@ reaches your model provider as
 
 Response-side redaction only runs when `post_call` is included in `mode`
 (the example config registers both: `mode: ["pre_call", "post_call"]`).
-With it, PII in model *responses* is redacted before reaching the client.
+With it, PII in model _responses_ is redacted before reaching the client.
 
 In `block` mode, rejected requests return **HTTP 400** with an entity-type
 summary — litellm classifies them as guardrail interventions, not backend
