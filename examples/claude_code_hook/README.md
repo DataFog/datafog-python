@@ -63,6 +63,17 @@ card number — the call is intercepted before it runs:
 Environment variables (set in `settings.json` `env` or your shell):
 
 - `DATAFOG_HOOK_ACTION` — `ask` (default) or `deny` for PreToolUse.
+  **Important:** `ask` defers to your permission mode — in
+  `--dangerously-skip-permissions` or auto-accept sessions, the ask is
+  silently approved and nothing is intercepted. If you run with permissions
+  relaxed (exactly when you most need a firewall), use `deny`:
+
+  ```json
+  {"type": "command", "command": "DATAFOG_HOOK_ACTION=deny datafog-hook", "timeout": 10}
+  ```
+
+  In `deny` mode the tool call is hard-blocked before it executes, the
+  model is told what was found, and it self-corrects by redacting.
 - `DATAFOG_HOOK_ENTITIES` — comma-separated entity types. Default:
   `EMAIL,PHONE,CREDIT_CARD,SSN`. Noisier types (`IP_ADDRESS`, `DOB`, `ZIP`)
   are available but opt-in — version strings, dates, and 5-digit numbers are
