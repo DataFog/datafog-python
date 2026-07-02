@@ -1,1 +1,10 @@
 comment: no
+
+codecov:
+  notify:
+    # The CI test matrix uploads 12 coverage reports (4 Python versions x 3
+    # install profiles). Only the nlp-advanced profile installs litellm, so
+    # the guardrail adapter's lines look uncovered until those uploads land.
+    # Waiting for all builds prevents the recurring interim-red patch status.
+    after_n_builds: 12
+    wait_for_ci: true
