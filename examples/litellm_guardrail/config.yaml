@@ -1,0 +1,17 @@
+# LiteLLM proxy config with the DataFog PII guardrail.
+# Run: litellm --config config.yaml
+model_list:
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+guardrails:
+  - guardrail_name: "datafog-pii"
+    litellm_params:
+      guardrail: datafog.integrations.litellm_guardrail.DataFogGuardrail
+      mode: ["pre_call", "post_call"] # requests AND responses; a bare "pre_call" scans requests only
+      default_on: true
+      action: "redact" # "redact" replaces PII with [TYPE_N] tokens; "block" rejects
+      fail_policy: "open" # "closed" rejects traffic if the scan engine errors
+      # entity_types: ["EMAIL", "PHONE", "CREDIT_CARD", "SSN"]  # defaults shown
