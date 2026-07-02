@@ -79,6 +79,47 @@ Environment variables (set in `settings.json` `env` or your shell):
   are available but opt-in — version strings, dates, and 5-digit numbers are
   everywhere in coding sessions.
 
+## What this actually protects against
+
+The realistic risk in agent sessions is rarely "the user asks for a
+PII-laden network call." It's **second-order leakage**: you paste a real
+stack trace or customer record while debugging, and forty turns later the
+agent helpfully hardcodes that email into a committed test fixture, a
+GitHub issue, or a Slack message. The data crossed a boundary and nobody
+asked it to.
+
+That's what the `Write|Edit|Bash|mcp__.*` gates cover: the moment PII is
+**re-emitted** into a file, command, or external tool, it appears in the
+tool input and the firewall fires — before the write, before the network
+call.
+
+What this does *not* cover: PII you hand the agent directly (a bank
+statement, a log file). By the time anything local can scan it, it is
+already in the session context, already sent to the model API, and already
+in your local transcript files. The hook warns the model so it avoids
+repeating those values, but the inbound event itself is not preventable at
+the hook layer — redact *before* sharing (`datafog redact` on a copy) if
+the model provider must not see the data.
+
+## Limitations
+
+Be honest with yourself about what a regex gate at the tool boundary can do:
+
+- **It sees tool-input text, nothing else.** `curl -d @file.txt`, an env
+  var expansion, string concatenation, or base64 all bypass the gate —
+  the PII never appears in the command string. This is a seatbelt against
+  accidental leakage, not armor against deliberate exfiltration or prompt
+  injection.
+- **Inbound PII is warned about, not blocked** (see above).
+- **Images and PDFs are not scanned.** A bank statement PDF often reaches
+  the model as page images; regex sees nothing.
+- **Regex precision is imperfect.** Defaults are tuned high-precision
+  (checksummed/structured types on; dates, ZIPs, and IPs off), but false
+  positives and negatives happen. Validators and confidence scoring are on
+  the roadmap.
+- **Fail-open by design.** A hook failure means that call went unscanned
+  rather than your session breaking.
+
 ## Design notes
 
 - **Offline.** DataFog's core makes zero network calls and has one
