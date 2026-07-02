@@ -9,6 +9,7 @@ hook) quiet while the tests exercise real detections.
 import pytest
 
 litellm = pytest.importorskip("litellm")
+pytest.importorskip("fastapi")  # adapter raises fastapi.HTTPException on block
 
 from datafog.integrations.litellm_guardrail import DataFogGuardrail  # noqa: E402
 
@@ -118,6 +119,92 @@ class TestPostCall:
             data={}, user_api_key_dict=None, response=response
         )
         assert EMAIL not in response.choices[0].message.content
+
+    async def test_response_without_choices_is_returned_untouched(self):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
+        opaque = object()
+        result = await guardrail.async_post_call_success_hook(
+            data={}, user_api_key_dict=None, response=opaque
+        )
+        assert result is opaque
+
+    async def test_non_text_response_content_is_skipped_not_crashed(self):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
+        response = _model_response("placeholder")
+        response.choices[0].message.content = [{"type": "tool_use"}]
+        result = await guardrail.async_post_call_success_hook(
+            data={}, user_api_key_dict=None, response=response
+        )
+        assert result.choices[0].message.content == [{"type": "tool_use"}]
+
+    async def test_post_call_fail_open_returns_unredacted_response(self, monkeypatch):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii", fail_policy="open")
+        monkeypatch.setattr(
+            "datafog.integrations.litellm_guardrail._redact_text",
+            lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")),
+        )
+        response = _model_response(f"reach me at {EMAIL}")
+        result = await guardrail.async_post_call_success_hook(
+            data={}, user_api_key_dict=None, response=response
+        )
+        assert result.choices[0].message.content == f"reach me at {EMAIL}"
+
+
+@pytest.mark.asyncio
+class TestEdgeShapes:
+    async def test_data_without_messages_passes_through(self):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
+        data = {"input": f"embed {EMAIL}"}
+        result = await guardrail.async_pre_call_hook(
+            user_api_key_dict=None, cache=None, data=data, call_type="aembedding"
+        )
+        assert result == data
+
+    async def test_message_without_content_key_passes_through(self):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
+        data = {"messages": [{"role": "assistant", "tool_calls": []}]}
+        result = await guardrail.async_pre_call_hook(
+            user_api_key_dict=None, cache=None, data=data, call_type="completion"
+        )
+        assert result == data
+
+    async def test_mixed_content_parts_skips_non_text_and_redacts_text(self):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
+        data = _chat_data(
+            [
+                {"type": "image_url", "image_url": {"url": "data:image/png;base64,xx"}},
+                {"type": "text", "text": f"card {CARD}"},
+            ]
+        )
+        result = await guardrail.async_pre_call_hook(
+            user_api_key_dict=None, cache=None, data=data, call_type="completion"
+        )
+        parts = result["messages"][0]["content"]
+        assert parts[0]["type"] == "image_url"  # untouched
+        assert CARD not in parts[1]["text"]
+
+    async def test_non_string_non_list_content_passes_through(self):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
+        data = _chat_data(None)
+        result = await guardrail.async_pre_call_hook(
+            user_api_key_dict=None, cache=None, data=data, call_type="completion"
+        )
+        assert result["messages"][0]["content"] is None
+
+    async def test_logging_helper_failure_never_breaks_traffic(self, monkeypatch):
+        guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
+        monkeypatch.setattr(
+            DataFogGuardrail,
+            "add_standard_logging_guardrail_information_to_request_data",
+            lambda self, **kw: (_ for _ in ()).throw(RuntimeError("obs down")),
+        )
+        data = await guardrail.async_pre_call_hook(
+            user_api_key_dict=None,
+            cache=None,
+            data=_chat_data(f"reach me at {EMAIL}"),
+            call_type="completion",
+        )
+        assert EMAIL not in data["messages"][0]["content"]  # redaction still happened
 
 
 @pytest.mark.asyncio

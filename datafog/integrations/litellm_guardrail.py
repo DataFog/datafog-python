@@ -26,7 +26,8 @@ Behavior:
 Errors and block messages report entity type counts only — matched PII is
 never echoed into logs, exceptions, or proxy responses.
 
-Requires ``litellm`` (this module is not imported by ``datafog`` core).
+Requires ``litellm`` and ``fastapi`` (this module is not imported by
+``datafog`` core; the LiteLLM proxy, where this runs, always ships fastapi).
 """
 
 import logging
