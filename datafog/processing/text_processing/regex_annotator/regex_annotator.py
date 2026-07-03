@@ -104,15 +104,23 @@ class RegexAnnotator:
             # inside a DE_VAT_ID) are resolved by the engine's span-overlap
             # suppression, not here, so default (EN) detection keeps v4.4.0
             # behavior even when German labels are active.
+            # The no-dash branch has stricter boundaries than the dashed one:
+            # a nine-digit run embedded in a longer alphanumeric token (random
+            # hex IDs, UUID segments) is not an SSN. The run must not be
+            # followed by a letter, and must start either at a non-alphanumeric
+            # boundary or right after a two-letter token prefix (country codes
+            # like "DE123456789" — v4.4.0 parity).
             "SSN": re.compile(
                 r"""
-                (?<!\d)
                 (?:
+                    (?<!\d)
                     (?!000|666)\d{3}-(?!00)\d{2}-(?!0000)\d{4}
+                    (?!\d)
                     |
+                    (?:(?<![0-9A-Za-z])|(?<=\b[A-Za-z]{2}))
                     (?!000|666)\d{3}(?!00)\d{2}(?!0000)\d{4}
+                    (?![0-9A-Za-z])
                 )
-                (?!\d)
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),

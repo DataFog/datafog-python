@@ -373,6 +373,29 @@ def test_annotation_result_format():
     assert ssn_spans[0].text == "123-45-6789"
 
 
+def test_ssn_no_dash_not_flagged_inside_alphanumeric_tokens():
+    """Regression guard: bare nine-digit runs embedded in longer
+    alphanumeric tokens (random hex IDs, UUID segments, blob names) must
+    not match SSN. A digit run counts as embedded when the token
+    continues with letters after it, or when it is preceded by a token
+    prefix that is not a bare two-letter country code (see
+    test_ssn_detection_keeps_v44_behavior_for_country_prefixed_digits)."""
+    annotator = RegexAnnotator()
+    for text in (
+        "serverId 3f2a123456789bc is up.",  # letters on both sides
+        "session 9c-3f2a123456789-77 restarted.",  # run ends a hex segment
+        "blob deadbeef123456789cafe stored.",
+        "id a1b2-123456789abc-x9",  # run starts a segment, letters after
+    ):
+        assert annotator.annotate(text)["SSN"] == [], text
+
+
+def test_ssn_no_dash_still_flagged_standalone():
+    """A bare nine-digit number that is its own token must keep matching."""
+    annotator = RegexAnnotator()
+    assert annotator.annotate("Case 219099999 assigned.")["SSN"] == ["219099999"]
+
+
 def test_ssn_detection_keeps_v44_behavior_for_country_prefixed_digits():
     """Regression guard: bare nine-digit runs after a country prefix must
     still match SSN when no locale is configured (v4.4.0 parity). The
