@@ -24,9 +24,7 @@ def mock_regex_annotator():
 
     # Add mock for annotate_with_spans method
     from datafog.processing.text_processing.regex_annotator import (
-        AnnotationResult,
-        Span,
-    )
+        AnnotationResult, Span)
 
     spans = [
         Span(label="EMAIL", start=0, end=15, text="john@example.com"),
@@ -265,9 +263,7 @@ def test_structured_output_regex_engine(text_service_with_engine, mock_regex_ann
     """Test structured output mode with regex engine."""
     # Set up the mock to return spans that match the input text
     from datafog.processing.text_processing.regex_annotator import (
-        AnnotationResult,
-        Span,
-    )
+        AnnotationResult, Span)
 
     # Create spans that will be returned by the mock
     test_text = "john@example.com"
@@ -340,7 +336,8 @@ def test_structured_output_auto_engine(
 ):
     """Test structured output mode with auto engine."""
     # Configure regex annotator to return empty spans
-    from datafog.processing.text_processing.regex_annotator import AnnotationResult
+    from datafog.processing.text_processing.regex_annotator import \
+        AnnotationResult
 
     mock_regex_annotator.annotate_with_spans.return_value = (
         {"EMAIL": [], "PHONE": []},

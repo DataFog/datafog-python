@@ -44,12 +44,18 @@ class TestPatternAllowlist:
     def test_pattern_suppresses_matching_entities(self):
         # The motivating case: unix timestamps and numeric IDs match the
         # PHONE pattern; a pattern allowlist can exempt all-digit strings.
-        noisy = datafog.scan(f"created {TIMESTAMP_LIKE}", engine="regex")
-        assert len(noisy.entities) == 1  # sanity: it is detected by default
+        # A bare ten-digit run is not a PHONE under strict_numeric (the #158
+        # default); in permissive mode it is, and the pattern allowlist can
+        # still exempt it. Both paths must end with no findings.
+        noisy = datafog.scan(
+            f"created {TIMESTAMP_LIKE}", engine="regex", strict_numeric=False
+        )
+        assert len(noisy.entities) == 1  # detected in permissive mode
 
         result = datafog.scan(
             f"created {TIMESTAMP_LIKE}",
             engine="regex",
+            strict_numeric=False,
             allowlist_patterns=[r"^\d{10}$"],
         )
         assert result.entities == []

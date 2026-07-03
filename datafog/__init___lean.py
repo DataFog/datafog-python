@@ -15,15 +15,10 @@ Optional extras available for advanced features:
 """
 
 from .__about__ import __version__
-
 # Core imports - always available
 from .models.annotator import AnnotationResult, AnnotatorRequest
-from .models.anonymizer import (
-    AnonymizationResult,
-    Anonymizer,
-    AnonymizerRequest,
-    AnonymizerType,
-)
+from .models.anonymizer import (AnonymizationResult, Anonymizer,
+                                AnonymizerRequest, AnonymizerType)
 from .models.common import EntityTypes
 from .processing.text_processing.regex_annotator import RegexAnnotator
 

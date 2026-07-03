@@ -134,12 +134,14 @@ def test_redaction_and_service_locale_support() -> None:
 def test_german_vat_redaction_suppresses_inner_generic_ssn_match(
     text: str, vat_text: str
 ) -> None:
-    # Default (no locale): v4.4.0 parity — the bare nine-digit run still
-    # matches the generic SSN pattern even when prefixed by a country code.
+    # Default (no locale): strict_numeric drops the bare nine-digit run, so
+    # no generic SSN is matched even when prefixed by a country code (#158).
     scan_result = scan(text, engine="regex")
-    assert [(entity.type, entity.text) for entity in scan_result.entities] == [
-        ("SSN", "123456789")
-    ]
+    assert scan_result.entities == []
+
+    # v4.4.0 parity is available opt-in: the bare run matches SSN again.
+    permissive = scan(text, engine="regex", strict_numeric=False)
+    assert [(e.type, e.text) for e in permissive.entities] == [("SSN", "123456789")]
 
     # German locale: the longer DE_VAT_ID span wins via the engine's
     # span-overlap suppression, so the inner SSN match is dropped.
@@ -149,7 +151,7 @@ def test_german_vat_redaction_suppresses_inner_generic_ssn_match(
     ]
 
     default_redaction = scan_and_redact(text, engine="regex")
-    assert default_redaction.redacted_text == text.replace("123456789", "[SSN_1]")
+    assert default_redaction.redacted_text == text
 
     redaction = scan_and_redact(text, engine="regex", locales=["de"])
     assert redaction.redacted_text == text.replace(vat_text, "[DE_VAT_ID_1]")

@@ -199,9 +199,8 @@ def download_model(
 
     elif engine == "gliner":
         try:
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+            from datafog.processing.text_processing.gliner_annotator import \
+                GLiNERAnnotator
 
             GLiNERAnnotator.download_model(model_name)
             typer.echo(f"GLiNER model {model_name} downloaded and cached successfully.")
@@ -310,9 +309,8 @@ def list_entities():
         typer.echo(annotator.list_entities())
     except ModuleNotFoundError as e:
         try:
-            from .processing.text_processing.spacy_pii_annotator import (
-                PII_ANNOTATION_LABELS,
-            )
+            from .processing.text_processing.spacy_pii_annotator import \
+                PII_ANNOTATION_LABELS
 
             typer.echo(PII_ANNOTATION_LABELS)
         except Exception:

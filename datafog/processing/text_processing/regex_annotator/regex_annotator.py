@@ -47,11 +47,69 @@ class RegexAnnotator:
         "de_de": GERMAN_LABELS,
     }
 
+    @staticmethod
+    def _phone_pattern(strict_numeric: bool) -> "Pattern":
+        # Strict (default): a separator, parentheses, or a +country prefix is
+        # required, so a bare ten-digit run (tab/row ids, timestamps) is not
+        # matched (issue #158). Structural NANP validation (area/exchange must
+        # start 2-9) is deferred to the DFPY-110 validator layer.
+        bare = "" if strict_numeric else r"| (?:\+?1[-.\s]?)? \d{3} \d{3} \d{4}"
+        return re.compile(
+            r"""
+            (?<![A-Za-z0-9])
+            (?:
+                # Parenthesized area code (separators optional afterwards)
+                (?:(?:\+?1)[-.\s]?)?
+                \(\d{3}\) [-.\s]? \d{3} [-.\s]? \d{4}
+                |
+                # Bare area code but a separator between groups is required
+                (?:(?:\+?1)[-.\s]?)?
+                \d{3} [-.\s] \d{3} [-.\s] \d{4}
+                |
+                # International formats, e.g. a +country prefixed number
+                \+\d{1,3} [\s\-.]? \d{1,4} (?:[\s\-.]?\d{2,4}){2,3}
+                BARE
+            )
+            (?![-A-Za-z0-9])
+            """.replace(
+                "BARE", bare
+            ),
+            re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+        )
+
+    @staticmethod
+    def _ssn_pattern(strict_numeric: bool) -> "Pattern":
+        # Strict (default): a dash or space delimiter is required, so a bare
+        # nine-digit run is not treated as an SSN (issue #158). Area != 000/666,
+        # group != 00, serial != 0000 as before; broader SSA range checks are
+        # deferred to the DFPY-110 validator layer. Opt in to bare matching
+        # with strict_numeric=False for v4.4.0 parity.
+        bare = "" if strict_numeric else r"| (?!000|666)\d{3}(?!00)\d{2}(?!0000)\d{4}"
+        return re.compile(
+            r"""
+            (?<!\d)
+            (?:
+                (?!000|666)\d{3}[-\s](?!00)\d{2}[-\s](?!0000)\d{4}
+                BARE
+            )
+            (?!\d)
+            """.replace(
+                "BARE", bare
+            ),
+            re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+        )
+
     def __init__(
         self,
         locales: str | Iterable[str] | None = None,
         enabled_labels: Iterable[str] | None = None,
+        strict_numeric: bool = True,
     ):
+        # When strict_numeric is True (default), SSN requires delimiters and
+        # PHONE requires formatting cues, so bare digit runs (tab ids, row
+        # ids, timestamps) do not match. Set False to also accept undelimited
+        # nine-digit SSNs and bare ten-digit phone numbers (issue #158).
+        self.strict_numeric = strict_numeric
         self.locales = self._normalize_locales(locales)
         self.active_labels = self.active_labels_for(self.locales, enabled_labels)
 
@@ -74,48 +132,18 @@ class RegexAnnotator:
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
-            # Phone pattern - North American Numbering Plan (NANP) format
-            # Accepts common US and international formats while avoiding IDs/product codes.
-            "PHONE": re.compile(
-                r"""
-                (?<![A-Za-z0-9])
-                (?:
-                    # US/NANP patterns
-                    (?:(?:\+?1)[-\.\s]?)?
-                    (?:\(\d{3}\)|\d{3})
-                    [-\.\s]?
-                    \d{3}
-                    [-\.\s]?
-                    \d{4}
-                    |
-                    # International example formats, e.g., +44 20 7946 0958
-                    \+\d{1,3}
-                    [\s\-\.]?
-                    \d{1,4}
-                    (?:[\s\-\.]?\d{2,4}){2,3}
-                )
-                (?![-A-Za-z0-9])
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
+            # Phone pattern - North American Numbering Plan (NANP) format.
+            # Area code and exchange must start 2-9. In strict mode
+            # (default) a bare ten-digit run is not matched; a separator,
+            # parentheses, or a +country prefix is required (issue #158).
+            "PHONE": self._phone_pattern(strict_numeric),
             # SSN pattern - U.S. Social Security Number
             # Supports dashed and no-dash formats.
             # Note: overlaps with locale-gated labels (e.g. the nine-digit run
             # inside a DE_VAT_ID) are resolved by the engine's span-overlap
             # suppression, not here, so default (EN) detection keeps v4.4.0
             # behavior even when German labels are active.
-            "SSN": re.compile(
-                r"""
-                (?<!\d)
-                (?:
-                    (?!000|666)\d{3}-(?!00)\d{2}-(?!0000)\d{4}
-                    |
-                    (?!000|666)\d{3}(?!00)\d{2}(?!0000)\d{4}
-                )
-                (?!\d)
-                """,
-                re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-            ),
+            "SSN": self._ssn_pattern(strict_numeric),
             # Credit card pattern - Visa, Mastercard, and American Express
             # Visa: 16 digits, starts with 4
             # Mastercard: 16 digits, starts with 51-55

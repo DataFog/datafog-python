@@ -155,6 +155,7 @@ def scan(
     locales: list[str] | None = None,
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
+    strict_numeric: bool = True,
 ) -> ScanResult:
     """
     v5-preview scan entrypoint.
@@ -165,7 +166,10 @@ def scan(
     ``allowlist`` exempts exact entity texts (your own support address, doc
     placeholders); ``allowlist_patterns`` exempts entities whose full text
     matches a regex (e.g. ``^\\d{10}$`` so unix timestamps stop matching as
-    phone numbers).
+    phone numbers). ``strict_numeric`` (default True) requires SSNs to be
+    delimited and phone numbers to carry formatting cues, so bare digit runs
+    (tab ids, row ids, timestamps) are not flagged; set False to also detect
+    undelimited nine-digit SSNs and bare ten-digit phone numbers.
     """
     return _scan(
         text=text,
@@ -174,6 +178,7 @@ def scan(
         locales=locales,
         allowlist=allowlist,
         allowlist_patterns=allowlist_patterns,
+        strict_numeric=strict_numeric,
     )
 
 
@@ -187,6 +192,7 @@ def redact(
     locales: list[str] | None = None,
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
+    strict_numeric: bool = True,
 ) -> RedactResult:
     """
     v5-preview redaction entrypoint.
@@ -195,7 +201,9 @@ def redact(
     using the selected engine and redact the detected entities. ``allowlist``
     and ``allowlist_patterns`` exempt findings from redaction (exact text and
     full-text regex match respectively); they apply to the scan path and are
-    rejected when explicit ``entities`` are supplied.
+    rejected when explicit ``entities`` are supplied. ``strict_numeric``
+    matches ``scan``: bare digit runs are not treated as SSN/PHONE unless it
+    is set False.
     """
     if preset is not None:
         try:
@@ -220,6 +228,7 @@ def redact(
         locales=locales,
         allowlist=allowlist,
         allowlist_patterns=allowlist_patterns,
+        strict_numeric=strict_numeric,
     )
 
 

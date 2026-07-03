@@ -101,9 +101,8 @@ class ImageService:
             return self.tesseract_processor
 
         try:
-            from datafog.processing.image_processing.pytesseract_processor import (
-                PytesseractProcessor,
-            )
+            from datafog.processing.image_processing.pytesseract_processor import \
+                PytesseractProcessor
         except ImportError as e:
             raise ModuleNotFoundError(
                 "Tesseract OCR requires optional dependencies. "
@@ -118,9 +117,8 @@ class ImageService:
             return self.donut_processor
 
         try:
-            from datafog.processing.image_processing.donut_processor import (
-                DonutProcessor,
-            )
+            from datafog.processing.image_processing.donut_processor import \
+                DonutProcessor
         except ImportError as e:
             raise ModuleNotFoundError(
                 "Donut OCR requires optional dependencies. "

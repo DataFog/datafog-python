@@ -2,6 +2,28 @@
 
 ## [2026-07-02]
 
+### `datafog-python` [4.7.1]
+
+#### Behavior change (precision)
+
+- **Bare digit runs are no longer treated as SSN or PHONE by default.**
+  A nine-digit run with no delimiter and a ten-digit run with no formatting
+  are no longer matched as `SSN`/`PHONE`; delimited SSNs (`NNN-NN-NNNN`,
+  `NNN NN NNNN`) and formatted phone numbers (separators, parentheses, or a
+  `+country` prefix) still match. This fixes the dominant false-positive
+  class in structured tool output — tab ids, database row ids, epoch
+  timestamps, ticket numbers — reported in
+  [#158](https://github.com/DataFog/datafog-python/issues/158). Spaces are
+  now also accepted as an SSN delimiter.
+- **Migration:** to restore the previous behavior (undelimited nine-digit
+  SSNs and bare ten-digit phone numbers), pass `strict_numeric=False` to
+  `scan()` / `redact()`. The Claude Code hook and LiteLLM guardrail run in
+  strict mode; the hook additionally supports an
+  `^\d{9}$|^\d{10}$` allowlist pattern as belt-and-braces.
+- Broader structural validation (SSA area/group ranges, NANP area/exchange
+  rules) is deferred to the v5 validator layer; this release only changes
+  the delimiter/formatting requirement.
+
 ### `datafog-python` [4.7.0]
 
 #### Added

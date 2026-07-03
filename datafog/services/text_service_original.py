@@ -14,10 +14,9 @@ import asyncio
 from typing import Dict, List, Union
 
 from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-    RegexAnnotator,
-    Span,
-)
-from datafog.processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
+    RegexAnnotator, Span)
+from datafog.processing.text_processing.spacy_pii_annotator import \
+    SpacyPIIAnnotator
 
 
 class TextService:

@@ -10,7 +10,8 @@ import warnings
 from typing import TYPE_CHECKING, Dict, List, Union
 
 if TYPE_CHECKING:
-    from datafog.processing.text_processing.regex_annotator.regex_annotator import Span
+    from datafog.processing.text_processing.regex_annotator.regex_annotator import \
+        Span
 else:
     # Runtime import for Span when needed
     Span = None
@@ -20,9 +21,8 @@ def _get_span_class():
     """Lazily import Span class when needed."""
     global Span
     if Span is None:
-        from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-            Span,
-        )
+        from datafog.processing.text_processing.regex_annotator.regex_annotator import \
+            Span
     return Span
 
 
@@ -102,9 +102,8 @@ class TextService:
     def regex_annotator(self):
         """Lazy-loaded regex annotator."""
         if self._regex_annotator is None:
-            from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-                RegexAnnotator,
-            )
+            from datafog.processing.text_processing.regex_annotator.regex_annotator import \
+                RegexAnnotator
 
             self._regex_annotator = RegexAnnotator(locales=self.locales)
         return self._regex_annotator
@@ -148,9 +147,8 @@ class TextService:
     def _create_spacy_annotator(self):
         """Create spaCy annotator if dependencies are available."""
         try:
-            from datafog.processing.text_processing.spacy_pii_annotator import (
-                SpacyPIIAnnotator,
-            )
+            from datafog.processing.text_processing.spacy_pii_annotator import \
+                SpacyPIIAnnotator
 
             return SpacyPIIAnnotator.create()
         except ImportError:
@@ -159,9 +157,8 @@ class TextService:
     def _create_gliner_annotator(self):
         """Create GLiNER annotator if dependencies are available."""
         try:
-            from datafog.processing.text_processing.gliner_annotator import (
-                GLiNERAnnotator,
-            )
+            from datafog.processing.text_processing.gliner_annotator import \
+                GLiNERAnnotator
 
             return GLiNERAnnotator.create(model_name=self.gliner_model)
         except ImportError:
@@ -392,11 +389,9 @@ class TextService:
                 result = self._annotate_multiple_chunks_dict(chunks)
 
         try:
-            from datafog.telemetry import (
-                _get_duration_bucket,
-                _get_text_length_bucket,
-                track_function_call,
-            )
+            from datafog.telemetry import (_get_duration_bucket,
+                                           _get_text_length_bucket,
+                                           track_function_call)
 
             _duration = (_time.monotonic() - _start) * 1000
             track_function_call(

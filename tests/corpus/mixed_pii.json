@@ -278,12 +278,6 @@
         "text": "Omar Aziz",
         "start": 9,
         "end": 18
-      },
-      {
-        "type": "PHONE",
-        "text": "5551234567",
-        "start": 45,
-        "end": 55
       }
     ]
   },

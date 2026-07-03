@@ -45,7 +45,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test GLiNER annotator creation when dependencies are available."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         annotator = GLiNERAnnotator.create()
 
@@ -61,7 +62,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test GLiNER annotator with custom model."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         custom_entities = ["person", "organization", "location"]
         annotator = GLiNERAnnotator.create(
@@ -79,7 +81,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test GLiNER text annotation."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         annotator = GLiNERAnnotator.create()
         result = annotator.annotate(
@@ -97,7 +100,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test GLiNER annotation with empty text."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         annotator = GLiNERAnnotator.create()
         result = annotator.annotate("")
@@ -112,7 +116,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test GLiNER annotation with text exceeding max length."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         annotator = GLiNERAnnotator.create()
 
@@ -133,7 +138,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test GLiNER model download functionality."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         GLiNERAnnotator.download_model("urchade/gliner_base")
 
@@ -141,7 +147,8 @@ class TestGLiNERAnnotatorWithDependencies:
 
     def test_gliner_list_available_models(self):
         """Test listing available GLiNER models."""
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         models = GLiNERAnnotator.list_available_models()
 
@@ -154,7 +161,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test getting model information."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         annotator = GLiNERAnnotator.create()
         info = annotator.get_model_info()
@@ -168,7 +176,8 @@ class TestGLiNERAnnotatorWithDependencies:
         """Test updating entity types."""
         mock_gliner_class, mock_model = mock_gliner_module
 
-        from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
+        from datafog.processing.text_processing.gliner_annotator import \
+            GLiNERAnnotator
 
         annotator = GLiNERAnnotator.create()
         new_entities = ["person", "location", "organization"]
@@ -194,9 +203,8 @@ class TestGLiNERAnnotatorWithoutDependencies:
 
             # Mock only the gliner import
             with patch.dict("sys.modules", {"gliner": None}):
-                from datafog.processing.text_processing.gliner_annotator import (
-                    GLiNERAnnotator,
-                )
+                from datafog.processing.text_processing.gliner_annotator import \
+                    GLiNERAnnotator
 
                 with pytest.raises(
                     ImportError, match="GLiNER dependencies not available"
@@ -229,9 +237,8 @@ class TestGLiNERAnnotatorWithoutDependencies:
 
             # Mock only the gliner import
             with patch.dict("sys.modules", {"gliner": None}):
-                from datafog.processing.text_processing.gliner_annotator import (
-                    GLiNERAnnotator,
-                )
+                from datafog.processing.text_processing.gliner_annotator import \
+                    GLiNERAnnotator
 
                 with pytest.raises(
                     ImportError, match="GLiNER dependencies not available"

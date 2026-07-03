@@ -16,9 +16,8 @@ try:
     if find_spec("spacy") is None:
         raise ImportError("spacy not installed")
 
-    from datafog.processing.text_processing.spacy_pii_annotator import (
-        SpacyPIIAnnotator as TextPIIAnnotator,
-    )
+    from datafog.processing.text_processing.spacy_pii_annotator import \
+        SpacyPIIAnnotator as TextPIIAnnotator
     from datafog.services.image_service import ImageService
     from datafog.services.text_service import TextService
 

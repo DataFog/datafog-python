@@ -1,12 +1,8 @@
 import pytest
 
 from datafog.models.annotator import AnnotationResult, AnnotatorMetadata
-from datafog.models.anonymizer import (
-    AnonymizationResult,
-    Anonymizer,
-    AnonymizerType,
-    HashType,
-)
+from datafog.models.anonymizer import (AnonymizationResult, Anonymizer,
+                                       AnonymizerType, HashType)
 from datafog.models.common import EntityTypes
 
 

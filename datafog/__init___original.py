@@ -11,23 +11,18 @@ from .__about__ import __version__
 from .client import app
 from .config import OperationType, get_config
 from .main import DataFog, TextPIIAnnotator
-from .models.annotator import (
-    AnalysisExplanation,
-    AnnotationResult,
-    AnnotationResultWithAnaysisExplanation,
-    AnnotatorRequest,
-)
-from .models.anonymizer import (
-    AnonymizationResult,
-    Anonymizer,
-    AnonymizerRequest,
-    AnonymizerType,
-)
-from .models.common import AnnotatorMetadata, EntityTypes, Pattern, PatternRecognizer
+from .models.annotator import (AnalysisExplanation, AnnotationResult,
+                               AnnotationResultWithAnaysisExplanation,
+                               AnnotatorRequest)
+from .models.anonymizer import (AnonymizationResult, Anonymizer,
+                                AnonymizerRequest, AnonymizerType)
+from .models.common import (AnnotatorMetadata, EntityTypes, Pattern,
+                            PatternRecognizer)
 from .models.spacy_nlp import SpacyAnnotator
 from .processing.image_processing.donut_processor import DonutProcessor
 from .processing.image_processing.image_downloader import ImageDownloader
-from .processing.image_processing.pytesseract_processor import PytesseractProcessor
+from .processing.image_processing.pytesseract_processor import \
+    PytesseractProcessor
 from .processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
 from .services.image_service import ImageService
 from .services.spark_service import SparkService

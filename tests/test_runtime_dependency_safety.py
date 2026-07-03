@@ -88,7 +88,8 @@ def test_spacy_pii_missing_model_requires_explicit_download(
 
     monkeypatch.setitem(sys.modules, "spacy", FakeSpacy())
 
-    from datafog.processing.text_processing.spacy_pii_annotator import SpacyPIIAnnotator
+    from datafog.processing.text_processing.spacy_pii_annotator import \
+        SpacyPIIAnnotator
 
     with pytest.raises(ImportError, match="Download it explicitly"):
         SpacyPIIAnnotator.create()
