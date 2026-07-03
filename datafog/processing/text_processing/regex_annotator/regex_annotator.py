@@ -108,8 +108,10 @@ class RegexAnnotator:
             # a nine-digit run embedded in a longer alphanumeric token (random
             # hex IDs, UUID segments) is not an SSN. The run must not be
             # followed by a letter, and must start either at a non-alphanumeric
-            # boundary or right after a two-letter token prefix (country codes
-            # like "DE123456789" — v4.4.0 parity).
+            # boundary or right after an uppercase "DE" token prefix — the one
+            # letter-prefixed shape pinned for v4.4.0 DE_VAT_ID parity. The
+            # prefix is case-sensitive ((?-i:...)) because lowercase "de" is a
+            # hex byte and would reopen the random-hex-ID false positive.
             "SSN": re.compile(
                 r"""
                 (?:
@@ -117,7 +119,7 @@ class RegexAnnotator:
                     (?!000|666)\d{3}-(?!00)\d{2}-(?!0000)\d{4}
                     (?!\d)
                     |
-                    (?:(?<![0-9A-Za-z])|(?<=\b[A-Za-z]{2}))
+                    (?:(?<![0-9A-Za-z])|(?<=\b(?-i:DE)))
                     (?!000|666)\d{3}(?!00)\d{2}(?!0000)\d{4}
                     (?![0-9A-Za-z])
                 )

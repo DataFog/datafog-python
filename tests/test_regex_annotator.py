@@ -375,10 +375,9 @@ def test_annotation_result_format():
 
 def test_ssn_no_dash_not_flagged_inside_alphanumeric_tokens():
     """Regression guard: bare nine-digit runs embedded in longer
-    alphanumeric tokens (random hex IDs, UUID segments, blob names) must
-    not match SSN. A digit run counts as embedded when the token
-    continues with letters after it, or when it is preceded by a token
-    prefix that is not a bare two-letter country code (see
+    alphanumeric tokens (random hex IDs, UUID segments, blob names,
+    prefixed record IDs) must not match SSN. The only letter-prefixed
+    shape that still matches is an uppercase "DE" token prefix (see
     test_ssn_detection_keeps_v44_behavior_for_country_prefixed_digits)."""
     annotator = RegexAnnotator()
     for text in (
@@ -386,6 +385,9 @@ def test_ssn_no_dash_not_flagged_inside_alphanumeric_tokens():
         "session 9c-3f2a123456789-77 restarted.",  # run ends a hex segment
         "blob deadbeef123456789cafe stored.",
         "id a1b2-123456789abc-x9",  # run starts a segment, letters after
+        "order ID219099999 shipped.",  # generic two-letter record prefix
+        "ticket PO219099999 open.",
+        "hex de219099999 blob.",  # lowercase "de" is a hex byte, not a country code
     ):
         assert annotator.annotate(text)["SSN"] == [], text
 
