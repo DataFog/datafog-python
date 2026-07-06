@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 
-### `datafog-python`
+## [2026-07-05]
+
+### `datafog-python` [4.8.0]
 
 #### Fixed
 
