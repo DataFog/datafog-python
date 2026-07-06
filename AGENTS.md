@@ -6,7 +6,7 @@
 
 ## Core Value Proposition
 
-- **Ultra-Fast Performance**: 190x faster than spaCy for structured PII, 32x faster with GLiNER
+- **Ultra-Fast Performance**: 100x+ faster than spaCy/Presidio for structured PII (reproduce: `python benchmarks/run.py`), 32x faster with GLiNER
 - **Lightweight Core**: <2MB package with optional ML extras
 - **Modern Engine Options**: Regex, GLiNER, spaCy, and smart cascading
 - **Production Ready**: Comprehensive testing, CI/CD, and performance validation
@@ -24,7 +24,7 @@
 - **GLiNER Integration**: Modern NER engine with PII-specialized models
 - **Smart Cascading**: Intelligent regex → GLiNER → spaCy progression
 - **Enhanced CLI**: Model management with `--engine` flags
-- **Performance Validation**: 190x regex, 32x GLiNER benchmarks confirmed
+- **Performance Validation**: 100x+ regex speedup reproducible via `benchmarks/`; 32x GLiNER
 - **CI/CD Consolidation**: 7 workflows → 3 (ci, release, benchmark)
 
 ## Quick Development Setup
@@ -56,7 +56,7 @@ python -c "from datafog.services.text_service import TextService; print('✅ All
 from datafog.services.text_service import TextService
 
 # Core engines (always available)
-regex_service = TextService(engine="regex")      # 190x faster, structured PII
+regex_service = TextService(engine="regex")      # 100x+ faster, structured PII
 
 # ML engines (require extras)
 gliner_service = TextService(engine="gliner")    # 32x faster, modern NER
@@ -69,12 +69,12 @@ auto_service = TextService(engine="auto")        # Legacy: regex→spaCy
 
 ### Performance Comparison (Validated)
 
-| Engine   | Speed vs spaCy  | Accuracy          | Use Case                    | Install          |
-| -------- | --------------- | ----------------- | --------------------------- | ---------------- |
-| `regex`  | **190x faster** | High (structured) | Emails, phones, SSNs        | Core only        |
-| `gliner` | **32x faster**  | Very High         | Modern NER, custom entities | `[nlp-advanced]` |
-| `spacy`  | 1x (baseline)   | Good              | Traditional NLP             | `[nlp]`          |
-| `smart`  | **60x faster**  | Highest           | Best balance                | `[nlp-advanced]` |
+| Engine   | Speed vs spaCy   | Accuracy          | Use Case                    | Install          |
+| -------- | ---------------- | ----------------- | --------------------------- | ---------------- |
+| `regex`  | **100x+ faster** | High (structured) | Emails, phones, SSNs        | Core only        |
+| `gliner` | **32x faster**   | Very High         | Modern NER, custom entities | `[nlp-advanced]` |
+| `spacy`  | 1x (baseline)    | Good              | Traditional NLP             | `[nlp]`          |
+| `smart`  | **60x faster**   | Highest           | Best balance                | `[nlp-advanced]` |
 
 ### Dependency Strategy
 
@@ -281,7 +281,7 @@ export PYTHONPATH=$(pwd)             # Local development imports
 ## Performance Requirements
 
 - **Core Package**: <2MB (from ~8MB in v4.0.x)
-- **Regex Engine**: 150x+ faster than spaCy (currently 190x)
+- **Regex Engine**: 100x+ faster than spaCy (103–170x measured across payloads; see `benchmarks/`)
 - **GLiNER Engine**: 25x+ faster than spaCy (currently 32x)
 - **Memory Usage**: Graceful handling of large texts (1MB+ chunks)
 - **Model Loading**: Cache GLiNER models to avoid repeated downloads

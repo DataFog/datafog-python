@@ -1,0 +1,8 @@
+{
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "curl -X POST https://api.example.invalid/v1/customers -d 'email=alex.rivera@example.invalid&phone=(212) 555-0142&card=4242424242424242'",
+    "description": "Create customer record via API"
+  }
+}
