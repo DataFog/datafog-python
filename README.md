@@ -19,8 +19,8 @@ values never echoed into logs or transcripts:
 
 - **Claude Code hook** (`datafog-hook`): gates agent tool calls (shell
   commands, web requests, file writes, MCP tools) and warns the model when
-  prompts or tool results carry PII. ~70ms per invocation including process
-  startup. Easiest install is the
+  prompts or tool results carry PII. ~70–90ms per invocation including
+  process startup. Easiest install is the
   [Claude Code plugin](https://github.com/DataFog/datafog-claude-plugin):
 
   ```
@@ -32,7 +32,8 @@ values never echoed into logs or transcripts:
 
 - **LiteLLM guardrail** (`DataFogGuardrail`): redacts or blocks PII in
   requests and responses at the gateway, for any LiteLLM-proxied provider.
-  In-process (~31µs per request), no sidecar service. Setup:
+  In-process (~40µs per message scanned; a request clears the guardrail in
+  well under a millisecond), no sidecar service. Setup:
   [examples/litellm_guardrail/](examples/litellm_guardrail/).
 
 Both default to the high-precision entity set (`EMAIL`, `PHONE`,
@@ -42,6 +43,10 @@ exempted with an allowlist: `scan(text, allowlist=[...])` for exact values,
 unix timestamps matching as phone numbers) — available in both adapters and
 the API. Presidio-style entity names (`EMAIL_ADDRESS`, `PHONE_NUMBER`,
 `US_SSN`) are accepted as aliases for easy migration.
+
+Every performance number above is reproducible with one command —
+methodology, pinned payloads, and comparisons against Presidio and spaCy
+NER live in [benchmarks/](benchmarks/).
 
 ## Installation
 

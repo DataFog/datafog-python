@@ -1,7 +1,8 @@
 """
 DataFog: Lightning-fast PII detection and anonymization library.
 
-Core package provides regex-based PII detection with 190x performance advantage.
+Core package provides regex-based PII detection, 100x+ faster than NER-based
+detection on identical payloads (reproduce: python benchmarks/run.py).
 Optional extras available for advanced features:
 - pip install datafog[nlp] - for spaCy integration
 - pip install datafog[ocr] - for image/OCR processing

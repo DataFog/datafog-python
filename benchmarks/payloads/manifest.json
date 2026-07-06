@@ -1,0 +1,36 @@
+{
+  "entity_types": [
+    "EMAIL",
+    "PHONE",
+    "CREDIT_CARD",
+    "SSN"
+  ],
+  "note": "All PII values are synthetic test values (reserved domains, 555-01XX phones, public test cards, SSA example SSNs). expected_counts pins what the regex engine must detect before timing begins.",
+  "payloads": {
+    "core_100kb_sparse.txt": {
+      "bytes": 100000,
+      "expected_counts": {
+        "EMAIL": 9,
+        "PHONE": 9
+      }
+    },
+    "core_10kb_mixed.txt": {
+      "bytes": 10241,
+      "expected_counts": {
+        "CREDIT_CARD": 2,
+        "EMAIL": 4,
+        "PHONE": 4,
+        "SSN": 2
+      }
+    },
+    "core_1kb_dense.txt": {
+      "bytes": 1232,
+      "expected_counts": {
+        "CREDIT_CARD": 2,
+        "EMAIL": 2,
+        "PHONE": 2,
+        "SSN": 2
+      }
+    }
+  }
+}

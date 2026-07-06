@@ -1,0 +1,8 @@
+Support ticket #48213 — account verification
+
+Customer alex.rivera@example.invalid called from (212) 555-0142 about a failed payment on card 4242424242424242. Identity was confirmed against SSN 219-09-9999.
+
+Escalated to j.chen@support.example.com; callback scheduled at 415-555-0188. A retry was attempted with backup card 4111-1111-1111-1111, which also declined. Secondary account holder (SSN 078-05-1120) authorized the change.
+
+The quarterly review covered onboarding latency, retention cohorts, and the migration of the billing reconciliation job to the new scheduler. Action items were assigned to the platform team with a two-week horizon. No regressions were observed in the canary environment during the rollout window, and error budgets remain within policy for all tier-one services. 
+The quarterly review covered onboarding latency, retention cohorts, and the migration of the billing reconciliation job to the new scheduler. Action items were assigned to the platform team with a two-week horizon. No regressions were observed in the canary environment during the rollout window, and error budgets remain within policy for all tier-one services. Resolution: card replaced, customer notified by email, ticket closed.

@@ -78,7 +78,7 @@ setup(
     version=__version__,
     author="Sid Mohan",
     author_email="sid@datafog.ai",
-    description="Lightning-fast PII detection and anonymization library with 190x performance advantage",
+    description="Lightning-fast PII detection and anonymization library, 100x+ faster than NER-based detection (see benchmarks/)",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),

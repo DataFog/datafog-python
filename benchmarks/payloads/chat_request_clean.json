@@ -1,0 +1,13 @@
+{
+  "model": "gpt-4o-mini",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a concise assistant for a customer support team. Answer in plain language and never invent account details."
+    },
+    {
+      "role": "user",
+      "content": "Summarize the attached quarterly report in three bullet points and suggest one follow-up question for the finance team."
+    }
+  ]
+}
