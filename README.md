@@ -6,14 +6,14 @@ It provides:
 
 - Fast structured PII detection via regex
 - An offline PII firewall for AI agents: a Claude Code hook and a LiteLLM
-  gateway guardrail (new in 4.6)
+  gateway guardrail (introduced in 4.6)
 - Optional NER support via spaCy and GLiNER
 - A simple agent-oriented API for LLM applications
 - Backward-compatible `DataFog` and `TextService` classes
 
-## Agent & Gateway Firewall (4.6)
+## Agent & Gateway Firewall
 
-DataFog 4.6 adds two ready-made enforcement points that catch PII at the
+DataFog includes two ready-made enforcement points that catch PII at the
 moment it would leave your machine — offline, in microseconds, with matched
 values never echoed into logs or transcripts:
 
@@ -72,8 +72,8 @@ pip install datafog[all]
 
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
 `nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
-that is available locally before runtime use. `distributed` and `all` are not
-newly certified on Python 3.13 in the 4.x line.
+that is available locally before runtime use. `distributed` and `all` remain
+optional, heavier profiles and are not part of the lightweight core path.
 
 ## Quick Start
 

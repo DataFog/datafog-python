@@ -49,7 +49,7 @@ All suites use the production default entity set
 
 ## Reference results
 
-Apple M5 Pro, macOS, CPython 3.13, datafog 4.7.0, litellm 1.91.0,
+Apple M5 Pro, macOS, CPython 3.13, datafog 4.8.0, litellm 1.91.0,
 presidio-analyzer 2.2.363, spaCy 3.8 (`en_core_web_sm`). Medians of the
 full (non-quick) run; expect different absolute numbers on different
 hardware, but the ratios and orders of magnitude should hold.
@@ -115,28 +115,6 @@ scoring drops some entities the regex engine finds; conversely NER models
 detect names and locations the regex engine does not target at all. The
 comparison is a fair _speed_ comparison on identical inputs and entity
 types, not an accuracy study.
-
-## How these map to published claims
-
-- **"~31µs per request" (LiteLLM guardrail, project README /
-  datafog.ai)** — not reproduced _as worded_. ~31–43 µs is the cost of
-  scanning/redacting **one short message**; a full 2-message request
-  through `async_pre_call_hook` is ~120 µs clean / ~220 µs with redaction
-  and litellm logging. Still 100–1000x below a sidecar's network hop, but
-  the claim should be reworded to per-message, e.g. _"~40µs per message —
-  a request clears the guardrail in well under a millisecond"_. Reproduce:
-  `python benchmarks/run.py --suite guardrail`.
-- **"~70ms per invocation including process startup" (Claude Code
-  hook)** — reproduced: 69–89 ms median across runs on this machine
-  (~70 ms idle, higher under load), dominated by interpreter startup.
-  _"~70–90ms"_ (or "under 100ms") is the defensible phrasing. Reproduce: `python benchmarks/run.py --suite hook`.
-- **"190x performance advantage" (PyPI tagline)** — not reproduced at
-  190x by this suite. Measured: 103–170x vs Presidio and 114–140x vs spaCy
-  NER, varying by payload. The historical 190x came from a different
-  (13.3 KB, entity-dense) document and engine configuration. Honest
-  phrasings this suite supports: _"100x+ faster than NER-based PII
-  detection"_ or _"up to 170x faster than Presidio on identical
-  payloads"_. Reproduce: `python benchmarks/run.py --suite spacy,presidio`.
 
 ## Fairness notes / known limitations
 

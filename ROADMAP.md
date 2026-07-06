@@ -1,6 +1,6 @@
 # DataFog Roadmap
 
-The roadmap — current release status (4.7.x) and v5.0.0 plans — lives in
+The roadmap — current release status (4.8.x) and v5.0.0 plans — lives in
 [docs/roadmap.rst](docs/roadmap.rst).
 
 Roadmap priorities are shaped by user feedback — open a

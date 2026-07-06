@@ -1,23 +1,23 @@
-=======================================
-Contributor Setup And 4.5 Release Flow
-=======================================
+==================================
+Contributor Setup And Release Flow
+==================================
 
-This page is the contributor runbook for DataFog 4.5 work. It is meant for
+This page is the contributor runbook for DataFog 4.x work. It is meant for
 humans and agents preparing local changes, choosing verification commands, and
-understanding where the 4.5 release boundary sits.
+understanding where the current release boundary sits.
 
 Version Frame
 =============
 
 Current release planning uses this frame:
 
-* Stable package release: ``4.4.0``.
-* Current development package version: ``4.4.0a5``.
-* Next minor target: ``4.5.0``.
+* Stable package release: ``4.8.0``.
+* Current development package version: ``4.8.0``.
+* Next major target: ``5.0.0``.
 
-Do not bump routine feature, documentation, or cleanup branches directly to
-``4.5.0``. Keep the version stable during local release-prep work, then handle
-the final version and release-note alignment in the release-readiness slice.
+Do not bump routine feature, documentation, or cleanup branches directly to a
+future release number. Keep the version stable during local work, then handle
+final version and release-note alignment in the dedicated release slice.
 
 Python Environments
 ===================
@@ -25,8 +25,8 @@ Python Environments
 DataFog currently declares support for Python ``>=3.10,<3.14``. The CI matrix
 tests core, NLP, and NLP-advanced installs on Python 3.10, 3.11, 3.12, and
 3.13. OCR profile smoke checks also run on Python 3.13 with system Tesseract
-installed. Distributed and all-profile Python 3.13 validation remain outside
-the 4.5 support claim.
+installed. Distributed and all-profile installs remain heavier optional
+profiles rather than the lightweight core support claim.
 
 Create one virtual environment per Python version when you need to compare
 profiles locally:
@@ -171,41 +171,35 @@ Live Modules
 ============
 
 Use :doc:`live-module-map` before changing core package structure. It lists the
-live 4.5 modules for each concept and the historical ``*_lean`` and
+live 4.x modules for each concept and the historical ``*_lean`` and
 ``*_original`` files that are kept only as non-live compatibility/audit
 artifacts.
 
-4.5 Release Flow
-================
+Release Flow
+============
 
-The 4.5 work lands as focused pull requests into ``dev``. Keep feature and docs
-branches narrow, and avoid mixing local cleanup, external PR review, and final
-release mechanics in one branch.
+4.x and v5 preparation work lands as focused pull requests into ``dev``. Keep
+feature and docs branches narrow, and avoid mixing local cleanup, external PR
+review, and final release mechanics in one branch.
 
-The release flow for 4.5 is:
+The release flow is:
 
-1. Land the local release-prep baseline and follow-up cleanup/docs slices.
-2. Review the external German regex PR after the local release-prep baseline is
-   in place.
-3. Integrate German regex support only if review says it fits the 4.5
-   lightweight text screening thesis.
-4. Validate optional Python 3.13 profiles before claiming support beyond core
-   SDK and CLI.
-5. Prepare release readiness with :doc:`v45-release-readiness`: changelog and
-   release notes, package checks, docs build, CI state, and version alignment.
-6. Bump or override the final stable release to ``4.5.0`` only during the
-   release-readiness and stable-release path.
+1. Land focused feature, fix, or docs slices into ``dev``.
+2. Update the changelog, release notes, package checks, docs build, CI state,
+   and version alignment in a dedicated release-readiness change.
+3. Validate optional Python 3.13 profiles before expanding support claims.
+4. Bump or override the final stable release version only during the
+   stable-release path.
 
 The current release workflow strips prerelease suffixes from the package
-version unless a manual stable ``version_override`` is provided. For the final
-4.5 stable release, use a dedicated release-readiness change or the stable
-workflow override so the published version is ``4.5.0`` rather than another
-``4.4.0`` prerelease line.
+version unless a manual stable ``version_override`` is provided. Use a
+dedicated release-readiness change or the stable workflow override when the
+published version should move to a new stable line.
 
 External PR Boundary
 ====================
 
-The external German PII regex PR belongs after local baseline cleanup. Review
-it as a 4.5 candidate, not as a v5 planning shortcut. If accepted, adapt it in
-the German regex integration slice with tests, documentation of locale
-coverage, and no new dependency burden on the core path.
+Review external PII regex PRs against the current lightweight text screening
+thesis, not as v5 planning shortcuts. If accepted, adapt them with tests,
+documentation of locale coverage, and no new dependency burden on the core
+path.
