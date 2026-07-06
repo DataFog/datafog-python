@@ -173,6 +173,7 @@ def _suppress_overlapping_entities(entities: list[Entity]) -> list[Entity]:
         key=lambda item: (
             -_entity_length(item),
             -ENTITY_TYPE_PRIORITY.get(item.type, 0),
+            -item.confidence,
             item.start,
             item.end,
             item.type,
@@ -465,7 +466,18 @@ def redact(
     entities: list[Entity],
     strategy: str = "token",
 ) -> RedactResult:
-    """Redact PII entities from text."""
+    """Redact PII entities from text.
+
+    Callers may pass arbitrary entity lists (not just ``scan()`` output), so
+    overlapping or duplicate spans are resolved here: for each overlapping
+    group only one span is redacted — the longest, breaking ties by entity
+    type priority and then confidence. Suppressed spans are omitted from
+    ``RedactResult.entities`` and ``mapping``.
+
+    ``mapping`` for the ``mask`` strategy is keyed by per-type indexed keys
+    (``[EMAIL_MASK_1]``) rather than the mask string, because distinct
+    same-length values produce identical masks and would collide.
+    """
     if not isinstance(text, str):
         raise TypeError("text must be a string")
     if strategy not in {"token", "mask", "hash", "pseudonymize"}:
@@ -481,7 +493,8 @@ def redact(
         for entity in entities
         if 0 <= entity.start < entity.end <= len(text) and entity.text
     ]
-    valid_entities = sorted(valid_entities, key=lambda e: (e.start, e.end))
+    # Returns non-overlapping spans sorted by document position.
+    valid_entities = _suppress_overlapping_entities(valid_entities)
 
     # Assign replacements in document order so the per-type counters used by
     # the token/pseudonymize strategies number the first occurrence _1; spans
@@ -489,8 +502,13 @@ def redact(
     replacements: list[tuple[Entity, str]] = []
     for entity in valid_entities:
         original = text[entity.start : entity.end]
+        mapping_key: Optional[str] = None
         if strategy == "mask":
             replacement = "*" * max(len(original), 1)
+            # Distinct same-length values share a mask, so the mask string
+            # cannot key the mapping without collisions.
+            counters[entity.type] = counters.get(entity.type, 0) + 1
+            mapping_key = f"[{entity.type}_MASK_{counters[entity.type]}]"
         elif strategy == "hash":
             digest = hashlib.sha256(original.encode("utf-8")).hexdigest()[:12]
             replacement = f"[{entity.type}_{digest}]"
@@ -507,7 +525,7 @@ def redact(
             replacement = f"[{entity.type}_{counters[entity.type]}]"
 
         replacements.append((entity, replacement))
-        mapping[replacement] = original
+        mapping[mapping_key if mapping_key is not None else replacement] = original
 
     for entity, replacement in reversed(replacements):
         redacted_text = (

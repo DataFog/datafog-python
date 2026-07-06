@@ -100,6 +100,99 @@ def test_redact_pseudonymize_numbering_follows_document_order() -> None:
     }
 
 
+def _span(
+    text: str,
+    start: int,
+    end: int,
+    entity_type: str = "PHONE",
+    confidence: float = 1.0,
+    engine: str = "regex",
+) -> Entity:
+    return Entity(
+        type=entity_type,
+        text=text[start:end],
+        start=start,
+        end=end,
+        confidence=confidence,
+        engine=engine,
+    )
+
+
+@pytest.mark.parametrize("strategy", ["token", "mask", "hash", "pseudonymize"])
+def test_redact_overlapping_spans_match_longest_only(strategy: str) -> None:
+    text = "call 555-000-1111 now"
+    full = _span(text, 5, 17)
+    suffix = _span(text, 9, 17)
+
+    result = redact(text=text, entities=[full, suffix], strategy=strategy)
+    expected = redact(text=text, entities=[full], strategy=strategy)
+
+    assert result.redacted_text == expected.redacted_text
+    assert result.mapping == expected.mapping
+    assert result.entities == [full]
+
+
+@pytest.mark.parametrize("strategy", ["token", "mask", "hash", "pseudonymize"])
+def test_redact_nested_spans_keep_outer(strategy: str) -> None:
+    text = "mail alice@example.com today"
+    outer = _span(text, 5, 22, entity_type="EMAIL")
+    inner = _span(text, 11, 18, entity_type="EMAIL")
+
+    result = redact(text=text, entities=[inner, outer], strategy=strategy)
+    expected = redact(text=text, entities=[outer], strategy=strategy)
+
+    assert result.redacted_text == expected.redacted_text
+    assert result.mapping == expected.mapping
+    assert result.entities == [outer]
+
+
+def test_redact_overlapping_spans_produce_clean_token_output() -> None:
+    text = "call 555-000-1111 now"
+    entities = [_span(text, 5, 17), _span(text, 9, 17)]
+
+    result = redact(text=text, entities=entities, strategy="token")
+
+    assert result.redacted_text == "call [PHONE_1] now"
+    assert result.mapping == {"[PHONE_1]": text[5:17]}
+
+
+def test_redact_duplicate_spans_applied_once() -> None:
+    text = "mail alice@example.com today"
+    entity = _entity_at(text, "alice@example.com")
+
+    result = redact(text=text, entities=[entity, entity], strategy="token")
+
+    assert result.redacted_text == "mail [EMAIL_1] today"
+    assert result.entities == [entity]
+
+
+def test_redact_overlap_tiebreak_prefers_higher_confidence() -> None:
+    text = "Acme Corporation announced"
+    org = _span(text, 0, 16, entity_type="ORGANIZATION", confidence=0.7, engine="spacy")
+    person = _span(text, 0, 16, entity_type="PERSON", confidence=0.9, engine="gliner")
+
+    result = redact(text=text, entities=[org, person], strategy="token")
+
+    assert result.redacted_text == "[PERSON_1] announced"
+    assert result.entities == [person]
+
+
+def test_redact_mask_mapping_distinguishes_same_length_values() -> None:
+    text = "a alice@example.com b bobby@example.com c"
+    entities = [
+        _entity_at(text, "alice@example.com"),
+        _entity_at(text, "bobby@example.com"),
+    ]
+
+    result = redact(text=text, entities=entities, strategy="mask")
+
+    assert result.redacted_text == "a " + "*" * 17 + " b " + "*" * 17 + " c"
+    assert result.mapping == {
+        "[EMAIL_MASK_1]": "alice@example.com",
+        "[EMAIL_MASK_2]": "bobby@example.com",
+    }
+
+
 def test_redact_invalid_strategy_raises_value_error() -> None:
     with pytest.raises(ValueError, match="strategy must be one of"):
         redact("test", entities=[], strategy="invalid")

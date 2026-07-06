@@ -16,11 +16,25 @@
   document position (ascending) instead of descending. Replacement values
   in `mapping` are now always read from the original input text, fixing a
   case where an already-inserted token could leak into a mapping value when
-  entity spans overlapped. Known pre-existing limitation (unchanged): the
-  `mask` strategy keys `mapping` by the mask string itself, so distinct
-  same-length values collide and only one original is retained — with the
-  new left-to-right order the *last* colliding occurrence wins instead of
-  the first.
+  entity spans overlapped.
+- **`redact()` now resolves overlapping and duplicate entity spans**:
+  `redact()` is public API and accepts arbitrary entity lists, but applied
+  every span verbatim — overlapping spans (e.g. a phone number and a
+  sub-span of it) corrupted the output with stray fragments like
+  `[PHONE_1]]`. For each group of overlapping spans only one is now
+  redacted: the longest, breaking ties by entity type priority and then
+  confidence — the same suppression rule the regex scan pipeline already
+  used. Suppressed spans are omitted from `RedactResult.entities` and
+  `mapping`. Output for non-overlapping entity lists (including everything
+  produced by `scan()`) is unchanged.
+- **`mask` strategy mapping no longer collides on same-length values**:
+  the mask replacement (`***…`) previously keyed `mapping` directly, so two
+  distinct values of the same length produced the same key and only one
+  original survived. Mask mappings are now keyed by per-type indexed keys
+  in document order (`[EMAIL_MASK_1]`, `[EMAIL_MASK_2]`), preserving every
+  original value. Consumers that looked up mask mappings by the mask string
+  must switch to the indexed keys; `token`, `hash`, and `pseudonymize`
+  mapping keys are unchanged.
 
 ## [2026-07-02]
 
