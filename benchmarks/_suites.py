@@ -258,8 +258,9 @@ def suite_hook(quick: bool) -> list[Measurement]:
 def suite_spacy(quick: bool) -> list[Measurement]:
     """datafog regex engine vs the spaCy NER pipeline on the same payloads."""
     try:
-        from datafog.processing.text_processing.spacy_pii_annotator import \
-            SpacyPIIAnnotator
+        from datafog.processing.text_processing.spacy_pii_annotator import (
+            SpacyPIIAnnotator,
+        )
 
         annotator = SpacyPIIAnnotator.create(model_name=COMPARISON_SPACY_MODEL)
     except Exception as exc:

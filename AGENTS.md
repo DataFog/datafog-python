@@ -69,12 +69,12 @@ auto_service = TextService(engine="auto")        # Legacy: regex→spaCy
 
 ### Performance Comparison (Validated)
 
-| Engine   | Speed vs spaCy  | Accuracy          | Use Case                    | Install          |
-| -------- | --------------- | ----------------- | --------------------------- | ---------------- |
+| Engine   | Speed vs spaCy   | Accuracy          | Use Case                    | Install          |
+| -------- | ---------------- | ----------------- | --------------------------- | ---------------- |
 | `regex`  | **100x+ faster** | High (structured) | Emails, phones, SSNs        | Core only        |
-| `gliner` | **32x faster**  | Very High         | Modern NER, custom entities | `[nlp-advanced]` |
-| `spacy`  | 1x (baseline)   | Good              | Traditional NLP             | `[nlp]`          |
-| `smart`  | **60x faster**  | Highest           | Best balance                | `[nlp-advanced]` |
+| `gliner` | **32x faster**   | Very High         | Modern NER, custom entities | `[nlp-advanced]` |
+| `spacy`  | 1x (baseline)    | Good              | Traditional NLP             | `[nlp]`          |
+| `smart`  | **60x faster**   | Highest           | Best balance                | `[nlp-advanced]` |
 
 ### Dependency Strategy
 
