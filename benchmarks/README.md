@@ -49,7 +49,7 @@ All suites use the production default entity set
 
 ## Reference results
 
-Apple M5 Pro, macOS, CPython 3.13, datafog 4.7.0, litellm 1.91.0,
+Apple M5 Pro, macOS, CPython 3.13, datafog 4.8.0, litellm 1.91.0,
 presidio-analyzer 2.2.363, spaCy 3.8 (`en_core_web_sm`). Medians of the
 full (non-quick) run; expect different absolute numbers on different
 hardware, but the ratios and orders of magnitude should hold.
