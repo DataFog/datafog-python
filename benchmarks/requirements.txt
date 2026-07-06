@@ -1,0 +1,9 @@
+# Dependencies for the full benchmark suite. The core and hook suites need
+# only datafog itself; these extras enable the guardrail and comparison
+# suites. Kept out of the package's install_requires/extras on purpose.
+litellm>=1.53
+fastapi>=0.115
+presidio-analyzer>=2.2
+spacy>=3.7
+# Also required once, for the spacy/presidio comparison suites:
+#   python -m spacy download en_core_web_sm

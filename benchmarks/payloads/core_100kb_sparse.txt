@@ -1,0 +1,1171 @@
+2026-07-01T08:00:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000000 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:01Z DEBUG cache.miss key=report:1 shard=3 ttl=900
+2026-07-01T08:00:02Z INFO  worker.job id=2 queue=exports attempt=1 result=ok
+2026-07-01T08:00:03Z WARN  rate.limit tenant=t_3 remaining=17 window=60s
+2026-07-01T08:00:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000004 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:05Z DEBUG cache.miss key=report:5 shard=3 ttl=900
+2026-07-01T08:00:06Z INFO  worker.job id=6 queue=exports attempt=1 result=ok
+2026-07-01T08:00:07Z WARN  rate.limit tenant=t_7 remaining=17 window=60s
+2026-07-01T08:00:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000008 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:09Z DEBUG cache.miss key=report:9 shard=3 ttl=900
+2026-07-01T08:00:10Z INFO  worker.job id=10 queue=exports attempt=1 result=ok
+2026-07-01T08:00:11Z WARN  rate.limit tenant=t_11 remaining=17 window=60s
+2026-07-01T08:00:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000012 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:13Z DEBUG cache.miss key=report:13 shard=3 ttl=900
+2026-07-01T08:00:14Z INFO  worker.job id=14 queue=exports attempt=1 result=ok
+2026-07-01T08:00:15Z WARN  rate.limit tenant=t_15 remaining=17 window=60s
+2026-07-01T08:00:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000016 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:17Z DEBUG cache.miss key=report:17 shard=3 ttl=900
+2026-07-01T08:00:18Z INFO  worker.job id=18 queue=exports attempt=1 result=ok
+2026-07-01T08:00:19Z WARN  rate.limit tenant=t_19 remaining=17 window=60s
+2026-07-01T08:00:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000020 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:21Z DEBUG cache.miss key=report:21 shard=3 ttl=900
+2026-07-01T08:00:22Z INFO  worker.job id=22 queue=exports attempt=1 result=ok
+2026-07-01T08:00:23Z WARN  rate.limit tenant=t_23 remaining=17 window=60s
+2026-07-01T08:00:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000024 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:25Z DEBUG cache.miss key=report:25 shard=3 ttl=900
+2026-07-01T08:00:26Z INFO  worker.job id=26 queue=exports attempt=1 result=ok
+2026-07-01T08:00:27Z WARN  rate.limit tenant=t_27 remaining=17 window=60s
+2026-07-01T08:00:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000028 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:29Z DEBUG cache.miss key=report:29 shard=3 ttl=900
+2026-07-01T08:00:30Z INFO  worker.job id=30 queue=exports attempt=1 result=ok
+2026-07-01T08:00:31Z WARN  rate.limit tenant=t_31 remaining=17 window=60s
+2026-07-01T08:00:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000032 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:33Z DEBUG cache.miss key=report:33 shard=3 ttl=900
+2026-07-01T08:00:34Z INFO  worker.job id=34 queue=exports attempt=1 result=ok
+2026-07-01T08:00:35Z WARN  rate.limit tenant=t_35 remaining=17 window=60s
+2026-07-01T08:00:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000036 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:37Z DEBUG cache.miss key=report:37 shard=3 ttl=900
+2026-07-01T08:00:38Z INFO  worker.job id=38 queue=exports attempt=1 result=ok
+2026-07-01T08:00:39Z WARN  rate.limit tenant=t_39 remaining=17 window=60s
+2026-07-01T08:00:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000040 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:41Z DEBUG cache.miss key=report:41 shard=3 ttl=900
+2026-07-01T08:00:42Z INFO  worker.job id=42 queue=exports attempt=1 result=ok
+2026-07-01T08:00:43Z WARN  rate.limit tenant=t_43 remaining=17 window=60s
+2026-07-01T08:00:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000044 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:45Z DEBUG cache.miss key=report:45 shard=3 ttl=900
+2026-07-01T08:00:46Z INFO  worker.job id=46 queue=exports attempt=1 result=ok
+2026-07-01T08:00:47Z WARN  rate.limit tenant=t_47 remaining=17 window=60s
+2026-07-01T08:00:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000048 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:49Z DEBUG cache.miss key=report:49 shard=3 ttl=900
+2026-07-01T08:00:50Z INFO  worker.job id=50 queue=exports attempt=1 result=ok
+2026-07-01T08:00:51Z WARN  rate.limit tenant=t_51 remaining=17 window=60s
+2026-07-01T08:00:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000052 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:53Z DEBUG cache.miss key=report:53 shard=3 ttl=900
+2026-07-01T08:00:54Z INFO  worker.job id=54 queue=exports attempt=1 result=ok
+2026-07-01T08:00:55Z WARN  rate.limit tenant=t_55 remaining=17 window=60s
+2026-07-01T08:00:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000056 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:00:57Z DEBUG cache.miss key=report:57 shard=3 ttl=900
+2026-07-01T08:00:58Z INFO  worker.job id=58 queue=exports attempt=1 result=ok
+2026-07-01T08:00:59Z WARN  rate.limit tenant=t_59 remaining=17 window=60s
+2026-07-01T08:01:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000060 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:01Z DEBUG cache.miss key=report:61 shard=3 ttl=900
+2026-07-01T08:01:02Z INFO  worker.job id=62 queue=exports attempt=1 result=ok
+2026-07-01T08:01:03Z WARN  rate.limit tenant=t_63 remaining=17 window=60s
+2026-07-01T08:01:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000064 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:05Z DEBUG cache.miss key=report:65 shard=3 ttl=900
+2026-07-01T08:01:06Z INFO  worker.job id=66 queue=exports attempt=1 result=ok
+2026-07-01T08:01:07Z WARN  rate.limit tenant=t_67 remaining=17 window=60s
+2026-07-01T08:01:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000068 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:09Z DEBUG cache.miss key=report:69 shard=3 ttl=900
+2026-07-01T08:01:10Z INFO  worker.job id=70 queue=exports attempt=1 result=ok
+2026-07-01T08:01:11Z WARN  rate.limit tenant=t_71 remaining=17 window=60s
+2026-07-01T08:01:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000072 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:13Z DEBUG cache.miss key=report:73 shard=3 ttl=900
+2026-07-01T08:01:14Z INFO  worker.job id=74 queue=exports attempt=1 result=ok
+2026-07-01T08:01:15Z WARN  rate.limit tenant=t_75 remaining=17 window=60s
+2026-07-01T08:01:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000076 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:17Z DEBUG cache.miss key=report:77 shard=3 ttl=900
+2026-07-01T08:01:18Z INFO  worker.job id=78 queue=exports attempt=1 result=ok
+2026-07-01T08:01:19Z WARN  rate.limit tenant=t_79 remaining=17 window=60s
+2026-07-01T08:01:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000080 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:21Z DEBUG cache.miss key=report:81 shard=3 ttl=900
+2026-07-01T08:01:22Z INFO  worker.job id=82 queue=exports attempt=1 result=ok
+2026-07-01T08:01:23Z WARN  rate.limit tenant=t_83 remaining=17 window=60s
+2026-07-01T08:01:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000084 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:25Z DEBUG cache.miss key=report:85 shard=3 ttl=900
+2026-07-01T08:01:26Z INFO  worker.job id=86 queue=exports attempt=1 result=ok
+2026-07-01T08:01:27Z WARN  rate.limit tenant=t_87 remaining=17 window=60s
+2026-07-01T08:01:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000088 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:29Z DEBUG cache.miss key=report:89 shard=3 ttl=900
+2026-07-01T08:01:30Z INFO  worker.job id=90 queue=exports attempt=1 result=ok
+2026-07-01T08:01:31Z WARN  rate.limit tenant=t_91 remaining=17 window=60s
+2026-07-01T08:01:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000092 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:33Z DEBUG cache.miss key=report:93 shard=3 ttl=900
+2026-07-01T08:01:34Z INFO  worker.job id=94 queue=exports attempt=1 result=ok
+2026-07-01T08:01:35Z WARN  rate.limit tenant=t_95 remaining=17 window=60s
+2026-07-01T08:01:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000096 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:37Z DEBUG cache.miss key=report:97 shard=3 ttl=900
+2026-07-01T08:01:38Z INFO  worker.job id=98 queue=exports attempt=1 result=ok
+2026-07-01T08:01:39Z WARN  rate.limit tenant=t_99 remaining=17 window=60s
+2026-07-01T08:01:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000100 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:41Z DEBUG cache.miss key=report:101 shard=3 ttl=900
+2026-07-01T08:01:42Z INFO  worker.job id=102 queue=exports attempt=1 result=ok
+2026-07-01T08:01:43Z WARN  rate.limit tenant=t_103 remaining=17 window=60s
+2026-07-01T08:01:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000104 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:45Z DEBUG cache.miss key=report:105 shard=3 ttl=900
+2026-07-01T08:01:46Z INFO  worker.job id=106 queue=exports attempt=1 result=ok
+2026-07-01T08:01:47Z WARN  rate.limit tenant=t_107 remaining=17 window=60s
+2026-07-01T08:01:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000108 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:49Z DEBUG cache.miss key=report:109 shard=3 ttl=900
+2026-07-01T08:01:50Z INFO  worker.job id=110 queue=exports attempt=1 result=ok
+2026-07-01T08:01:51Z WARN  rate.limit tenant=t_111 remaining=17 window=60s
+2026-07-01T08:01:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000112 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:53Z DEBUG cache.miss key=report:113 shard=3 ttl=900
+2026-07-01T08:01:54Z INFO  worker.job id=114 queue=exports attempt=1 result=ok
+2026-07-01T08:01:55Z WARN  rate.limit tenant=t_115 remaining=17 window=60s
+2026-07-01T08:01:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000116 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:01:57Z DEBUG cache.miss key=report:117 shard=3 ttl=900
+2026-07-01T08:01:58Z INFO  worker.job id=118 queue=exports attempt=1 result=ok
+2026-07-01T08:01:59Z WARN  rate.limit tenant=t_119 remaining=17 window=60s
+2026-07-01T08:02:00Z WARN  pii.echo user_email=j.chen@support.example.com callback=415-555-0188
+2026-07-01T08:02:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000120 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:01Z DEBUG cache.miss key=report:121 shard=3 ttl=900
+2026-07-01T08:02:02Z INFO  worker.job id=122 queue=exports attempt=1 result=ok
+2026-07-01T08:02:03Z WARN  rate.limit tenant=t_123 remaining=17 window=60s
+2026-07-01T08:02:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000124 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:05Z DEBUG cache.miss key=report:125 shard=3 ttl=900
+2026-07-01T08:02:06Z INFO  worker.job id=126 queue=exports attempt=1 result=ok
+2026-07-01T08:02:07Z WARN  rate.limit tenant=t_127 remaining=17 window=60s
+2026-07-01T08:02:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000128 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:09Z DEBUG cache.miss key=report:129 shard=3 ttl=900
+2026-07-01T08:02:10Z INFO  worker.job id=130 queue=exports attempt=1 result=ok
+2026-07-01T08:02:11Z WARN  rate.limit tenant=t_131 remaining=17 window=60s
+2026-07-01T08:02:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000132 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:13Z DEBUG cache.miss key=report:133 shard=3 ttl=900
+2026-07-01T08:02:14Z INFO  worker.job id=134 queue=exports attempt=1 result=ok
+2026-07-01T08:02:15Z WARN  rate.limit tenant=t_135 remaining=17 window=60s
+2026-07-01T08:02:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000136 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:17Z DEBUG cache.miss key=report:137 shard=3 ttl=900
+2026-07-01T08:02:18Z INFO  worker.job id=138 queue=exports attempt=1 result=ok
+2026-07-01T08:02:19Z WARN  rate.limit tenant=t_139 remaining=17 window=60s
+2026-07-01T08:02:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000140 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:21Z DEBUG cache.miss key=report:141 shard=3 ttl=900
+2026-07-01T08:02:22Z INFO  worker.job id=142 queue=exports attempt=1 result=ok
+2026-07-01T08:02:23Z WARN  rate.limit tenant=t_143 remaining=17 window=60s
+2026-07-01T08:02:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000144 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:25Z DEBUG cache.miss key=report:145 shard=3 ttl=900
+2026-07-01T08:02:26Z INFO  worker.job id=146 queue=exports attempt=1 result=ok
+2026-07-01T08:02:27Z WARN  rate.limit tenant=t_147 remaining=17 window=60s
+2026-07-01T08:02:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000148 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:29Z DEBUG cache.miss key=report:149 shard=3 ttl=900
+2026-07-01T08:02:30Z INFO  worker.job id=150 queue=exports attempt=1 result=ok
+2026-07-01T08:02:31Z WARN  rate.limit tenant=t_151 remaining=17 window=60s
+2026-07-01T08:02:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000152 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:33Z DEBUG cache.miss key=report:153 shard=3 ttl=900
+2026-07-01T08:02:34Z INFO  worker.job id=154 queue=exports attempt=1 result=ok
+2026-07-01T08:02:35Z WARN  rate.limit tenant=t_155 remaining=17 window=60s
+2026-07-01T08:02:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000156 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:37Z DEBUG cache.miss key=report:157 shard=3 ttl=900
+2026-07-01T08:02:38Z INFO  worker.job id=158 queue=exports attempt=1 result=ok
+2026-07-01T08:02:39Z WARN  rate.limit tenant=t_159 remaining=17 window=60s
+2026-07-01T08:02:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000160 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:41Z DEBUG cache.miss key=report:161 shard=3 ttl=900
+2026-07-01T08:02:42Z INFO  worker.job id=162 queue=exports attempt=1 result=ok
+2026-07-01T08:02:43Z WARN  rate.limit tenant=t_163 remaining=17 window=60s
+2026-07-01T08:02:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000164 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:45Z DEBUG cache.miss key=report:165 shard=3 ttl=900
+2026-07-01T08:02:46Z INFO  worker.job id=166 queue=exports attempt=1 result=ok
+2026-07-01T08:02:47Z WARN  rate.limit tenant=t_167 remaining=17 window=60s
+2026-07-01T08:02:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000168 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:49Z DEBUG cache.miss key=report:169 shard=3 ttl=900
+2026-07-01T08:02:50Z INFO  worker.job id=170 queue=exports attempt=1 result=ok
+2026-07-01T08:02:51Z WARN  rate.limit tenant=t_171 remaining=17 window=60s
+2026-07-01T08:02:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000172 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:53Z DEBUG cache.miss key=report:173 shard=3 ttl=900
+2026-07-01T08:02:54Z INFO  worker.job id=174 queue=exports attempt=1 result=ok
+2026-07-01T08:02:55Z WARN  rate.limit tenant=t_175 remaining=17 window=60s
+2026-07-01T08:02:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000176 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:02:57Z DEBUG cache.miss key=report:177 shard=3 ttl=900
+2026-07-01T08:02:58Z INFO  worker.job id=178 queue=exports attempt=1 result=ok
+2026-07-01T08:02:59Z WARN  rate.limit tenant=t_179 remaining=17 window=60s
+2026-07-01T08:03:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000180 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:01Z DEBUG cache.miss key=report:181 shard=3 ttl=900
+2026-07-01T08:03:02Z INFO  worker.job id=182 queue=exports attempt=1 result=ok
+2026-07-01T08:03:03Z WARN  rate.limit tenant=t_183 remaining=17 window=60s
+2026-07-01T08:03:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000184 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:05Z DEBUG cache.miss key=report:185 shard=3 ttl=900
+2026-07-01T08:03:06Z INFO  worker.job id=186 queue=exports attempt=1 result=ok
+2026-07-01T08:03:07Z WARN  rate.limit tenant=t_187 remaining=17 window=60s
+2026-07-01T08:03:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000188 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:09Z DEBUG cache.miss key=report:189 shard=3 ttl=900
+2026-07-01T08:03:10Z INFO  worker.job id=190 queue=exports attempt=1 result=ok
+2026-07-01T08:03:11Z WARN  rate.limit tenant=t_191 remaining=17 window=60s
+2026-07-01T08:03:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000192 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:13Z DEBUG cache.miss key=report:193 shard=3 ttl=900
+2026-07-01T08:03:14Z INFO  worker.job id=194 queue=exports attempt=1 result=ok
+2026-07-01T08:03:15Z WARN  rate.limit tenant=t_195 remaining=17 window=60s
+2026-07-01T08:03:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000196 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:17Z DEBUG cache.miss key=report:197 shard=3 ttl=900
+2026-07-01T08:03:18Z INFO  worker.job id=198 queue=exports attempt=1 result=ok
+2026-07-01T08:03:19Z WARN  rate.limit tenant=t_199 remaining=17 window=60s
+2026-07-01T08:03:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000200 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:21Z DEBUG cache.miss key=report:201 shard=3 ttl=900
+2026-07-01T08:03:22Z INFO  worker.job id=202 queue=exports attempt=1 result=ok
+2026-07-01T08:03:23Z WARN  rate.limit tenant=t_203 remaining=17 window=60s
+2026-07-01T08:03:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000204 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:25Z DEBUG cache.miss key=report:205 shard=3 ttl=900
+2026-07-01T08:03:26Z INFO  worker.job id=206 queue=exports attempt=1 result=ok
+2026-07-01T08:03:27Z WARN  rate.limit tenant=t_207 remaining=17 window=60s
+2026-07-01T08:03:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000208 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:29Z DEBUG cache.miss key=report:209 shard=3 ttl=900
+2026-07-01T08:03:30Z INFO  worker.job id=210 queue=exports attempt=1 result=ok
+2026-07-01T08:03:31Z WARN  rate.limit tenant=t_211 remaining=17 window=60s
+2026-07-01T08:03:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000212 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:33Z DEBUG cache.miss key=report:213 shard=3 ttl=900
+2026-07-01T08:03:34Z INFO  worker.job id=214 queue=exports attempt=1 result=ok
+2026-07-01T08:03:35Z WARN  rate.limit tenant=t_215 remaining=17 window=60s
+2026-07-01T08:03:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000216 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:37Z DEBUG cache.miss key=report:217 shard=3 ttl=900
+2026-07-01T08:03:38Z INFO  worker.job id=218 queue=exports attempt=1 result=ok
+2026-07-01T08:03:39Z WARN  rate.limit tenant=t_219 remaining=17 window=60s
+2026-07-01T08:03:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000220 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:41Z DEBUG cache.miss key=report:221 shard=3 ttl=900
+2026-07-01T08:03:42Z INFO  worker.job id=222 queue=exports attempt=1 result=ok
+2026-07-01T08:03:43Z WARN  rate.limit tenant=t_223 remaining=17 window=60s
+2026-07-01T08:03:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000224 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:45Z DEBUG cache.miss key=report:225 shard=3 ttl=900
+2026-07-01T08:03:46Z INFO  worker.job id=226 queue=exports attempt=1 result=ok
+2026-07-01T08:03:47Z WARN  rate.limit tenant=t_227 remaining=17 window=60s
+2026-07-01T08:03:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000228 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:49Z DEBUG cache.miss key=report:229 shard=3 ttl=900
+2026-07-01T08:03:50Z INFO  worker.job id=230 queue=exports attempt=1 result=ok
+2026-07-01T08:03:51Z WARN  rate.limit tenant=t_231 remaining=17 window=60s
+2026-07-01T08:03:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000232 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:53Z DEBUG cache.miss key=report:233 shard=3 ttl=900
+2026-07-01T08:03:54Z INFO  worker.job id=234 queue=exports attempt=1 result=ok
+2026-07-01T08:03:55Z WARN  rate.limit tenant=t_235 remaining=17 window=60s
+2026-07-01T08:03:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000236 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:03:57Z DEBUG cache.miss key=report:237 shard=3 ttl=900
+2026-07-01T08:03:58Z INFO  worker.job id=238 queue=exports attempt=1 result=ok
+2026-07-01T08:03:59Z WARN  rate.limit tenant=t_239 remaining=17 window=60s
+2026-07-01T08:04:00Z WARN  pii.echo user_email=billing-team@example.invalid callback=+1 646 555 0123
+2026-07-01T08:04:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000240 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:01Z DEBUG cache.miss key=report:241 shard=3 ttl=900
+2026-07-01T08:04:02Z INFO  worker.job id=242 queue=exports attempt=1 result=ok
+2026-07-01T08:04:03Z WARN  rate.limit tenant=t_243 remaining=17 window=60s
+2026-07-01T08:04:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000244 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:05Z DEBUG cache.miss key=report:245 shard=3 ttl=900
+2026-07-01T08:04:06Z INFO  worker.job id=246 queue=exports attempt=1 result=ok
+2026-07-01T08:04:07Z WARN  rate.limit tenant=t_247 remaining=17 window=60s
+2026-07-01T08:04:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000248 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:09Z DEBUG cache.miss key=report:249 shard=3 ttl=900
+2026-07-01T08:04:10Z INFO  worker.job id=250 queue=exports attempt=1 result=ok
+2026-07-01T08:04:11Z WARN  rate.limit tenant=t_251 remaining=17 window=60s
+2026-07-01T08:04:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000252 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:13Z DEBUG cache.miss key=report:253 shard=3 ttl=900
+2026-07-01T08:04:14Z INFO  worker.job id=254 queue=exports attempt=1 result=ok
+2026-07-01T08:04:15Z WARN  rate.limit tenant=t_255 remaining=17 window=60s
+2026-07-01T08:04:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000256 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:17Z DEBUG cache.miss key=report:257 shard=3 ttl=900
+2026-07-01T08:04:18Z INFO  worker.job id=258 queue=exports attempt=1 result=ok
+2026-07-01T08:04:19Z WARN  rate.limit tenant=t_259 remaining=17 window=60s
+2026-07-01T08:04:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000260 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:21Z DEBUG cache.miss key=report:261 shard=3 ttl=900
+2026-07-01T08:04:22Z INFO  worker.job id=262 queue=exports attempt=1 result=ok
+2026-07-01T08:04:23Z WARN  rate.limit tenant=t_263 remaining=17 window=60s
+2026-07-01T08:04:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000264 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:25Z DEBUG cache.miss key=report:265 shard=3 ttl=900
+2026-07-01T08:04:26Z INFO  worker.job id=266 queue=exports attempt=1 result=ok
+2026-07-01T08:04:27Z WARN  rate.limit tenant=t_267 remaining=17 window=60s
+2026-07-01T08:04:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000268 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:29Z DEBUG cache.miss key=report:269 shard=3 ttl=900
+2026-07-01T08:04:30Z INFO  worker.job id=270 queue=exports attempt=1 result=ok
+2026-07-01T08:04:31Z WARN  rate.limit tenant=t_271 remaining=17 window=60s
+2026-07-01T08:04:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000272 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:33Z DEBUG cache.miss key=report:273 shard=3 ttl=900
+2026-07-01T08:04:34Z INFO  worker.job id=274 queue=exports attempt=1 result=ok
+2026-07-01T08:04:35Z WARN  rate.limit tenant=t_275 remaining=17 window=60s
+2026-07-01T08:04:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000276 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:37Z DEBUG cache.miss key=report:277 shard=3 ttl=900
+2026-07-01T08:04:38Z INFO  worker.job id=278 queue=exports attempt=1 result=ok
+2026-07-01T08:04:39Z WARN  rate.limit tenant=t_279 remaining=17 window=60s
+2026-07-01T08:04:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000280 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:41Z DEBUG cache.miss key=report:281 shard=3 ttl=900
+2026-07-01T08:04:42Z INFO  worker.job id=282 queue=exports attempt=1 result=ok
+2026-07-01T08:04:43Z WARN  rate.limit tenant=t_283 remaining=17 window=60s
+2026-07-01T08:04:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000284 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:45Z DEBUG cache.miss key=report:285 shard=3 ttl=900
+2026-07-01T08:04:46Z INFO  worker.job id=286 queue=exports attempt=1 result=ok
+2026-07-01T08:04:47Z WARN  rate.limit tenant=t_287 remaining=17 window=60s
+2026-07-01T08:04:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000288 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:49Z DEBUG cache.miss key=report:289 shard=3 ttl=900
+2026-07-01T08:04:50Z INFO  worker.job id=290 queue=exports attempt=1 result=ok
+2026-07-01T08:04:51Z WARN  rate.limit tenant=t_291 remaining=17 window=60s
+2026-07-01T08:04:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000292 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:53Z DEBUG cache.miss key=report:293 shard=3 ttl=900
+2026-07-01T08:04:54Z INFO  worker.job id=294 queue=exports attempt=1 result=ok
+2026-07-01T08:04:55Z WARN  rate.limit tenant=t_295 remaining=17 window=60s
+2026-07-01T08:04:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000296 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:04:57Z DEBUG cache.miss key=report:297 shard=3 ttl=900
+2026-07-01T08:04:58Z INFO  worker.job id=298 queue=exports attempt=1 result=ok
+2026-07-01T08:04:59Z WARN  rate.limit tenant=t_299 remaining=17 window=60s
+2026-07-01T08:05:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000300 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:01Z DEBUG cache.miss key=report:301 shard=3 ttl=900
+2026-07-01T08:05:02Z INFO  worker.job id=302 queue=exports attempt=1 result=ok
+2026-07-01T08:05:03Z WARN  rate.limit tenant=t_303 remaining=17 window=60s
+2026-07-01T08:05:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000304 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:05Z DEBUG cache.miss key=report:305 shard=3 ttl=900
+2026-07-01T08:05:06Z INFO  worker.job id=306 queue=exports attempt=1 result=ok
+2026-07-01T08:05:07Z WARN  rate.limit tenant=t_307 remaining=17 window=60s
+2026-07-01T08:05:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000308 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:09Z DEBUG cache.miss key=report:309 shard=3 ttl=900
+2026-07-01T08:05:10Z INFO  worker.job id=310 queue=exports attempt=1 result=ok
+2026-07-01T08:05:11Z WARN  rate.limit tenant=t_311 remaining=17 window=60s
+2026-07-01T08:05:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000312 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:13Z DEBUG cache.miss key=report:313 shard=3 ttl=900
+2026-07-01T08:05:14Z INFO  worker.job id=314 queue=exports attempt=1 result=ok
+2026-07-01T08:05:15Z WARN  rate.limit tenant=t_315 remaining=17 window=60s
+2026-07-01T08:05:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000316 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:17Z DEBUG cache.miss key=report:317 shard=3 ttl=900
+2026-07-01T08:05:18Z INFO  worker.job id=318 queue=exports attempt=1 result=ok
+2026-07-01T08:05:19Z WARN  rate.limit tenant=t_319 remaining=17 window=60s
+2026-07-01T08:05:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000320 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:21Z DEBUG cache.miss key=report:321 shard=3 ttl=900
+2026-07-01T08:05:22Z INFO  worker.job id=322 queue=exports attempt=1 result=ok
+2026-07-01T08:05:23Z WARN  rate.limit tenant=t_323 remaining=17 window=60s
+2026-07-01T08:05:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000324 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:25Z DEBUG cache.miss key=report:325 shard=3 ttl=900
+2026-07-01T08:05:26Z INFO  worker.job id=326 queue=exports attempt=1 result=ok
+2026-07-01T08:05:27Z WARN  rate.limit tenant=t_327 remaining=17 window=60s
+2026-07-01T08:05:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000328 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:29Z DEBUG cache.miss key=report:329 shard=3 ttl=900
+2026-07-01T08:05:30Z INFO  worker.job id=330 queue=exports attempt=1 result=ok
+2026-07-01T08:05:31Z WARN  rate.limit tenant=t_331 remaining=17 window=60s
+2026-07-01T08:05:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000332 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:33Z DEBUG cache.miss key=report:333 shard=3 ttl=900
+2026-07-01T08:05:34Z INFO  worker.job id=334 queue=exports attempt=1 result=ok
+2026-07-01T08:05:35Z WARN  rate.limit tenant=t_335 remaining=17 window=60s
+2026-07-01T08:05:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000336 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:37Z DEBUG cache.miss key=report:337 shard=3 ttl=900
+2026-07-01T08:05:38Z INFO  worker.job id=338 queue=exports attempt=1 result=ok
+2026-07-01T08:05:39Z WARN  rate.limit tenant=t_339 remaining=17 window=60s
+2026-07-01T08:05:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000340 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:41Z DEBUG cache.miss key=report:341 shard=3 ttl=900
+2026-07-01T08:05:42Z INFO  worker.job id=342 queue=exports attempt=1 result=ok
+2026-07-01T08:05:43Z WARN  rate.limit tenant=t_343 remaining=17 window=60s
+2026-07-01T08:05:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000344 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:45Z DEBUG cache.miss key=report:345 shard=3 ttl=900
+2026-07-01T08:05:46Z INFO  worker.job id=346 queue=exports attempt=1 result=ok
+2026-07-01T08:05:47Z WARN  rate.limit tenant=t_347 remaining=17 window=60s
+2026-07-01T08:05:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000348 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:49Z DEBUG cache.miss key=report:349 shard=3 ttl=900
+2026-07-01T08:05:50Z INFO  worker.job id=350 queue=exports attempt=1 result=ok
+2026-07-01T08:05:51Z WARN  rate.limit tenant=t_351 remaining=17 window=60s
+2026-07-01T08:05:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000352 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:53Z DEBUG cache.miss key=report:353 shard=3 ttl=900
+2026-07-01T08:05:54Z INFO  worker.job id=354 queue=exports attempt=1 result=ok
+2026-07-01T08:05:55Z WARN  rate.limit tenant=t_355 remaining=17 window=60s
+2026-07-01T08:05:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000356 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:05:57Z DEBUG cache.miss key=report:357 shard=3 ttl=900
+2026-07-01T08:05:58Z INFO  worker.job id=358 queue=exports attempt=1 result=ok
+2026-07-01T08:05:59Z WARN  rate.limit tenant=t_359 remaining=17 window=60s
+2026-07-01T08:06:00Z WARN  pii.echo user_email=maria.gonzalez@example.com callback=(303) 555-0176
+2026-07-01T08:06:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000360 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:01Z DEBUG cache.miss key=report:361 shard=3 ttl=900
+2026-07-01T08:06:02Z INFO  worker.job id=362 queue=exports attempt=1 result=ok
+2026-07-01T08:06:03Z WARN  rate.limit tenant=t_363 remaining=17 window=60s
+2026-07-01T08:06:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000364 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:05Z DEBUG cache.miss key=report:365 shard=3 ttl=900
+2026-07-01T08:06:06Z INFO  worker.job id=366 queue=exports attempt=1 result=ok
+2026-07-01T08:06:07Z WARN  rate.limit tenant=t_367 remaining=17 window=60s
+2026-07-01T08:06:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000368 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:09Z DEBUG cache.miss key=report:369 shard=3 ttl=900
+2026-07-01T08:06:10Z INFO  worker.job id=370 queue=exports attempt=1 result=ok
+2026-07-01T08:06:11Z WARN  rate.limit tenant=t_371 remaining=17 window=60s
+2026-07-01T08:06:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000372 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:13Z DEBUG cache.miss key=report:373 shard=3 ttl=900
+2026-07-01T08:06:14Z INFO  worker.job id=374 queue=exports attempt=1 result=ok
+2026-07-01T08:06:15Z WARN  rate.limit tenant=t_375 remaining=17 window=60s
+2026-07-01T08:06:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000376 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:17Z DEBUG cache.miss key=report:377 shard=3 ttl=900
+2026-07-01T08:06:18Z INFO  worker.job id=378 queue=exports attempt=1 result=ok
+2026-07-01T08:06:19Z WARN  rate.limit tenant=t_379 remaining=17 window=60s
+2026-07-01T08:06:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000380 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:21Z DEBUG cache.miss key=report:381 shard=3 ttl=900
+2026-07-01T08:06:22Z INFO  worker.job id=382 queue=exports attempt=1 result=ok
+2026-07-01T08:06:23Z WARN  rate.limit tenant=t_383 remaining=17 window=60s
+2026-07-01T08:06:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000384 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:25Z DEBUG cache.miss key=report:385 shard=3 ttl=900
+2026-07-01T08:06:26Z INFO  worker.job id=386 queue=exports attempt=1 result=ok
+2026-07-01T08:06:27Z WARN  rate.limit tenant=t_387 remaining=17 window=60s
+2026-07-01T08:06:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000388 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:29Z DEBUG cache.miss key=report:389 shard=3 ttl=900
+2026-07-01T08:06:30Z INFO  worker.job id=390 queue=exports attempt=1 result=ok
+2026-07-01T08:06:31Z WARN  rate.limit tenant=t_391 remaining=17 window=60s
+2026-07-01T08:06:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000392 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:33Z DEBUG cache.miss key=report:393 shard=3 ttl=900
+2026-07-01T08:06:34Z INFO  worker.job id=394 queue=exports attempt=1 result=ok
+2026-07-01T08:06:35Z WARN  rate.limit tenant=t_395 remaining=17 window=60s
+2026-07-01T08:06:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000396 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:37Z DEBUG cache.miss key=report:397 shard=3 ttl=900
+2026-07-01T08:06:38Z INFO  worker.job id=398 queue=exports attempt=1 result=ok
+2026-07-01T08:06:39Z WARN  rate.limit tenant=t_399 remaining=17 window=60s
+2026-07-01T08:06:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000400 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:41Z DEBUG cache.miss key=report:401 shard=3 ttl=900
+2026-07-01T08:06:42Z INFO  worker.job id=402 queue=exports attempt=1 result=ok
+2026-07-01T08:06:43Z WARN  rate.limit tenant=t_403 remaining=17 window=60s
+2026-07-01T08:06:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000404 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:45Z DEBUG cache.miss key=report:405 shard=3 ttl=900
+2026-07-01T08:06:46Z INFO  worker.job id=406 queue=exports attempt=1 result=ok
+2026-07-01T08:06:47Z WARN  rate.limit tenant=t_407 remaining=17 window=60s
+2026-07-01T08:06:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000408 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:49Z DEBUG cache.miss key=report:409 shard=3 ttl=900
+2026-07-01T08:06:50Z INFO  worker.job id=410 queue=exports attempt=1 result=ok
+2026-07-01T08:06:51Z WARN  rate.limit tenant=t_411 remaining=17 window=60s
+2026-07-01T08:06:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000412 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:53Z DEBUG cache.miss key=report:413 shard=3 ttl=900
+2026-07-01T08:06:54Z INFO  worker.job id=414 queue=exports attempt=1 result=ok
+2026-07-01T08:06:55Z WARN  rate.limit tenant=t_415 remaining=17 window=60s
+2026-07-01T08:06:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000416 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:06:57Z DEBUG cache.miss key=report:417 shard=3 ttl=900
+2026-07-01T08:06:58Z INFO  worker.job id=418 queue=exports attempt=1 result=ok
+2026-07-01T08:06:59Z WARN  rate.limit tenant=t_419 remaining=17 window=60s
+2026-07-01T08:07:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000420 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:01Z DEBUG cache.miss key=report:421 shard=3 ttl=900
+2026-07-01T08:07:02Z INFO  worker.job id=422 queue=exports attempt=1 result=ok
+2026-07-01T08:07:03Z WARN  rate.limit tenant=t_423 remaining=17 window=60s
+2026-07-01T08:07:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000424 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:05Z DEBUG cache.miss key=report:425 shard=3 ttl=900
+2026-07-01T08:07:06Z INFO  worker.job id=426 queue=exports attempt=1 result=ok
+2026-07-01T08:07:07Z WARN  rate.limit tenant=t_427 remaining=17 window=60s
+2026-07-01T08:07:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000428 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:09Z DEBUG cache.miss key=report:429 shard=3 ttl=900
+2026-07-01T08:07:10Z INFO  worker.job id=430 queue=exports attempt=1 result=ok
+2026-07-01T08:07:11Z WARN  rate.limit tenant=t_431 remaining=17 window=60s
+2026-07-01T08:07:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000432 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:13Z DEBUG cache.miss key=report:433 shard=3 ttl=900
+2026-07-01T08:07:14Z INFO  worker.job id=434 queue=exports attempt=1 result=ok
+2026-07-01T08:07:15Z WARN  rate.limit tenant=t_435 remaining=17 window=60s
+2026-07-01T08:07:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000436 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:17Z DEBUG cache.miss key=report:437 shard=3 ttl=900
+2026-07-01T08:07:18Z INFO  worker.job id=438 queue=exports attempt=1 result=ok
+2026-07-01T08:07:19Z WARN  rate.limit tenant=t_439 remaining=17 window=60s
+2026-07-01T08:07:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000440 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:21Z DEBUG cache.miss key=report:441 shard=3 ttl=900
+2026-07-01T08:07:22Z INFO  worker.job id=442 queue=exports attempt=1 result=ok
+2026-07-01T08:07:23Z WARN  rate.limit tenant=t_443 remaining=17 window=60s
+2026-07-01T08:07:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000444 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:25Z DEBUG cache.miss key=report:445 shard=3 ttl=900
+2026-07-01T08:07:26Z INFO  worker.job id=446 queue=exports attempt=1 result=ok
+2026-07-01T08:07:27Z WARN  rate.limit tenant=t_447 remaining=17 window=60s
+2026-07-01T08:07:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000448 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:29Z DEBUG cache.miss key=report:449 shard=3 ttl=900
+2026-07-01T08:07:30Z INFO  worker.job id=450 queue=exports attempt=1 result=ok
+2026-07-01T08:07:31Z WARN  rate.limit tenant=t_451 remaining=17 window=60s
+2026-07-01T08:07:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000452 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:33Z DEBUG cache.miss key=report:453 shard=3 ttl=900
+2026-07-01T08:07:34Z INFO  worker.job id=454 queue=exports attempt=1 result=ok
+2026-07-01T08:07:35Z WARN  rate.limit tenant=t_455 remaining=17 window=60s
+2026-07-01T08:07:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000456 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:37Z DEBUG cache.miss key=report:457 shard=3 ttl=900
+2026-07-01T08:07:38Z INFO  worker.job id=458 queue=exports attempt=1 result=ok
+2026-07-01T08:07:39Z WARN  rate.limit tenant=t_459 remaining=17 window=60s
+2026-07-01T08:07:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000460 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:41Z DEBUG cache.miss key=report:461 shard=3 ttl=900
+2026-07-01T08:07:42Z INFO  worker.job id=462 queue=exports attempt=1 result=ok
+2026-07-01T08:07:43Z WARN  rate.limit tenant=t_463 remaining=17 window=60s
+2026-07-01T08:07:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000464 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:45Z DEBUG cache.miss key=report:465 shard=3 ttl=900
+2026-07-01T08:07:46Z INFO  worker.job id=466 queue=exports attempt=1 result=ok
+2026-07-01T08:07:47Z WARN  rate.limit tenant=t_467 remaining=17 window=60s
+2026-07-01T08:07:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000468 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:49Z DEBUG cache.miss key=report:469 shard=3 ttl=900
+2026-07-01T08:07:50Z INFO  worker.job id=470 queue=exports attempt=1 result=ok
+2026-07-01T08:07:51Z WARN  rate.limit tenant=t_471 remaining=17 window=60s
+2026-07-01T08:07:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000472 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:53Z DEBUG cache.miss key=report:473 shard=3 ttl=900
+2026-07-01T08:07:54Z INFO  worker.job id=474 queue=exports attempt=1 result=ok
+2026-07-01T08:07:55Z WARN  rate.limit tenant=t_475 remaining=17 window=60s
+2026-07-01T08:07:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000476 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:07:57Z DEBUG cache.miss key=report:477 shard=3 ttl=900
+2026-07-01T08:07:58Z INFO  worker.job id=478 queue=exports attempt=1 result=ok
+2026-07-01T08:07:59Z WARN  rate.limit tenant=t_479 remaining=17 window=60s
+2026-07-01T08:08:00Z WARN  pii.echo user_email=alex.rivera@example.invalid callback=(212) 555-0142
+2026-07-01T08:08:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000480 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:01Z DEBUG cache.miss key=report:481 shard=3 ttl=900
+2026-07-01T08:08:02Z INFO  worker.job id=482 queue=exports attempt=1 result=ok
+2026-07-01T08:08:03Z WARN  rate.limit tenant=t_483 remaining=17 window=60s
+2026-07-01T08:08:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000484 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:05Z DEBUG cache.miss key=report:485 shard=3 ttl=900
+2026-07-01T08:08:06Z INFO  worker.job id=486 queue=exports attempt=1 result=ok
+2026-07-01T08:08:07Z WARN  rate.limit tenant=t_487 remaining=17 window=60s
+2026-07-01T08:08:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000488 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:09Z DEBUG cache.miss key=report:489 shard=3 ttl=900
+2026-07-01T08:08:10Z INFO  worker.job id=490 queue=exports attempt=1 result=ok
+2026-07-01T08:08:11Z WARN  rate.limit tenant=t_491 remaining=17 window=60s
+2026-07-01T08:08:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000492 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:13Z DEBUG cache.miss key=report:493 shard=3 ttl=900
+2026-07-01T08:08:14Z INFO  worker.job id=494 queue=exports attempt=1 result=ok
+2026-07-01T08:08:15Z WARN  rate.limit tenant=t_495 remaining=17 window=60s
+2026-07-01T08:08:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000496 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:17Z DEBUG cache.miss key=report:497 shard=3 ttl=900
+2026-07-01T08:08:18Z INFO  worker.job id=498 queue=exports attempt=1 result=ok
+2026-07-01T08:08:19Z WARN  rate.limit tenant=t_499 remaining=17 window=60s
+2026-07-01T08:08:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000500 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:21Z DEBUG cache.miss key=report:501 shard=3 ttl=900
+2026-07-01T08:08:22Z INFO  worker.job id=502 queue=exports attempt=1 result=ok
+2026-07-01T08:08:23Z WARN  rate.limit tenant=t_503 remaining=17 window=60s
+2026-07-01T08:08:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000504 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:25Z DEBUG cache.miss key=report:505 shard=3 ttl=900
+2026-07-01T08:08:26Z INFO  worker.job id=506 queue=exports attempt=1 result=ok
+2026-07-01T08:08:27Z WARN  rate.limit tenant=t_507 remaining=17 window=60s
+2026-07-01T08:08:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000508 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:29Z DEBUG cache.miss key=report:509 shard=3 ttl=900
+2026-07-01T08:08:30Z INFO  worker.job id=510 queue=exports attempt=1 result=ok
+2026-07-01T08:08:31Z WARN  rate.limit tenant=t_511 remaining=17 window=60s
+2026-07-01T08:08:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000512 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:33Z DEBUG cache.miss key=report:513 shard=3 ttl=900
+2026-07-01T08:08:34Z INFO  worker.job id=514 queue=exports attempt=1 result=ok
+2026-07-01T08:08:35Z WARN  rate.limit tenant=t_515 remaining=17 window=60s
+2026-07-01T08:08:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000516 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:37Z DEBUG cache.miss key=report:517 shard=3 ttl=900
+2026-07-01T08:08:38Z INFO  worker.job id=518 queue=exports attempt=1 result=ok
+2026-07-01T08:08:39Z WARN  rate.limit tenant=t_519 remaining=17 window=60s
+2026-07-01T08:08:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000520 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:41Z DEBUG cache.miss key=report:521 shard=3 ttl=900
+2026-07-01T08:08:42Z INFO  worker.job id=522 queue=exports attempt=1 result=ok
+2026-07-01T08:08:43Z WARN  rate.limit tenant=t_523 remaining=17 window=60s
+2026-07-01T08:08:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000524 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:45Z DEBUG cache.miss key=report:525 shard=3 ttl=900
+2026-07-01T08:08:46Z INFO  worker.job id=526 queue=exports attempt=1 result=ok
+2026-07-01T08:08:47Z WARN  rate.limit tenant=t_527 remaining=17 window=60s
+2026-07-01T08:08:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000528 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:49Z DEBUG cache.miss key=report:529 shard=3 ttl=900
+2026-07-01T08:08:50Z INFO  worker.job id=530 queue=exports attempt=1 result=ok
+2026-07-01T08:08:51Z WARN  rate.limit tenant=t_531 remaining=17 window=60s
+2026-07-01T08:08:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000532 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:53Z DEBUG cache.miss key=report:533 shard=3 ttl=900
+2026-07-01T08:08:54Z INFO  worker.job id=534 queue=exports attempt=1 result=ok
+2026-07-01T08:08:55Z WARN  rate.limit tenant=t_535 remaining=17 window=60s
+2026-07-01T08:08:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000536 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:08:57Z DEBUG cache.miss key=report:537 shard=3 ttl=900
+2026-07-01T08:08:58Z INFO  worker.job id=538 queue=exports attempt=1 result=ok
+2026-07-01T08:08:59Z WARN  rate.limit tenant=t_539 remaining=17 window=60s
+2026-07-01T08:09:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000540 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:01Z DEBUG cache.miss key=report:541 shard=3 ttl=900
+2026-07-01T08:09:02Z INFO  worker.job id=542 queue=exports attempt=1 result=ok
+2026-07-01T08:09:03Z WARN  rate.limit tenant=t_543 remaining=17 window=60s
+2026-07-01T08:09:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000544 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:05Z DEBUG cache.miss key=report:545 shard=3 ttl=900
+2026-07-01T08:09:06Z INFO  worker.job id=546 queue=exports attempt=1 result=ok
+2026-07-01T08:09:07Z WARN  rate.limit tenant=t_547 remaining=17 window=60s
+2026-07-01T08:09:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000548 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:09Z DEBUG cache.miss key=report:549 shard=3 ttl=900
+2026-07-01T08:09:10Z INFO  worker.job id=550 queue=exports attempt=1 result=ok
+2026-07-01T08:09:11Z WARN  rate.limit tenant=t_551 remaining=17 window=60s
+2026-07-01T08:09:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000552 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:13Z DEBUG cache.miss key=report:553 shard=3 ttl=900
+2026-07-01T08:09:14Z INFO  worker.job id=554 queue=exports attempt=1 result=ok
+2026-07-01T08:09:15Z WARN  rate.limit tenant=t_555 remaining=17 window=60s
+2026-07-01T08:09:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000556 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:17Z DEBUG cache.miss key=report:557 shard=3 ttl=900
+2026-07-01T08:09:18Z INFO  worker.job id=558 queue=exports attempt=1 result=ok
+2026-07-01T08:09:19Z WARN  rate.limit tenant=t_559 remaining=17 window=60s
+2026-07-01T08:09:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000560 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:21Z DEBUG cache.miss key=report:561 shard=3 ttl=900
+2026-07-01T08:09:22Z INFO  worker.job id=562 queue=exports attempt=1 result=ok
+2026-07-01T08:09:23Z WARN  rate.limit tenant=t_563 remaining=17 window=60s
+2026-07-01T08:09:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000564 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:25Z DEBUG cache.miss key=report:565 shard=3 ttl=900
+2026-07-01T08:09:26Z INFO  worker.job id=566 queue=exports attempt=1 result=ok
+2026-07-01T08:09:27Z WARN  rate.limit tenant=t_567 remaining=17 window=60s
+2026-07-01T08:09:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000568 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:29Z DEBUG cache.miss key=report:569 shard=3 ttl=900
+2026-07-01T08:09:30Z INFO  worker.job id=570 queue=exports attempt=1 result=ok
+2026-07-01T08:09:31Z WARN  rate.limit tenant=t_571 remaining=17 window=60s
+2026-07-01T08:09:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000572 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:33Z DEBUG cache.miss key=report:573 shard=3 ttl=900
+2026-07-01T08:09:34Z INFO  worker.job id=574 queue=exports attempt=1 result=ok
+2026-07-01T08:09:35Z WARN  rate.limit tenant=t_575 remaining=17 window=60s
+2026-07-01T08:09:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000576 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:37Z DEBUG cache.miss key=report:577 shard=3 ttl=900
+2026-07-01T08:09:38Z INFO  worker.job id=578 queue=exports attempt=1 result=ok
+2026-07-01T08:09:39Z WARN  rate.limit tenant=t_579 remaining=17 window=60s
+2026-07-01T08:09:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000580 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:41Z DEBUG cache.miss key=report:581 shard=3 ttl=900
+2026-07-01T08:09:42Z INFO  worker.job id=582 queue=exports attempt=1 result=ok
+2026-07-01T08:09:43Z WARN  rate.limit tenant=t_583 remaining=17 window=60s
+2026-07-01T08:09:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000584 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:45Z DEBUG cache.miss key=report:585 shard=3 ttl=900
+2026-07-01T08:09:46Z INFO  worker.job id=586 queue=exports attempt=1 result=ok
+2026-07-01T08:09:47Z WARN  rate.limit tenant=t_587 remaining=17 window=60s
+2026-07-01T08:09:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000588 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:49Z DEBUG cache.miss key=report:589 shard=3 ttl=900
+2026-07-01T08:09:50Z INFO  worker.job id=590 queue=exports attempt=1 result=ok
+2026-07-01T08:09:51Z WARN  rate.limit tenant=t_591 remaining=17 window=60s
+2026-07-01T08:09:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000592 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:53Z DEBUG cache.miss key=report:593 shard=3 ttl=900
+2026-07-01T08:09:54Z INFO  worker.job id=594 queue=exports attempt=1 result=ok
+2026-07-01T08:09:55Z WARN  rate.limit tenant=t_595 remaining=17 window=60s
+2026-07-01T08:09:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000596 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:09:57Z DEBUG cache.miss key=report:597 shard=3 ttl=900
+2026-07-01T08:09:58Z INFO  worker.job id=598 queue=exports attempt=1 result=ok
+2026-07-01T08:09:59Z WARN  rate.limit tenant=t_599 remaining=17 window=60s
+2026-07-01T08:10:00Z WARN  pii.echo user_email=j.chen@support.example.com callback=415-555-0188
+2026-07-01T08:10:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000600 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:01Z DEBUG cache.miss key=report:601 shard=3 ttl=900
+2026-07-01T08:10:02Z INFO  worker.job id=602 queue=exports attempt=1 result=ok
+2026-07-01T08:10:03Z WARN  rate.limit tenant=t_603 remaining=17 window=60s
+2026-07-01T08:10:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000604 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:05Z DEBUG cache.miss key=report:605 shard=3 ttl=900
+2026-07-01T08:10:06Z INFO  worker.job id=606 queue=exports attempt=1 result=ok
+2026-07-01T08:10:07Z WARN  rate.limit tenant=t_607 remaining=17 window=60s
+2026-07-01T08:10:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000608 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:09Z DEBUG cache.miss key=report:609 shard=3 ttl=900
+2026-07-01T08:10:10Z INFO  worker.job id=610 queue=exports attempt=1 result=ok
+2026-07-01T08:10:11Z WARN  rate.limit tenant=t_611 remaining=17 window=60s
+2026-07-01T08:10:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000612 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:13Z DEBUG cache.miss key=report:613 shard=3 ttl=900
+2026-07-01T08:10:14Z INFO  worker.job id=614 queue=exports attempt=1 result=ok
+2026-07-01T08:10:15Z WARN  rate.limit tenant=t_615 remaining=17 window=60s
+2026-07-01T08:10:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000616 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:17Z DEBUG cache.miss key=report:617 shard=3 ttl=900
+2026-07-01T08:10:18Z INFO  worker.job id=618 queue=exports attempt=1 result=ok
+2026-07-01T08:10:19Z WARN  rate.limit tenant=t_619 remaining=17 window=60s
+2026-07-01T08:10:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000620 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:21Z DEBUG cache.miss key=report:621 shard=3 ttl=900
+2026-07-01T08:10:22Z INFO  worker.job id=622 queue=exports attempt=1 result=ok
+2026-07-01T08:10:23Z WARN  rate.limit tenant=t_623 remaining=17 window=60s
+2026-07-01T08:10:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000624 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:25Z DEBUG cache.miss key=report:625 shard=3 ttl=900
+2026-07-01T08:10:26Z INFO  worker.job id=626 queue=exports attempt=1 result=ok
+2026-07-01T08:10:27Z WARN  rate.limit tenant=t_627 remaining=17 window=60s
+2026-07-01T08:10:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000628 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:29Z DEBUG cache.miss key=report:629 shard=3 ttl=900
+2026-07-01T08:10:30Z INFO  worker.job id=630 queue=exports attempt=1 result=ok
+2026-07-01T08:10:31Z WARN  rate.limit tenant=t_631 remaining=17 window=60s
+2026-07-01T08:10:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000632 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:33Z DEBUG cache.miss key=report:633 shard=3 ttl=900
+2026-07-01T08:10:34Z INFO  worker.job id=634 queue=exports attempt=1 result=ok
+2026-07-01T08:10:35Z WARN  rate.limit tenant=t_635 remaining=17 window=60s
+2026-07-01T08:10:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000636 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:37Z DEBUG cache.miss key=report:637 shard=3 ttl=900
+2026-07-01T08:10:38Z INFO  worker.job id=638 queue=exports attempt=1 result=ok
+2026-07-01T08:10:39Z WARN  rate.limit tenant=t_639 remaining=17 window=60s
+2026-07-01T08:10:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000640 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:41Z DEBUG cache.miss key=report:641 shard=3 ttl=900
+2026-07-01T08:10:42Z INFO  worker.job id=642 queue=exports attempt=1 result=ok
+2026-07-01T08:10:43Z WARN  rate.limit tenant=t_643 remaining=17 window=60s
+2026-07-01T08:10:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000644 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:45Z DEBUG cache.miss key=report:645 shard=3 ttl=900
+2026-07-01T08:10:46Z INFO  worker.job id=646 queue=exports attempt=1 result=ok
+2026-07-01T08:10:47Z WARN  rate.limit tenant=t_647 remaining=17 window=60s
+2026-07-01T08:10:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000648 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:49Z DEBUG cache.miss key=report:649 shard=3 ttl=900
+2026-07-01T08:10:50Z INFO  worker.job id=650 queue=exports attempt=1 result=ok
+2026-07-01T08:10:51Z WARN  rate.limit tenant=t_651 remaining=17 window=60s
+2026-07-01T08:10:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000652 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:53Z DEBUG cache.miss key=report:653 shard=3 ttl=900
+2026-07-01T08:10:54Z INFO  worker.job id=654 queue=exports attempt=1 result=ok
+2026-07-01T08:10:55Z WARN  rate.limit tenant=t_655 remaining=17 window=60s
+2026-07-01T08:10:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000656 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:10:57Z DEBUG cache.miss key=report:657 shard=3 ttl=900
+2026-07-01T08:10:58Z INFO  worker.job id=658 queue=exports attempt=1 result=ok
+2026-07-01T08:10:59Z WARN  rate.limit tenant=t_659 remaining=17 window=60s
+2026-07-01T08:11:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000660 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:01Z DEBUG cache.miss key=report:661 shard=3 ttl=900
+2026-07-01T08:11:02Z INFO  worker.job id=662 queue=exports attempt=1 result=ok
+2026-07-01T08:11:03Z WARN  rate.limit tenant=t_663 remaining=17 window=60s
+2026-07-01T08:11:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000664 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:05Z DEBUG cache.miss key=report:665 shard=3 ttl=900
+2026-07-01T08:11:06Z INFO  worker.job id=666 queue=exports attempt=1 result=ok
+2026-07-01T08:11:07Z WARN  rate.limit tenant=t_667 remaining=17 window=60s
+2026-07-01T08:11:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000668 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:09Z DEBUG cache.miss key=report:669 shard=3 ttl=900
+2026-07-01T08:11:10Z INFO  worker.job id=670 queue=exports attempt=1 result=ok
+2026-07-01T08:11:11Z WARN  rate.limit tenant=t_671 remaining=17 window=60s
+2026-07-01T08:11:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000672 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:13Z DEBUG cache.miss key=report:673 shard=3 ttl=900
+2026-07-01T08:11:14Z INFO  worker.job id=674 queue=exports attempt=1 result=ok
+2026-07-01T08:11:15Z WARN  rate.limit tenant=t_675 remaining=17 window=60s
+2026-07-01T08:11:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000676 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:17Z DEBUG cache.miss key=report:677 shard=3 ttl=900
+2026-07-01T08:11:18Z INFO  worker.job id=678 queue=exports attempt=1 result=ok
+2026-07-01T08:11:19Z WARN  rate.limit tenant=t_679 remaining=17 window=60s
+2026-07-01T08:11:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000680 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:21Z DEBUG cache.miss key=report:681 shard=3 ttl=900
+2026-07-01T08:11:22Z INFO  worker.job id=682 queue=exports attempt=1 result=ok
+2026-07-01T08:11:23Z WARN  rate.limit tenant=t_683 remaining=17 window=60s
+2026-07-01T08:11:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000684 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:25Z DEBUG cache.miss key=report:685 shard=3 ttl=900
+2026-07-01T08:11:26Z INFO  worker.job id=686 queue=exports attempt=1 result=ok
+2026-07-01T08:11:27Z WARN  rate.limit tenant=t_687 remaining=17 window=60s
+2026-07-01T08:11:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000688 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:29Z DEBUG cache.miss key=report:689 shard=3 ttl=900
+2026-07-01T08:11:30Z INFO  worker.job id=690 queue=exports attempt=1 result=ok
+2026-07-01T08:11:31Z WARN  rate.limit tenant=t_691 remaining=17 window=60s
+2026-07-01T08:11:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000692 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:33Z DEBUG cache.miss key=report:693 shard=3 ttl=900
+2026-07-01T08:11:34Z INFO  worker.job id=694 queue=exports attempt=1 result=ok
+2026-07-01T08:11:35Z WARN  rate.limit tenant=t_695 remaining=17 window=60s
+2026-07-01T08:11:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000696 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:37Z DEBUG cache.miss key=report:697 shard=3 ttl=900
+2026-07-01T08:11:38Z INFO  worker.job id=698 queue=exports attempt=1 result=ok
+2026-07-01T08:11:39Z WARN  rate.limit tenant=t_699 remaining=17 window=60s
+2026-07-01T08:11:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000700 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:41Z DEBUG cache.miss key=report:701 shard=3 ttl=900
+2026-07-01T08:11:42Z INFO  worker.job id=702 queue=exports attempt=1 result=ok
+2026-07-01T08:11:43Z WARN  rate.limit tenant=t_703 remaining=17 window=60s
+2026-07-01T08:11:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000704 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:45Z DEBUG cache.miss key=report:705 shard=3 ttl=900
+2026-07-01T08:11:46Z INFO  worker.job id=706 queue=exports attempt=1 result=ok
+2026-07-01T08:11:47Z WARN  rate.limit tenant=t_707 remaining=17 window=60s
+2026-07-01T08:11:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000708 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:49Z DEBUG cache.miss key=report:709 shard=3 ttl=900
+2026-07-01T08:11:50Z INFO  worker.job id=710 queue=exports attempt=1 result=ok
+2026-07-01T08:11:51Z WARN  rate.limit tenant=t_711 remaining=17 window=60s
+2026-07-01T08:11:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000712 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:53Z DEBUG cache.miss key=report:713 shard=3 ttl=900
+2026-07-01T08:11:54Z INFO  worker.job id=714 queue=exports attempt=1 result=ok
+2026-07-01T08:11:55Z WARN  rate.limit tenant=t_715 remaining=17 window=60s
+2026-07-01T08:11:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000716 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:11:57Z DEBUG cache.miss key=report:717 shard=3 ttl=900
+2026-07-01T08:11:58Z INFO  worker.job id=718 queue=exports attempt=1 result=ok
+2026-07-01T08:11:59Z WARN  rate.limit tenant=t_719 remaining=17 window=60s
+2026-07-01T08:12:00Z WARN  pii.echo user_email=billing-team@example.invalid callback=+1 646 555 0123
+2026-07-01T08:12:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000720 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:01Z DEBUG cache.miss key=report:721 shard=3 ttl=900
+2026-07-01T08:12:02Z INFO  worker.job id=722 queue=exports attempt=1 result=ok
+2026-07-01T08:12:03Z WARN  rate.limit tenant=t_723 remaining=17 window=60s
+2026-07-01T08:12:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000724 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:05Z DEBUG cache.miss key=report:725 shard=3 ttl=900
+2026-07-01T08:12:06Z INFO  worker.job id=726 queue=exports attempt=1 result=ok
+2026-07-01T08:12:07Z WARN  rate.limit tenant=t_727 remaining=17 window=60s
+2026-07-01T08:12:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000728 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:09Z DEBUG cache.miss key=report:729 shard=3 ttl=900
+2026-07-01T08:12:10Z INFO  worker.job id=730 queue=exports attempt=1 result=ok
+2026-07-01T08:12:11Z WARN  rate.limit tenant=t_731 remaining=17 window=60s
+2026-07-01T08:12:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000732 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:13Z DEBUG cache.miss key=report:733 shard=3 ttl=900
+2026-07-01T08:12:14Z INFO  worker.job id=734 queue=exports attempt=1 result=ok
+2026-07-01T08:12:15Z WARN  rate.limit tenant=t_735 remaining=17 window=60s
+2026-07-01T08:12:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000736 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:17Z DEBUG cache.miss key=report:737 shard=3 ttl=900
+2026-07-01T08:12:18Z INFO  worker.job id=738 queue=exports attempt=1 result=ok
+2026-07-01T08:12:19Z WARN  rate.limit tenant=t_739 remaining=17 window=60s
+2026-07-01T08:12:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000740 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:21Z DEBUG cache.miss key=report:741 shard=3 ttl=900
+2026-07-01T08:12:22Z INFO  worker.job id=742 queue=exports attempt=1 result=ok
+2026-07-01T08:12:23Z WARN  rate.limit tenant=t_743 remaining=17 window=60s
+2026-07-01T08:12:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000744 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:25Z DEBUG cache.miss key=report:745 shard=3 ttl=900
+2026-07-01T08:12:26Z INFO  worker.job id=746 queue=exports attempt=1 result=ok
+2026-07-01T08:12:27Z WARN  rate.limit tenant=t_747 remaining=17 window=60s
+2026-07-01T08:12:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000748 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:29Z DEBUG cache.miss key=report:749 shard=3 ttl=900
+2026-07-01T08:12:30Z INFO  worker.job id=750 queue=exports attempt=1 result=ok
+2026-07-01T08:12:31Z WARN  rate.limit tenant=t_751 remaining=17 window=60s
+2026-07-01T08:12:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000752 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:33Z DEBUG cache.miss key=report:753 shard=3 ttl=900
+2026-07-01T08:12:34Z INFO  worker.job id=754 queue=exports attempt=1 result=ok
+2026-07-01T08:12:35Z WARN  rate.limit tenant=t_755 remaining=17 window=60s
+2026-07-01T08:12:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000756 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:37Z DEBUG cache.miss key=report:757 shard=3 ttl=900
+2026-07-01T08:12:38Z INFO  worker.job id=758 queue=exports attempt=1 result=ok
+2026-07-01T08:12:39Z WARN  rate.limit tenant=t_759 remaining=17 window=60s
+2026-07-01T08:12:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000760 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:41Z DEBUG cache.miss key=report:761 shard=3 ttl=900
+2026-07-01T08:12:42Z INFO  worker.job id=762 queue=exports attempt=1 result=ok
+2026-07-01T08:12:43Z WARN  rate.limit tenant=t_763 remaining=17 window=60s
+2026-07-01T08:12:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000764 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:45Z DEBUG cache.miss key=report:765 shard=3 ttl=900
+2026-07-01T08:12:46Z INFO  worker.job id=766 queue=exports attempt=1 result=ok
+2026-07-01T08:12:47Z WARN  rate.limit tenant=t_767 remaining=17 window=60s
+2026-07-01T08:12:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000768 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:49Z DEBUG cache.miss key=report:769 shard=3 ttl=900
+2026-07-01T08:12:50Z INFO  worker.job id=770 queue=exports attempt=1 result=ok
+2026-07-01T08:12:51Z WARN  rate.limit tenant=t_771 remaining=17 window=60s
+2026-07-01T08:12:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000772 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:53Z DEBUG cache.miss key=report:773 shard=3 ttl=900
+2026-07-01T08:12:54Z INFO  worker.job id=774 queue=exports attempt=1 result=ok
+2026-07-01T08:12:55Z WARN  rate.limit tenant=t_775 remaining=17 window=60s
+2026-07-01T08:12:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000776 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:12:57Z DEBUG cache.miss key=report:777 shard=3 ttl=900
+2026-07-01T08:12:58Z INFO  worker.job id=778 queue=exports attempt=1 result=ok
+2026-07-01T08:12:59Z WARN  rate.limit tenant=t_779 remaining=17 window=60s
+2026-07-01T08:13:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000780 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:01Z DEBUG cache.miss key=report:781 shard=3 ttl=900
+2026-07-01T08:13:02Z INFO  worker.job id=782 queue=exports attempt=1 result=ok
+2026-07-01T08:13:03Z WARN  rate.limit tenant=t_783 remaining=17 window=60s
+2026-07-01T08:13:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000784 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:05Z DEBUG cache.miss key=report:785 shard=3 ttl=900
+2026-07-01T08:13:06Z INFO  worker.job id=786 queue=exports attempt=1 result=ok
+2026-07-01T08:13:07Z WARN  rate.limit tenant=t_787 remaining=17 window=60s
+2026-07-01T08:13:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000788 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:09Z DEBUG cache.miss key=report:789 shard=3 ttl=900
+2026-07-01T08:13:10Z INFO  worker.job id=790 queue=exports attempt=1 result=ok
+2026-07-01T08:13:11Z WARN  rate.limit tenant=t_791 remaining=17 window=60s
+2026-07-01T08:13:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000792 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:13Z DEBUG cache.miss key=report:793 shard=3 ttl=900
+2026-07-01T08:13:14Z INFO  worker.job id=794 queue=exports attempt=1 result=ok
+2026-07-01T08:13:15Z WARN  rate.limit tenant=t_795 remaining=17 window=60s
+2026-07-01T08:13:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000796 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:17Z DEBUG cache.miss key=report:797 shard=3 ttl=900
+2026-07-01T08:13:18Z INFO  worker.job id=798 queue=exports attempt=1 result=ok
+2026-07-01T08:13:19Z WARN  rate.limit tenant=t_799 remaining=17 window=60s
+2026-07-01T08:13:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000800 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:21Z DEBUG cache.miss key=report:801 shard=3 ttl=900
+2026-07-01T08:13:22Z INFO  worker.job id=802 queue=exports attempt=1 result=ok
+2026-07-01T08:13:23Z WARN  rate.limit tenant=t_803 remaining=17 window=60s
+2026-07-01T08:13:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000804 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:25Z DEBUG cache.miss key=report:805 shard=3 ttl=900
+2026-07-01T08:13:26Z INFO  worker.job id=806 queue=exports attempt=1 result=ok
+2026-07-01T08:13:27Z WARN  rate.limit tenant=t_807 remaining=17 window=60s
+2026-07-01T08:13:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000808 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:29Z DEBUG cache.miss key=report:809 shard=3 ttl=900
+2026-07-01T08:13:30Z INFO  worker.job id=810 queue=exports attempt=1 result=ok
+2026-07-01T08:13:31Z WARN  rate.limit tenant=t_811 remaining=17 window=60s
+2026-07-01T08:13:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000812 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:33Z DEBUG cache.miss key=report:813 shard=3 ttl=900
+2026-07-01T08:13:34Z INFO  worker.job id=814 queue=exports attempt=1 result=ok
+2026-07-01T08:13:35Z WARN  rate.limit tenant=t_815 remaining=17 window=60s
+2026-07-01T08:13:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000816 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:37Z DEBUG cache.miss key=report:817 shard=3 ttl=900
+2026-07-01T08:13:38Z INFO  worker.job id=818 queue=exports attempt=1 result=ok
+2026-07-01T08:13:39Z WARN  rate.limit tenant=t_819 remaining=17 window=60s
+2026-07-01T08:13:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000820 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:41Z DEBUG cache.miss key=report:821 shard=3 ttl=900
+2026-07-01T08:13:42Z INFO  worker.job id=822 queue=exports attempt=1 result=ok
+2026-07-01T08:13:43Z WARN  rate.limit tenant=t_823 remaining=17 window=60s
+2026-07-01T08:13:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000824 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:45Z DEBUG cache.miss key=report:825 shard=3 ttl=900
+2026-07-01T08:13:46Z INFO  worker.job id=826 queue=exports attempt=1 result=ok
+2026-07-01T08:13:47Z WARN  rate.limit tenant=t_827 remaining=17 window=60s
+2026-07-01T08:13:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000828 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:49Z DEBUG cache.miss key=report:829 shard=3 ttl=900
+2026-07-01T08:13:50Z INFO  worker.job id=830 queue=exports attempt=1 result=ok
+2026-07-01T08:13:51Z WARN  rate.limit tenant=t_831 remaining=17 window=60s
+2026-07-01T08:13:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000832 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:53Z DEBUG cache.miss key=report:833 shard=3 ttl=900
+2026-07-01T08:13:54Z INFO  worker.job id=834 queue=exports attempt=1 result=ok
+2026-07-01T08:13:55Z WARN  rate.limit tenant=t_835 remaining=17 window=60s
+2026-07-01T08:13:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000836 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:13:57Z DEBUG cache.miss key=report:837 shard=3 ttl=900
+2026-07-01T08:13:58Z INFO  worker.job id=838 queue=exports attempt=1 result=ok
+2026-07-01T08:13:59Z WARN  rate.limit tenant=t_839 remaining=17 window=60s
+2026-07-01T08:14:00Z WARN  pii.echo user_email=maria.gonzalez@example.com callback=(303) 555-0176
+2026-07-01T08:14:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000840 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:01Z DEBUG cache.miss key=report:841 shard=3 ttl=900
+2026-07-01T08:14:02Z INFO  worker.job id=842 queue=exports attempt=1 result=ok
+2026-07-01T08:14:03Z WARN  rate.limit tenant=t_843 remaining=17 window=60s
+2026-07-01T08:14:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000844 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:05Z DEBUG cache.miss key=report:845 shard=3 ttl=900
+2026-07-01T08:14:06Z INFO  worker.job id=846 queue=exports attempt=1 result=ok
+2026-07-01T08:14:07Z WARN  rate.limit tenant=t_847 remaining=17 window=60s
+2026-07-01T08:14:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000848 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:09Z DEBUG cache.miss key=report:849 shard=3 ttl=900
+2026-07-01T08:14:10Z INFO  worker.job id=850 queue=exports attempt=1 result=ok
+2026-07-01T08:14:11Z WARN  rate.limit tenant=t_851 remaining=17 window=60s
+2026-07-01T08:14:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000852 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:13Z DEBUG cache.miss key=report:853 shard=3 ttl=900
+2026-07-01T08:14:14Z INFO  worker.job id=854 queue=exports attempt=1 result=ok
+2026-07-01T08:14:15Z WARN  rate.limit tenant=t_855 remaining=17 window=60s
+2026-07-01T08:14:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000856 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:17Z DEBUG cache.miss key=report:857 shard=3 ttl=900
+2026-07-01T08:14:18Z INFO  worker.job id=858 queue=exports attempt=1 result=ok
+2026-07-01T08:14:19Z WARN  rate.limit tenant=t_859 remaining=17 window=60s
+2026-07-01T08:14:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000860 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:21Z DEBUG cache.miss key=report:861 shard=3 ttl=900
+2026-07-01T08:14:22Z INFO  worker.job id=862 queue=exports attempt=1 result=ok
+2026-07-01T08:14:23Z WARN  rate.limit tenant=t_863 remaining=17 window=60s
+2026-07-01T08:14:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000864 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:25Z DEBUG cache.miss key=report:865 shard=3 ttl=900
+2026-07-01T08:14:26Z INFO  worker.job id=866 queue=exports attempt=1 result=ok
+2026-07-01T08:14:27Z WARN  rate.limit tenant=t_867 remaining=17 window=60s
+2026-07-01T08:14:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000868 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:29Z DEBUG cache.miss key=report:869 shard=3 ttl=900
+2026-07-01T08:14:30Z INFO  worker.job id=870 queue=exports attempt=1 result=ok
+2026-07-01T08:14:31Z WARN  rate.limit tenant=t_871 remaining=17 window=60s
+2026-07-01T08:14:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000872 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:33Z DEBUG cache.miss key=report:873 shard=3 ttl=900
+2026-07-01T08:14:34Z INFO  worker.job id=874 queue=exports attempt=1 result=ok
+2026-07-01T08:14:35Z WARN  rate.limit tenant=t_875 remaining=17 window=60s
+2026-07-01T08:14:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000876 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:37Z DEBUG cache.miss key=report:877 shard=3 ttl=900
+2026-07-01T08:14:38Z INFO  worker.job id=878 queue=exports attempt=1 result=ok
+2026-07-01T08:14:39Z WARN  rate.limit tenant=t_879 remaining=17 window=60s
+2026-07-01T08:14:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000880 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:41Z DEBUG cache.miss key=report:881 shard=3 ttl=900
+2026-07-01T08:14:42Z INFO  worker.job id=882 queue=exports attempt=1 result=ok
+2026-07-01T08:14:43Z WARN  rate.limit tenant=t_883 remaining=17 window=60s
+2026-07-01T08:14:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000884 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:45Z DEBUG cache.miss key=report:885 shard=3 ttl=900
+2026-07-01T08:14:46Z INFO  worker.job id=886 queue=exports attempt=1 result=ok
+2026-07-01T08:14:47Z WARN  rate.limit tenant=t_887 remaining=17 window=60s
+2026-07-01T08:14:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000888 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:49Z DEBUG cache.miss key=report:889 shard=3 ttl=900
+2026-07-01T08:14:50Z INFO  worker.job id=890 queue=exports attempt=1 result=ok
+2026-07-01T08:14:51Z WARN  rate.limit tenant=t_891 remaining=17 window=60s
+2026-07-01T08:14:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000892 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:53Z DEBUG cache.miss key=report:893 shard=3 ttl=900
+2026-07-01T08:14:54Z INFO  worker.job id=894 queue=exports attempt=1 result=ok
+2026-07-01T08:14:55Z WARN  rate.limit tenant=t_895 remaining=17 window=60s
+2026-07-01T08:14:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000896 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:14:57Z DEBUG cache.miss key=report:897 shard=3 ttl=900
+2026-07-01T08:14:58Z INFO  worker.job id=898 queue=exports attempt=1 result=ok
+2026-07-01T08:14:59Z WARN  rate.limit tenant=t_899 remaining=17 window=60s
+2026-07-01T08:15:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000900 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:01Z DEBUG cache.miss key=report:901 shard=3 ttl=900
+2026-07-01T08:15:02Z INFO  worker.job id=902 queue=exports attempt=1 result=ok
+2026-07-01T08:15:03Z WARN  rate.limit tenant=t_903 remaining=17 window=60s
+2026-07-01T08:15:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000904 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:05Z DEBUG cache.miss key=report:905 shard=3 ttl=900
+2026-07-01T08:15:06Z INFO  worker.job id=906 queue=exports attempt=1 result=ok
+2026-07-01T08:15:07Z WARN  rate.limit tenant=t_907 remaining=17 window=60s
+2026-07-01T08:15:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000908 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:09Z DEBUG cache.miss key=report:909 shard=3 ttl=900
+2026-07-01T08:15:10Z INFO  worker.job id=910 queue=exports attempt=1 result=ok
+2026-07-01T08:15:11Z WARN  rate.limit tenant=t_911 remaining=17 window=60s
+2026-07-01T08:15:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000912 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:13Z DEBUG cache.miss key=report:913 shard=3 ttl=900
+2026-07-01T08:15:14Z INFO  worker.job id=914 queue=exports attempt=1 result=ok
+2026-07-01T08:15:15Z WARN  rate.limit tenant=t_915 remaining=17 window=60s
+2026-07-01T08:15:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000916 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:17Z DEBUG cache.miss key=report:917 shard=3 ttl=900
+2026-07-01T08:15:18Z INFO  worker.job id=918 queue=exports attempt=1 result=ok
+2026-07-01T08:15:19Z WARN  rate.limit tenant=t_919 remaining=17 window=60s
+2026-07-01T08:15:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000920 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:21Z DEBUG cache.miss key=report:921 shard=3 ttl=900
+2026-07-01T08:15:22Z INFO  worker.job id=922 queue=exports attempt=1 result=ok
+2026-07-01T08:15:23Z WARN  rate.limit tenant=t_923 remaining=17 window=60s
+2026-07-01T08:15:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000924 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:25Z DEBUG cache.miss key=report:925 shard=3 ttl=900
+2026-07-01T08:15:26Z INFO  worker.job id=926 queue=exports attempt=1 result=ok
+2026-07-01T08:15:27Z WARN  rate.limit tenant=t_927 remaining=17 window=60s
+2026-07-01T08:15:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000928 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:29Z DEBUG cache.miss key=report:929 shard=3 ttl=900
+2026-07-01T08:15:30Z INFO  worker.job id=930 queue=exports attempt=1 result=ok
+2026-07-01T08:15:31Z WARN  rate.limit tenant=t_931 remaining=17 window=60s
+2026-07-01T08:15:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000932 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:33Z DEBUG cache.miss key=report:933 shard=3 ttl=900
+2026-07-01T08:15:34Z INFO  worker.job id=934 queue=exports attempt=1 result=ok
+2026-07-01T08:15:35Z WARN  rate.limit tenant=t_935 remaining=17 window=60s
+2026-07-01T08:15:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000936 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:37Z DEBUG cache.miss key=report:937 shard=3 ttl=900
+2026-07-01T08:15:38Z INFO  worker.job id=938 queue=exports attempt=1 result=ok
+2026-07-01T08:15:39Z WARN  rate.limit tenant=t_939 remaining=17 window=60s
+2026-07-01T08:15:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000940 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:41Z DEBUG cache.miss key=report:941 shard=3 ttl=900
+2026-07-01T08:15:42Z INFO  worker.job id=942 queue=exports attempt=1 result=ok
+2026-07-01T08:15:43Z WARN  rate.limit tenant=t_943 remaining=17 window=60s
+2026-07-01T08:15:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000944 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:45Z DEBUG cache.miss key=report:945 shard=3 ttl=900
+2026-07-01T08:15:46Z INFO  worker.job id=946 queue=exports attempt=1 result=ok
+2026-07-01T08:15:47Z WARN  rate.limit tenant=t_947 remaining=17 window=60s
+2026-07-01T08:15:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000948 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:49Z DEBUG cache.miss key=report:949 shard=3 ttl=900
+2026-07-01T08:15:50Z INFO  worker.job id=950 queue=exports attempt=1 result=ok
+2026-07-01T08:15:51Z WARN  rate.limit tenant=t_951 remaining=17 window=60s
+2026-07-01T08:15:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000952 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:53Z DEBUG cache.miss key=report:953 shard=3 ttl=900
+2026-07-01T08:15:54Z INFO  worker.job id=954 queue=exports attempt=1 result=ok
+2026-07-01T08:15:55Z WARN  rate.limit tenant=t_955 remaining=17 window=60s
+2026-07-01T08:15:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000956 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:15:57Z DEBUG cache.miss key=report:957 shard=3 ttl=900
+2026-07-01T08:15:58Z INFO  worker.job id=958 queue=exports attempt=1 result=ok
+2026-07-01T08:15:59Z WARN  rate.limit tenant=t_959 remaining=17 window=60s
+2026-07-01T08:16:00Z WARN  pii.echo user_email=alex.rivera@example.invalid callback=(212) 555-0142
+2026-07-01T08:16:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000960 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:01Z DEBUG cache.miss key=report:961 shard=3 ttl=900
+2026-07-01T08:16:02Z INFO  worker.job id=962 queue=exports attempt=1 result=ok
+2026-07-01T08:16:03Z WARN  rate.limit tenant=t_963 remaining=17 window=60s
+2026-07-01T08:16:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000964 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:05Z DEBUG cache.miss key=report:965 shard=3 ttl=900
+2026-07-01T08:16:06Z INFO  worker.job id=966 queue=exports attempt=1 result=ok
+2026-07-01T08:16:07Z WARN  rate.limit tenant=t_967 remaining=17 window=60s
+2026-07-01T08:16:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000968 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:09Z DEBUG cache.miss key=report:969 shard=3 ttl=900
+2026-07-01T08:16:10Z INFO  worker.job id=970 queue=exports attempt=1 result=ok
+2026-07-01T08:16:11Z WARN  rate.limit tenant=t_971 remaining=17 window=60s
+2026-07-01T08:16:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000972 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:13Z DEBUG cache.miss key=report:973 shard=3 ttl=900
+2026-07-01T08:16:14Z INFO  worker.job id=974 queue=exports attempt=1 result=ok
+2026-07-01T08:16:15Z WARN  rate.limit tenant=t_975 remaining=17 window=60s
+2026-07-01T08:16:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000976 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:17Z DEBUG cache.miss key=report:977 shard=3 ttl=900
+2026-07-01T08:16:18Z INFO  worker.job id=978 queue=exports attempt=1 result=ok
+2026-07-01T08:16:19Z WARN  rate.limit tenant=t_979 remaining=17 window=60s
+2026-07-01T08:16:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000980 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:21Z DEBUG cache.miss key=report:981 shard=3 ttl=900
+2026-07-01T08:16:22Z INFO  worker.job id=982 queue=exports attempt=1 result=ok
+2026-07-01T08:16:23Z WARN  rate.limit tenant=t_983 remaining=17 window=60s
+2026-07-01T08:16:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000984 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:25Z DEBUG cache.miss key=report:985 shard=3 ttl=900
+2026-07-01T08:16:26Z INFO  worker.job id=986 queue=exports attempt=1 result=ok
+2026-07-01T08:16:27Z WARN  rate.limit tenant=t_987 remaining=17 window=60s
+2026-07-01T08:16:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000988 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:29Z DEBUG cache.miss key=report:989 shard=3 ttl=900
+2026-07-01T08:16:30Z INFO  worker.job id=990 queue=exports attempt=1 result=ok
+2026-07-01T08:16:31Z WARN  rate.limit tenant=t_991 remaining=17 window=60s
+2026-07-01T08:16:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000992 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:33Z DEBUG cache.miss key=report:993 shard=3 ttl=900
+2026-07-01T08:16:34Z INFO  worker.job id=994 queue=exports attempt=1 result=ok
+2026-07-01T08:16:35Z WARN  rate.limit tenant=t_995 remaining=17 window=60s
+2026-07-01T08:16:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000000996 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:37Z DEBUG cache.miss key=report:997 shard=3 ttl=900
+2026-07-01T08:16:38Z INFO  worker.job id=998 queue=exports attempt=1 result=ok
+2026-07-01T08:16:39Z WARN  rate.limit tenant=t_999 remaining=17 window=60s
+2026-07-01T08:16:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001000 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:41Z DEBUG cache.miss key=report:1001 shard=3 ttl=900
+2026-07-01T08:16:42Z INFO  worker.job id=1002 queue=exports attempt=1 result=ok
+2026-07-01T08:16:43Z WARN  rate.limit tenant=t_1003 remaining=17 window=60s
+2026-07-01T08:16:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001004 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:45Z DEBUG cache.miss key=report:1005 shard=3 ttl=900
+2026-07-01T08:16:46Z INFO  worker.job id=1006 queue=exports attempt=1 result=ok
+2026-07-01T08:16:47Z WARN  rate.limit tenant=t_1007 remaining=17 window=60s
+2026-07-01T08:16:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001008 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:49Z DEBUG cache.miss key=report:1009 shard=3 ttl=900
+2026-07-01T08:16:50Z INFO  worker.job id=1010 queue=exports attempt=1 result=ok
+2026-07-01T08:16:51Z WARN  rate.limit tenant=t_1011 remaining=17 window=60s
+2026-07-01T08:16:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001012 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:53Z DEBUG cache.miss key=report:1013 shard=3 ttl=900
+2026-07-01T08:16:54Z INFO  worker.job id=1014 queue=exports attempt=1 result=ok
+2026-07-01T08:16:55Z WARN  rate.limit tenant=t_1015 remaining=17 window=60s
+2026-07-01T08:16:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001016 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:16:57Z DEBUG cache.miss key=report:1017 shard=3 ttl=900
+2026-07-01T08:16:58Z INFO  worker.job id=1018 queue=exports attempt=1 result=ok
+2026-07-01T08:16:59Z WARN  rate.limit tenant=t_1019 remaining=17 window=60s
+2026-07-01T08:17:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001020 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:01Z DEBUG cache.miss key=report:1021 shard=3 ttl=900
+2026-07-01T08:17:02Z INFO  worker.job id=1022 queue=exports attempt=1 result=ok
+2026-07-01T08:17:03Z WARN  rate.limit tenant=t_1023 remaining=17 window=60s
+2026-07-01T08:17:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001024 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:05Z DEBUG cache.miss key=report:1025 shard=3 ttl=900
+2026-07-01T08:17:06Z INFO  worker.job id=1026 queue=exports attempt=1 result=ok
+2026-07-01T08:17:07Z WARN  rate.limit tenant=t_1027 remaining=17 window=60s
+2026-07-01T08:17:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001028 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:09Z DEBUG cache.miss key=report:1029 shard=3 ttl=900
+2026-07-01T08:17:10Z INFO  worker.job id=1030 queue=exports attempt=1 result=ok
+2026-07-01T08:17:11Z WARN  rate.limit tenant=t_1031 remaining=17 window=60s
+2026-07-01T08:17:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001032 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:13Z DEBUG cache.miss key=report:1033 shard=3 ttl=900
+2026-07-01T08:17:14Z INFO  worker.job id=1034 queue=exports attempt=1 result=ok
+2026-07-01T08:17:15Z WARN  rate.limit tenant=t_1035 remaining=17 window=60s
+2026-07-01T08:17:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001036 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:17Z DEBUG cache.miss key=report:1037 shard=3 ttl=900
+2026-07-01T08:17:18Z INFO  worker.job id=1038 queue=exports attempt=1 result=ok
+2026-07-01T08:17:19Z WARN  rate.limit tenant=t_1039 remaining=17 window=60s
+2026-07-01T08:17:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001040 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:21Z DEBUG cache.miss key=report:1041 shard=3 ttl=900
+2026-07-01T08:17:22Z INFO  worker.job id=1042 queue=exports attempt=1 result=ok
+2026-07-01T08:17:23Z WARN  rate.limit tenant=t_1043 remaining=17 window=60s
+2026-07-01T08:17:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001044 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:25Z DEBUG cache.miss key=report:1045 shard=3 ttl=900
+2026-07-01T08:17:26Z INFO  worker.job id=1046 queue=exports attempt=1 result=ok
+2026-07-01T08:17:27Z WARN  rate.limit tenant=t_1047 remaining=17 window=60s
+2026-07-01T08:17:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001048 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:29Z DEBUG cache.miss key=report:1049 shard=3 ttl=900
+2026-07-01T08:17:30Z INFO  worker.job id=1050 queue=exports attempt=1 result=ok
+2026-07-01T08:17:31Z WARN  rate.limit tenant=t_1051 remaining=17 window=60s
+2026-07-01T08:17:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001052 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:33Z DEBUG cache.miss key=report:1053 shard=3 ttl=900
+2026-07-01T08:17:34Z INFO  worker.job id=1054 queue=exports attempt=1 result=ok
+2026-07-01T08:17:35Z WARN  rate.limit tenant=t_1055 remaining=17 window=60s
+2026-07-01T08:17:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001056 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:37Z DEBUG cache.miss key=report:1057 shard=3 ttl=900
+2026-07-01T08:17:38Z INFO  worker.job id=1058 queue=exports attempt=1 result=ok
+2026-07-01T08:17:39Z WARN  rate.limit tenant=t_1059 remaining=17 window=60s
+2026-07-01T08:17:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001060 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:41Z DEBUG cache.miss key=report:1061 shard=3 ttl=900
+2026-07-01T08:17:42Z INFO  worker.job id=1062 queue=exports attempt=1 result=ok
+2026-07-01T08:17:43Z WARN  rate.limit tenant=t_1063 remaining=17 window=60s
+2026-07-01T08:17:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001064 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:45Z DEBUG cache.miss key=report:1065 shard=3 ttl=900
+2026-07-01T08:17:46Z INFO  worker.job id=1066 queue=exports attempt=1 result=ok
+2026-07-01T08:17:47Z WARN  rate.limit tenant=t_1067 remaining=17 window=60s
+2026-07-01T08:17:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001068 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:49Z DEBUG cache.miss key=report:1069 shard=3 ttl=900
+2026-07-01T08:17:50Z INFO  worker.job id=1070 queue=exports attempt=1 result=ok
+2026-07-01T08:17:51Z WARN  rate.limit tenant=t_1071 remaining=17 window=60s
+2026-07-01T08:17:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001072 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:53Z DEBUG cache.miss key=report:1073 shard=3 ttl=900
+2026-07-01T08:17:54Z INFO  worker.job id=1074 queue=exports attempt=1 result=ok
+2026-07-01T08:17:55Z WARN  rate.limit tenant=t_1075 remaining=17 window=60s
+2026-07-01T08:17:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001076 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:17:57Z DEBUG cache.miss key=report:1077 shard=3 ttl=900
+2026-07-01T08:17:58Z INFO  worker.job id=1078 queue=exports attempt=1 result=ok
+2026-07-01T08:17:59Z WARN  rate.limit tenant=t_1079 remaining=17 window=60s
+2026-07-01T08:18:00Z WARN  pii.echo user_email=j.chen@support.example.com callback=415-555-0188
+2026-07-01T08:18:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001080 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:01Z DEBUG cache.miss key=report:1081 shard=3 ttl=900
+2026-07-01T08:18:02Z INFO  worker.job id=1082 queue=exports attempt=1 result=ok
+2026-07-01T08:18:03Z WARN  rate.limit tenant=t_1083 remaining=17 window=60s
+2026-07-01T08:18:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001084 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:05Z DEBUG cache.miss key=report:1085 shard=3 ttl=900
+2026-07-01T08:18:06Z INFO  worker.job id=1086 queue=exports attempt=1 result=ok
+2026-07-01T08:18:07Z WARN  rate.limit tenant=t_1087 remaining=17 window=60s
+2026-07-01T08:18:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001088 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:09Z DEBUG cache.miss key=report:1089 shard=3 ttl=900
+2026-07-01T08:18:10Z INFO  worker.job id=1090 queue=exports attempt=1 result=ok
+2026-07-01T08:18:11Z WARN  rate.limit tenant=t_1091 remaining=17 window=60s
+2026-07-01T08:18:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001092 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:13Z DEBUG cache.miss key=report:1093 shard=3 ttl=900
+2026-07-01T08:18:14Z INFO  worker.job id=1094 queue=exports attempt=1 result=ok
+2026-07-01T08:18:15Z WARN  rate.limit tenant=t_1095 remaining=17 window=60s
+2026-07-01T08:18:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001096 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:17Z DEBUG cache.miss key=report:1097 shard=3 ttl=900
+2026-07-01T08:18:18Z INFO  worker.job id=1098 queue=exports attempt=1 result=ok
+2026-07-01T08:18:19Z WARN  rate.limit tenant=t_1099 remaining=17 window=60s
+2026-07-01T08:18:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001100 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:21Z DEBUG cache.miss key=report:1101 shard=3 ttl=900
+2026-07-01T08:18:22Z INFO  worker.job id=1102 queue=exports attempt=1 result=ok
+2026-07-01T08:18:23Z WARN  rate.limit tenant=t_1103 remaining=17 window=60s
+2026-07-01T08:18:24Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001104 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:25Z DEBUG cache.miss key=report:1105 shard=3 ttl=900
+2026-07-01T08:18:26Z INFO  worker.job id=1106 queue=exports attempt=1 result=ok
+2026-07-01T08:18:27Z WARN  rate.limit tenant=t_1107 remaining=17 window=60s
+2026-07-01T08:18:28Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001108 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:29Z DEBUG cache.miss key=report:1109 shard=3 ttl=900
+2026-07-01T08:18:30Z INFO  worker.job id=1110 queue=exports attempt=1 result=ok
+2026-07-01T08:18:31Z WARN  rate.limit tenant=t_1111 remaining=17 window=60s
+2026-07-01T08:18:32Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001112 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:33Z DEBUG cache.miss key=report:1113 shard=3 ttl=900
+2026-07-01T08:18:34Z INFO  worker.job id=1114 queue=exports attempt=1 result=ok
+2026-07-01T08:18:35Z WARN  rate.limit tenant=t_1115 remaining=17 window=60s
+2026-07-01T08:18:36Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001116 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:37Z DEBUG cache.miss key=report:1117 shard=3 ttl=900
+2026-07-01T08:18:38Z INFO  worker.job id=1118 queue=exports attempt=1 result=ok
+2026-07-01T08:18:39Z WARN  rate.limit tenant=t_1119 remaining=17 window=60s
+2026-07-01T08:18:40Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001120 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:41Z DEBUG cache.miss key=report:1121 shard=3 ttl=900
+2026-07-01T08:18:42Z INFO  worker.job id=1122 queue=exports attempt=1 result=ok
+2026-07-01T08:18:43Z WARN  rate.limit tenant=t_1123 remaining=17 window=60s
+2026-07-01T08:18:44Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001124 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:45Z DEBUG cache.miss key=report:1125 shard=3 ttl=900
+2026-07-01T08:18:46Z INFO  worker.job id=1126 queue=exports attempt=1 result=ok
+2026-07-01T08:18:47Z WARN  rate.limit tenant=t_1127 remaining=17 window=60s
+2026-07-01T08:18:48Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001128 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:49Z DEBUG cache.miss key=report:1129 shard=3 ttl=900
+2026-07-01T08:18:50Z INFO  worker.job id=1130 queue=exports attempt=1 result=ok
+2026-07-01T08:18:51Z WARN  rate.limit tenant=t_1131 remaining=17 window=60s
+2026-07-01T08:18:52Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001132 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:53Z DEBUG cache.miss key=report:1133 shard=3 ttl=900
+2026-07-01T08:18:54Z INFO  worker.job id=1134 queue=exports attempt=1 result=ok
+2026-07-01T08:18:55Z WARN  rate.limit tenant=t_1135 remaining=17 window=60s
+2026-07-01T08:18:56Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001136 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:18:57Z DEBUG cache.miss key=report:1137 shard=3 ttl=900
+2026-07-01T08:18:58Z INFO  worker.job id=1138 queue=exports attempt=1 result=ok
+2026-07-01T08:18:59Z WARN  rate.limit tenant=t_1139 remaining=17 window=60s
+2026-07-01T08:19:00Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001140 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:19:01Z DEBUG cache.miss key=report:1141 shard=3 ttl=900
+2026-07-01T08:19:02Z INFO  worker.job id=1142 queue=exports attempt=1 result=ok
+2026-07-01T08:19:03Z WARN  rate.limit tenant=t_1143 remaining=17 window=60s
+2026-07-01T08:19:04Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001144 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:19:05Z DEBUG cache.miss key=report:1145 shard=3 ttl=900
+2026-07-01T08:19:06Z INFO  worker.job id=1146 queue=exports attempt=1 result=ok
+2026-07-01T08:19:07Z WARN  rate.limit tenant=t_1147 remaining=17 window=60s
+2026-07-01T08:19:08Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001148 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:19:09Z DEBUG cache.miss key=report:1149 shard=3 ttl=900
+2026-07-01T08:19:10Z INFO  worker.job id=1150 queue=exports attempt=1 result=ok
+2026-07-01T08:19:11Z WARN  rate.limit tenant=t_1151 remaining=17 window=60s
+2026-07-01T08:19:12Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001152 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:19:13Z DEBUG cache.miss key=report:1153 shard=3 ttl=900
+2026-07-01T08:19:14Z INFO  worker.job id=1154 queue=exports attempt=1 result=ok
+2026-07-01T08:19:15Z WARN  rate.limit tenant=t_1155 remaining=17 window=60s
+2026-07-01T08:19:16Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001156 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:19:17Z DEBUG cache.miss key=report:1157 shard=3 ttl=900
+2026-07-01T08:19:18Z INFO  worker.job id=1158 queue=exports attempt=1 result=ok
+2026-07-01T08:19:19Z WARN  rate.limit tenant=t_1159 remaining=17 window=60s
+2026-07-01T08:19:20Z INFO  api.request id=9f8c2d1e-4b7a-4c3e-9d2f-000000001160 route=/v1/reports status=200 dur_ms=41
+2026-07-01T08:19:21Z DEBUG cache.miss key=report:1161 shard=3 ttl=900

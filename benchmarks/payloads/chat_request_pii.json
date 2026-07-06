@@ -1,0 +1,13 @@
+{
+  "model": "gpt-4o-mini",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a concise assistant for a customer support team. Answer in plain language and never invent account details."
+    },
+    {
+      "role": "user",
+      "content": "Draft a follow-up email to alex.rivera@example.invalid, mention the declined card 4242424242424242, and ask them to call (212) 555-0142 to confirm."
+    }
+  ]
+}
