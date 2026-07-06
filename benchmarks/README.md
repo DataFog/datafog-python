@@ -103,9 +103,9 @@ usual proxy deployment.
 
 | Payload       | datafog regex | Presidio | spaCy NER | datafog vs Presidio | datafog vs spaCy |
 | ------------- | ------------- | -------- | --------- | ------------------- | ---------------- |
-| 1.2 KB dense  | 222–251 µs    | 22.8 ms  | 28.6 ms   | 103x                | 114x             |
-| 10 KB mixed   | 1.2 ms        | 174 ms   | 171 ms    | 148x                | 140x             |
-| 100 KB sparse | 11.9–12.2 ms  | 2.02 s   | 1.60 s    | 170x                | 131x             |
+| 1.2 KB dense  | 228–230 µs    | 27.7 ms  | 23.4 ms   | 120x                | 103x             |
+| 10 KB mixed   | 1.28–1.29 ms  | 186 ms   | 170 ms    | 144x                | 133x             |
+| 100 KB sparse | 12.1–12.2 ms  | 2.09 s   | 1.67 s    | 171x                | 138x             |
 
 Speed is not the only axis: the runner records what each engine actually
 detected on each payload (see the `detected` metadata in the output).
