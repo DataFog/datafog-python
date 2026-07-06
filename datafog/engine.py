@@ -481,12 +481,14 @@ def redact(
         for entity in entities
         if 0 <= entity.start < entity.end <= len(text) and entity.text
     ]
-    valid_entities = sorted(
-        valid_entities, key=lambda e: (e.start, e.end), reverse=True
-    )
+    valid_entities = sorted(valid_entities, key=lambda e: (e.start, e.end))
 
+    # Assign replacements in document order so the per-type counters used by
+    # the token/pseudonymize strategies number the first occurrence _1; spans
+    # are applied right-to-left below so earlier offsets stay valid.
+    replacements: list[tuple[Entity, str]] = []
     for entity in valid_entities:
-        original = redacted_text[entity.start : entity.end]
+        original = text[entity.start : entity.end]
         if strategy == "mask":
             replacement = "*" * max(len(original), 1)
         elif strategy == "hash":
@@ -504,10 +506,13 @@ def redact(
             counters[entity.type] = counters.get(entity.type, 0) + 1
             replacement = f"[{entity.type}_{counters[entity.type]}]"
 
+        replacements.append((entity, replacement))
+        mapping[replacement] = original
+
+    for entity, replacement in reversed(replacements):
         redacted_text = (
             redacted_text[: entity.start] + replacement + redacted_text[entity.end :]
         )
-        mapping[replacement] = original
 
     return RedactResult(
         redacted_text=redacted_text,

@@ -1,5 +1,27 @@
 # ChangeLog
 
+## [Unreleased]
+
+### `datafog-python`
+
+#### Fixed
+
+- **Redaction token numbering now follows document order**: `redact()`
+  previously assigned per-type counters while replacing spans right-to-left,
+  so with multiple entities of the same type the *last* occurrence received
+  `_1` (two emails redacted as `[EMAIL_2] ... [EMAIL_1]`). Tokens for the
+  `token` and `pseudonymize` strategies are now numbered left-to-right, so
+  the first occurrence is always `_1`. This changes redacted output text for
+  multi-entity inputs; `RedactResult.entities` is now also ordered by
+  document position (ascending) instead of descending. Replacement values
+  in `mapping` are now always read from the original input text, fixing a
+  case where an already-inserted token could leak into a mapping value when
+  entity spans overlapped. Known pre-existing limitation (unchanged): the
+  `mask` strategy keys `mapping` by the mask string itself, so distinct
+  same-length values collide and only one original is retained — with the
+  new left-to-right order the *last* colliding occurrence wins instead of
+  the first.
+
 ## [2026-07-02]
 
 ### `datafog-python` [4.7.0]

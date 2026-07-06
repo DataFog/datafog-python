@@ -56,6 +56,50 @@ def test_redact_strategies(strategy: str) -> None:
     assert result.mapping
 
 
+def _entity_at(text: str, value: str, entity_type: str = "EMAIL") -> Entity:
+    start = text.index(value)
+    return Entity(
+        type=entity_type,
+        text=value,
+        start=start,
+        end=start + len(value),
+        confidence=1.0,
+        engine="regex",
+    )
+
+
+def test_redact_token_numbering_follows_document_order() -> None:
+    text = "first alpha@example.com then beta@example.com end"
+    entities = [
+        _entity_at(text, "alpha@example.com"),
+        _entity_at(text, "beta@example.com"),
+    ]
+
+    result = redact(text=text, entities=entities, strategy="token")
+
+    assert result.redacted_text == "first [EMAIL_1] then [EMAIL_2] end"
+    assert result.mapping == {
+        "[EMAIL_1]": "alpha@example.com",
+        "[EMAIL_2]": "beta@example.com",
+    }
+
+
+def test_redact_pseudonymize_numbering_follows_document_order() -> None:
+    text = "first alpha@example.com then beta@example.com end"
+    entities = [
+        _entity_at(text, "alpha@example.com"),
+        _entity_at(text, "beta@example.com"),
+    ]
+
+    result = redact(text=text, entities=entities, strategy="pseudonymize")
+
+    assert result.redacted_text == "first [EMAIL_PSEUDO_1] then [EMAIL_PSEUDO_2] end"
+    assert result.mapping == {
+        "[EMAIL_PSEUDO_1]": "alpha@example.com",
+        "[EMAIL_PSEUDO_2]": "beta@example.com",
+    }
+
+
 def test_redact_invalid_strategy_raises_value_error() -> None:
     with pytest.raises(ValueError, match="strategy must be one of"):
         redact("test", entities=[], strategy="invalid")
