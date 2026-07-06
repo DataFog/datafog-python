@@ -51,11 +51,9 @@ def detect_pii(
             pii_dict[entity.type].append(entity.text)
 
         try:
-            from datafog.telemetry import (
-                _get_duration_bucket,
-                _get_text_length_bucket,
-                track_function_call,
-            )
+            from datafog.telemetry import (_get_duration_bucket,
+                                           _get_text_length_bucket,
+                                           track_function_call)
 
             _duration = (_time.monotonic() - _start) * 1000
             entity_count = sum(len(v) for v in pii_dict.values())
@@ -132,11 +130,9 @@ def anonymize_text(
         )
 
         try:
-            from datafog.telemetry import (
-                _get_duration_bucket,
-                _get_text_length_bucket,
-                track_function_call,
-            )
+            from datafog.telemetry import (_get_duration_bucket,
+                                           _get_text_length_bucket,
+                                           track_function_call)
 
             _duration = (_time.monotonic() - _start) * 1000
             track_function_call(

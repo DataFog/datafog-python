@@ -16,9 +16,7 @@ import asyncio
 from typing import Dict, List, Union
 
 from datafog.processing.text_processing.regex_annotator.regex_annotator import (
-    RegexAnnotator,
-    Span,
-)
+    RegexAnnotator, Span)
 
 
 class TextService:
@@ -57,9 +55,8 @@ class TextService:
         self.spacy_annotator = None
         if engine in {"spacy", "auto"}:
             try:
-                from datafog.processing.text_processing.spacy_pii_annotator import (
-                    SpacyPIIAnnotator,
-                )
+                from datafog.processing.text_processing.spacy_pii_annotator import \
+                    SpacyPIIAnnotator
 
                 self.spacy_annotator = SpacyPIIAnnotator.create()
             except ImportError:

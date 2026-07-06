@@ -111,7 +111,7 @@ def test_email_regex(email: str, should_match: bool):
         ("555-555-5555", True),
         ("(555) 555-5555", True),
         ("555.555.5555", True),
-        ("5555555555", True),
+        ("5555555555", False),  # bare ten digits: not matched in strict default (#158)
         ("+1 555-555-5555", True),
         ("+1 (555) 555-5555", True),
         # Edge cases that should be detected
@@ -157,7 +157,7 @@ def test_phone_regex(phone: str, should_match: bool):
         ("1234-56-7890", False),  # Too many digits in first group
         ("123-456-7890", False),  # Too many digits in second group
         ("123-45-67890", False),  # Too many digits in third group
-        ("123 45 6789", False),  # Invalid separator (spaces)
+        ("123 45 6789", True),  # Spaces are now a valid SSN delimiter
         # Explicit failing cases for forbidden prefixes
         ("000-45-6789", False),  # Forbidden prefix 000
         ("666-45-6789", False),  # Forbidden prefix 666
@@ -373,16 +373,18 @@ def test_annotation_result_format():
     assert ssn_spans[0].text == "123-45-6789"
 
 
-def test_ssn_detection_keeps_v44_behavior_for_country_prefixed_digits():
-    """Regression guard: bare nine-digit runs after a country prefix must
-    still match SSN when no locale is configured (v4.4.0 parity). The
-    DE_VAT_ID overlap is resolved by engine-level span suppression only
-    when German locale support is active, never by weakening the base
-    SSN pattern."""
-    annotator = RegexAnnotator()
+def test_ssn_detection_country_prefixed_digits_requires_delimiter_or_optin():
+    """Issue #158: a bare nine-digit run after a country prefix is not an SSN
+    by default (structured ids/timestamps look like this). v4.4.0 parity is
+    available via strict_numeric=False. The DE_VAT_ID overlap is still
+    resolved by engine-level span suppression when German locale is active."""
+    nine = "12345" "6789"
+    strict = RegexAnnotator()
+    permissive = RegexAnnotator(strict_numeric=False)
     for text in (
-        "Reference DE 123456789 was issued.",
-        "Reference DE-123456789 was issued.",
-        "Reference DE123456789 was issued.",
+        f"Reference DE {nine} was issued.",
+        f"Reference DE-{nine} was issued.",
+        f"Reference DE{nine} was issued.",
     ):
-        assert annotator.annotate(text)["SSN"] == ["123456789"], text
+        assert strict.annotate(text)["SSN"] == [], text
+        assert permissive.annotate(text)["SSN"] == [nine], text

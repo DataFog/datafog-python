@@ -88,7 +88,8 @@ class DonutProcessor:
                 raise ImportError(self._missing_dependency_message("torch")) from exc
 
             try:
-                from transformers import DonutProcessor as TransformersDonutProcessor
+                from transformers import \
+                    DonutProcessor as TransformersDonutProcessor
                 from transformers import VisionEncoderDecoderModel
             except ImportError as e:
                 raise ImportError(

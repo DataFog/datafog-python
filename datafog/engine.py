@@ -188,8 +188,13 @@ def _regex_entities(
     text: str,
     entity_types: Optional[list[str]] = None,
     locales: Optional[list[str]] = None,
+    strict_numeric: bool = True,
 ) -> list[Entity]:
-    annotator = RegexAnnotator(locales=locales, enabled_labels=entity_types)
+    annotator = RegexAnnotator(
+        locales=locales,
+        enabled_labels=entity_types,
+        strict_numeric=strict_numeric,
+    )
     _, structured = annotator.annotate_with_spans(text)
     entities: list[Entity] = []
     for span in structured.spans:
@@ -363,12 +368,17 @@ def scan(
     locales: Optional[list[str]] = None,
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
+    strict_numeric: bool = True,
 ) -> ScanResult:
     """Scan text for PII entities.
 
     ``allowlist`` exempts exact entity texts (e.g. your own support email);
     ``allowlist_patterns`` exempts entities whose full text matches a regex
     (e.g. ``^\\d{10}$`` to stop unix timestamps matching as phone numbers).
+    ``strict_numeric`` (default True) requires SSNs to be delimited and phone
+    numbers to carry formatting cues, so bare digit runs are not matched; set
+    False to also detect undelimited nine-digit SSNs and bare ten-digit phone
+    numbers.
     """
     if not isinstance(text, str):
         raise TypeError("text must be a string")
@@ -384,6 +394,7 @@ def scan(
         text,
         entity_types=entity_types,
         locales=locales,
+        strict_numeric=strict_numeric,
     )
 
     if engine == "regex":
@@ -524,6 +535,7 @@ def scan_and_redact(
     locales: Optional[list[str]] = None,
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
+    strict_numeric: bool = True,
 ) -> RedactResult:
     """Convenience wrapper: scan then redact."""
     scan_result = scan(
@@ -533,5 +545,6 @@ def scan_and_redact(
         locales=locales,
         allowlist=allowlist,
         allowlist_patterns=allowlist_patterns,
+        strict_numeric=strict_numeric,
     )
     return redact(text=text, entities=scan_result.entities, strategy=strategy)

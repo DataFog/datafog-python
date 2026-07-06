@@ -84,6 +84,20 @@ Environment variables (set in `settings.json` `env` or your shell):
   are available but opt-in — version strings, dates, and 5-digit numbers are
   everywhere in coding sessions.
 
+- `DATAFOG_HOOK_ALLOWLIST_PATTERNS` — comma-separated regexes; a finding
+  whose full text matches is exempt. As of datafog 4.7.1 the engine no
+  longer treats bare digit runs as SSN/PHONE by default, so tab ids, row
+  ids, and timestamps in structured tool output stay quiet on their own. If
+  you still see numeric false positives, add a belt-and-braces pattern:
+
+  ```json
+  {
+    "type": "command",
+    "command": "DATAFOG_HOOK_ACTION=deny DATAFOG_HOOK_ALLOWLIST_PATTERNS='^\\d{9}$|^\\d{10}$' datafog-hook",
+    "timeout": 10
+  }
+  ```
+
 ## What this actually protects against
 
 The realistic risk in agent sessions is rarely "the user asks for a

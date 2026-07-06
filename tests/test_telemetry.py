@@ -548,7 +548,8 @@ class TestIntegration:
 
 class TestEdgeCases:
     def test_empty_text(self, mock_urlopen, enable_telemetry):
-        from datafog.telemetry import _get_text_length_bucket, track_function_call
+        from datafog.telemetry import (_get_text_length_bucket,
+                                       track_function_call)
 
         track_function_call(
             "detect",

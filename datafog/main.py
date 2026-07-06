@@ -141,7 +141,8 @@ class DataFog:
                 _pipeline_result = str_list
 
             try:
-                from .telemetry import _get_duration_bucket, track_function_call
+                from .telemetry import (_get_duration_bucket,
+                                        track_function_call)
 
                 _duration = (_time.monotonic() - _start) * 1000
                 track_function_call(
@@ -194,11 +195,9 @@ class DataFog:
             result.setdefault(label, []).append(entity.text)
 
         try:
-            from .telemetry import (
-                _get_duration_bucket,
-                _get_text_length_bucket,
-                track_function_call,
-            )
+            from .telemetry import (_get_duration_bucket,
+                                    _get_text_length_bucket,
+                                    track_function_call)
 
             _duration = (_time.monotonic() - _start) * 1000
             entity_count = sum(len(v) for v in result.values())

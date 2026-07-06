@@ -5,12 +5,8 @@ from typer.testing import CliRunner
 
 from datafog.client import app
 from datafog.models.annotator import AnnotationResult, AnnotatorMetadata
-from datafog.models.anonymizer import (
-    AnonymizationResult,
-    Anonymizer,
-    AnonymizerType,
-    HashType,
-)
+from datafog.models.anonymizer import (AnonymizationResult, Anonymizer,
+                                       AnonymizerType, HashType)
 from datafog.models.common import EntityTypes
 
 runner = CliRunner()

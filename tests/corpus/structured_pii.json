@@ -150,14 +150,7 @@
   {
     "id": "phone-plain-digits",
     "input": "Desk: 5551234567 ext 9",
-    "expected_entities": [
-      {
-        "type": "PHONE",
-        "text": "5551234567",
-        "start": 6,
-        "end": 16
-      }
-    ]
+    "expected_entities": []
   },
   {
     "id": "phone-dots",
@@ -260,14 +253,7 @@
   {
     "id": "ssn-no-dashes",
     "input": "Legacy value 123456789 appears here.",
-    "expected_entities": [
-      {
-        "type": "SSN",
-        "text": "123456789",
-        "start": 13,
-        "end": 22
-      }
-    ]
+    "expected_entities": []
   },
   {
     "id": "ssn-spaced",
