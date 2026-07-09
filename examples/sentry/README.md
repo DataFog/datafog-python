@@ -62,10 +62,28 @@ Every string value in the event, including:
 - breadcrumbs (messages and data — log lines, SQL, HTTP query strings)
 - request URL, headers, cookies, and body
 - `extra`, `tags`, `user`, and contexts
-- span descriptions and data in transactions
+- span descriptions and data in transactions — including the
+  **`gen_ai.*` prompt/completion attributes** captured by Sentry's AI
+  agent monitoring, which Sentry's server-side scrubbing does not cover.
+  With this integration you can keep `include_prompts` on for AI
+  observability without shipping your users' PII to Sentry.
 
 Machine identifiers (`event_id`, `release`, `environment`, `sdk`,
-`modules`, ...) are never touched.
+`modules`, ...) are never touched. Text beyond the (very generous)
+per-event scan caps is replaced with an `[UNSCANNED_N_CHARS]` marker —
+never sent raw.
+
+## Logs and metrics
+
+[Sentry Logs](https://docs.sentry.io/platforms/python/logs/) (sentry-sdk ≥
+2.35, `enable_logs=True`) and trace metrics (≥ 2.44) bypass event
+processors, so the integration wraps `before_send_log`,
+`before_send_metric`, and the experimental `before_send_span` at init:
+the scrub runs first, then your own callback — which therefore only ever
+sees scrubbed telemetry. Log bodies, log/metric attributes (including the
+auto-attached `user.email`), and streamed span descriptions are all
+covered. The wrap engages the first time the integration is set up in a
+process, so call `sentry_sdk.init` once, as Sentry recommends.
 
 ## Options
 

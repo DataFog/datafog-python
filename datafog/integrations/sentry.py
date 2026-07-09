@@ -18,8 +18,17 @@ Behavior:
 
 - The integration registers a *global event processor*, so it scrubs both
   error events and transactions (span descriptions and data ride inside
-  transaction events) while leaving the single ``before_send`` slot free
-  for the application's own callback.
+  transaction events — including the ``gen_ai.*`` prompt/completion
+  attributes captured by Sentry's AI agent monitoring, which Sentry's
+  server-side scrubbing does not cover) while leaving the single
+  ``before_send`` slot free for the application's own callback.
+- On SDKs that support them, Sentry Logs, trace metrics, and streamed
+  spans are scrubbed too: the integration wraps ``before_send_log``,
+  ``before_send_metric``, and ``_experiments["before_send_span"]`` at
+  init, running the scrub first and then chaining to the application's
+  own callback (which therefore only ever sees scrubbed telemetry). The
+  wrap happens the first time the integration is set up in a process —
+  call ``sentry_sdk.init`` once, as Sentry recommends.
 - Scrubbing is content-based: every string value in the event — messages,
   exception values, stack-frame local variables, breadcrumbs, request
   data, ``extra``, tags, span descriptions — is scanned and findings are
@@ -40,7 +49,7 @@ existing sentry-sdk).
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import sentry_sdk
 from sentry_sdk.integrations import Integration
@@ -68,7 +77,11 @@ TOTAL_SCAN_CHARS = 8_000_000
 # tag containing an @, a server hostname) and matches what Sentry's own
 # EventScrubber leaves alone. The skip applies at the event's top level
 # only — a nested key that happens to be named "release" (e.g. inside
-# ``extra``) is still scanned.
+# ``extra``) is still scanned. This set is shared by the telemetry scrub
+# path (logs/metrics/spans): the overlapping keys there ("type",
+# "timestamp") are enum/numeric in the Sentry protocol, so skipping them
+# is currently safe — revisit if a telemetry schema grows free text under
+# one of these names.
 _SKIP_TOP_LEVEL_KEYS = frozenset(
     {
         "event_id",
@@ -296,6 +309,104 @@ class DataFogSentryIntegration(Integration):
         from sentry_sdk.scope import add_global_event_processor
 
         add_global_event_processor(_global_processor)
+
+    def setup_once_with_options(self, options: Optional[dict] = None) -> None:
+        """Wrap the telemetry ``before_send_*`` callbacks in ``options``.
+
+        Logs, trace metrics, and streamed spans bypass event processors —
+        their only interception point is the ``before_send_log`` /
+        ``before_send_metric`` / ``_experiments["before_send_span"]``
+        options, which the client re-reads from this same dict on every
+        capture. The wrappers scrub first, then chain to the application's
+        original callback. Like ``setup_once``, this runs only the first
+        time the integration identifier is processed per process, so a
+        second ``sentry_sdk.init`` gets event scrubbing (via the global
+        processor) but not telemetry wrapping.
+
+        Called by sentry-sdk >= 2.14; on older 2.x the SDK predates logs
+        and metrics, so there is nothing to wrap.
+        """
+        if options is None:
+            return
+        # ``experiments`` is the live dict shared with the client's options,
+        # not a copy — mutations here are what the client reads at capture.
+        experiments = options.get("_experiments")
+        for key in ("before_send_log", "before_send_metric"):
+            wrapped = _wrap_telemetry_callback(_existing_callback(options, key))
+            options[key] = wrapped
+            if isinstance(experiments, dict) and key in experiments:
+                # Overwrite the legacy location too: leaving the raw user
+                # callback reachable there is a latent unscrubbed path for
+                # anything that reads _experiments directly.
+                experiments[key] = wrapped
+        if isinstance(experiments, dict):
+            # before_send_span is read from _experiments only.
+            experiments["before_send_span"] = _wrap_telemetry_callback(
+                experiments.get("before_send_span")
+            )
+
+
+_TelemetryCallback = Callable[[dict, Optional[dict]], Optional[dict]]
+
+
+def _existing_callback(options: dict, key: str) -> Optional[_TelemetryCallback]:
+    """Resolve the user's callback with the SDK's precedence: top-level
+    option first, then the legacy ``_experiments`` location."""
+    value = options.get(key)
+    if value is not None:
+        return value
+    experiments = options.get("_experiments")
+    if isinstance(experiments, dict):
+        return experiments.get(key)
+    return None
+
+
+def _wrap_telemetry_callback(
+    original: Optional[_TelemetryCallback],
+) -> _TelemetryCallback:
+    """Compose scrubbing with the user's ``before_send_*`` callback.
+
+    Scrub runs first, so the user callback only ever sees scrubbed
+    telemetry; a ``None`` from the scrub (fail_policy ``closed`` on engine
+    error) drops the payload without invoking the user callback. Config is
+    resolved from the current client per payload, mirroring
+    ``_global_processor``.
+
+    Idempotent: wrapping an already-wrapped callback returns it unchanged,
+    so a repeated ``setup_once_with_options`` cannot stack scrub passes.
+    """
+    if getattr(original, "_datafog_wrapped", False):
+        return original  # type: ignore[return-value]
+
+    def wrapped(payload: dict, hint: Optional[dict]) -> Optional[dict]:
+        try:
+            integration = sentry_sdk.get_client().get_integration(
+                DataFogSentryIntegration
+            )
+        except Exception as exc:  # noqa: BLE001 — never break delivery
+            logger.warning(
+                "DataFog Sentry integration lookup failed (telemetry "
+                "passed through unscanned): %s",
+                type(exc).__name__,
+            )
+            integration = None
+        if integration is not None:
+            scrubbed = _scrub_with_policy(
+                payload,
+                integration.entity_types,
+                integration.allowlist,
+                integration.allowlist_patterns,
+                integration.fail_policy,
+            )
+            if scrubbed is None:
+                return None
+            payload = scrubbed
+        if original is not None:
+            return original(payload, hint)
+        return payload
+
+    wrapped._datafog_wrapped = True  # type: ignore[attr-defined]
+    return wrapped
 
 
 def _global_processor(event: dict, hint: Optional[dict]) -> Optional[dict]:
