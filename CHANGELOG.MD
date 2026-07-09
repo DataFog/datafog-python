@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Sentry SDK integration** (`datafog.integrations.sentry`): scrubs PII
+  from Sentry events in-process, before they leave the machine. Add
+  `DataFogSentryIntegration()` to `sentry_sdk.init(integrations=[...])` —
+  it registers a global event processor covering error events *and*
+  transactions (messages, exception values, stack-frame local variables,
+  breadcrumbs, request data, `extra`, tags, span descriptions), so the
+  application's own `before_send` slot stays free. A standalone
+  `scrub_event(event, hint)` is also exported for manual `before_send`
+  wiring. Same configuration surface as the other adapters:
+  `entity_types` (default `EMAIL`, `PHONE`, `CREDIT_CARD`, `SSN`),
+  `allowlist` / `allowlist_patterns`, and `fail_policy` (`open` sends the
+  event unscanned on engine error; `closed` drops it). Matched values are
+  never echoed into logs — counts only. Install with
+  `pip install datafog[sentry]` (any sentry-sdk 2.x).
+
 ## [2026-07-05]
 
 ### `datafog-python` [4.8.0]
