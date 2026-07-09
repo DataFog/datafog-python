@@ -39,6 +39,9 @@ assert {entity.type for entity in scan_result.entities} >= {"EMAIL", "PHONE"}
 redact_result = datafog.redact("Email jane@example.com or call 415-555-1212")
 assert "jane@example.com" not in redact_result.redacted_text
 assert "415-555-1212" not in redact_result.redacted_text
+
+batch_result = datafog.redact_many(["Email jane@example.com", "Call 415-555-1212"])
+assert batch_result.redacted_texts == ["Email [EMAIL_1]", "Call [PHONE_1]"]
 """
     )
 
@@ -58,6 +61,11 @@ def test_core_defaults_do_not_initialize_optional_engines(monkeypatch) -> None:
 
     redact_result = datafog.redact("Email jane@example.com")
     assert redact_result.redacted_text == "Email [EMAIL_1]"
+
+    batch_result = datafog.redact_many(
+        ["Email jane@example.com", "Email support@example.com"]
+    )
+    assert batch_result.redacted_texts == ["Email [EMAIL_1]", "Email [EMAIL_2]"]
 
     guardrail = datafog.protect()
     guarded = guardrail.filter("Email jane@example.com")
@@ -139,6 +147,7 @@ import datafog
 
 assert datafog.scan("Email jane@example.com").entities
 assert datafog.redact("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
+assert datafog.redact_many(["Email jane@example.com"]).redacted_texts == ["Email [EMAIL_1]"]
 assert datafog.protect().filter("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
 assert datafog.sanitize("Email jane@example.com") == "Email [EMAIL_1]"
 assert datafog.scan_prompt("Email jane@example.com").entities

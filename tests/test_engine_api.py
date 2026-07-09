@@ -4,7 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from datafog.engine import Entity, redact, scan, scan_and_redact
+from datafog.engine import (
+    Entity,
+    redact,
+    redact_many,
+    scan,
+    scan_and_redact,
+    scan_and_redact_many,
+)
 from datafog.exceptions import EngineNotAvailable
 
 
@@ -15,6 +22,7 @@ def test_scan_regex_detects_structured_entities() -> None:
     assert "EMAIL" in entity_types
     assert "SSN" in entity_types
     assert result.engine_used == "regex"
+    assert result.entity_counts == {"EMAIL": 1, "SSN": 1}
 
 
 def test_scan_filters_entity_types() -> None:
@@ -82,6 +90,56 @@ def test_redact_token_numbering_follows_document_order() -> None:
         "[EMAIL_1]": "alpha@example.com",
         "[EMAIL_2]": "beta@example.com",
     }
+    assert result.entity_counts == {"EMAIL": 2}
+
+
+def test_redact_many_preserves_numbering_across_fragments() -> None:
+    texts = ["first alpha@example.com", "then beta@example.com"]
+    entities = [
+        [_entity_at(texts[0], "alpha@example.com")],
+        [_entity_at(texts[1], "beta@example.com")],
+    ]
+
+    result = redact_many(texts=texts, entities=entities)
+
+    assert result.redacted_texts == ["first [EMAIL_1]", "then [EMAIL_2]"]
+    assert result.mapping == {
+        "[EMAIL_1]": "alpha@example.com",
+        "[EMAIL_2]": "beta@example.com",
+    }
+    assert result.entity_counts == {"EMAIL": 2}
+
+
+def test_redact_many_reuses_pseudonym_across_fragments() -> None:
+    texts = ["first alpha@example.com", "again alpha@example.com"]
+    entities = [
+        [_entity_at(texts[0], "alpha@example.com")],
+        [_entity_at(texts[1], "alpha@example.com")],
+    ]
+
+    result = redact_many(texts=texts, entities=entities, strategy="pseudonymize")
+
+    assert result.redacted_texts == [
+        "first [EMAIL_PSEUDO_1]",
+        "again [EMAIL_PSEUDO_1]",
+    ]
+    assert result.mapping == {"[EMAIL_PSEUDO_1]": "alpha@example.com"}
+
+
+def test_scan_and_redact_many_scans_each_fragment() -> None:
+    result = scan_and_redact_many(
+        ["first alpha@example.com", "then beta@example.com"],
+        engine="regex",
+    )
+
+    assert result.redacted_texts == ["first [EMAIL_1]", "then [EMAIL_2]"]
+
+
+def test_redact_many_validates_shape() -> None:
+    with pytest.raises(TypeError, match="list of strings"):
+        redact_many(["valid", None], [[], []])  # type: ignore[list-item]
+    with pytest.raises(ValueError, match="one entity list per text"):
+        redact_many(["one", "two"], [[]])
 
 
 def test_redact_pseudonymize_numbering_follows_document_order() -> None:
