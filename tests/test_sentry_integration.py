@@ -39,9 +39,9 @@ def _error_event(**overrides) -> dict:
                             {
                                 "function": "charge",
                                 "vars": {
-                                    "customer_ssn": f"'{SSN}'",
+                                    "customer_ssn": f"{SSN!r}",
                                     "attempts": "3",
-                                    "form": {"contact": f"'{EMAIL}'"},
+                                    "form": {"contact": f"{EMAIL!r}"},
                                 },
                             }
                         ]
@@ -78,8 +78,8 @@ def _transaction_event() -> dict:
         "spans": [
             {
                 "op": "db.query",
-                "description": f"SELECT * FROM users WHERE email = '{EMAIL}'",
-                "data": {"db.statement": f"... ssn = '{SSN}' ..."},
+                "description": f"SELECT * FROM users WHERE email = {EMAIL!r}",
+                "data": {"db.statement": f"... ssn = {SSN!r} ..."},
             }
         ],
     }

@@ -5,11 +5,11 @@ in-process, microseconds per string scanned.
 
 ## Why this over Sentry's built-in scrubbing
 
-|                  | DataFog integration                        | Sentry `EventScrubber`            | Server-side scrubbing            |
-| ---------------- | ------------------------------------------ | --------------------------------- | -------------------------------- |
-| Detection        | content-based (validated regex)            | sensitive *key names* only        | basic regexes, no phone detector |
-| Where it runs    | in your process, pre-egress                | in your process                   | after data reaches Sentry        |
-| Catches          | PII inside messages, exception text, local variables, breadcrumbs | values under keys like `password` | whatever survives the SDK        |
+|               | DataFog integration                                               | Sentry `EventScrubber`            | Server-side scrubbing            |
+| ------------- | ----------------------------------------------------------------- | --------------------------------- | -------------------------------- |
+| Detection     | content-based (validated regex)                                   | sensitive _key names_ only        | basic regexes, no phone detector |
+| Where it runs | in your process, pre-egress                                       | in your process                   | after data reaches Sentry        |
+| Catches       | PII inside messages, exception text, local variables, breadcrumbs | values under keys like `password` | whatever survives the SDK        |
 
 Sentry's client-side `EventScrubber` never inspects values: an email in an
 exception message, an SSN in a stack-frame local, or a card number in a
