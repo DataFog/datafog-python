@@ -31,12 +31,18 @@ values never echoed into logs or transcripts:
   Manual hook setup and limitations: [examples/claude_code_hook/](examples/claude_code_hook/).
 
 - **LiteLLM guardrail** (`DataFogGuardrail`): redacts or blocks PII in
-  requests and responses at the gateway, for any LiteLLM-proxied provider.
-  In-process (~40µs per message scanned; a request clears the guardrail in
-  well under a millisecond), no sidecar service. Setup:
+  chat, Responses API, text-completion, tool, schema, and streaming traffic at
+  the gateway, for any LiteLLM-proxied provider. In-process (~40µs per message
+  scanned; a request clears the guardrail in well under a millisecond), no
+  sidecar service. Setup:
   [examples/litellm_guardrail/](examples/litellm_guardrail/).
 
-Both default to the high-precision entity set (`EMAIL`, `PHONE`,
+- **Batch redaction** (`redact_many`): scans separate text fragments without
+  joining them, while preserving token numbering and pseudonyms across the
+  batch. Scan and redaction results expose privacy-safe `entity_counts` for
+  policy decisions and observability.
+
+Both adapters default to the high-precision entity set (`EMAIL`, `PHONE`,
 `CREDIT_CARD`, `SSN`); noisier types are opt-in. Known-safe values can be
 exempted with an allowlist: `scan(text, allowlist=[...])` for exact values,
 `allowlist_patterns=[...]` for full-match regexes (e.g. `^\d{10}$` to stop
