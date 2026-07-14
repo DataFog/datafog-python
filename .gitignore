@@ -60,6 +60,8 @@ docs/*
 !docs/Makefile
 !docs/make.bat
 !docs/optional-surfaces.rst
+!docs/cla-policy.md
+!docs/cla-administration.md
 !docs/agents/
 !docs/agents/**
 !docs/audit/

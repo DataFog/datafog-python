@@ -121,6 +121,19 @@ By submitting a pull request, you license your contribution under the project
 [license](LICENSE). You also affirm that you authored the contribution or have
 the right to submit it under the project license.
 
+Before an external contribution can be merged, every contributor must sign the
+[DataFog Individual Contributor License Agreement](CLA.md) unless DataFog has
+documented another agreement covering the contributor and contribution. You
+retain copyright ownership; the CLA grants DataFog, Inc. broad, non-exclusive
+copyright and patent rights, including the ability to use the contribution in
+open-source, commercial, and proprietary distributions while continuing to
+offer it under the project's license in effect when it was submitted.
+
+If an employer or another entity owns or may own your contribution, contact
+[`legal@datafog.ai`](mailto:legal@datafog.ai) before signing or submitting it.
+See the [CLA policy](docs/cla-policy.md) for signing, exemptions, and entity-owned
+contributions.
+
 ## Contributors
 
 Thanks to early contributors including:
