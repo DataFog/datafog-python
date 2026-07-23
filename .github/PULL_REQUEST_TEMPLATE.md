@@ -32,6 +32,11 @@ Optional profiles tested:
 - [ ] ocr
 - [ ] distributed
 
+## Contributor License
+
+- [ ] The `license/cla` check passes, or DataFog has documented an exemption for
+      every contributor to this pull request.
+
 ## Notes For Reviewers
 
 Mention API changes, migrations, warnings, or release-note needs.
