@@ -16,10 +16,12 @@ from .agent import create_guardrail, filter_output, sanitize, scan_prompt
 
 # Core API functions - always available (lightweight)
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
-from .engine import Entity, RedactResult, ScanResult
+from .engine import BatchRedactResult, Entity, RedactResult, ScanResult
 from .engine import redact as _redact_entities
+from .engine import redact_many as _redact_many_entities
 from .engine import scan as _scan
 from .engine import scan_and_redact as _scan_and_redact
+from .engine import scan_and_redact_many as _scan_and_redact_many
 
 # Essential models - always available
 from .models.common import EntityTypes
@@ -224,6 +226,48 @@ def redact(
     )
 
 
+def redact_many(
+    texts: list[str],
+    entities: list[list[Entity]] | None = None,
+    engine: str = "regex",
+    entity_types: list[str] | None = None,
+    strategy: str = "token",
+    preset: str | None = None,
+    locales: list[str] | None = None,
+    allowlist: list[str] | None = None,
+    allowlist_patterns: list[str] | None = None,
+) -> BatchRedactResult:
+    """Redact multiple fragments with stable numbering across the batch.
+
+    Detection still runs independently per fragment, so entities cannot span
+    fragment boundaries. Token counters and pseudonym assignments are shared.
+    """
+    if preset is not None:
+        try:
+            strategy = _REDACT_PRESETS[preset]
+        except KeyError as exc:
+            allowed = ", ".join(sorted(_REDACT_PRESETS))
+            raise ValueError(f"preset must be one of: {allowed}") from exc
+
+    if entities is not None:
+        if allowlist or allowlist_patterns:
+            raise ValueError(
+                "allowlist/allowlist_patterns cannot be combined with explicit "
+                "entities; filter the entities before calling redact_many"
+            )
+        return _redact_many_entities(texts=texts, entities=entities, strategy=strategy)
+
+    return _scan_and_redact_many(
+        texts=texts,
+        engine=engine,
+        entity_types=entity_types,
+        strategy=strategy,
+        locales=locales,
+        allowlist=allowlist,
+        allowlist_patterns=allowlist_patterns,
+    )
+
+
 def protect(
     entity_types: list[str] | None = None,
     engine: str = "regex",
@@ -388,8 +432,10 @@ __all__ = [
     "Entity",
     "ScanResult",
     "RedactResult",
+    "BatchRedactResult",
     "scan",
     "redact",
+    "redact_many",
     "protect",
     "detect",
     "process",

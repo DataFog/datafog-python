@@ -19,8 +19,20 @@ and do not require OCR, Spark, model downloads, or distributed dependencies.
 
    redact_result = datafog.redact(text, engine="regex")
    print(redact_result.redacted_text)
+   print(redact_result.entity_counts)
+
+   batch_result = datafog.redact_many(
+       ["Email jane@example.com", "Call 415-555-1212"],
+       engine="regex",
+   )
+   print(batch_result.redacted_texts)
 
    print(datafog.sanitize(text))
+
+``redact_many()`` scans each fragment independently while sharing token
+numbering and pseudonym assignments across the batch. This is useful for
+messages, tool payloads, log fields, and other structured records where text
+boundaries must remain intact.
 
 The backward-compatible ``DataFog`` and ``TextService`` classes remain
 available for existing users. ``TextService(engine="regex")`` is the

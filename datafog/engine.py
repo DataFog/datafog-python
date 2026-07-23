@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import re
 import warnings
+from collections.abc import Iterable
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Optional
@@ -94,6 +95,11 @@ class ScanResult:
     text: str
     engine_used: str
 
+    @property
+    def entity_counts(self) -> dict[str, int]:
+        """Return detected entity totals keyed by canonical entity type."""
+        return _entity_counts(self.entities)
+
 
 @dataclass
 class RedactResult:
@@ -102,6 +108,36 @@ class RedactResult:
     redacted_text: str
     mapping: dict[str, str]
     entities: list[Entity]
+
+    @property
+    def entity_counts(self) -> dict[str, int]:
+        """Return redacted entity totals keyed by canonical entity type."""
+        return _entity_counts(self.entities)
+
+
+@dataclass
+class BatchRedactResult:
+    """Result of redacting multiple text fragments as one logical batch."""
+
+    redacted_texts: list[str]
+    mapping: dict[str, str]
+    entities: list[list[Entity]]
+
+    @property
+    def entity_counts(self) -> dict[str, int]:
+        """Return redacted entity totals across every batch fragment."""
+        return _entity_counts(
+            entity
+            for fragment_entities in self.entities
+            for entity in fragment_entities
+        )
+
+
+def _entity_counts(entities: Iterable[Entity]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for entity in entities:
+        counts[entity.type] = counts.get(entity.type, 0) + 1
+    return counts
 
 
 def _canonical_type(entity_type: str) -> str:
@@ -483,10 +519,26 @@ def redact(
     if strategy not in {"token", "mask", "hash", "pseudonymize"}:
         raise ValueError("strategy must be one of: token, mask, hash, pseudonymize")
 
+    return _redact_with_state(
+        text=text,
+        entities=entities,
+        strategy=strategy,
+        counters={},
+        pseudonym_by_value={},
+    )
+
+
+def _redact_with_state(
+    text: str,
+    entities: list[Entity],
+    strategy: str,
+    counters: dict[str, int],
+    pseudonym_by_value: dict[tuple[str, str], str],
+) -> RedactResult:
+    """Redact one fragment while sharing numbering state with its batch."""
+
     redacted_text = text
     mapping: dict[str, str] = {}
-    counters: dict[str, int] = {}
-    pseudonym_by_value: dict[tuple[str, str], str] = {}
 
     valid_entities = [
         entity
@@ -539,6 +591,50 @@ def redact(
     )
 
 
+def redact_many(
+    texts: list[str],
+    entities: list[list[Entity]],
+    strategy: str = "token",
+) -> BatchRedactResult:
+    """Redact text fragments with stable numbering across the whole batch."""
+    if not isinstance(texts, list) or not all(isinstance(text, str) for text in texts):
+        raise TypeError("texts must be a list of strings")
+    if (
+        not isinstance(entities, list)
+        or len(entities) != len(texts)
+        or not all(
+            isinstance(fragment_entities, list) for fragment_entities in entities
+        )
+    ):
+        raise ValueError("entities must contain one entity list per text")
+    if strategy not in {"token", "mask", "hash", "pseudonymize"}:
+        raise ValueError("strategy must be one of: token, mask, hash, pseudonymize")
+
+    counters: dict[str, int] = {}
+    pseudonym_by_value: dict[tuple[str, str], str] = {}
+    redacted_texts: list[str] = []
+    mapping: dict[str, str] = {}
+    redacted_entities: list[list[Entity]] = []
+
+    for text, fragment_entities in zip(texts, entities, strict=True):
+        result = _redact_with_state(
+            text=text,
+            entities=fragment_entities,
+            strategy=strategy,
+            counters=counters,
+            pseudonym_by_value=pseudonym_by_value,
+        )
+        redacted_texts.append(result.redacted_text)
+        mapping.update(result.mapping)
+        redacted_entities.append(result.entities)
+
+    return BatchRedactResult(
+        redacted_texts=redacted_texts,
+        mapping=mapping,
+        entities=redacted_entities,
+    )
+
+
 def scan_and_redact(
     text: str,
     engine: str = "smart",
@@ -558,3 +654,30 @@ def scan_and_redact(
         allowlist_patterns=allowlist_patterns,
     )
     return redact(text=text, entities=scan_result.entities, strategy=strategy)
+
+
+def scan_and_redact_many(
+    texts: list[str],
+    engine: str = "smart",
+    entity_types: Optional[list[str]] = None,
+    strategy: str = "token",
+    locales: Optional[list[str]] = None,
+    allowlist: Optional[list[str]] = None,
+    allowlist_patterns: Optional[list[str]] = None,
+) -> BatchRedactResult:
+    """Scan and redact text fragments with batch-stable replacements."""
+    if not isinstance(texts, list) or not all(isinstance(text, str) for text in texts):
+        raise TypeError("texts must be a list of strings")
+
+    entity_groups = [
+        scan(
+            text=text,
+            engine=engine,
+            entity_types=entity_types,
+            locales=locales,
+            allowlist=allowlist,
+            allowlist_patterns=allowlist_patterns,
+        ).entities
+        for text in texts
+    ]
+    return redact_many(texts=texts, entities=entity_groups, strategy=strategy)

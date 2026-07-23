@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Batch redaction API**: `datafog.redact_many()` scans text fragments
+  independently while sharing token numbering and pseudonym assignments.
+  `ScanResult`, `RedactResult`, and `BatchRedactResult` expose computed
+  `entity_counts` dictionaries so integrations no longer need to recount
+  result entities.
+
+### Fixed
+
+- **LiteLLM request and response coverage**: the compatibility guardrail now
+  scans Responses API input/output, top-level instructions and system prompts,
+  text-completion prompts and choices, tool/function arguments and schemas,
+  structured-output schemas, Anthropic content, and buffered streaming output.
+  It supports `during_call` blocking, preserves exact and regex allowlists,
+  adds locale configuration, keeps legacy option names compatible, and never
+  yields a streaming fragment before the complete text has been checked.
+
 ## [2026-07-05]
 
 ### `datafog-python` [4.8.0]

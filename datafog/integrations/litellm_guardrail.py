@@ -1,43 +1,45 @@
-"""LiteLLM guardrail adapter: redact or block PII at the gateway.
+"""DataFog PII guardrail: offline, in-process PII redaction and blocking.
 
-Usage (LiteLLM proxy ``config.yaml``)::
+Uses the `datafog` library (https://github.com/DataFog/datafog-python) to
+detect and redact PII locally — no external service, no sidecar, no network
+calls. Scans run in microseconds per request, so the guardrail can sit on
+every call without a latency budget.
 
-    guardrails:
-      - guardrail_name: "datafog-pii"
-        litellm_params:
-          guardrail: datafog.integrations.litellm_guardrail.DataFogGuardrail
-          mode: "pre_call"
-          action: "redact"          # or "block"
-          fail_policy: "open"       # or "closed"
-          # entity_types: ["EMAIL", "PHONE", "CREDIT_CARD", "SSN"]
-
-Behavior:
-
-- ``pre_call``  — scans request messages. ``redact`` (default) replaces
+- ``pre_call``: scans request messages. ``redact`` (default) replaces
   findings with ``[TYPE_N]`` tokens before the request leaves the gateway;
-  ``block`` rejects the request outright.
-- ``post_call`` — redacts findings from model responses before they reach
+  ``block`` rejects the request with HTTP 400.
+- ``during_call``: same as pre_call, but runs in parallel with the LLM call
+  (block only — content cannot be modified mid-flight).
+- ``post_call``: redacts findings from model responses before they reach
   the client.
-- ``fail_policy`` — ``open`` (default) lets traffic through unscanned if
-  the engine errors, so a guardrail bug never takes down the gateway;
-  ``closed`` rejects traffic instead, for compliance deployments where
-  unscanned egress is worse than downtime.
 
-Errors and block messages report entity type counts only — matched PII is
-never echoed into logs, exceptions, or proxy responses.
+Defaults to the high-precision entity types (EMAIL, PHONE, CREDIT_CARD,
+SSN). Noisier types (IP_ADDRESS, DOB, ZIP, DE_* locale entities) are opt-in
+via ``datafog_entity_types`` because version strings, dates, and short
+numbers saturate technical text.
 
-Requires ``litellm`` and ``fastapi`` (this module is not imported by
-``datafog`` core; the LiteLLM proxy, where this runs, always ships fastapi).
+Errors and block messages report entity type counts only; matched PII is
+never echoed into logs, exceptions, or proxy responses. Engine exceptions
+are re-raised with ``from None`` and logged by type name only, since their
+messages can embed the text being scanned.
+
+This compatibility class accepts DataFog's original option names (``action``,
+``entity_types``, ``fail_policy``, ``allowlist``, ``allowlist_patterns``, and
+``locales``) plus the native LiteLLM provider's ``datafog_*`` aliases.
 """
 
+import json
 import logging
-from typing import Any, Optional
+from collections.abc import AsyncGenerator, Callable
+from typing import TYPE_CHECKING, Any, Literal
 
 from fastapi import HTTPException
 from litellm.integrations.custom_guardrail import CustomGuardrail
+from litellm.types.guardrails import GuardrailEventHooks
 
-# High-precision defaults, matching the Claude Code hook adapter: noisy-in-
-# practice types (IP_ADDRESS, DOB, ZIP) must be opted into explicitly.
+if TYPE_CHECKING:
+    from litellm.proxy._types import UserAPIKeyAuth
+
 DEFAULT_ENTITY_TYPES = ["EMAIL", "PHONE", "CREDIT_CARD", "SSN"]
 
 VALID_ACTIONS = {"redact", "block"}
@@ -49,8 +51,9 @@ logger = logging.getLogger(__name__)
 def _redact_text(
     text: str,
     entity_types: list[str],
-    allowlist: list[str] | None = None,
-    allowlist_patterns: list[str] | None = None,
+    locales: list[str] | None,
+    allowlist: list[str] | None,
+    allowlist_patterns: list[str] | None,
 ) -> tuple[str, dict[str, int]]:
     """Redact ``text``; return (redacted_text, counts per entity type)."""
     import datafog
@@ -59,69 +62,112 @@ def _redact_text(
         text,
         engine="regex",
         entity_types=entity_types,
+        locales=locales,
         allowlist=allowlist,
         allowlist_patterns=allowlist_patterns,
     )
-    counts: dict[str, int] = {}
-    for entity in result.entities:
-        counts[entity.type] = counts.get(entity.type, 0) + 1
-    return result.redacted_text, counts
+    return result.redacted_text, result.entity_counts
 
 
 def _summary(counts: dict[str, int]) -> str:
     return ", ".join(f"{etype} x{n}" for etype, n in sorted(counts.items()))
 
 
+def _merge_counts(total_counts: dict[str, int], counts: dict[str, int]) -> None:
+    for etype, n in counts.items():
+        total_counts[etype] = total_counts.get(etype, 0) + n
+
+
+def _get_field(container: Any, field_name: str) -> Any:
+    if isinstance(container, dict):
+        return container.get(field_name)
+    return getattr(container, field_name, None)
+
+
+def _set_field(container: Any, field_name: str, value: Any) -> None:
+    if isinstance(container, dict):
+        container[field_name] = value
+    else:
+        setattr(container, field_name, value)
+
+
 class DataFogGuardrail(CustomGuardrail):
-    """Offline PII guardrail for the LiteLLM proxy, powered by datafog."""
+    """Offline PII guardrail powered by the datafog library."""
 
     def __init__(
         self,
-        action: str = "redact",
-        entity_types: Optional[list[str]] = None,
-        fail_policy: str = "open",
-        allowlist: Optional[list[str]] = None,
-        allowlist_patterns: Optional[list[str]] = None,
+        action: Literal["redact", "block"] | None = "redact",
+        entity_types: list[str] | None = None,
+        fail_policy: Literal["open", "closed"] | None = "open",
+        allowlist: list[str] | None = None,
+        allowlist_patterns: list[str] | None = None,
+        locales: list[str] | None = None,
+        datafog_action: Literal["redact", "block"] | None = None,
+        datafog_entity_types: list[str] | None = None,
+        datafog_locales: list[str] | None = None,
+        datafog_fail_policy: Literal["open", "closed"] | None = None,
+        datafog_allowlist: list[str] | None = None,
+        datafog_allowlist_patterns: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
-        if action not in VALID_ACTIONS:
+        resolved_action = (
+            datafog_action if datafog_action is not None else action or "redact"
+        )
+        resolved_fail_policy = (
+            datafog_fail_policy
+            if datafog_fail_policy is not None
+            else fail_policy or "open"
+        )
+        if resolved_action not in VALID_ACTIONS:
             raise ValueError(f"action must be one of: {sorted(VALID_ACTIONS)}")
-        if fail_policy not in VALID_FAIL_POLICIES:
+        if resolved_fail_policy not in VALID_FAIL_POLICIES:
             raise ValueError(
                 f"fail_policy must be one of: {sorted(VALID_FAIL_POLICIES)}"
             )
-        self.action = action
-        self.entity_types = entity_types or DEFAULT_ENTITY_TYPES
-        self.fail_policy = fail_policy
-        self.allowlist = allowlist
-        self.allowlist_patterns = allowlist_patterns
-        super().__init__(**kwargs)
+
+        self.action = resolved_action
+        self.entity_types = (
+            datafog_entity_types
+            if datafog_entity_types is not None
+            else entity_types or DEFAULT_ENTITY_TYPES
+        )
+        self.locales = datafog_locales if datafog_locales is not None else locales
+        self.fail_policy = resolved_fail_policy
+        self.allowlist = (
+            datafog_allowlist if datafog_allowlist is not None else allowlist
+        )
+        self.allowlist_patterns = (
+            datafog_allowlist_patterns
+            if datafog_allowlist_patterns is not None
+            else allowlist_patterns
+        )
+        default_on = kwargs.pop("default_on", True)
+        super().__init__(default_on=default_on, **kwargs)
+
+    def _redact(self, text: str) -> tuple[str, dict[str, int]]:
+        return _redact_text(
+            text,
+            self.entity_types,
+            self.locales,
+            self.allowlist,
+            self.allowlist_patterns,
+        )
 
     def _process_content(self, content: Any) -> tuple[Any, dict[str, int]]:
         """Redact a message content value (str or list of content parts)."""
         counts: dict[str, int] = {}
         if isinstance(content, str):
-            redacted, counts = _redact_text(
-                content, self.entity_types, self.allowlist, self.allowlist_patterns
-            )
-            return redacted, counts
+            return self._redact(content)
         if isinstance(content, list):
             new_parts = []
             skipped_parts = 0
             for part in content:
                 if isinstance(part, dict) and isinstance(part.get("text"), str):
-                    redacted, part_counts = _redact_text(
-                        part["text"],
-                        self.entity_types,
-                        self.allowlist,
-                        self.allowlist_patterns,
-                    )
+                    redacted, part_counts = self._redact(part["text"])
                     new_parts.append({**part, "text": redacted})
                     for etype, n in part_counts.items():
                         counts[etype] = counts.get(etype, 0) + n
                 else:
-                    # Images and other non-text parts are not scanned —
-                    # count them so the blind spot is auditable.
                     new_parts.append(part)
                     skipped_parts += 1
             if skipped_parts:
@@ -132,48 +178,639 @@ class DataFogGuardrail(CustomGuardrail):
             return new_parts, counts
         return content, counts
 
+    def _process_tool_payload(self, payload: Any) -> tuple[Any, dict[str, int]]:
+        """Redact text inside supported tool/function argument payloads."""
+        return self._process_tool_payload_inner(payload, seen=set())
+
+    def _process_tool_payload_inner(
+        self, payload: Any, seen: set[int]
+    ) -> tuple[Any, dict[str, int]]:
+        if isinstance(payload, str):
+            return self._redact(payload)
+        if not isinstance(payload, (list, dict)) or id(payload) in seen:
+            return payload, {}
+
+        seen.add(id(payload))
+        counts: dict[str, int] = {}
+        changed = False
+
+        if isinstance(payload, list):
+            new_items: list[Any] = []
+            for value in payload:
+                new_value, value_counts = self._process_tool_payload_inner(value, seen)
+                new_items.append(new_value)
+                if value_counts:
+                    changed = True
+                    _merge_counts(counts, value_counts)
+            seen.remove(id(payload))
+            return (new_items if changed else payload), counts
+
+        new_mapping: dict[Any, Any] = {}
+        for key, value in payload.items():
+            new_value, value_counts = self._process_tool_payload_inner(value, seen)
+            new_mapping[key] = new_value
+            if value_counts:
+                changed = True
+                _merge_counts(counts, value_counts)
+        seen.remove(id(payload))
+        return (new_mapping if changed else payload), counts
+
+    def _scan_argument_mapping(
+        self, mapping: dict[str, Any]
+    ) -> tuple[dict[str, Any], dict[str, int]]:
+        counts: dict[str, int] = {}
+        new_mapping = dict(mapping)
+        changed = False
+        for field_name in ("arguments", "input"):
+            payload = mapping.get(field_name)
+            if not isinstance(payload, (str, list, dict)):
+                continue
+            new_payload, payload_counts = self._process_tool_payload(payload)
+            if payload_counts:
+                new_mapping[field_name] = new_payload
+                changed = True
+                _merge_counts(counts, payload_counts)
+        return (new_mapping if changed else mapping), counts
+
+    def _scan_argument_container(
+        self, container: Any, *, redact: bool
+    ) -> dict[str, int]:
+        """Scan supported argument fields on a dict/object container."""
+        counts: dict[str, int] = {}
+        for field_name in ("arguments", "input"):
+            payload = _get_field(container, field_name)
+            if not isinstance(payload, (str, list, dict)):
+                continue
+            new_payload, payload_counts = self._process_tool_payload(payload)
+            if payload_counts:
+                if redact:
+                    _set_field(container, field_name, new_payload)
+                _merge_counts(counts, payload_counts)
+        return counts
+
+    def _scan_request_tool_calls(self, tool_calls: Any) -> tuple[Any, dict[str, int]]:
+        if not isinstance(tool_calls, list):
+            return tool_calls, {}
+        counts: dict[str, int] = {}
+        new_tool_calls = []
+        changed = False
+        for tool_call in tool_calls:
+            if isinstance(tool_call, dict) and isinstance(
+                tool_call.get("function"), dict
+            ):
+                new_function, function_counts = self._scan_argument_mapping(
+                    tool_call["function"]
+                )
+                if function_counts:
+                    new_tool_calls.append({**tool_call, "function": new_function})
+                    changed = True
+                    _merge_counts(counts, function_counts)
+                    continue
+            new_tool_calls.append(tool_call)
+        return (new_tool_calls if changed else tool_calls), counts
+
+    def _scan_message(
+        self, message: dict[str, Any]
+    ) -> tuple[dict[str, Any], dict[str, int]]:
+        counts: dict[str, int] = {}
+        new_message = dict(message)
+        changed = False
+
+        if "content" in message:
+            new_content, content_counts = self._process_content(message["content"])
+            if content_counts:
+                new_message["content"] = new_content
+                changed = True
+                _merge_counts(counts, content_counts)
+
+        function_call = message.get("function_call")
+        if isinstance(function_call, dict):
+            new_function_call, function_counts = self._scan_argument_mapping(
+                function_call
+            )
+            if function_counts:
+                new_message["function_call"] = new_function_call
+                changed = True
+                _merge_counts(counts, function_counts)
+
+        new_tool_calls, tool_counts = self._scan_request_tool_calls(
+            message.get("tool_calls")
+        )
+        if tool_counts:
+            new_message["tool_calls"] = new_tool_calls
+            changed = True
+            _merge_counts(counts, tool_counts)
+
+        return (new_message if changed else message), counts
+
+    def _scan_responses_input_item(self, item: Any) -> tuple[Any, dict[str, int]]:
+        if isinstance(item, str):
+            return self._redact(item)
+        if not isinstance(item, dict):
+            return item, {}
+
+        counts: dict[str, int] = {}
+        new_item, message_counts = self._scan_message(item)
+        changed = bool(message_counts)
+        _merge_counts(counts, message_counts)
+
+        argument_item, argument_counts = self._scan_argument_mapping(new_item)
+        if argument_counts:
+            new_item = argument_item
+            changed = True
+            _merge_counts(counts, argument_counts)
+
+        for field_name in ("text", "output"):
+            payload = new_item.get(field_name)
+            if not isinstance(payload, (str, list, dict)):
+                continue
+            new_payload, payload_counts = self._process_tool_payload(payload)
+            if payload_counts:
+                if not changed:
+                    new_item = dict(new_item)
+                new_item[field_name] = new_payload
+                changed = True
+                _merge_counts(counts, payload_counts)
+
+        return (new_item if changed else item), counts
+
+    def _scan_responses_api_input(self, input_value: Any) -> tuple[Any, dict[str, int]]:
+        if isinstance(input_value, str):
+            return self._redact(input_value)
+        if not isinstance(input_value, list):
+            return input_value, {}
+
+        counts: dict[str, int] = {}
+        new_items = []
+        changed = False
+        for item in input_value:
+            new_item, item_counts = self._scan_responses_input_item(item)
+            new_items.append(new_item)
+            if item_counts:
+                changed = True
+                _merge_counts(counts, item_counts)
+
+        return (new_items if changed else input_value), counts
+
+    def _scan_top_level_prompt_fields(self, data: dict) -> tuple[dict, dict[str, int]]:
+        counts: dict[str, int] = {}
+        new_data = data
+        for field_name in ("instructions", "system"):
+            if field_name not in data:
+                continue
+            new_value, field_counts = self._process_content(data[field_name])
+            if field_counts:
+                if new_data is data:
+                    new_data = dict(data)
+                new_data[field_name] = new_value
+                _merge_counts(counts, field_counts)
+        return new_data, counts
+
+    def _scan_schema_fields(self, data: dict) -> tuple[dict, dict[str, int]]:
+        counts: dict[str, int] = {}
+        new_data = data
+        for field_name in ("tools", "functions", "response_format"):
+            schema = data.get(field_name)
+            if not isinstance(schema, (list, dict)):
+                continue
+            new_schema, field_counts = self._process_tool_payload(schema)
+            if field_counts:
+                if new_data is data:
+                    new_data = dict(data)
+                new_data[field_name] = new_schema
+                _merge_counts(counts, field_counts)
+        return new_data, counts
+
+    def _process_completion_prompt(self, prompt: Any) -> tuple[Any, dict[str, int]]:
+        if isinstance(prompt, str):
+            return self._redact(prompt)
+        if not isinstance(prompt, list) or not all(
+            isinstance(item, str) for item in prompt
+        ):
+            return prompt, {}
+
+        counts: dict[str, int] = {}
+        new_prompt = []
+        changed = False
+        for item in prompt:
+            new_item, item_counts = self._redact(item)
+            new_prompt.append(new_item)
+            if item_counts:
+                changed = True
+                _merge_counts(counts, item_counts)
+        return (new_prompt if changed else prompt), counts
+
     def _handle_engine_error(self, exc: Exception) -> None:
-        # Only the exception *type* is ever logged or re-raised. Engine
-        # exception messages can embed the text being scanned, so chaining
-        # (`from exc`) or interpolating str(exc) would leak matched PII into
-        # tracebacks and logs — the exact thing this guardrail exists to
-        # prevent. `from None` suppresses both __cause__ and __context__.
+        """Apply the fail policy without leaking scanned text.
+
+        Only the exception type is logged or re-raised: engine exception
+        messages can embed the text being scanned, so chaining via ``from
+        exc`` or interpolating ``str(exc)`` would leak matched PII into
+        tracebacks. A missing dependency is a config error and is surfaced
+        regardless of fail policy.
+        """
+        if isinstance(exc, ImportError):
+            raise exc
         if self.fail_policy == "closed":
-            # RuntimeError (no status_code attr) intentionally surfaces as
-            # HTTP 500: an engine failure is a server fault, distinct from
-            # the policy block below, which is a 400.
             raise RuntimeError(
-                "DataFog guardrail failed and fail_policy is 'closed'; "
-                f"rejecting unscanned traffic ({type(exc).__name__})."
+                "DataFog guardrail failed and fail_policy is "
+                f"'closed'; rejecting unscanned traffic ({type(exc).__name__})."
             ) from None
         logger.warning(
             "DataFog guardrail error (fail-open, traffic unscanned): %s",
             type(exc).__name__,
         )
 
-    async def async_pre_call_hook(
-        self,
-        user_api_key_dict: Any,
-        cache: Any,
-        data: dict,
-        call_type: str,
-    ) -> dict:
+    def _scan_messages(self, data: dict) -> tuple[dict, dict[str, int]]:
+        """Scan/redact all message contents; return (new_data, counts)."""
         messages = data.get("messages")
         if not isinstance(messages, list):
-            return data
+            return data, {}
 
         total_counts: dict[str, int] = {}
         new_messages = []
+        for message in messages:
+            if isinstance(message, dict):
+                new_message, counts = self._scan_message(message)
+                new_messages.append(new_message)
+                _merge_counts(total_counts, counts)
+            else:
+                new_messages.append(message)
+
+        if not total_counts:
+            return data, {}
+        return {**data, "messages": new_messages}, total_counts
+
+    def _scan_request_data(self, data: dict) -> tuple[dict, dict[str, int]]:
+        """Scan/redact supported request payload fields."""
+        new_data, total_counts = self._scan_messages(data)
+
+        new_input, input_counts = self._scan_responses_api_input(new_data.get("input"))
+        if input_counts:
+            new_data = {**new_data, "input": new_input}
+            _merge_counts(total_counts, input_counts)
+
+        new_prompt_data, prompt_counts = self._scan_top_level_prompt_fields(new_data)
+        if prompt_counts:
+            new_data = new_prompt_data
+            _merge_counts(total_counts, prompt_counts)
+
+        if "prompt" in new_data:
+            new_prompt, completion_prompt_counts = self._process_completion_prompt(
+                new_data["prompt"]
+            )
+            if completion_prompt_counts:
+                new_data = {**new_data, "prompt": new_prompt}
+                _merge_counts(total_counts, completion_prompt_counts)
+
+        new_schema_data, schema_counts = self._scan_schema_fields(new_data)
+        if schema_counts:
+            new_data = new_schema_data
+            _merge_counts(total_counts, schema_counts)
+
+        if not total_counts:
+            return data, {}
+        return new_data, total_counts
+
+    def _scan_text_field(
+        self, container: Any, field_name: str, *, redact: bool
+    ) -> dict[str, int]:
+        text = _get_field(container, field_name)
+        if not isinstance(text, str):
+            return {}
+        new_text, counts = self._redact(text)
+        if counts and redact:
+            _set_field(container, field_name, new_text)
+        return counts
+
+    def _scan_response_content(self, container: Any, *, redact: bool) -> dict[str, int]:
+        content = _get_field(container, "content")
+        if content is None:
+            return {}
+        new_content, counts = self._process_content(content)
+        if counts and redact:
+            _set_field(container, "content", new_content)
+        if isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict) and part.get("type") == "tool_use":
+                    input_counts = self._scan_argument_container(part, redact=redact)
+                    _merge_counts(counts, input_counts)
+        return counts
+
+    def _scan_response_tool_calls(
+        self, message: Any, *, redact: bool
+    ) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        function_call = _get_field(message, "function_call")
+        if function_call is not None:
+            _merge_counts(
+                counts, self._scan_argument_container(function_call, redact=redact)
+            )
+
+        tool_calls = _get_field(message, "tool_calls")
+        if isinstance(tool_calls, list):
+            for tool_call in tool_calls:
+                function = _get_field(tool_call, "function")
+                if function is not None:
+                    _merge_counts(
+                        counts, self._scan_argument_container(function, redact=redact)
+                    )
+        return counts
+
+    def _scan_response_message(self, message: Any, *, redact: bool) -> dict[str, int]:
+        counts = self._scan_response_content(message, redact=redact)
+        _merge_counts(counts, self._scan_response_tool_calls(message, redact=redact))
+        return counts
+
+    def _scan_responses_api_output(
+        self, response: Any, *, redact: bool
+    ) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        output = _get_field(response, "output")
+        if not isinstance(output, list):
+            return counts
+        for item in output:
+            item_type = _get_field(item, "type")
+            if item_type == "message":
+                _merge_counts(counts, self._scan_response_content(item, redact=redact))
+            elif item_type in {"function_call", "custom_tool_call"}:
+                _merge_counts(
+                    counts, self._scan_argument_container(item, redact=redact)
+                )
+        return counts
+
+    @staticmethod
+    def _stream_group_key(prefix: str, *parts: Any) -> tuple[Any, ...]:
+        return (prefix, *parts)
+
+    @staticmethod
+    def _field_setter(container: Any, field_name: str) -> Callable[[str], None]:
+        def set_value(new_text: str) -> None:
+            _set_field(container, field_name, new_text)
+
+        return set_value
+
+    def _sse_chunk_setter(
+        self, chunks: list[Any], chunk_index: int
+    ) -> Callable[[str], None]:
+        def set_value(new_text: str) -> None:
+            chunks[chunk_index] = self._replace_sse_text_delta(
+                chunks[chunk_index], new_text
+            )
+
+        return set_value
+
+    @staticmethod
+    def _decode_sse_text_delta(chunk: bytes | bytearray) -> tuple[Any, str] | None:
+        raw = bytes(chunk).decode("utf-8", errors="replace")
+        for line in raw.splitlines():
+            stripped = line.strip()
+            if not stripped.startswith("data: "):
+                continue
+            try:
+                data = json.loads(stripped[6:])
+            except (json.JSONDecodeError, ValueError):
+                continue
+            if not isinstance(data, dict) or data.get("type") != "content_block_delta":
+                continue
+            delta = data.get("delta")
+            if (
+                isinstance(delta, dict)
+                and delta.get("type") == "text_delta"
+                and isinstance(delta.get("text"), str)
+            ):
+                return data.get("index"), delta["text"]
+        return None
+
+    @staticmethod
+    def _replace_sse_text_delta(chunk: bytes | bytearray, new_text: str) -> bytes:
+        raw = bytes(chunk).decode("utf-8", errors="replace")
+        lines = raw.splitlines(keepends=True)
+        for index, line in enumerate(lines):
+            line_ending = ""
+            line_body = line
+            if line.endswith("\r\n"):
+                line_ending = "\r\n"
+                line_body = line[:-2]
+            elif line.endswith("\n"):
+                line_ending = "\n"
+                line_body = line[:-1]
+
+            leading = line_body[: len(line_body) - len(line_body.lstrip())]
+            stripped = line_body.lstrip()
+            if not stripped.startswith("data: "):
+                continue
+            try:
+                data = json.loads(stripped[6:])
+            except (json.JSONDecodeError, ValueError):
+                continue
+            if not isinstance(data, dict) or data.get("type") != "content_block_delta":
+                continue
+            delta = data.get("delta")
+            if not isinstance(delta, dict) or delta.get("type") != "text_delta":
+                continue
+            delta["text"] = new_text
+            lines[index] = (
+                f"{leading}data: {json.dumps(data, separators=(',', ':'))}{line_ending}"
+            )
+            break
+        return "".join(lines).encode("utf-8")
+
+    def _append_chat_stream_text_refs(
+        self,
+        chunk: Any,
+        refs: list[tuple[tuple[Any, ...], str, Callable[[str], None]]],
+    ) -> None:
+        choices = _get_field(chunk, "choices")
+        if not isinstance(choices, list):
+            return
+
+        for choice_index, choice in enumerate(choices):
+            choice_text = _get_field(choice, "text")
+            if isinstance(choice_text, str) and choice_text:
+                key = self._stream_group_key(
+                    "completion", _get_field(choice, "index") or choice_index
+                )
+                refs.append(
+                    (
+                        key,
+                        choice_text,
+                        self._field_setter(choice, "text"),
+                    )
+                )
+
+            delta = _get_field(choice, "delta")
+            if delta is None:
+                continue
+            content = _get_field(delta, "content")
+            if not isinstance(content, str) or not content:
+                continue
+            key = self._stream_group_key(
+                "chat", _get_field(choice, "index") or choice_index
+            )
+            refs.append(
+                (
+                    key,
+                    content,
+                    self._field_setter(delta, "content"),
+                )
+            )
+
+    def _append_responses_stream_text_ref(
+        self,
+        chunk: Any,
+        refs: list[tuple[tuple[Any, ...], str, Callable[[str], None]]],
+    ) -> None:
+        if _get_field(chunk, "type") != "response.output_text.delta":
+            return
+        delta = _get_field(chunk, "delta")
+        if not isinstance(delta, str) or not delta:
+            return
+        key = self._stream_group_key(
+            "responses",
+            _get_field(chunk, "item_id"),
+            _get_field(chunk, "output_index"),
+            _get_field(chunk, "content_index"),
+        )
+        refs.append(
+            (
+                key,
+                delta,
+                self._field_setter(chunk, "delta"),
+            )
+        )
+
+    def _append_anthropic_stream_text_ref(
+        self,
+        chunk: Any,
+        refs: list[tuple[tuple[Any, ...], str, Callable[[str], None]]],
+    ) -> None:
+        if _get_field(chunk, "type") != "content_block_delta":
+            return
+        delta = _get_field(chunk, "delta")
+        if _get_field(delta, "type") != "text_delta":
+            return
+        text = _get_field(delta, "text")
+        if not isinstance(text, str) or not text:
+            return
+        key = self._stream_group_key("anthropic", _get_field(chunk, "index"))
+        refs.append(
+            (
+                key,
+                text,
+                self._field_setter(delta, "text"),
+            )
+        )
+
+    def _collect_stream_text_refs(
+        self, chunks: list[Any]
+    ) -> list[tuple[tuple[Any, ...], str, Callable[[str], None]]]:
+        refs: list[tuple[tuple[Any, ...], str, Callable[[str], None]]] = []
+        for chunk_index, chunk in enumerate(chunks):
+            if isinstance(chunk, (bytes, bytearray)):
+                sse_delta = self._decode_sse_text_delta(chunk)
+                if sse_delta:
+                    content_index, text = sse_delta
+                    key = self._stream_group_key("anthropic_sse", content_index)
+                    refs.append(
+                        (
+                            key,
+                            text,
+                            self._sse_chunk_setter(chunks, chunk_index),
+                        )
+                    )
+                continue
+
+            self._append_chat_stream_text_refs(chunk, refs)
+            self._append_responses_stream_text_ref(chunk, refs)
+            self._append_anthropic_stream_text_ref(chunk, refs)
+
+        return refs
+
+    def _scan_stream_text_refs(
+        self,
+        refs: list[tuple[tuple[Any, ...], str, Callable[[str], None]]],
+        *,
+        redact: bool,
+    ) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        refs_by_group: dict[
+            tuple[Any, ...], list[tuple[str, Callable[[str], None]]]
+        ] = {}
+        for key, text, setter in refs:
+            refs_by_group.setdefault(key, []).append((text, setter))
+
+        for grouped_refs in refs_by_group.values():
+            stream_text = "".join(text for text, _ in grouped_refs)
+            redacted_text, group_counts = self._redact(stream_text)
+            if not group_counts:
+                continue
+            _merge_counts(counts, group_counts)
+            if not redact:
+                continue
+            first_ref = True
+            for _, setter in grouped_refs:
+                setter(redacted_text if first_ref else "")
+                first_ref = False
+
+        return counts
+
+    def _scan_streaming_chunks(
+        self, chunks: list[Any], *, redact: bool
+    ) -> dict[str, int]:
+        refs = self._collect_stream_text_refs(chunks)
+        if not refs:
+            return {}
+        return self._scan_stream_text_refs(refs, redact=redact)
+
+    def _raise_block(self, total_counts: dict[str, int]) -> None:
+        """Reject with HTTP 400 so the block is classified as a guardrail
+        intervention by ``_is_guardrail_intervention`` rather than a
+        backend failure, and reaches the client as 400 instead of 500."""
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": (
+                    f"Violated DataFog PII guardrail policy: request contains {_summary(total_counts)}."
+                )
+            },
+        )
+
+    def _record_guardrail_logging(
+        self, data: dict, total_counts: dict[str, int]
+    ) -> None:
+        """Record the decision into standard guardrail logging."""
         try:
-            for message in messages:
-                if isinstance(message, dict) and "content" in message:
-                    new_content, counts = self._process_content(message["content"])
-                    new_messages.append({**message, "content": new_content})
-                    for etype, n in counts.items():
-                        total_counts[etype] = total_counts.get(etype, 0) + n
-                else:
-                    new_messages.append(message)
-        except Exception as exc:  # noqa: BLE001 — fail policy decides
+            self.add_standard_logging_guardrail_information_to_request_data(
+                guardrail_json_response=_summary(total_counts),
+                request_data=data,
+                guardrail_status="guardrail_intervened",
+                masked_entity_count=dict(total_counts),
+            )
+        except (
+            Exception
+        ):  # noqa: BLE001  # logging failures must not break guardrail enforcement
+            logger.debug("DataFog guardrail: could not record logging information")
+
+    async def async_pre_call_hook(
+        self,
+        user_api_key_dict: "UserAPIKeyAuth",
+        cache: Any,
+        data: dict,
+        call_type: str,
+    ) -> Exception | str | dict | None:
+        if (
+            self.should_run_guardrail(
+                data=data, event_type=GuardrailEventHooks.pre_call
+            )
+            is not True
+        ):
+            return data
+        try:
+            new_data, total_counts = self._scan_request_data(data)
+        except (
+            Exception
+        ) as exc:  # noqa: BLE001  # engine failures are handled by the configured fail policy
             self._handle_engine_error(exc)
             return data
 
@@ -182,75 +819,135 @@ class DataFogGuardrail(CustomGuardrail):
 
         if self.action == "block":
             self._record_guardrail_logging(data, total_counts)
-            # HTTPException(400) is one of the exception types litellm's
-            # _is_guardrail_intervention recognizes, so the block is
-            # classified as a policy intervention (not a backend failure)
-            # and reaches the client as a 400, not a 500.
-            # Counts only — never the matched values.
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": (
-                        f"DataFog PII guardrail: request blocked, messages "
-                        f"contain {_summary(total_counts)}."
-                    )
-                },
-            )
-
-        new_data = {**data, "messages": new_messages}
+            self._raise_block(total_counts)
         self._record_guardrail_logging(new_data, total_counts)
         return new_data
 
-    def _record_guardrail_logging(
-        self, data: dict, total_counts: dict[str, int]
-    ) -> None:
-        """Record the decision into litellm's standard guardrail logging."""
-        try:
-            self.add_standard_logging_guardrail_information_to_request_data(
-                guardrail_json_response=_summary(total_counts),
-                request_data=data,
-                guardrail_status="guardrail_intervened",
-                masked_entity_count=dict(total_counts),
+    async def async_moderation_hook(
+        self,
+        data: dict,
+        user_api_key_dict: "UserAPIKeyAuth",
+        call_type: str,
+    ) -> Any:
+        """Block on PII during the parallel call window.
+
+        Content cannot be rewritten mid-flight, so redact mode is a no-op
+        here; only block has an effect.
+        """
+        if self.action != "block":
+            return data
+        if (
+            self.should_run_guardrail(
+                data=data, event_type=GuardrailEventHooks.during_call
             )
-        except Exception:  # noqa: BLE001 — observability must never break traffic
-            logger.debug("could not record guardrail logging information")
+            is not True
+        ):
+            return data
+        try:
+            _, total_counts = self._scan_request_data(data)
+        except (
+            Exception
+        ) as exc:  # noqa: BLE001  # engine failures are handled by the configured fail policy
+            self._handle_engine_error(exc)
+            return data
+
+        if total_counts:
+            self._record_guardrail_logging(data, total_counts)
+            self._raise_block(total_counts)
+        return data
 
     async def async_post_call_success_hook(
         self,
         data: dict,
-        user_api_key_dict: Any,
+        user_api_key_dict: "UserAPIKeyAuth",
         response: Any,
     ) -> Any:
-        """Redact PII from model responses.
+        """Redact PII from model responses, or block when action is block.
 
-        Mutates ``response`` in place — deliberate: litellm post_call
-        guardrails share the response object rather than cloning it, and
-        an unredacted clone escaping through another callback would defeat
-        the purpose.
+        Redaction mutates ``response`` in place, deliberately: post_call
+        guardrails share the response object, and an unredacted copy
+        escaping through another callback would defeat the purpose.
         """
-        choices = getattr(response, "choices", None)
-        if not choices:
+        if (
+            self.should_run_guardrail(
+                data=data, event_type=GuardrailEventHooks.post_call
+            )
+            is not True
+        ):
             return response
+        response_counts: dict[str, int] = {}
         try:
-            skipped_parts = 0
-            for choice in choices:
-                message = getattr(choice, "message", None)
-                if message is not None and isinstance(message.content, str):
-                    redacted, counts = _redact_text(
-                        message.content,
-                        self.entity_types,
-                        self.allowlist,
-                        self.allowlist_patterns,
+            redact = self.action != "block"
+            choices = getattr(response, "choices", None)
+            if choices:
+                for choice in choices:
+                    message = getattr(choice, "message", None)
+                    if message is not None:
+                        _merge_counts(
+                            response_counts,
+                            self._scan_response_message(message, redact=redact),
+                        )
+                    _merge_counts(
+                        response_counts,
+                        self._scan_text_field(choice, "text", redact=redact),
                     )
-                    if counts:
-                        message.content = redacted
-                elif message is not None and message.content is not None:
-                    skipped_parts += 1
-            if skipped_parts:
-                logger.debug(
-                    "DataFog guardrail: %d non-text response parts not scanned",
-                    skipped_parts,
+            _merge_counts(
+                response_counts,
+                self._scan_responses_api_output(response, redact=redact),
+            )
+            if isinstance(response, dict):
+                _merge_counts(
+                    response_counts,
+                    self._scan_response_content(response, redact=redact),
                 )
-        except Exception as exc:  # noqa: BLE001 — fail policy decides
+        except (
+            Exception
+        ) as exc:  # noqa: BLE001  # engine failures are handled by the configured fail policy
             self._handle_engine_error(exc)
+            return response
+        if response_counts:
+            self._record_guardrail_logging(data, response_counts)
+            if self.action == "block":
+                self._raise_block(response_counts)
         return response
+
+    async def async_post_call_streaming_iterator_hook(
+        self,
+        user_api_key_dict: "UserAPIKeyAuth",
+        response: Any,
+        request_data: dict,
+    ) -> AsyncGenerator[Any, None]:
+        if (
+            self.should_run_guardrail(
+                data=request_data, event_type=GuardrailEventHooks.post_call
+            )
+            is not True
+        ):
+            async for chunk in response:
+                yield chunk
+            return
+
+        chunks = []
+        async for chunk in response:
+            chunks.append(chunk)
+
+        stream_counts: dict[str, int] = {}
+        try:
+            stream_counts = self._scan_streaming_chunks(
+                chunks, redact=self.action != "block"
+            )
+        except (
+            Exception
+        ) as exc:  # noqa: BLE001  # engine failures are handled by the configured fail policy
+            self._handle_engine_error(exc)
+            for chunk in chunks:
+                yield chunk
+            return
+
+        if stream_counts:
+            self._record_guardrail_logging(request_data, stream_counts)
+            if self.action == "block":
+                self._raise_block(stream_counts)
+
+        for chunk in chunks:
+            yield chunk

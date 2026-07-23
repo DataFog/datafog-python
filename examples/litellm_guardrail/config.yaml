@@ -15,3 +15,6 @@ guardrails:
       action: "redact" # "redact" replaces PII with [TYPE_N] tokens; "block" rejects
       fail_policy: "open" # "closed" rejects traffic if the scan engine errors
       # entity_types: ["EMAIL", "PHONE", "CREDIT_CARD", "SSN"]  # defaults shown
+      # allowlist: ["support@example.com"]
+      # allowlist_patterns: ["^555-0100$"]  # trusted operator config only
+      # locales: ["de"]

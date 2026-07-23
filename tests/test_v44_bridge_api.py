@@ -47,6 +47,16 @@ def test_top_level_redact_supports_preview_presets() -> None:
     assert "[EMAIL_1]" in result.redacted_text
 
 
+def test_top_level_redact_many_uses_batch_stable_tokens() -> None:
+    result = datafog.redact_many(
+        ["Email alpha@example.com", "Email beta@example.com"],
+        engine="regex",
+    )
+
+    assert result.redacted_texts == ["Email [EMAIL_1]", "Email [EMAIL_2]"]
+    assert result.entity_counts == {"EMAIL": 2}
+
+
 def test_top_level_protect_returns_guardrail() -> None:
     guardrail = datafog.protect(on_detect="redact")
 
