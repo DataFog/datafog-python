@@ -59,6 +59,7 @@ jobs:
         run: |
           pip install -e ".[test,cli,nlp,nlp-advanced]" -r requirements-test.txt
           pip install "litellm>=1.90,<2" fastapi  # exercises the LiteLLM guardrail adapter tests (proxy deployments always have fastapi)
+          pip install "sentry-sdk>=2.35,<3"  # exercises the Sentry integration adapter tests (2.35+ for before_send_log)
           python -m spacy download en_core_web_lg
           datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
 

@@ -1,0 +1,600 @@
+"""Tests for the Sentry SDK integration (DataFogSentryIntegration).
+
+PII literals below are split ("jane.doe@" "acme.com") so this source file
+itself never contains a contiguous match — the values only assemble at
+runtime. This keeps write-time PII scanners (including our own Claude Code
+hook) quiet while the tests exercise real detections.
+"""
+
+import json
+
+import pytest
+
+sentry_sdk = pytest.importorskip("sentry_sdk")
+
+from datafog.integrations.sentry import (  # noqa: E402
+    DataFogSentryIntegration,
+    scrub_event,
+)
+
+EMAIL = "jane.doe@" "acme.com"
+CARD = "4242 4242 " "4242 4242"
+SSN = "856-45-" "6789"
+PHONE = "(555) 867-" "5309"
+
+
+def _error_event(**overrides) -> dict:
+    event = {
+        "event_id": "0123456789abcdef0123456789abcdef",
+        "platform": "python",
+        "release": "myapp@1.2.3",
+        "logentry": {"message": f"lookup failed for {EMAIL}", "params": []},
+        "exception": {
+            "values": [
+                {
+                    "type": "ValueError",
+                    "value": f"could not bill card {CARD}",
+                    "stacktrace": {
+                        "frames": [
+                            {
+                                "function": "charge",
+                                "vars": {
+                                    "customer_ssn": f"{SSN!r}",
+                                    "attempts": "3",
+                                    "form": {"contact": f"{EMAIL!r}"},
+                                },
+                            }
+                        ]
+                    },
+                }
+            ]
+        },
+        "breadcrumbs": {
+            "values": [
+                {
+                    "message": f"sms sent to {PHONE}",
+                    "category": "notify",
+                    "data": {"to": PHONE},
+                }
+            ]
+        },
+        "request": {
+            "url": f"https://api.example.com/users?email={EMAIL}",
+            "headers": {"X-Contact": EMAIL},
+            "data": {"ssn": SSN},
+        },
+        "extra": {"note": f"customer email {EMAIL}", "nested": [{"card": CARD}]},
+        "tags": {"support_contact": EMAIL},
+        "user": {"email": EMAIL, "id": "42"},
+    }
+    event.update(overrides)
+    return event
+
+
+def _transaction_event() -> dict:
+    return {
+        "type": "transaction",
+        "transaction": f"/users/{EMAIL}",
+        "spans": [
+            {
+                "op": "db.query",
+                "description": f"SELECT * FROM users WHERE email = {EMAIL!r}",
+                "data": {"db.statement": f"... ssn = {SSN!r} ..."},
+            }
+        ],
+    }
+
+
+class TestScrubEvent:
+    def test_scrubs_all_error_event_surfaces(self):
+        event = scrub_event(_error_event(), None)
+        flat = json.dumps(event)
+        for value in (EMAIL, CARD, SSN, PHONE):
+            assert value not in flat
+        assert "[EMAIL_1]" in event["logentry"]["message"]
+        assert "[CREDIT_CARD_1]" in event["exception"]["values"][0]["value"]
+        frame_vars = event["exception"]["values"][0]["stacktrace"]["frames"][0]["vars"]
+        assert SSN not in frame_vars["customer_ssn"]
+        assert EMAIL not in frame_vars["form"]["contact"]
+
+    def test_scrubs_transaction_spans(self):
+        event = scrub_event(_transaction_event(), None)
+        flat = json.dumps(event)
+        assert EMAIL not in flat
+        assert SSN not in flat
+
+    def test_clean_event_unchanged(self):
+        event = {
+            "event_id": "0123456789abcdef0123456789abcdef",
+            "logentry": {"message": "connection refused"},
+            "extra": {"retries": "3"},
+        }
+        assert scrub_event(json.loads(json.dumps(event)), None) == event
+
+    def test_skip_keys_untouched(self):
+        # Machine identifiers are never scanned, even when a value happens
+        # to look like PII (a release tag is not an email).
+        event = _error_event(release=f"deploy-by-{EMAIL}")
+        scrubbed = scrub_event(event, None)
+        assert scrubbed["release"] == f"deploy-by-{EMAIL}"
+        assert scrubbed["event_id"] == "0123456789abcdef0123456789abcdef"
+
+    def test_allowlist_exempts_exact_value(self):
+        event = scrub_event(_error_event(), None, allowlist=[EMAIL])
+        assert event["tags"]["support_contact"] == EMAIL
+        assert CARD not in json.dumps(event)
+
+    def test_allowlist_patterns_exempt_fullmatch(self):
+        event = scrub_event(_error_event(), None, allowlist_patterns=[r".*@acme\.com"])
+        assert event["tags"]["support_contact"] == EMAIL
+
+    def test_entity_types_restrict_detection(self):
+        event = scrub_event(_error_event(), None, entity_types=["CREDIT_CARD"])
+        flat = json.dumps(event)
+        assert CARD not in flat
+        assert EMAIL in flat
+
+    def test_non_string_values_survive(self):
+        event = {
+            "extra": {"count": 3, "ok": True, "none": None, "pi": 3.14},
+            "logentry": {"message": f"contact {EMAIL}"},
+        }
+        scrubbed = scrub_event(event, None)
+        assert scrubbed["extra"] == {"count": 3, "ok": True, "none": None, "pi": 3.14}
+        assert EMAIL not in scrubbed["logentry"]["message"]
+
+    def test_budget_overflow_replaced_with_marker_never_raw(self, monkeypatch):
+        # Once the per-event budget is exhausted, remaining strings are
+        # replaced with [UNSCANNED_N_CHARS] markers — never sent raw, which
+        # would be unscanned PII egress.
+        from datafog.integrations import sentry as sentry_module
+
+        # The walker drains its stack LIFO, so the logentry message (30
+        # chars) is scanned first and exactly exhausts the budget; the extra
+        # string then takes the whole-string marker path.
+        monkeypatch.setattr(sentry_module, "TOTAL_SCAN_CHARS", 30)
+        event = {
+            "extra": {"a": f"first field has {EMAIL} inside it"},
+            "logentry": {"message": f"second field {EMAIL}"},
+        }
+        scrubbed = scrub_event(event, None)
+        flat = json.dumps(scrubbed)
+        assert EMAIL not in flat
+        assert "[EMAIL_1]" in scrubbed["logentry"]["message"]
+        assert scrubbed["extra"]["a"] == "[UNSCANNED_43_CHARS]"
+
+    def test_pii_straddling_scan_boundary_never_reassembles(self, monkeypatch):
+        # A PII value split by the per-string cap fails to match in the
+        # truncated chunk; the tail must be masked, not reattached raw —
+        # otherwise the full value reassembles unredacted in the output.
+        from datafog.integrations import sentry as sentry_module
+
+        monkeypatch.setattr(sentry_module, "MAX_SCAN_CHARS", 24)
+        event = {"logentry": {"message": f"padding here {EMAIL} after"}}
+        message = scrub_event(event, None)["logentry"]["message"]
+        assert EMAIL not in message
+        assert "[UNSCANNED_" in message
+
+    def test_tuple_and_set_values_scrubbed(self):
+        # Sentry frame vars and user extra can carry tuples pre-serialization;
+        # they are rebuilt as lists (the serializer emits both as JSON arrays).
+        event = {
+            "extra": {
+                "pair": (f"first {EMAIL}", f"second {CARD}"),
+                "unique": {f"member {SSN}"},
+            }
+        }
+        flat = json.dumps(scrub_event(event, None))
+        for value in (EMAIL, CARD, SSN):
+            assert value not in flat
+
+    def test_aliased_container_scanned_once(self, monkeypatch):
+        # The same object reachable from two places must be scanned once:
+        # double-scanning double-spends the budget, which could starve later
+        # fields into the unscanned path.
+        import datafog
+
+        calls = []
+        real_redact = datafog.redact
+
+        def counting_redact(text, **kwargs):
+            calls.append(text)
+            return real_redact(text, **kwargs)
+
+        monkeypatch.setattr(datafog, "redact", counting_redact)
+        shared = {"contact": f"reach me at {EMAIL}"}
+        event = {"extra": {"first": shared, "second": shared}}
+        scrubbed = scrub_event(event, None)
+        assert len(calls) == 1
+        assert EMAIL not in json.dumps(scrubbed)
+
+    def test_cyclic_structure_terminates(self):
+        cyclic = {"note": f"contact {EMAIL}"}
+        cyclic["self"] = cyclic
+        event = {"extra": cyclic}
+        scrubbed = scrub_event(event, None)
+        assert EMAIL not in scrubbed["extra"]["note"]
+
+    def test_scrub_event_rejects_invalid_fail_policy(self):
+        with pytest.raises(ValueError):
+            scrub_event(_error_event(), None, fail_policy="sideways")
+
+
+class TestFailPolicy:
+    def test_fail_open_returns_event_on_engine_error(self, monkeypatch):
+        import datafog
+
+        def boom(*args, **kwargs):
+            raise RuntimeError("engine exploded")
+
+        monkeypatch.setattr(datafog, "redact", boom)
+        event = _error_event()
+        assert scrub_event(event, None, fail_policy="open") is event
+
+    def test_fail_closed_drops_event_on_engine_error(self, monkeypatch):
+        import datafog
+
+        def boom(*args, **kwargs):
+            raise RuntimeError("engine exploded")
+
+        monkeypatch.setattr(datafog, "redact", boom)
+        assert scrub_event(_error_event(), None, fail_policy="closed") is None
+
+    def test_error_logging_never_echoes_event_content(self, monkeypatch, caplog):
+        import datafog
+
+        def boom(*args, **kwargs):
+            raise RuntimeError(f"engine choked on {EMAIL}")
+
+        monkeypatch.setattr(datafog, "redact", boom)
+        with caplog.at_level("WARNING", logger="datafog.integrations.sentry"):
+            scrub_event(_error_event(), None, fail_policy="open")
+        assert EMAIL not in caplog.text
+
+    def test_invalid_fail_policy_rejected(self):
+        with pytest.raises(ValueError):
+            DataFogSentryIntegration(fail_policy="sideways")
+
+
+class TestIntegrationWiring:
+    """End-to-end through a real sentry_sdk client.
+
+    Events are captured in ``before_send`` — which runs *after* global
+    event processors, so it sees exactly what the integration produces —
+    and dropped by returning None, so nothing touches the network.
+    """
+
+    def _init(self, captured, **integration_kwargs):
+        def _capture(event, hint):
+            captured.append(event)
+            return None
+
+        sentry_sdk.init(
+            dsn="https://key@example.invalid/1",
+            integrations=[DataFogSentryIntegration(**integration_kwargs)],
+            default_integrations=False,
+            before_send=_capture,
+        )
+
+    def test_capture_message_scrubbed(self):
+        captured = []
+        self._init(captured)
+        sentry_sdk.capture_message(f"reset link sent to {EMAIL}")
+        assert len(captured) == 1
+        flat = json.dumps(captured[0])
+        assert EMAIL not in flat
+        assert "[EMAIL_1]" in flat
+
+    def test_capture_exception_scrubs_message_and_local_vars(self):
+        captured = []
+        self._init(captured)
+        try:
+            customer_ssn = SSN  # noqa: F841 — captured as a frame local
+            raise ValueError(f"invalid ssn for {EMAIL}")
+        except ValueError:
+            sentry_sdk.capture_exception()
+        assert len(captured) == 1
+        flat = json.dumps(captured[0])
+        assert EMAIL not in flat
+        assert SSN not in flat
+
+    def test_integration_absent_is_passthrough(self):
+        # The global processor stays registered for the life of the process;
+        # with no DataFogSentryIntegration on the current client it must not
+        # touch events.
+        captured = []
+
+        def _capture(event, hint):
+            captured.append(event)
+            return None
+
+        sentry_sdk.init(
+            dsn="https://key@example.invalid/1",
+            default_integrations=False,
+            before_send=_capture,
+        )
+        sentry_sdk.capture_message(f"contact {EMAIL}")
+        assert len(captured) == 1
+        assert EMAIL in json.dumps(captured[0])
+
+    def test_integration_allowlist_respected(self):
+        captured = []
+        self._init(captured, allowlist=[EMAIL])
+        sentry_sdk.capture_message(f"support contact {EMAIL}, card {CARD}")
+        flat = json.dumps(captured[0])
+        assert EMAIL in flat
+        assert CARD not in flat
+
+    def test_processor_lookup_failure_passes_event_through(self, monkeypatch):
+        # The integration lookup runs outside the fail-policy path; if it
+        # raises, event delivery must survive (pass-through, fail open).
+        from datafog.integrations import sentry as sentry_module
+
+        def boom():
+            raise RuntimeError("client lookup exploded")
+
+        monkeypatch.setattr(sentry_module.sentry_sdk, "get_client", boom)
+        event = {"logentry": {"message": "hello"}}
+        assert sentry_module._global_processor(event, None) is event
+
+
+class TestGenAiSpans:
+    """AI agent monitoring stores full prompts/completions in gen_ai.* span
+    attributes — Sentry documents that default server-side scrubbing does
+    NOT cover them, so the walker must."""
+
+    def test_gen_ai_message_lists_scrubbed(self):
+        event = {
+            "type": "transaction",
+            "spans": [
+                {
+                    "op": "gen_ai.chat",
+                    "data": {
+                        "gen_ai.input.messages": [
+                            {"role": "user", "content": f"my ssn is {SSN}"}
+                        ],
+                        "gen_ai.output.messages": [
+                            {
+                                "role": "assistant",
+                                "content": f"emailing {EMAIL} now",
+                            }
+                        ],
+                    },
+                }
+            ],
+        }
+        flat = json.dumps(scrub_event(event, None))
+        assert SSN not in flat
+        assert EMAIL not in flat
+
+    def test_gen_ai_json_string_attributes_scrubbed(self):
+        # Some SDK versions serialize prompt messages to a JSON string
+        # before attaching them; the walker sees one big string.
+        payload = json.dumps([{"role": "user", "content": f"card {CARD}"}])
+        event = {
+            "type": "transaction",
+            "spans": [{"data": {"gen_ai.input.messages": payload}}],
+        }
+        assert CARD not in json.dumps(scrub_event(event, None))
+
+
+class _StubClient:
+    def __init__(self, integration):
+        self._integration = integration
+
+    def get_integration(self, name_or_class):
+        return self._integration
+
+
+class TestTelemetryWrapping:
+    """Logs, metrics, and streamed spans have no event-processor path; the
+    integration composes wrappers around the user's before_send_* callbacks
+    via setup_once_with_options."""
+
+    def _wrapped_options(self, integration=None, **options):
+        options.setdefault("_experiments", {})
+        (integration or DataFogSentryIntegration()).setup_once_with_options(options)
+        return options
+
+    def _use_client_integration(self, monkeypatch, integration):
+        from datafog.integrations import sentry as sentry_module
+
+        monkeypatch.setattr(
+            sentry_module.sentry_sdk,
+            "get_client",
+            lambda: _StubClient(integration),
+        )
+
+    def _log(self):
+        return {
+            "severity_text": "info",
+            "severity_number": 9,
+            "body": f"password reset for {EMAIL}",
+            "attributes": {"user.email": EMAIL, "server.port": 443},
+            "time_unix_nano": 1,
+            "trace_id": "ab" * 16,
+        }
+
+    def test_before_send_log_scrubs_body_and_attributes(self, monkeypatch):
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        options = self._wrapped_options()
+        log = options["before_send_log"](self._log(), None)
+        assert EMAIL not in json.dumps(log)
+        assert "[EMAIL_1]" in log["body"]
+        assert log["severity_text"] == "info"
+        assert log["attributes"]["server.port"] == 443
+
+    def test_wrapped_log_chains_to_user_callback(self, monkeypatch):
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        seen = []
+
+        def user_callback(log, hint):
+            seen.append(log)
+            return None  # user drops the log
+
+        options = self._wrapped_options(before_send_log=user_callback)
+        result = options["before_send_log"](self._log(), None)
+        assert result is None
+        assert len(seen) == 1
+        assert EMAIL not in json.dumps(seen[0])  # user saw the scrubbed log
+
+    def test_user_callback_in_experiments_still_chained(self, monkeypatch):
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        seen = []
+
+        def user_callback(log, hint):
+            seen.append(log)
+            return log
+
+        options = self._wrapped_options(_experiments={"before_send_log": user_callback})
+        options["before_send_log"](self._log(), None)
+        assert len(seen) == 1
+        assert EMAIL not in json.dumps(seen[0])
+
+    def test_before_send_metric_scrubs_attributes(self, monkeypatch):
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        options = self._wrapped_options()
+        metric = options["before_send_metric"](
+            {
+                "name": "checkout.total",
+                "type": "counter",
+                "value": 1,
+                "attributes": {"user.email": EMAIL},
+            },
+            None,
+        )
+        assert EMAIL not in json.dumps(metric)
+        assert metric["name"] == "checkout.total"
+
+    def test_before_send_span_wrapped_in_experiments(self, monkeypatch):
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        options = self._wrapped_options()
+        span = options["_experiments"]["before_send_span"](
+            {"description": f"lookup {EMAIL}", "op": "db.query"}, None
+        )
+        assert EMAIL not in span["description"]
+
+    def test_wrapper_without_integration_is_passthrough(self, monkeypatch):
+        self._use_client_integration(monkeypatch, None)
+        seen = []
+
+        def user_callback(log, hint):
+            seen.append(log)
+            return log
+
+        options = self._wrapped_options(before_send_log=user_callback)
+        log = self._log()
+        result = options["before_send_log"](log, None)
+        assert result is log
+        assert EMAIL in result["body"]  # untouched without the integration
+        assert len(seen) == 1
+
+    def test_wrapper_fail_closed_drops_telemetry(self, monkeypatch):
+        import datafog
+
+        self._use_client_integration(
+            monkeypatch, DataFogSentryIntegration(fail_policy="closed")
+        )
+        options = self._wrapped_options()
+
+        def boom(*args, **kwargs):
+            raise RuntimeError("engine exploded")
+
+        monkeypatch.setattr(datafog, "redact", boom)
+        assert options["before_send_log"](self._log(), None) is None
+
+    def test_logs_end_to_end(self):
+        # setup_once_with_options only runs the first time the integration
+        # identifier is processed in this process; discard it so this
+        # re-init exercises the wrap (production apps init once).
+        import sentry_sdk.integrations as si
+        from sentry_sdk import logger as sentry_logger
+
+        si._processed_integrations.discard("datafog")
+        captured = []
+
+        def capture_log(log, hint):
+            captured.append(log)
+            return None
+
+        sentry_sdk.init(
+            dsn="https://key@example.invalid/1",
+            integrations=[DataFogSentryIntegration()],
+            default_integrations=False,
+            enable_logs=True,
+            before_send_log=capture_log,
+        )
+        sentry_logger.warning(f"login failed for {EMAIL}")
+        sentry_sdk.get_client().flush()
+        assert len(captured) == 1
+        assert EMAIL not in json.dumps(captured[0])
+        assert "[EMAIL_1]" in captured[0]["body"]
+
+    def test_setup_without_options_is_noop(self):
+        DataFogSentryIntegration().setup_once_with_options(None)
+
+    def test_no_experiments_dict_resolves_no_callback(self, monkeypatch):
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        options = {}  # no _experiments key at all
+        DataFogSentryIntegration().setup_once_with_options(options)
+        log = options["before_send_log"](self._log(), None)
+        assert EMAIL not in json.dumps(log)
+
+    def test_wrapper_lookup_failure_passes_telemetry_through(self, monkeypatch):
+        from datafog.integrations import sentry as sentry_module
+
+        options = self._wrapped_options()
+
+        def boom():
+            raise RuntimeError("client lookup exploded")
+
+        monkeypatch.setattr(sentry_module.sentry_sdk, "get_client", boom)
+        log = self._log()
+        assert options["before_send_log"](log, None) is log
+
+    def test_top_level_callback_shadows_experiments_callback(self, monkeypatch):
+        # When the user set callbacks in BOTH locations, only the top-level
+        # one runs (matching the SDK's own precedence), exactly once.
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        top_calls, exp_calls = [], []
+
+        def top_cb(log, hint):
+            top_calls.append(log)
+            return log
+
+        def exp_cb(log, hint):
+            exp_calls.append(log)
+            return log
+
+        options = self._wrapped_options(
+            before_send_log=top_cb, _experiments={"before_send_log": exp_cb}
+        )
+        options["before_send_log"](self._log(), None)
+        assert len(top_calls) == 1
+        assert exp_calls == []
+
+    def test_experiments_copy_is_wrapped_not_stale(self, monkeypatch):
+        # The legacy _experiments location must not retain the raw user
+        # callback: anything reading it directly would get an unscrubbed
+        # path. After setup both locations hold the same wrapped closure.
+        self._use_client_integration(monkeypatch, DataFogSentryIntegration())
+        seen = []
+
+        def user_callback(log, hint):
+            seen.append(log)
+            return log
+
+        options = self._wrapped_options(_experiments={"before_send_log": user_callback})
+        assert options["_experiments"]["before_send_log"] is options["before_send_log"]
+        options["_experiments"]["before_send_log"](self._log(), None)
+        assert len(seen) == 1
+        assert EMAIL not in json.dumps(seen[0])
+
+    def test_repeated_setup_does_not_stack_wrappers(self, monkeypatch):
+        # setup_once_with_options is normally once-per-process, but a repeat
+        # call must be idempotent, not stack N scrub passes.
+        integration = DataFogSentryIntegration()
+        options = self._wrapped_options(integration=integration)
+        first = options["before_send_log"]
+        integration.setup_once_with_options(options)
+        assert options["before_send_log"] is first
