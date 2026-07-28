@@ -13,19 +13,19 @@
 
 ## Current Project Status
 
-**Stable version: 4.4.0**
+**Stable version: 4.8.0**
 
-**Development version: 4.4.0a5**
+**Development version: 4.8.0**
 
-**Next minor target: 4.5.0**
+**Next major target: 5.0.0**
 
 ### ✅ Recently Completed (Latest)
 
+- **Redaction Correctness**: Document-order token numbering, overlap-safe span handling, and stable mask mappings
+- **Allowlists and Typing**: Exact and regex allowlists, Presidio-style aliases, and `py.typed`
+- **Agent & Gateway Firewall**: Claude Code hook and LiteLLM guardrail adapters
 - **GLiNER Integration**: Modern NER engine with PII-specialized models
-- **Smart Cascading**: Intelligent regex → GLiNER → spaCy progression
-- **Enhanced CLI**: Model management with `--engine` flags
 - **Performance Validation**: 100x+ regex speedup reproducible via `benchmarks/`; 32x GLiNER
-- **CI/CD Consolidation**: 7 workflows → 3 (ci, release, benchmark)
 
 ## Quick Development Setup
 
@@ -41,7 +41,7 @@ pre-commit install
 
 # 3. Install ML extras for advanced features
 pip install -e ".[nlp]"           # spaCy
-pip install -e ".[nlp-advanced]"  # GLiNER (NEW)
+pip install -e ".[nlp-advanced]"  # GLiNER
 pip install -e ".[all]"           # Everything
 
 # 4. Verify installation
@@ -89,7 +89,7 @@ pip install datafog[ocr]           # Image processing
 pip install datafog[all]           # Everything
 ```
 
-## GLiNER Integration (NEW)
+## GLiNER Integration
 
 ### Overview
 

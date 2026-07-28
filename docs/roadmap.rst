@@ -2,7 +2,7 @@
 Release Roadmap
 ================
 
-Where DataFog is today (4.7.x) and where it is going (v5.0.0). The 4.x
+Where DataFog is today (4.8.x) and where it is going (v5.0.0). The 4.x
 line delivered the lightweight-core architecture and, from 4.6.0 on, an
 offline PII firewall for AI agents and gateways. The v5 cycle turns that
 foundation into the fastest, easiest offline PII firewall for AI apps,
@@ -12,13 +12,13 @@ logs, and datasets.
    :local:
    :depth: 1
 
-Current status — 4.7.x
+Current status — 4.8.x
 ----------------------
 
-DataFog ``4.7.0`` is the current stable release (July 2026). Patch
-releases on the 4.7.x line focus on detection precision — reducing
-SSN/phone false positives surfaced by real-world agent traffic — while
-v5.0.0 is prepared.
+DataFog ``4.8.0`` is the current stable release (July 2026). Patch
+releases on the 4.8.x line focus on redaction correctness, detection
+precision, and keeping the 4.x agent/gateway firewall stable while v5.0.0
+is prepared.
 
 Every published performance number is reproducible with one command:
 ``python benchmarks/run.py`` (see ``benchmarks/`` for methodology,
@@ -111,6 +111,17 @@ Both default to the high-precision entity set (``EMAIL``, ``PHONE``,
 
 4.7.x patch releases: SSN and phone precision fixes (hex-string and
 no-dash false positives).
+
+✅ 4.8.0 — Redaction Correctness (Released July 2026)
+------------------------------------------------------
+
+* **Document-order redaction tokens**: repeated entities are numbered from
+  left to right, so the first email in a document becomes ``[EMAIL_1]``.
+* **Overlap-safe redaction**: public ``redact()`` calls now suppress
+  overlapping and duplicate spans before applying replacements, avoiding
+  corrupted output fragments.
+* **Mask mapping preservation**: same-length values no longer collide in
+  ``mask`` strategy mappings; each masked value receives a stable indexed key.
 
 v5.0.0 — Offline PII Firewall for AI Apps (In Progress)
 --------------------------------------------------------

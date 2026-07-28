@@ -123,11 +123,11 @@ The CLI core path is text-first:
 Image commands are optional. Install ``datafog[ocr]`` for local OCR and
 ``datafog[web,ocr]`` when the CLI needs to download image inputs.
 
-What 4.5 Is Not
+What 4.x Is Not
 ===============
 
-DataFog 4.5 prepares the package for future middleware use cases, but it does
-not ship dedicated Sentry, OpenTelemetry, logging-framework, or cloud DLP
+DataFog 4.x prepares the package for broader middleware use cases, but it does
+not yet ship dedicated Sentry, OpenTelemetry, logging-framework, or cloud DLP
 adapters. Those integrations are future-facing work built on the same core
 text screening path.
 
@@ -137,4 +137,4 @@ Next Pages
 * :doc:`python-sdk` documents the Python API surface.
 * :doc:`cli` documents command-line usage.
 * :doc:`optional-surfaces` documents OCR and Spark install notes.
-* :doc:`roadmap` explains how 4.5 leads toward later middleware work.
+* :doc:`roadmap` explains how the 4.x line leads toward later middleware work.

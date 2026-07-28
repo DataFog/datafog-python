@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-# Historical shadow packaging snapshot. The live DataFog 4.5 packaging input is
+# Historical shadow packaging snapshot. The live DataFog packaging input is
 # setup.py. Do not use this file for builds, releases, or dependency changes.
 
 # Read README for the long description
@@ -47,7 +47,7 @@ setup(
         "sphinx",
         "cryptography",
     ],
-    python_requires=">=3.10,<3.13",
+    python_requires=">=3.10",
     entry_points={
         "console_scripts": [
             "datafog=datafog.client:app",
@@ -55,6 +55,8 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
