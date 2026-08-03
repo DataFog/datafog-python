@@ -75,6 +75,10 @@ Python 3.13 support is certified for the core SDK, CLI, `nlp`,
 that is available locally before runtime use. `distributed` and `all` remain
 optional, heavier profiles and are not part of the lightweight core path.
 
+Python 3.14 support is certified for the core SDK and CLI. Optional profiles
+remain dependent on upstream Python 3.14 package availability until they are
+covered by the corresponding CI install-profile checks.
+
 ## Quick Start
 
 ```python

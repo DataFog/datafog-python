@@ -22,11 +22,12 @@ final version and release-note alignment in the dedicated release slice.
 Python Environments
 ===================
 
-DataFog currently declares support for Python ``>=3.10,<3.14``. The CI matrix
-tests core, NLP, and NLP-advanced installs on Python 3.10, 3.11, 3.12, and
-3.13. OCR profile smoke checks also run on Python 3.13 with system Tesseract
-installed. Distributed and all-profile installs remain heavier optional
-profiles rather than the lightweight core support claim.
+DataFog declares support for Python ``>=3.10``. The CI matrix tests core, NLP,
+and NLP-advanced installs on Python 3.10, 3.11, 3.12, and 3.13. Python 3.14
+is certified for the core SDK and CLI. OCR profile smoke checks also run on
+Python 3.13 with system Tesseract installed. Optional Python 3.14 profiles
+remain dependent on upstream package availability until their install-profile
+checks are added to CI.
 
 Create one virtual environment per Python version when you need to compare
 profiles locally:
