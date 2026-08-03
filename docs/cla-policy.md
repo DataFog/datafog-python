@@ -77,14 +77,22 @@ substitute for checking who owns the work.
    scope, and confirmation date in private records and marks the pull request
    as covered under that agreement.
 
+For an active advisor or contractor relationship that is being updated, use a
+short signed interim IP addendum before continuing new or deferred work. The
+addendum should identify the prior, current, and future service scope, the
+effective date, any pre-existing or third-party material, and the rights
+holder. Fold it into the amended or restated service agreement later. Do not
+require the individual CLA for work covered by the service agreement, but do
+not treat an unsigned agreement discussion as coverage.
+
 ### Contribution submitted before CLA acceptance
 
 The public CLA does not retroactively cover a prior submission. Before merge,
 DataFog must either obtain a separate signed historical ratification/IP
 assignment/license from the relevant rights holder, or replace or remove the
-uncovered material. The counsel-reviewable [historical ratification template]
-(cla-historical-ratification.md) is a starting point only and must not be
-treated as executed.
+uncovered material. The [historical ratification template]
+(cla-historical-ratification.md) is an interim starting point only and must not
+be treated as executed until completed and signed.
 
 ## Agreement and signature records
 

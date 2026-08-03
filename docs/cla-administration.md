@@ -1,8 +1,9 @@
 # CLA Administration Runbook
 
 This runbook describes the rollout and ongoing administration of DataFog's
-Contributor License Agreement (CLA). The legal text should be approved by
-DataFog's counsel before the hosted integration is activated.
+Contributor License Agreement (CLA). The legal text and interim contribution
+records should receive later legal review when available, especially before
+relying on them for a material ownership or relicensing decision.
 
 ## Signing workflow
 
@@ -61,15 +62,17 @@ historical code:
 1. inventory historical commits and pull requests by non-DataFog contributors;
 2. distinguish original contributions from mechanical or third-party changes;
 3. identify the actual rights holder and any employer or entity owner;
-4. have counsel approve a separate historical ratification/IP assignment/license
+4. prepare a separate written historical ratification/IP assignment/license
    that lists the covered project, files, commits, pull requests, or other
    submissions; and
 5. obtain signatures from DataFog and every required rights holder, or replace
    or isolate code where coverage cannot be obtained.
 
 The repository's [historical ratification template](cla-historical-ratification.md)
-is a counsel-reviewable starting point only. It is not an executed agreement and
-must not be used as evidence of coverage until completed, approved, and signed.
+is an interim starting point only. It is not an executed agreement and must not
+be used as evidence of coverage until completed and signed. If an existing
+advisor or contractor agreement covers the work, use a signed scope-confirming
+addendum instead of duplicating it with a historical ratification.
 
 ## Records and continuity
 

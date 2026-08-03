@@ -1,10 +1,10 @@
 # Historical Contribution Ratification, IP Assignment, and License
 
-> **Counsel-reviewable template only — not an executed agreement.** DataFog
-> must obtain counsel approval, complete the placeholders, confirm the actual
-> rights holders, and obtain all required signatures before relying on this
-> document. Do not publish a completed version or treat this template as proof
-> of coverage.
+> **Interim template only — not an executed agreement.** Complete the
+> placeholders, confirm the actual rights holders, and obtain all required
+> signatures before relying on this document. Keep completed copies private and
+> obtain legal review later, especially before a material ownership or
+> relicensing decision.
 
 This Historical Contribution Ratification, IP Assignment, and License
 ("Agreement") is entered into as of **[DATE]** by and among:
@@ -37,6 +37,11 @@ The parties should attach additional pages if needed. A contributor name,
 repository, or date range alone does not expand the covered scope beyond the
 items expressly listed above.
 
+If an existing advisor, contractor, or consulting agreement already covers the
+work, use a signed amendment or scope confirmation to that agreement instead
+of duplicating it here. This template is for historical work that is not
+already covered by a written agreement.
+
 ## 2. Ownership and authority representations
 
 Each signatory represents, as to the rights and Contributions within that
@@ -61,8 +66,10 @@ party and sign this Agreement.
 
 ## 3. Rights granted or assigned
 
-**Counsel must select, complete, and approve the applicable option before
-signature. Delete unused options.**
+Choose one rights option and delete the unused options before signature. For an
+interim self-managed contribution confirmation, Option B is the default because
+it is consistent with DataFog's public CLA. Use Option A only if the parties
+intentionally want to transfer ownership.
 
 ### Option A — Assignment
 
@@ -78,28 +85,31 @@ MORAL-RIGHTS LANGUAGE, OR REQUIRED LOCAL-LAW TERMS.]**
 Contributor and, if applicable, Entity Owner grant DataFog a perpetual,
 worldwide, non-exclusive, transferable, royalty-free, irrevocable license,
 with the right to sublicense through multiple tiers, under the Copyright and
-other rights identified by counsel, to reproduce, prepare derivative works of,
-modify, display, perform, use, and distribute the Contributions listed in
-Schedule A, including as part of open-source, commercial, or proprietary
-materials. **[COUNSEL TO COMPLETE PATENT, MORAL-RIGHTS, MEDIA, AND OTHER
-LICENSE TERMS.]**
+any patent claims covering the Contributions, to reproduce, prepare derivative
+works of, modify, display, perform, use, make, have made, sell, offer for sale,
+import, and distribute the Contributions listed in Schedule A, including as
+part of open-source, commercial, or proprietary materials. To the maximum
+extent permitted by law, Contributor waives and agrees not to assert applicable
+moral rights against DataFog and its licensees.
 
 ### Option C — Other approved treatment
 
-**[COUNSEL-APPROVED ASSIGNMENT, LICENSE, CONFIRMATION, OR LIMITATION.]**
+**[OTHER AGREED ASSIGNMENT, LICENSE, CONFIRMATION, OR LIMITATION.]**
 
 ## 4. No broader ratification
 
 Except for the rights expressly assigned, licensed, or confirmed above, each
 party reserves its rights. This Agreement does not cover unlisted commits,
 pull requests, files, or other Contributions, and it does not waive a claim or
-approve third-party material unless expressly stated in a counsel-approved
-completed version.
+approve third-party material unless expressly stated in the completed version.
 
 ## 5. Governing terms
 
-**[COUNSEL TO COMPLETE GOVERNING LAW, NOTICE, ENTIRE-AGREEMENT, ELECTRONIC
-SIGNATURE, COUNTERPARTS, AND OTHER REQUIRED TERMS.]**
+This Agreement is governed by Delaware law, excluding its conflict-of-law
+provisions. It is the entire agreement concerning the Contributions listed in
+Schedule A and may be signed in counterparts and electronically. A separate
+written agreement that DataFog has documented as governing a specific
+Contribution remains controlling for that Contribution.
 
 ## Schedule A — Covered historical Contributions
 
@@ -110,9 +120,8 @@ SIGNATURE, COUNTERPARTS, AND OTHER REQUIRED TERMS.]**
 
 ## Signatures
 
-By signing, each signatory confirms that it has reviewed the completed,
-counsel-approved Agreement and is signing only for the party and rights stated
-below.
+By signing, each signatory confirms that it has reviewed the completed
+Agreement and is signing only for the party and rights stated below.
 
 **DataFog, Inc.**
 
