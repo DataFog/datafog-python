@@ -19,56 +19,90 @@ agreement allows DataFog to:
 
 The CLA does not transfer copyright ownership to DataFog.
 
-## Who must sign
+## Coverage and signing
 
-Every external contributor whose pull request will be merged must sign the
-current CLA unless DataFog has documented another agreement covering that
-contributor and the contribution.
+An individual must accept the current CLA before submitting a contribution
+that is intended to be covered by it. The CLA's effective date is the
+acceptance date; submitting first and signing later does not silently create
+retroactive coverage. A new signature may be required if DataFog publishes a
+new agreement version.
 
-DataFog may exempt:
+An individual should accept the CLA only if they own the contribution or have
+authority to grant the rights in it. If an employer or another entity owns or
+may own the work, use the entity-owned or contract-covered workflow below.
 
-- DataFog employees and contractors whose contributions are covered by a
-  written intellectual-property agreement;
-- organization members whose contributions are otherwise covered in writing;
-  and
-- trusted automation accounts that make mechanical changes and cannot sign.
+Maintainers must not merge an external contribution unless the individual CLA
+was accepted before submission, another written agreement covers the specific
+contribution, or a separate historical ratification/IP assignment/license has
+been signed and documented. A workflow status is evidence of process, not a
+substitute for checking who owns the work.
 
-An allowlist is an administrative convenience, not a substitute for verifying
-that the contributor's work is covered by an appropriate agreement.
+## Contributor and maintainer workflow
 
-## Employer- or entity-owned work
+### Individual-owned contribution
 
-An individual should sign only if they own the contribution or have authority
-to grant the rights in it. If an employer or another entity owns or may own the
-work, contact [`legal@datafog.ai`](mailto:legal@datafog.ai) before the pull
-request is merged. DataFog will use an entity CLA or written authorization when
-appropriate.
+1. The contributor reviews and accepts the current CLA through DataFog's
+   designated signing workflow before opening the pull request or otherwise
+   submitting the contribution.
+2. The contributor identifies third-party material and applicable restrictions
+   in the pull request.
+3. The maintainer confirms that the acceptance record predates the submission,
+   verifies any third-party notices, and records the agreement version and
+   acceptance date in the private CLA records.
+4. The maintainer merges only after the coverage check passes.
 
-## How signing works
+### Entity-owned contribution
 
-When an external contributor opens a pull request, DataFog's CLA service posts
-signing instructions and reports a `license/cla` status. The contributor signs
-once with an authenticated GitHub account. A new signature may be required if
-DataFog publishes a new agreement version.
+1. The contributor tells the maintainer before submission or merge if an
+   employer or other entity owns or may own the contribution.
+2. The maintainer pauses the merge and contacts
+   [`legal@datafog.ai`](mailto:legal@datafog.ai) for the entity contribution
+   process.
+3. The entity, through an authorized representative, signs the applicable
+   entity CLA or other written authorization before the contribution is merged.
+4. The maintainer records the entity, signatory authority, covered project or
+   contribution, agreement version, and dates privately; an individual CLA is
+   not treated as covering entity-owned work unless the written agreement says
+   so.
 
-Maintainers must not merge an external pull request unless `license/cla` passes
-or the contributor has a documented exemption.
+### Contract-covered contribution
+
+1. The contributor identifies any employment, contractor, consulting, or other
+   intellectual-property agreement that may cover the contribution.
+2. The maintainer obtains confirmation from DataFog's authorized legal or
+   administrative contact that the agreement covers the relevant rights and
+   project. Do not request or store more confidential contract text than is
+   necessary to verify coverage.
+3. The maintainer records the agreement reference, rights holder, covered
+   scope, and confirmation date in private records and marks the pull request
+   as covered under that agreement.
+
+### Contribution submitted before CLA acceptance
+
+The public CLA does not retroactively cover a prior submission. Before merge,
+DataFog must either obtain a separate signed historical ratification/IP
+assignment/license from the relevant rights holder, or replace or remove the
+uncovered material. The counsel-reviewable [historical ratification template]
+(cla-historical-ratification.md) is a starting point only and must not be
+treated as executed.
 
 ## Agreement and signature records
 
 The agreement is versioned. DataFog retains or exports records sufficient to
-identify the signer, agreement version, signing time, and authenticated GitHub
-identity. The hosted CLA service may process the signer's GitHub identity and
-associated email under
-[SAP's CLA Assistant privacy notice](https://gist.github.com/CLAassistant/3a73e4cd729c9d0a6e30).
+identify the signer, agreement version, acceptance time, authenticated account,
+and the covered project or contribution where needed. Store these records,
+entity authorizations, contract-coverage confirmations, and historical
+ratifications in access-controlled private company storage. Do not publish a
+contributor signature list, public coverage roster, private contract text, or
+historical ratification in the repository.
 
 Requests concerning a signature record or the CLA should be sent to
 [`legal@datafog.ai`](mailto:legal@datafog.ai).
 
 ## Existing contributions
 
-The CLA workflow applies to new pull requests after activation. Existing
-contributions remain governed by the licenses and agreements in effect when
-they were submitted. If DataFog needs broader rights to an existing external
-contribution, it must obtain those rights from the contributor or replace the
-contribution.
+Existing contributions remain governed by the licenses and agreements in effect
+when they were submitted. If DataFog needs broader rights to an existing
+external contribution, it must obtain those rights through a separate signed
+historical ratification/IP assignment/license from the relevant rights holder,
+or replace or isolate the contribution.

@@ -14,10 +14,16 @@ other open-source projects owned or managed by DataFog, including projects in
 the [`DataFog` GitHub organization](https://github.com/DataFog) that reference
 this Agreement (collectively, the "Projects"). You need to accept this Agreement
 only once unless DataFog publishes a new version and asks you to accept it.
+Acceptance is prospective: this Agreement applies only to Contributions You
+Submit on or after the Effective Date. It does not grant rights in, or
+otherwise govern, Contributions submitted before that date. Historical
+Contributions require a separate signed historical ratification, intellectual
+property assignment, or license that identifies the covered work; a later
+acceptance of this Agreement is not that separate agreement.
 
 To accept this Agreement, follow the electronic signing instructions presented
-by DataFog's CLA service. The signing record will be associated with your
-authenticated GitHub account.
+by DataFog's designated signing workflow. The signing record will be associated
+with your authenticated account.
 
 If an employer or another entity owns or controls the rights in your
 Contribution, do not accept this individual Agreement on that entity's behalf
@@ -48,8 +54,10 @@ designated in writing as "Not a Contribution" are excluded.
 
 "Submission Date" means the date on which You Submit a Contribution to us.
 
-"Effective Date" means the date You electronically accept this Agreement or the
-date You first Submit a Contribution to us, whichever is earlier.
+"Effective Date" means the date You electronically accept this Agreement.
+
+"Historical Contribution" means a Contribution You Submitted before the
+Effective Date.
 
 "Media" means any portion of a Contribution that is not software.
 
@@ -57,7 +65,8 @@ date You first Submit a Contribution to us, whichever is earlier.
 
 ### 2.1 Copyright License
 
-You retain ownership of the Copyright in Your Contribution and have the same
+For each Contribution to which this Agreement applies, You retain ownership of
+the Copyright in Your Contribution and have the same
 rights to use or license the Contribution that You would have had without
 entering into this Agreement.
 
@@ -70,8 +79,9 @@ the Material, subject to Section 2.3.
 
 ### 2.2 Patent License
 
-For patent claims, including method, process, and apparatus claims, that You
-own, control, or have the right to grant now or in the future, You grant to us a
+For each Contribution to which this Agreement applies, and for patent claims,
+including method, process, and apparatus claims, that You own, control, or have
+the right to grant now or in the future, You grant to us a
 perpetual, worldwide, non-exclusive, transferable, royalty-free, irrevocable
 patent license, with the right to sublicense through multiple tiers of
 sublicensees, to make, have made, use, sell, offer for sale, import, and
@@ -150,7 +160,8 @@ REGARDLESS OF THE LEGAL OR EQUITABLE THEORY ON WHICH THE CLAIM IS BASED.
    for the International Sale of Goods does not apply.
 2. This Agreement is the entire agreement between You and us concerning Your
    Contributions and supersedes prior agreements or understandings concerning
-   those Contributions.
+   those Contributions, except for a separate written agreement that DataFog
+   has documented as governing a specific Contribution.
 3. If You or we assign rights or obligations under this Agreement to a third
    party, that third party must agree in writing to abide by this Agreement.
 4. A failure by either party to require performance of a provision in one
@@ -161,6 +172,10 @@ REGARDLESS OF THE LEGAL OR EQUITABLE THEORY ON WHICH THE CLAIM IS BASED.
 6. Electronic acceptance through DataFog's designated CLA service constitutes
    Your signature. The electronic record identifies the Agreement version, Your
    authenticated GitHub identity, and the time of acceptance.
+7. Acceptance of this Agreement does not amend, ratify, assign, or license any
+   Historical Contribution. Any rights in a Historical Contribution must be
+   documented in a separate written agreement signed by the relevant rights
+   holder and DataFog.
 
 ## Contact
 

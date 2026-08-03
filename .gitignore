@@ -62,6 +62,7 @@ docs/*
 !docs/optional-surfaces.rst
 !docs/cla-policy.md
 !docs/cla-administration.md
+!docs/cla-historical-ratification.md
 !docs/agents/
 !docs/agents/**
 !docs/audit/

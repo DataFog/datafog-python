@@ -34,8 +34,10 @@ Optional profiles tested:
 
 ## Contributor License
 
-- [ ] The `license/cla` check passes, or DataFog has documented an exemption for
-      every contributor to this pull request.
+- [ ] The `license/cla` check passes, or DataFog has documented a written
+      agreement/exemption for every contributor to this pull request. Any
+      historical contribution has a separate signed ratification, assignment,
+      or license documented privately.
 
 ## Notes For Reviewers
 
