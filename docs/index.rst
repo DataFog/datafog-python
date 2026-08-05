@@ -41,6 +41,7 @@ Contributing
    :caption: Contributing
 
    contributing
+   cla-assistant-operations
    v45-release-readiness
    live-module-map
 
