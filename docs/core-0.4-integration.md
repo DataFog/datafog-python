@@ -1,9 +1,8 @@
 # Core 0.4 capability adapter integration gate
 
-Status: draft implementation validated against the final local Core 0.4.0
-candidate wheel. Publication and hosted native CI remain pending; this branch
-must not merge or publish until those installation gates pass. See candidate
-evidence below.
+Status: validated against both the final local candidate and published Core
+0.4.0 wheel. Hosted CI results are tracked on Python PR #179. DataFog Python
+remains unpublished; merging and release require separate authorization.
 
 ## Scope
 
@@ -23,7 +22,7 @@ evidence below.
 - Ignore unrelated additive capability fields. Fail explicitly for incompatible
   contracts or unusable metadata rather than silently falling back to Python.
 
-## Pending release gates
+## Release validation checklist
 
 1. Obtain the finalized candidate wheel and platform support matrix from Core.
 2. Validate capability inventory and activation metadata against the candidate.
@@ -81,7 +80,30 @@ A regression test asserts this exact behavior. No new hardcoded entity
 priorities or selection-order changes were introduced. Any future change needs
 an explicit overlap-policy decision rather than silently changing legacy output.
 
-The tested wheel satisfies the local candidate gate. The supported dependency
-range is now `>=0.4.0,<0.5`. Hosted native CI and published-wheel validation remain
-blocked until Core 0.4.0 is available to those installers; do not publish Python
-or treat local macOS validation as a cross-platform CI result.
+The supported dependency range is `>=0.4.0,<0.5`. Local candidate validation
+was followed by published-artifact validation below. Do not treat local macOS
+validation as a cross-platform CI result.
+
+## Published artifact validation
+
+A fresh virtual environment installed the built Python wheel with `[test,cli,rust]`
+using `--no-cache-dir --index-url https://pypi.org/simple`, without a local Core
+wheel or editable Core checkout. The normal resolver selected published Core
+0.4.0 after an initial index propagation delay.
+
+- Publication source: `133bceff0d2a53a7f6d1a75693330c1797285654`, tag
+  `python-v0.4.0` (Core publish run `36496967055`).
+- Registry artifact: `datafog_core-0.4.0-cp310-abi3-macosx_11_0_arm64.whl`.
+- Download origin: `files.pythonhosted.org`, recorded by pip's installation report.
+- Published SHA256, matching PyPI release metadata:
+  `b4217c2a9834cb774d89a13b9543166dd7f38512a233b1c80984ea9c07c5162c`.
+- Installed-wheel smoke with `python -I`: passed.
+- `pip check`: passed.
+- Published Core / adapter / unchanged legacy contract tests: **352 passed**.
+- Frozen native comparison: **77 matches, two detector differences, one
+  validation difference, 31 outside-scope cases**, unchanged from the candidate.
+
+The earlier hosted Rust jobs failed only because PyPI did not yet offer Core
+0.4.0. Those failed jobs were retried after publication; the current PR head's
+CI checks remain the authority for cross-platform readiness. Nothing in this
+validation publishes or merges DataFog Python.

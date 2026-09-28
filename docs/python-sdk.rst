@@ -44,10 +44,9 @@ continue to work at the top level in 4.9 but warn of removal in 5.0, revising th
 previous promise to retain them throughout 5.x. Moving from ``process`` to
 ``redact`` can change old placeholder and hash output; compare results explicitly.
 
-The unreleased adapter requires ``datafog-core>=0.4.0,<0.5``. Until Core 0.4.0
-is published, use a validated candidate wheel with the development checkout;
-installing ``.[rust]`` from PyPI alone cannot resolve the new dependency yet.
-Once available, install ``.[rust]`` to evaluate Rust detection:
+The unreleased adapter requires ``datafog-core>=0.4.0,<0.5``. Core 0.4.0 is
+available on PyPI. Install ``.[rust]`` from the development checkout to evaluate
+Rust detection; DataFog Python 4.9 itself is not yet released:
 
 .. code-block:: python
 

@@ -57,9 +57,9 @@ extra to evaluate them:
    python -m pip install -e ".[rust]"
 
 The extra requires ``datafog-core>=0.4.0,<0.5`` and capability contract 1.
-Core 0.4.0 is not published yet: development evaluation requires a validated
-candidate wheel until the dependency is available on PyPI. It does not change the default Python
-backend, and the existing ``all`` extra does not include Rust. To opt in:
+Core 0.4.0 is available on PyPI; DataFog Python 4.9 remains unreleased. The extra
+does not change the default Python backend, and the existing ``all`` extra does
+not include Rust. To opt in:
 
 .. code-block:: python
 

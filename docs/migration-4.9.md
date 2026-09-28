@@ -1,9 +1,9 @@
 # Migrating incrementally with DataFog 4.9
 
 > **Unreleased:** This guide describes the upcoming 4.9 bridge. Until it is
-> published, use the development checkout and a validated Core 0.4.0 candidate
-> wheel. The declared Core dependency cannot resolve from PyPI until Core 0.4.0
-> is published. A normal released Python install does not include this follow-up.
+> published, install the development checkout with `python -m pip install -e
+".[rust]"`. Core 0.4.0 is available on PyPI. A normal released DataFog Python
+> install does not include this follow-up.
 
 4.9 is a bridge to the Rust-backed 5.0 API. The default Python detector, existing
 imports, result objects, and redaction strategies continue to work. The optional

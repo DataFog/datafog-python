@@ -6,8 +6,9 @@
 
 - Experimental `datafog[rust]` detection with keyword-only `backend="rust"`
   on scan/redact entry points; Python remains the default. The follow-up requires
-  `datafog-core>=0.4.0,<0.5` and capability contract 1; Core 0.4.0 publication is
-  pending, so development validation uses candidate wheels. ML composition is unchanged.
+  `datafog-core>=0.4.0,<0.5` and capability contract 1. Core 0.4.0 is published
+  and registry-wheel validation passed; DataFog Python remains unreleased.
+  ML composition is unchanged.
 - Capability-driven entity and locale discovery, German locale activation,
   explicit UUID activation, and forward-compatible finding labels. Core's
   structured-only PERSON is rejected for explicit Rust text selection.
