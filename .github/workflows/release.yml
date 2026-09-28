@@ -269,8 +269,8 @@ jobs:
       - name: Configure git
         if: inputs.dry_run != true
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
 
       - name: Generate version
         id: version
