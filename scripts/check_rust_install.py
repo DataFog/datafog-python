@@ -13,7 +13,8 @@ def main():
     from datafog import v5
     from datafog.compat import v4
 
-    assert importlib.metadata.version("datafog-core") == "0.3.1"
+    assert importlib.metadata.version("datafog-core").startswith("0.4.")
+    assert datafog_core.capabilities()["contract_version"] == 1
     assert v4.Entity is datafog.Entity
     assert v5.Finding is datafog_core.Finding
     text = "👋 Contact alice@example.com"

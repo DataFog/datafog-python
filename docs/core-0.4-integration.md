@@ -1,8 +1,9 @@
 # Core 0.4 capability adapter integration gate
 
-Status: draft implementation against the proposed capability contract. No Core
-candidate wheel has been validated yet. The dependency range remains unchanged
-until that gate passes; this branch must not merge or publish in this state.
+Status: draft implementation validated against the final local Core 0.4.0
+candidate wheel. Publication and hosted native CI remain pending; this branch
+must not merge or publish until those installation gates pass. See candidate
+evidence below.
 
 ## Scope
 
@@ -38,3 +39,49 @@ until that gate passes; this branch must not merge or publish in this state.
    migration documentation to distinguish the new contract from the 0.3.1 bridge.
 7. Verify the published Core wheel before publishing Python. No release is
    authorized by this integration work.
+
+## Candidate evidence
+
+The final Core wheel was force-reinstalled and tested on macOS ARM64, CPython
+3.12. It reports Core 0.4.0 and capability contract 1.
+
+- Source revision supplied by Core: `60c4636`.
+- Artifact: `datafog_core-0.4.0-cp310-abi3-macosx_11_0_arm64.whl`.
+- Verified SHA256:
+  `351ab81ae575b31a6739a43e29135884ccc0d7152f01df568cd1f7608d690b1c`.
+- Focused candidate/adapter/legacy contract suites: **352 passed**.
+- Base/CLI regression without native dependency: **833 passed, 19 skipped,
+  295 deselected, 19 existing xfails**.
+- Frozen corpus: **77 exact matches, two detector differences, one validation
+  difference, 31 cases outside backend scope**. All formerly unsupported German
+  cases now match. The invalid-card and embedded-SSN differences persist. The
+  unknown-locale exception remains `ValueError` with a new capability-based
+  diagnostic. Original `4.8.1.json` and historical `rust-0.3.1.json` are unchanged.
+- Clean Python wheel installed with the exact Core candidate: isolated smoke test
+  and `pip check` passed.
+- Sphinx documentation build passed with existing static/autodoc warnings.
+- Public scan/redact and cold-start measurements are recorded in
+  `../benchmarks/results-core-0.4.json`; compare only like-for-like local runs.
+  Median warm Rust scan: 3.23 µs short, 9.40 µs mixed, 7.25 ms for 1 MB sparse.
+  Python equivalents: 20.80 µs, 42.86 µs, 127.26 ms. These are candidate-local
+  measurements, not universal speed guarantees or a claim of unchanged Core
+  0.3.1 detector cost. Validated capabilities are cached per native reader
+  identity; reloading/replacing that reader gets a new snapshot.
+
+### Reviewed NPI overlap limitation
+
+Core returns both `PHONE` and `NPI` for `NPI 1234567893`. The legacy adapter
+preserves overlap-before-selection and its existing priority: `PHONE` wins.
+Consequently, explicit `entity_types=["NPI"]` can return no entities; default
+legacy redaction still protects the number as a phone. Native `datafog.v5.scan`
+retains both findings, and native transformation can explicitly select `NPI`.
+
+This is an intentional compatibility limitation, not complete NPI parity.
+A regression test asserts this exact behavior. No new hardcoded entity
+priorities or selection-order changes were introduced. Any future change needs
+an explicit overlap-policy decision rather than silently changing legacy output.
+
+The tested wheel satisfies the local candidate gate. The supported dependency
+range is now `>=0.4.0,<0.5`. Hosted native CI and published-wheel validation remain
+blocked until Core 0.4.0 is available to those installers; do not publish Python
+or treat local macOS validation as a cross-platform CI result.

@@ -44,7 +44,10 @@ continue to work at the top level in 4.9 but warn of removal in 5.0, revising th
 previous promise to retain them throughout 5.x. Moving from ``process`` to
 ``redact`` can change old placeholder and hash output; compare results explicitly.
 
-Install ``.[rust]`` from the development checkout to evaluate Rust detection:
+The unreleased adapter requires ``datafog-core>=0.4.0,<0.5``. Until Core 0.4.0
+is published, use a validated candidate wheel with the development checkout;
+installing ``.[rust]`` from PyPI alone cannot resolve the new dependency yet.
+Once available, install ``.[rust]`` to evaluate Rust detection:
 
 .. code-block:: python
 
@@ -84,9 +87,26 @@ native strategies. Importing the namespace is lazy; accessing its exports
 requires the Rust extra. The supported compatibility lifetime after 5.0 remains
 a separate decision.
 
-The pinned Core 0.3.1 lacks German detectors and differs on some structured
-inputs. The legacy Rust adapter rejects German requests; the raw native preview
-retains Core's own behavior and must not be assumed to provide German coverage.
+The adapter requires capability contract version 1 and discovers supported labels,
+locales, and activation settings from the installed Core. Future finding labels
+are preserved. Core 0.4.x updates may change detection output; lock the version
+when reproducibility is required. German aliases ``de``, ``de-DE``, and ``de_DE``
+activate German detectors; ``en-US`` and ``fr`` activate only base detectors.
+Locale validation trims ASCII whitespace and ignores ASCII case; unsupported
+explicit locales raise errors. Multiple Python locales produce a deduplicated
+union of Core scans. Explicit German entity selection enables the required locale.
+
+Select ``entity_types=["UUID"]`` with ``backend="rust"`` to enable UUID detection
+through Core metadata. Core's ``PERSON`` is structured-only and explicitly
+selecting it for Rust text scanning raises an error. The Python default backend
+keeps its existing behavior.
+
+Core 0.4.0 adds JWT, private-key, contextual routing-number, and contextual NPI
+findings. The legacy overlap policy can prefer ``PHONE`` over a same-span ``NPI``;
+filtering for NPI then returns no entities. Native ``datafog.v5.scan`` retains NPI,
+and native transformation can select it. Legacy result and transformation
+semantics remain unchanged.
+
 Read the :download:`complete migration guide <migration-4.9.md>` for the exact
 schema comparison, finite-corpus parity results, and verification commands.
 

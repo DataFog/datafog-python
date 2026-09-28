@@ -5,8 +5,16 @@
 #### Added
 
 - Experimental `datafog[rust]` detection with keyword-only `backend="rust"`
-  on scan/redact entry points; Python remains the default. Core 0.3.1 is pinned,
-  German requests are explicitly unsupported, and ML composition is unchanged.
+  on scan/redact entry points; Python remains the default. The follow-up requires
+  `datafog-core>=0.4.0,<0.5` and capability contract 1; Core 0.4.0 publication is
+  pending, so development validation uses candidate wheels. ML composition is unchanged.
+- Capability-driven entity and locale discovery, German locale activation,
+  explicit UUID activation, and forward-compatible finding labels. Core's
+  structured-only PERSON is rejected for explicit Rust text selection.
+- Core 0.4.0 adds JWT, private-key, contextual routing-number, and contextual NPI
+  detection, plus stricter explicit locale validation. The legacy overlap policy
+  still prefers PHONE over a same-span NPI; NPI filtering can return no entities.
+  Use native scanning/transformation when NPI must be retained.
 - `datafog.compat.v4` preserves the existing scan/redact facade and result classes;
   `datafog.v5` previews actual Core types and transformation APIs.
 - Native parity tests, installed-wheel CI checks, and public-call benchmarks.

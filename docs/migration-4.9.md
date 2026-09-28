@@ -1,8 +1,9 @@
 # Migrating incrementally with DataFog 4.9
 
 > **Unreleased:** This guide describes the upcoming 4.9 bridge. Until it is
-> published, evaluate these APIs from the development checkout with
-> `python -m pip install -e ".[rust]"`; a normal PyPI install does not include them.
+> published, use the development checkout and a validated Core 0.4.0 candidate
+> wheel. The declared Core dependency cannot resolve from PyPI until Core 0.4.0
+> is published. A normal released Python install does not include this follow-up.
 
 4.9 is a bridge to the Rust-backed 5.0 API. The default Python detector, existing
 imports, result objects, and redaction strategies continue to work. The optional
@@ -14,7 +15,10 @@ Rust backend and native API preview are experimental and explicitly selected.
 pip install "datafog[rust]"
 ```
 
-The extra pins the tested `datafog-core==0.3.1` wheel. The base package needs no
+The extra requires `datafog-core>=0.4.0,<0.5` and capability contract version 1.
+Compatible Core updates can add entity labels and locales without a Python
+release. Detection results may evolve; lock Core for reproducible output.
+Missing capabilities or incompatible contract versions fail clearly. The base package needs no
 Rust installation or native module. The existing `all` extra retains its legacy
 dependency set; request `rust` explicitly, or use `datafog[all,rust]`.
 
@@ -93,22 +97,57 @@ assume that the two schemas and provider requirements are interchangeable.
 
 ## Known detection differences
 
-Core 0.3.1 does not implement the seven German detectors. The legacy Rust adapter
-rejects German locales and `DE_*` selections, directing callers to Python.
-The raw native preview retains Core's own API: its accepted locale configuration
-does not imply German detector coverage. Continue using Python for those workloads.
+The adapter reads `datafog_core.capabilities()` from the installed build instead
+of maintaining a second supported-entity inventory. Unknown future finding labels
+are preserved. Entity selection derives activation settings from Core metadata.
+`PERSON` is structured-only in Core 0.4.0; explicitly selecting it for Rust text
+scanning raises an error. Use native structured scanning for that entity.
+
+Core 0.4.0 supports the seven German detectors through `de`, `de-DE`, or `de_DE`.
+Locale matching trims ASCII whitespace and ignores ASCII case. `en-US` and `fr`
+are accepted base-only locales; other explicit locales raise an error. Python
+accepts multiple locales, scans each through Core's singular-locale interface,
+and deduplicates findings before applying the existing overlap policy.
+
+```python
+result = datafog.scan(
+    "DE89370400440532013000", backend="rust", locales=["de"]
+)
+assert result.entities[0].type == "DE_IBAN"
+
+result = datafog.scan(
+    "550e8400-e29b-41d4-a716-446655440000",
+    backend="rust",
+    entity_types=["UUID"],
+)
+assert result.entities[0].type == "UUID"
+```
+
+German entity selection also enables its advertised locale automatically. UUID
+selection enables Core's `detect_uuid` setting; UUID is not enabled by default.
+Core 0.4.0 adds default JWT, private-key, contextual US routing number, and
+contextual NPI detection. Routing numbers and NPIs still require textual context.
+These detector additions and stricter locale validation intentionally change
+native behavior compared with Core 0.3.1.
+
+**NPI compatibility limitation:** Core can emit `PHONE` and `NPI` for the same
+span. The legacy adapter preserves its existing overlap-before-filter policy,
+which keeps `PHONE` in that tie. Consequently `entity_types=["NPI"]` can return
+no entities. Native `datafog.v5.scan()` retains the NPI finding; native
+transformation can select NPI. This limitation does not remove NPI support from
+Core, and changing the legacy overlap policy is outside this increment.
 
 The frozen 111-case baseline yields the following Rust-backend comparison:
 
-| Outcome                      | Cases | Interpretation                                                            |
-| ---------------------------- | ----: | ------------------------------------------------------------------------- |
-| Exact match                  |    61 | Same observable result on these inputs                                    |
-| Reviewed detector difference |     2 | Invalid-checksum card and alphanumeric-embedded SSN are rejected by Core  |
-| Explicitly unsupported       |    17 | German requests fail rather than silently lose coverage                   |
-| Outside backend scope        |    31 | Signatures, explicit-span transformations, legacy/service/guardrail paths |
+| Outcome                        | Cases | Interpretation                                                            |
+| ------------------------------ | ----: | ------------------------------------------------------------------------- |
+| Exact match                    |    77 | Same observable result on these inputs                                    |
+| Reviewed detector difference   |     2 | Invalid-checksum card and alphanumeric-embedded SSN are rejected by Core  |
+| Reviewed validation difference |     1 | Core rejects an unsupported explicit locale with its stricter validation  |
+| Outside backend scope          |    31 | Signatures, explicit-span transformations, legacy/service/guardrail paths |
 
 These counts describe this finite synthetic corpus, not universal detection
-equivalence or precision/recall. See `tests/contracts/rust-0.3.1.json` for exact
+equivalence or precision/recall. See `tests/contracts/rust-0.4.0.json` for exact
 reviewed outcomes and reasons. Each applicable case is asserted independently;
 unknown differences fail CI. Generate the full per-case report with:
 
@@ -159,7 +198,8 @@ synthetic text. It reports entity counts alongside timings. No general speedup
 claim is made from a single machine or from cases with different outputs.
 
 A local CPython 3.12 macOS ARM64 reference run is recorded in
-`benchmarks/results-4.9.json`. Median scan latency was 19.74 versus 2.30 microseconds
+`benchmarks/results-4.9.json`. This historical run used Core 0.3.1 and does not
+measure Core 0.4.0. Median scan latency was 19.74 versus 2.30 microseconds
 for the short payload, 39.50 versus 7.58 microseconds for mixed PII, and 121.91
 versus 5.33 milliseconds for the large sparse payload (Python versus Rust).
 Fresh-process import plus first scan was approximately 81 milliseconds for both.
