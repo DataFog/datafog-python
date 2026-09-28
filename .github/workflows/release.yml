@@ -21,6 +21,11 @@ on:
         required: false
         default: false
         type: boolean
+      dry_run_ref:
+        description: "Candidate ref to validate (allowed only with dry_run)"
+        required: false
+        default: ""
+        type: string
       force_build:
         description: "Force build even if no changes"
         required: false
@@ -43,10 +48,18 @@ jobs:
       release_type: ${{ steps.resolve.outputs.release_type }}
       has_changes: ${{ steps.changes.outputs.has_changes }}
       target_branch: ${{ steps.resolve.outputs.target_branch }}
+      source_sha: ${{ steps.source.outputs.sha }}
     steps:
       - name: Resolve release type
         id: resolve
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          DRY_RUN_REF: ${{ inputs.dry_run_ref }}
         run: |
+          if [ -n "$DRY_RUN_REF" ] && [ "$DRY_RUN" != "true" ]; then
+            echo "dry_run_ref is allowed only with dry_run=true"
+            exit 1
+          fi
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TYPE="${{ inputs.release_type }}"
           elif [ "${{ github.event.schedule }}" = "0 2 * * 4" ]; then
@@ -61,14 +74,21 @@ jobs:
             BRANCH="dev"
           fi
 
-          echo "release_type=$TYPE" >> "$GITHUB_OUTPUT"
-          echo "target_branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          {
+            echo "release_type=$TYPE"
+            echo "target_branch=$BRANCH"
+            echo "checkout_ref=${DRY_RUN_REF:-$BRANCH}"
+          } >> "$GITHUB_OUTPUT"
           echo "Release type: $TYPE from $BRANCH"
 
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ steps.resolve.outputs.target_branch }}
+          ref: ${{ steps.resolve.outputs.checkout_ref }}
+
+      - name: Freeze source commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Check for changes
         id: changes
@@ -110,7 +130,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ needs.determine-release.outputs.target_branch }}
+          ref: ${{ needs.determine-release.outputs.source_sha }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -131,9 +151,21 @@ jobs:
           python -m spacy download en_core_web_lg
           datafog download-model urchade/gliner_multi_pii-v1 --engine gliner
 
-      - name: Run tests with segfault protection
+      - name: Run release tests
+        env:
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+          OPENBLAS_NUM_THREADS: "1"
         run: |
-          python run_tests.py tests/ --ignore=tests/test_gliner_annotator.py --cov-report=xml --cov-config=.coveragerc
+          python -m pytest tests/ -m "not slow" \
+            --ignore=tests/test_detection_accuracy.py \
+            --ignore=tests/test_image_service.py \
+            --ignore=tests/test_ocr_integration.py \
+            --ignore=tests/test_spark_integration.py \
+            --cov=datafog --cov-report=xml --cov-config=.coveragerc
+
+      - name: Run detection accuracy corpus
+        run: python -m pytest tests/test_detection_accuracy.py -v --tb=short
 
       - name: Run performance validation
         run: |
@@ -148,7 +180,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ needs.determine-release.outputs.target_branch }}
+          ref: ${{ needs.determine-release.outputs.source_sha }}
 
       - name: Set up Python 3.14
         uses: actions/setup-python@v6
@@ -171,8 +203,49 @@ jobs:
             --ignore=tests/test_spark_integration.py \
             --ignore=tests/test_text_service_integration.py
 
+  rust-bridge:
+    needs: determine-release
+    if: needs.determine-release.outputs.has_changes == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.10"
+          - os: ubuntu-latest
+            python-version: "3.14"
+          - os: macos-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.determine-release.outputs.source_sha }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build and install wheel with published Core
+        shell: bash
+        run: |
+          python -m pip install build
+          python -m build --wheel
+          python -c "import glob, subprocess, sys; wheel = glob.glob('dist/*.whl')[0]; subprocess.check_call([sys.executable, '-m', 'pip', 'install', wheel + '[test,cli,rust]'])"
+          python -m pip check
+      - name: Verify installed wheel
+        run: python -I scripts/check_rust_install.py
+      - name: Test binding integration and compatibility
+        run: python -m pytest tests/test_contract_481.py tests/test_rust_backend.py tests/test_api_bridge_49.py tests/test_rust_contract.py tests/test_core_capability_adapter.py tests/test_core04_integration.py -q
+      - name: Record parity
+        run: python -m tests.rust_contract --output rust-parity.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-rust-parity-${{ matrix.os }}-${{ matrix.python-version }}
+          path: rust-parity.json
+
   publish:
-    needs: [determine-release, test, python314-core]
+    needs: [determine-release, test, python314-core, rust-bridge]
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -180,7 +253,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ needs.determine-release.outputs.target_branch }}
+          ref: ${{ needs.determine-release.outputs.source_sha }}
           token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
@@ -194,12 +267,15 @@ jobs:
           pip install build twine bump2version
 
       - name: Configure git
+        if: inputs.dry_run != true
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
 
       - name: Generate version
         id: version
+        env:
+          VERSION_OVERRIDE: ${{ inputs.version_override }}
         run: |
           set -e
           git fetch --tags
@@ -214,12 +290,16 @@ jobs:
 
           # Strip any pre-release suffix to get base version
           BASE=$(echo "$CURRENT" | sed -E 's/(a|b)[0-9]+([.][0-9A-Za-z]+)?$//')
-          if [ -n "${{ inputs.version_override }}" ]; then
-            BASE="${{ inputs.version_override }}"
+          if [ -n "$VERSION_OVERRIDE" ]; then
+            BASE="$VERSION_OVERRIDE"
             if echo "$BASE" | grep -Eq '(a|b)[0-9]+([.][0-9A-Za-z]+)?$'; then
               echo "version_override must be a stable base version like 4.4.0, not a prerelease"
               exit 1
             fi
+          fi
+          if ! echo "$BASE" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Release base must have numeric major.minor.patch format"
+            exit 1
           fi
           echo "Base version: $BASE"
 
@@ -250,12 +330,16 @@ jobs:
           fi
 
       - name: Generate changelog
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           TYPE="${{ needs.determine-release.outputs.release_type }}"
           if [ "$TYPE" = "alpha" ]; then
             python scripts/generate_changelog.py --alpha --output RELEASE_CHANGELOG.md
           elif [ "$TYPE" = "beta" ]; then
             python scripts/generate_changelog.py --beta --output RELEASE_CHANGELOG.md
+          elif [ -f "RELEASE_NOTES_${VERSION}.md" ]; then
+            cp "RELEASE_NOTES_${VERSION}.md" RELEASE_CHANGELOG.md
           else
             python scripts/generate_changelog.py --output RELEASE_CHANGELOG.md
           fi
@@ -264,6 +348,34 @@ jobs:
         run: |
           python -m build
           python scripts/check_wheel_size.py
+          python -m twine check dist/*
+
+      - name: Verify final versioned wheel with published Core
+        run: |
+          python -c "import glob, subprocess, sys; wheel = glob.glob('dist/*.whl')[0]; subprocess.check_call([sys.executable, '-m', 'pip', 'install', wheel + '[rust]'])"
+          python -m pip check
+          python -I scripts/check_rust_install.py
+
+      - name: Save release artifacts for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.version }}-${{ needs.determine-release.outputs.source_sha }}
+          path: |
+            dist/*
+            RELEASE_CHANGELOG.md
+          if-no-files-found: error
+
+      - name: Verify release branch still matches tested source
+        if: inputs.dry_run != true
+        env:
+          RELEASE_BRANCH: ${{ needs.determine-release.outputs.target_branch }}
+          TESTED_SHA: ${{ needs.determine-release.outputs.source_sha }}
+        run: |
+          git fetch origin "$RELEASE_BRANCH"
+          if [ "$(git rev-parse FETCH_HEAD)" != "$TESTED_SHA" ]; then
+            echo "Release branch changed during validation; rerun against its new head"
+            exit 1
+          fi
 
       - name: Publish to PyPI
         if: inputs.dry_run != true
@@ -284,7 +396,7 @@ jobs:
 
           git add datafog/__about__.py setup.py
           git commit -m "chore: bump version to $VERSION [skip ci]" || echo "No version changes to commit"
-          git push origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
 
           git tag -a "v$VERSION" -m "Release $VERSION"
           git push origin "v$VERSION"

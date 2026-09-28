@@ -1,14 +1,13 @@
 # ChangeLog
 
-## [Unreleased]
+## [4.9.0]
 
 #### Added
 
 - Experimental `datafog[rust]` detection with keyword-only `backend="rust"`
-  on scan/redact entry points; Python remains the default. The follow-up requires
-  `datafog-core>=0.4.0,<0.5` and capability contract 1. Core 0.4.0 is published
-  and registry-wheel validation passed; DataFog Python remains unreleased.
-  ML composition is unchanged.
+  on scan/redact entry points; Python remains the default. Requires
+  `datafog-core>=0.4.0,<0.5` and capability contract 1. The base installation
+  does not install or import Core. ML composition is unchanged.
 - Capability-driven entity and locale discovery, German locale activation,
   explicit UUID activation, and forward-compatible finding labels. Core's
   structured-only PERSON is rejected for explicit Rust text selection.
@@ -42,7 +41,7 @@
 
 - **Redaction token numbering now follows document order**: `redact()`
   previously assigned per-type counters while replacing spans right-to-left,
-  so with multiple entities of the same type the *last* occurrence received
+  so with multiple entities of the same type the _last_ occurrence received
   `_1` (two emails redacted as `[EMAIL_2] ... [EMAIL_1]`). Tokens for the
   `token` and `pseudonymize` strategies are now numbered left-to-right, so
   the first occurrence is always `_1`. This changes redacted output text for
@@ -347,6 +346,7 @@ opt-in. No changes to the core library or its dependencies.
 #### Migration Guide
 
 For users upgrading from v4.1.1:
+
 - All existing functionality remains unchanged
 - To use GLiNER: `pip install datafog[nlp-advanced]`
 - Smart cascading: `TextService(engine="smart")` for best balance

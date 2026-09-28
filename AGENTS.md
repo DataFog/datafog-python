@@ -13,9 +13,9 @@
 
 ## Current Project Status
 
-**Stable version: 4.8.0**
+**Stable version: 4.9.0**
 
-**Development version: 4.8.0**
+**Development version: 4.9.0**
 
 **Next major target: 5.0.0**
 

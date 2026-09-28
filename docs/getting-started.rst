@@ -45,19 +45,20 @@ Optional extras are explicit:
      - ``pip install "datafog[all]"``
      - You are developing or deliberately want every optional surface.
 
-Unreleased 4.9 bridge
-=====================
+4.9.0 migration bridge
+======================
 
-The following APIs are development previews, not a claim that 4.9 is published.
-From a checkout containing the 4.9 implementation, install the explicit Rust
-extra to evaluate them:
+The native API preview and Rust backend are experimental additions in 4.9.0.
+Upgrade the base package with ``python -m pip install --upgrade datafog==4.9.0``
+to keep using Python detection without a native dependency. To evaluate Rust,
+install the optional extra explicitly:
 
 .. code-block:: bash
 
-   python -m pip install -e ".[rust]"
+   python -m pip install --upgrade "datafog[rust]==4.9.0"
 
 The extra requires ``datafog-core>=0.4.0,<0.5`` and capability contract 1.
-Core 0.4.0 is available on PyPI; DataFog Python 4.9 remains unreleased. The extra
+The extra
 does not change the default Python backend, and the existing ``all`` extra does
 not include Rust. To opt in:
 
@@ -162,7 +163,7 @@ The CLI core path is text-first:
    datafog hash-text "Contact jane@example.com"
    datafog redact-text "Steuer-ID 12345678901" --locale de
 
-Image commands are optional and scheduled for deprecation in 4.9 and removal
+Image commands are optional, deprecated in 4.9, and scheduled for removal
 in 5.0. They remain functional in 4.9. Install ``datafog[ocr]`` for local OCR and
 ``datafog[web,ocr]`` when the CLI needs to download image inputs.
 

@@ -188,7 +188,7 @@ scan/redact helpers, or guardrail helpers.
     model.
   - A Java runtime is required by PySpark.
 
-The upcoming 4.9 release deprecates OCR and Spark with visible use-time
+DataFog 4.9.0 deprecates OCR and Spark with visible use-time
 warnings; their APIs and extras will be removed in 5.0. They remain functional
 in 4.9. Users who need these features can stay on the final 4.x release. See
 the [4.9 migration guide](docs/migration-4.9.md) for the transition plan.
@@ -261,9 +261,11 @@ The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
 the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
 `detect`/`process`, OCR, and Spark. The Python detector remains the default.
 
-The unreleased Rust adapter requires Core `>=0.4.0,<0.5` and capability contract 1.
-Core 0.4.0 is available on PyPI; install the development checkout with
-`python -m pip install -e ".[rust]"` to evaluate this unreleased Python adapter.
+The experimental Rust adapter in 4.9.0 requires Core `>=0.4.0,<0.5` and capability
+contract 1. Upgrade with `python -m pip install --upgrade "datafog[rust]==4.9.0"`
+to evaluate it. Base-only users can install `datafog==4.9.0` without Core;
+installing the Rust extra does not change the default backend. See the
+[4.9.0 release notes](RELEASE_NOTES_4.9.0.md).
 Entity labels, locales, and activation settings come from the installed
 Core, allowing compatible releases to add detectors without a Python update.
 German detection is opt-in through locale or entity selection; UUID is opt-in
