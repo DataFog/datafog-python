@@ -70,6 +70,9 @@ pip install datafog[distributed]
 pip install datafog[all]
 ```
 
+The `nlp-advanced` extra includes SentencePiece and protobuf for GLiNER's
+multilingual tokenizer; installing the OCR extra is not required for GLiNER.
+
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
 `nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
 that is available locally before runtime use. `distributed` and `all` remain
