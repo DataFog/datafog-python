@@ -253,6 +253,10 @@ Telemetry does not include input text or detected PII values.
 
 ## Development
 
+The [4.8.1 compatibility contract](docs/migration-4.8.1-contract.md) records
+published Python behavior for the Rust migration, with frozen fixtures and
+instructions for independently reproducing them from the release wheel.
+
 ```bash
 git clone https://github.com/datafog/datafog-python
 cd datafog-python
