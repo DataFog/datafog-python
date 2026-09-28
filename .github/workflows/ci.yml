@@ -40,7 +40,7 @@ jobs:
       - name: Verify installed package outside checkout imports
         run: python -I scripts/check_rust_install.py
       - name: Test compatibility, routing, preview and native parity
-        run: python -m pytest tests/test_contract_481.py tests/test_rust_backend.py tests/test_api_bridge_49.py tests/test_rust_contract.py -q
+        run: python -m pytest tests/test_contract_481.py tests/test_rust_backend.py tests/test_api_bridge_49.py tests/test_rust_contract.py tests/test_core_capability_adapter.py tests/test_core04_integration.py -q
       - name: Generate native parity report
         run: python -m tests.rust_contract --output rust-parity.json
       - uses: actions/upload-artifact@v4

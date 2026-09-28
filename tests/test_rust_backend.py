@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from datafog import engine
+from tests.test_core_capability_adapter import capability_fixture
 
 
 def finding(label, text, start, end):
@@ -23,11 +24,15 @@ def native(monkeypatch):
     calls = []
     findings = []
 
-    def scan(text):
+    def scan(text, config=None):
         calls.append(text)
         return findings
 
-    monkeypatch.setitem(sys.modules, "datafog_core", SimpleNamespace(scan=scan))
+    monkeypatch.setitem(
+        sys.modules,
+        "datafog_core",
+        SimpleNamespace(scan=scan, capabilities=capability_fixture),
+    )
     return findings, calls
 
 
@@ -72,11 +77,11 @@ def test_unknown_selection_preserves_legacy_empty_result(native):
     )
 
 
-def test_unknown_native_label_raises_instead_of_silently_dropping_pii(native):
+def test_unknown_native_label_preserved_without_silently_dropping_pii(native):
     findings, _ = native
     findings.append(finding("FUTURE_LABEL", "example", 0, 7))
-    with pytest.raises(RuntimeError, match="unsupported entity type.*FUTURE_LABEL"):
-        engine.scan("example", "regex", backend="rust")
+    result = engine.scan("example", "regex", backend="rust")
+    assert [item.type for item in result.entities] == ["FUTURE_LABEL"]
 
 
 def test_python_overlap_priority_precedes_selection(native):
@@ -120,22 +125,24 @@ def test_allowlist_validation_before_native(native, pattern):
 
 
 @pytest.mark.parametrize("locale", [["de"], [" DE-DE "], "de_de"])
-def test_german_locales_rejected(native, locale):
+def test_advertised_german_locales_accepted(native, locale):
     _, calls = native
-    with pytest.raises(ValueError, match="German"):
-        engine.scan("", "regex", locales=locale, backend="rust")
-    assert not calls
+    assert not engine.scan("", "regex", locales=locale, backend="rust").entities
+    assert calls == [""]
 
 
-@pytest.mark.parametrize("label", engine.RegexAnnotator.GERMAN_LABELS + ["DE_FUTURE"])
-def test_german_selection_rejected(native, label):
-    with pytest.raises(ValueError, match="German"):
-        engine.scan("", "regex", entity_types=[label.lower()], backend="rust")
+def test_german_selection_is_filtered_after_native_detection(native):
+    findings, _ = native
+    findings.append(finding("DE_IBAN", "DE-example", 0, 10))
+    result = engine.scan(
+        "DE-example", "regex", entity_types=["de_iban"], backend="rust"
+    )
+    assert [item.type for item in result.entities] == ["DE_IBAN"]
 
 
 def test_unknown_locale_validation_preserved(native):
-    with pytest.raises(ValueError, match="locale must be one of"):
-        engine.scan("", "regex", locales=["fr"], backend="rust")
+    with pytest.raises(ValueError, match="locale"):
+        engine.scan("", "regex", locales=["unsupported"], backend="rust")
 
 
 @pytest.mark.parametrize("name", ["smart", "spacy", "gliner"])
@@ -168,10 +175,14 @@ def test_no_native_import_on_python_path_and_actionable_missing_error(monkeypatc
 def test_native_failure_propagates_without_fallback(monkeypatch):
     error = RuntimeError("native failure")
 
-    def fail(text):
+    def fail(text, config=None):
         raise error
 
-    monkeypatch.setitem(sys.modules, "datafog_core", SimpleNamespace(scan=fail))
+    monkeypatch.setitem(
+        sys.modules,
+        "datafog_core",
+        SimpleNamespace(scan=fail, capabilities=capability_fixture),
+    )
     with pytest.raises(RuntimeError) as caught:
         engine.scan("a@example.com", "regex", backend="rust")
     assert caught.value is error

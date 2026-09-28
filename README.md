@@ -261,6 +261,17 @@ The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
 the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
 `detect`/`process`, OCR, and Spark. The Python detector remains the default.
 
+The unreleased Rust adapter requires Core `>=0.4.0,<0.5` and capability contract 1.
+Core 0.4.0 is available on PyPI; install the development checkout with
+`python -m pip install -e ".[rust]"` to evaluate this unreleased Python adapter.
+Entity labels, locales, and activation settings come from the installed
+Core, allowing compatible releases to add detectors without a Python update.
+German detection is opt-in through locale or entity selection; UUID is opt-in
+through `entity_types=["UUID"]`. Core's structured-only `PERSON` is unavailable
+for explicit Rust text selection. The legacy overlap policy can suppress NPI in
+favor of PHONE; the migration guide explains native alternatives. Lock the Core
+version if detection output must remain reproducible.
+
 The [4.8.1 compatibility contract](docs/migration-4.8.1-contract.md) records
 published Python behavior for the Rust migration, with frozen fixtures and
 instructions for independently reproducing them from the release wheel.

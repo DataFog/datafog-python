@@ -1,4 +1,4 @@
-"""Compare applicable 4.8.1 observations with the opt-in published Rust backend."""
+"""Compare applicable 4.8.1 observations with the opt-in Rust backend."""
 
 import argparse
 import copy
@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tests.contract_481 import FIXTURE, observe
 
-DEVIATIONS = Path(__file__).parent / "contracts" / "rust-0.3.1.json"
+DEVIATIONS = Path(__file__).parent / "contracts" / "rust-0.4.0.json"
 TARGETS = {
     "datafog:scan",
     "datafog:redact",

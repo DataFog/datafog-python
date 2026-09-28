@@ -15,10 +15,14 @@ CASES = [case for case in CONTRACT["cases"] if applicable(case)]
 
 
 def test_native_version_and_review_inventory():
-    assert importlib.metadata.version("datafog-core") == REVIEWED["core_version"]
+    assert importlib.metadata.version("datafog-core").startswith("0.4.")
     assert set(REVIEWED["cases"]) <= {case["id"] for case in CASES}
     for item in REVIEWED["cases"].values():
-        assert item["classification"] in {"unsupported", "detector-difference"}
+        assert item["classification"] in {
+            "unsupported",
+            "detector-difference",
+            "validation-difference",
+        }
         assert item["reason"]
 
 

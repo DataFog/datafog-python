@@ -220,14 +220,6 @@ def _rust_entities(
     suppression before entity selection and allowlists, preserving that order
     without duplicating the native detectors.
     """
-    normalized_locales = RegexAnnotator._normalize_locales(locales)
-    requested = {_canonical_type(value) for value in entity_types or []}
-    if normalized_locales or any(value.startswith("DE_") for value in requested):
-        raise ValueError(
-            "backend='rust' does not yet support German locales or DE_* entity "
-            "types; use backend='python' for German detection"
-        )
-
     try:
         import datafog_core
     except ImportError as exc:
@@ -236,26 +228,31 @@ def _rust_entities(
             'Install with: pip install "datafog[rust]"'
         ) from exc
 
+    from ._core_capabilities import scan_configs
+
+    requested = {_canonical_type(value) for value in entity_types or []}
+    configs = scan_configs(datafog_core, requested, locales)
     entities: list[Entity] = []
-    for finding in datafog_core.scan(text):
-        canonical_type = _canonical_type(finding.entity_type)
-        if canonical_type not in ALL_ENTITY_TYPES:
-            raise RuntimeError(
-                f"Rust backend returned unsupported entity type: "
-                f"{finding.entity_type!r}; check the installed datafog-core version"
+    seen: set[tuple[str, int, int]] = set()
+    for config in configs:
+        for finding in datafog_core.scan(text, config=config):
+            canonical_type = _canonical_type(finding.entity_type)
+            start = finding.codepoint_range.start
+            end = finding.codepoint_range.end
+            key = (canonical_type, start, end)
+            if key in seen or not finding.matched_text.strip():
+                continue
+            seen.add(key)
+            entities.append(
+                Entity(
+                    type=canonical_type,
+                    text=finding.matched_text,
+                    start=start,
+                    end=end,
+                    confidence=1.0,
+                    engine="regex",
+                )
             )
-        if not finding.matched_text.strip():
-            continue
-        entities.append(
-            Entity(
-                type=canonical_type,
-                text=finding.matched_text,
-                start=finding.codepoint_range.start,
-                end=finding.codepoint_range.end,
-                confidence=1.0,
-                engine="regex",
-            )
-        )
     return _suppress_overlapping_entities(entities)
 
 

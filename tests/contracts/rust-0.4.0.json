@@ -1,0 +1,46 @@
+{
+  "core_version": "0.4.0",
+  "cases": {
+    "scan-observation-invalid-card": {
+      "classification": "detector-difference",
+      "reason": "Core validates card checksums; Python 4.8.1 accepts this card-shaped value. Experimental precision difference, not a claim of full parity.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "4111 1111 1111 1112",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    "scan-observation-boundary": {
+      "classification": "detector-difference",
+      "reason": "Core rejects the SSN embedded in an ASCII alphanumeric token; Python 4.8.1 detects the numeric substring.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "x123-45-6789y",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    "locale-unknown": {
+      "classification": "validation-difference",
+      "reason": "The capability adapter rejects the unadvertised locale with a backend-specific diagnostic instead of the Python regex locale inventory. The exception remains ValueError.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "Unsupported locale for the Rust backend: 'xx'"
+        },
+        "warnings": []
+      }
+    }
+  }
+}

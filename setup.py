@@ -84,7 +84,7 @@ benchmark_deps = [
 ]
 
 extras_require = {
-    "rust": ["datafog-core==0.3.1"],
+    "rust": ["datafog-core>=0.4.0,<0.5"],
     "nlp": nlp_deps,
     "nlp-advanced": nlp_advanced_deps,
     "ocr": ocr_deps,

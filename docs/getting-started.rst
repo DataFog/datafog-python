@@ -56,8 +56,10 @@ extra to evaluate them:
 
    python -m pip install -e ".[rust]"
 
-The extra pins ``datafog-core==0.3.1``. It does not change the default Python
-backend, and the existing ``all`` extra does not include Rust. To opt in:
+The extra requires ``datafog-core>=0.4.0,<0.5`` and capability contract 1.
+Core 0.4.0 is available on PyPI; DataFog Python 4.9 remains unreleased. The extra
+does not change the default Python backend, and the existing ``all`` extra does
+not include Rust. To opt in:
 
 .. code-block:: python
 
@@ -66,10 +68,17 @@ backend, and the existing ``all`` extra does not include Rust. To opt in:
    result = datafog.scan("Contact jane@example.com", engine="regex", backend="rust")
    print(result.entities)
 
-Only ``engine="regex"`` supports this backend. German locales and ``DE_*`` entity
-selections are unsupported by the pinned Core version and explicitly rejected
-by the legacy Rust adapter; use the Python backend for German detection. Other
-detector differences remain, so this is an experimental comparison path.
+Only ``engine="regex"`` supports this backend. The adapter discovers entities and
+activation settings from Core capabilities. German detection is enabled by
+``locales=["de"]`` (also ``de-DE`` or ``de_DE``), or explicit German entity
+selection. ``en-US`` and ``fr`` are accepted base-only locales; other explicit
+locales fail validation. Select ``entity_types=["UUID"]`` to enable UUID.
+Core's structured-only ``PERSON`` cannot be explicitly selected for text scanning.
+
+Future Core labels pass through, but detection output may change across compatible
+updates. The preserved legacy overlap policy may retain ``PHONE`` instead of a
+same-span ``NPI``, including when filtering for NPI. See the migration guide for
+this limitation and native alternatives.
 
 For native Core types use ``datafog.v5``; for the explicit legacy facade use
 ``datafog.compat.v4``. See :doc:`python-sdk` and the
