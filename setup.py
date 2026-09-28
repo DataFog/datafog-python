@@ -34,6 +34,8 @@ nlp_advanced_deps = [
     "torch>=2.1.0,<2.7",
     "transformers>=4.20.0",
     "huggingface-hub>=0.16.0",
+    "sentencepiece>=0.2.0",
+    "protobuf>=4.0.0",
 ]
 
 ocr_deps = [

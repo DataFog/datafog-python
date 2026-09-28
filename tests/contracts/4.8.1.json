@@ -1,0 +1,4329 @@
+{
+  "schema_version": 1,
+  "provenance": {
+    "distribution": "datafog",
+    "version": "4.8.1",
+    "filename": "datafog-4.8.1-py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/80/b5/93063b6df06da145aeef015aaf4a74764c96e16201ec08c412a0a813b800/datafog-4.8.1-py3-none-any.whl",
+    "sha256": "d91cfb6d93568c9d073ca3ec93b492d29195f44828584556bd7bc443d3347040",
+    "uploaded_at": "2026-07-28T00:10:58.733942Z"
+  },
+  "cases": [
+    {
+      "id": "scan-empty",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": ""
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-negative",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "The quick brown fox jumps over the lazy dog."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "The quick brown fox jumps over the lazy dog.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-email",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Email alice@example.com."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 6,
+                  "end": 23,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Email alice@example.com.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-phone",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Call (555) 123-4567."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "(555) 123-4567",
+                  "start": 5,
+                  "end": 19,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Call (555) 123-4567.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-ssn",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "SSN 123-45-6789."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 4,
+                  "end": 15,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "SSN 123-45-6789.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-card",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Card 4111 1111 1111 1111."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "CREDIT_CARD",
+                  "text": "4111 1111 1111 1111",
+                  "start": 5,
+                  "end": 24,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Card 4111 1111 1111 1111.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-ip",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Host 192.168.1.1."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "IP_ADDRESS",
+                  "text": "192.168.1.1",
+                  "start": 5,
+                  "end": 16,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Host 192.168.1.1.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-date",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Born 01/15/1990."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DATE",
+                  "text": "01/15/1990",
+                  "start": 5,
+                  "end": 15,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Born 01/15/1990.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-zip",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "ZIP 94105."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "ZIP_CODE",
+                  "text": "94105",
+                  "start": 4,
+                  "end": 9,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "ZIP 94105.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-unicode",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "👩🏽‍💻 é 中文 alice@example.com\r\nBob bob@example.org"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 11,
+                  "end": 28,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "bob@example.org",
+                  "start": 34,
+                  "end": 49,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "👩🏽‍💻 é 中文 alice@example.com\r\nBob bob@example.org",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-repeated",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com then alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 23,
+                  "end": 40,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com then alice@example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-mixed",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com; 123-45-6789; (555) 123-4567; 4111 1111 1111 1111; 192.168.1.1; 01/15/1990; 94105"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 19,
+                  "end": 30,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "(555) 123-4567",
+                  "start": 32,
+                  "end": 46,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "CREDIT_CARD",
+                  "text": "4111 1111 1111 1111",
+                  "start": 48,
+                  "end": 67,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "IP_ADDRESS",
+                  "text": "192.168.1.1",
+                  "start": 69,
+                  "end": 80,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DATE",
+                  "text": "01/15/1990",
+                  "start": 82,
+                  "end": 92,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "ZIP_CODE",
+                  "text": "94105",
+                  "start": 94,
+                  "end": 99,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com; 123-45-6789; (555) 123-4567; 4111 1111 1111 1111; 192.168.1.1; 01/15/1990; 94105",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-observation-invalid-email",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@ and @example.com"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "alice@ and @example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-observation-invalid-ip",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "999.999.999.999"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "999.999.999.999",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-observation-invalid-card",
+      "classification": "review-required",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "4111 1111 1111 1112"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "CREDIT_CARD",
+                  "text": "4111 1111 1111 1112",
+                  "start": 0,
+                  "end": 19,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "4111 1111 1111 1112",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-observation-boundary",
+      "classification": "review-required",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "x123-45-6789y"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 1,
+                  "end": 12,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "x123-45-6789y",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "scan-observation-ambiguous-number",
+      "classification": "review-required",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Invoice 1234567890"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "1234567890",
+                  "start": 8,
+                  "end": 18,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Invoice 1234567890",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "selection-email",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+        "entity_types": ["EMAIL"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "selection-aliases",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+        "entity_types": [
+          "EMAIL_ADDRESS",
+          "US_SSN",
+          "PHONE_NUMBER",
+          "DOB",
+          "ZIP"
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 18,
+                  "end": 29,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "(555) 123-4567",
+                  "start": 30,
+                  "end": 44,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DATE",
+                  "text": "01/15/1990",
+                  "start": 45,
+                  "end": 55,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "ZIP_CODE",
+                  "text": "94105",
+                  "start": 56,
+                  "end": 61,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "selection-normalized",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+        "entity_types": [" email_address "]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "selection-unknown",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+        "entity_types": ["NOT_A_TYPE"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "selection-empty",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+        "entity_types": []
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 18,
+                  "end": 29,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "(555) 123-4567",
+                  "start": 30,
+                  "end": 44,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DATE",
+                  "text": "01/15/1990",
+                  "start": 45,
+                  "end": 55,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "ZIP_CODE",
+                  "text": "94105",
+                  "start": 56,
+                  "end": 61,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com 123-45-6789 (555) 123-4567 01/15/1990 94105",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "allowlist-exact",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com bob@example.org alice@example.com",
+        "allowlist": ["alice@example.com"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "bob@example.org",
+                  "start": 18,
+                  "end": 33,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com bob@example.org alice@example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "allowlist-case-sensitive",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com bob@example.org alice@example.com",
+        "allowlist": ["ALICE@example.com"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "bob@example.org",
+                  "start": 18,
+                  "end": 33,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 34,
+                  "end": 51,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com bob@example.org alice@example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "allowlist-regex",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com bob@example.org alice@example.com",
+        "allowlist_patterns": [".+@example\\.com"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "bob@example.org",
+                  "start": 18,
+                  "end": 33,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com bob@example.org alice@example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "allowlist-full-match",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com bob@example.org alice@example.com",
+        "allowlist_patterns": ["example"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "bob@example.org",
+                  "start": 18,
+                  "end": 33,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 34,
+                  "end": 51,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com bob@example.org alice@example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "allowlist-combined",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com bob@example.org alice@example.com",
+        "allowlist": ["alice@example.com"],
+        "allowlist_patterns": [".+@example\\.org"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "alice@example.com bob@example.org alice@example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-default-DE_VAT_ID",
+      "classification": "review-required",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "USt-IdNr DE 123456789 ist gesetzt."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123456789",
+                  "start": 12,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "USt-IdNr DE 123456789 ist gesetzt.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-de-DE_VAT_ID",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "USt-IdNr DE 123456789 ist gesetzt.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_VAT_ID",
+                  "text": "DE 123456789",
+                  "start": 9,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "USt-IdNr DE 123456789 ist gesetzt.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-explicit-DE_VAT_ID",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "USt-IdNr DE 123456789 ist gesetzt.",
+        "entity_types": ["DE_VAT_ID"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_VAT_ID",
+                  "text": "DE 123456789",
+                  "start": 9,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "USt-IdNr DE 123456789 ist gesetzt.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-default-DE_IBAN",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "IBAN DE44 5001 0517 5407 3249 31 ist gueltig."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "IBAN DE44 5001 0517 5407 3249 31 ist gueltig.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-de-DE_IBAN",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "IBAN DE44 5001 0517 5407 3249 31 ist gueltig.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_IBAN",
+                  "text": "DE44 5001 0517 5407 3249 31",
+                  "start": 5,
+                  "end": 32,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "IBAN DE44 5001 0517 5407 3249 31 ist gueltig.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-explicit-DE_IBAN",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "IBAN DE44 5001 0517 5407 3249 31 ist gueltig.",
+        "entity_types": ["DE_IBAN"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_IBAN",
+                  "text": "DE44 5001 0517 5407 3249 31",
+                  "start": 5,
+                  "end": 32,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "IBAN DE44 5001 0517 5407 3249 31 ist gueltig.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-default-DE_TAX_ID",
+      "classification": "review-required",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Steuer-ID 12345678901 liegt vor."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "12345678901",
+                  "start": 10,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Steuer-ID 12345678901 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-de-DE_TAX_ID",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Steuer-ID 12345678901 liegt vor.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_TAX_ID",
+                  "text": "12345678901",
+                  "start": 10,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Steuer-ID 12345678901 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-explicit-DE_TAX_ID",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Steuer-ID 12345678901 liegt vor.",
+        "entity_types": ["DE_TAX_ID"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_TAX_ID",
+                  "text": "12345678901",
+                  "start": 10,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Steuer-ID 12345678901 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-default-DE_SOCIAL_SECURITY_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Rentenversicherungsnummer 65150804A123 liegt vor."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "Rentenversicherungsnummer 65150804A123 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-de-DE_SOCIAL_SECURITY_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Rentenversicherungsnummer 65150804A123 liegt vor.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_SOCIAL_SECURITY_NUMBER",
+                  "text": "65150804A123",
+                  "start": 26,
+                  "end": 38,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Rentenversicherungsnummer 65150804A123 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-explicit-DE_SOCIAL_SECURITY_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Rentenversicherungsnummer 65150804A123 liegt vor.",
+        "entity_types": ["DE_SOCIAL_SECURITY_NUMBER"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_SOCIAL_SECURITY_NUMBER",
+                  "text": "65150804A123",
+                  "start": 26,
+                  "end": 38,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Rentenversicherungsnummer 65150804A123 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-default-DE_POSTAL_CODE",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "PLZ10115 Berlin."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "PLZ10115 Berlin.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-de-DE_POSTAL_CODE",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "PLZ10115 Berlin.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_POSTAL_CODE",
+                  "text": "PLZ10115",
+                  "start": 0,
+                  "end": 8,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "PLZ10115 Berlin.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-explicit-DE_POSTAL_CODE",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "PLZ10115 Berlin.",
+        "entity_types": ["DE_POSTAL_CODE"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_POSTAL_CODE",
+                  "text": "PLZ10115",
+                  "start": 0,
+                  "end": 8,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "PLZ10115 Berlin.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-default-DE_PASSPORT_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Passnummer C12345678 wurde geprueft."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "Passnummer C12345678 wurde geprueft.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-de-DE_PASSPORT_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Passnummer C12345678 wurde geprueft.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_PASSPORT_NUMBER",
+                  "text": "C12345678",
+                  "start": 11,
+                  "end": 20,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Passnummer C12345678 wurde geprueft.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-explicit-DE_PASSPORT_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Passnummer C12345678 wurde geprueft.",
+        "entity_types": ["DE_PASSPORT_NUMBER"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_PASSPORT_NUMBER",
+                  "text": "C12345678",
+                  "start": 11,
+                  "end": 20,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Passnummer C12345678 wurde geprueft.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-default-DE_RESIDENCE_PERMIT_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Aufenthaltstitel AT1234567 gueltig."
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "Aufenthaltstitel AT1234567 gueltig.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-de-DE_RESIDENCE_PERMIT_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Aufenthaltstitel AT1234567 gueltig.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_RESIDENCE_PERMIT_NUMBER",
+                  "text": "AT1234567",
+                  "start": 17,
+                  "end": 26,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Aufenthaltstitel AT1234567 gueltig.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-explicit-DE_RESIDENCE_PERMIT_NUMBER",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Aufenthaltstitel AT1234567 gueltig.",
+        "entity_types": ["DE_RESIDENCE_PERMIT_NUMBER"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_RESIDENCE_PERMIT_NUMBER",
+                  "text": "AT1234567",
+                  "start": 17,
+                  "end": 26,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Aufenthaltstitel AT1234567 gueltig.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-negative-context",
+      "classification": "review-required",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Invoice 12345678901; Ticket A12345678; Order AT1234567.",
+        "locales": ["de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "12345678901",
+                  "start": 8,
+                  "end": 19,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Invoice 12345678901; Ticket A12345678; Order AT1234567.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-unknown",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com",
+        "locales": ["xx"]
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "locale must be one of: de, de-de, de_de"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-token",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com 123-45-6789",
+        "strategy": "token"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2] [EMAIL_3] [SSN_1]",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com",
+              "[EMAIL_2]": "b@example.com",
+              "[EMAIL_3]": "a@example.com",
+              "[SSN_1]": "123-45-6789"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 42,
+                  "end": 53,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "engine-redact-token",
+      "classification": "compatibility",
+      "target": "datafog.engine:scan_and_redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com",
+        "strategy": "token",
+        "engine": "regex"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2] [EMAIL_3]",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com",
+              "[EMAIL_2]": "b@example.com",
+              "[EMAIL_3]": "a@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-mask",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com 123-45-6789",
+        "strategy": "mask"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "************* ************* ************* ***********",
+            "mapping": {
+              "[EMAIL_MASK_1]": "a@example.com",
+              "[EMAIL_MASK_2]": "b@example.com",
+              "[EMAIL_MASK_3]": "a@example.com",
+              "[SSN_MASK_1]": "123-45-6789"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 42,
+                  "end": 53,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "engine-redact-mask",
+      "classification": "compatibility",
+      "target": "datafog.engine:scan_and_redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com",
+        "strategy": "mask",
+        "engine": "regex"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "************* ************* *************",
+            "mapping": {
+              "[EMAIL_MASK_1]": "a@example.com",
+              "[EMAIL_MASK_2]": "b@example.com",
+              "[EMAIL_MASK_3]": "a@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-hash",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com 123-45-6789",
+        "strategy": "hash"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_08168cd80dfd] [EMAIL_e8f39b3e1382] [EMAIL_08168cd80dfd] [SSN_01a54629efb9]",
+            "mapping": {
+              "[EMAIL_08168cd80dfd]": "a@example.com",
+              "[EMAIL_e8f39b3e1382]": "b@example.com",
+              "[SSN_01a54629efb9]": "123-45-6789"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 42,
+                  "end": 53,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "engine-redact-hash",
+      "classification": "compatibility",
+      "target": "datafog.engine:scan_and_redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com",
+        "strategy": "hash",
+        "engine": "regex"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_08168cd80dfd] [EMAIL_e8f39b3e1382] [EMAIL_08168cd80dfd]",
+            "mapping": {
+              "[EMAIL_08168cd80dfd]": "a@example.com",
+              "[EMAIL_e8f39b3e1382]": "b@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-pseudonymize",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com 123-45-6789",
+        "strategy": "pseudonymize"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_PSEUDO_1] [EMAIL_PSEUDO_2] [EMAIL_PSEUDO_1] [SSN_PSEUDO_1]",
+            "mapping": {
+              "[EMAIL_PSEUDO_1]": "a@example.com",
+              "[EMAIL_PSEUDO_2]": "b@example.com",
+              "[SSN_PSEUDO_1]": "123-45-6789"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 42,
+                  "end": 53,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "engine-redact-pseudonymize",
+      "classification": "compatibility",
+      "target": "datafog.engine:scan_and_redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com a@example.com",
+        "strategy": "pseudonymize",
+        "engine": "regex"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_PSEUDO_1] [EMAIL_PSEUDO_2] [EMAIL_PSEUDO_1]",
+            "mapping": {
+              "[EMAIL_PSEUDO_1]": "a@example.com",
+              "[EMAIL_PSEUDO_2]": "b@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-unicode",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "👩🏽‍💻 é 中文 alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "👩🏽‍💻 é 中文 [EMAIL_1]",
+            "mapping": {
+              "[EMAIL_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 11,
+                  "end": 28,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-empty",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": ""
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "",
+            "mapping": {},
+            "entities": []
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-allowlist",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com bob@example.org",
+        "allowlist": ["alice@example.com"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "alice@example.com [EMAIL_1]",
+            "mapping": {
+              "[EMAIL_1]": "bob@example.org"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "bob@example.org",
+                  "start": 18,
+                  "end": 33,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "preset-default",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "preset": "default"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1]",
+            "mapping": {
+              "[EMAIL_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "preset-llm",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "preset": "llm"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1]",
+            "mapping": {
+              "[EMAIL_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "preset-mask",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "preset": "mask"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "*****************",
+            "mapping": {
+              "[EMAIL_MASK_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "preset-hash",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "preset": "hash"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_ff8d9819fc0e]",
+            "mapping": {
+              "[EMAIL_ff8d9819fc0e]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "preset-replace",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "preset": "replace"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_PSEUDO_1]",
+            "mapping": {
+              "[EMAIL_PSEUDO_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "preset-pseudonymize",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "preset": "pseudonymize"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_PSEUDO_1]",
+            "mapping": {
+              "[EMAIL_PSEUDO_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-unsorted",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "b@example.com",
+            "start": 14,
+            "end": 27,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2]",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com",
+              "[EMAIL_2]": "b@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-duplicates",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "b@example.com",
+            "start": 14,
+            "end": 27,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2]",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com",
+              "[EMAIL_2]": "b@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-empty",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": []
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "a@example.com b@example.com",
+            "mapping": {},
+            "entities": []
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-overlap",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "PHONE",
+            "text": "example.",
+            "start": 2,
+            "end": 10,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "b@example.com",
+            "start": 14,
+            "end": 27,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2]",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com",
+              "[EMAIL_2]": "b@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-type-priority",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "PHONE",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[PHONE_1] b@example.com",
+            "mapping": {
+              "[PHONE_1]": "a@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PHONE",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-confidence-tie",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 0.5,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] b@example.com",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-adjacent",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "abcd",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "ab",
+            "start": 0,
+            "end": 2,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "cd",
+            "start": 2,
+            "end": 4,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1][EMAIL_2]",
+            "mapping": {
+              "[EMAIL_1]": "ab",
+              "[EMAIL_2]": "cd"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "ab",
+                  "start": 0,
+                  "end": 2,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "cd",
+                  "start": 2,
+                  "end": 4,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-invalid-bounds",
+      "classification": "review-required",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "",
+            "start": -1,
+            "end": 5,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "a@example.com b@example.com",
+            "start": 0,
+            "end": 100,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "",
+            "start": 3,
+            "end": 3,
+            "confidence": 1.0,
+            "engine": "regex"
+          },
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] b@example.com",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "explicit-mismatched-text",
+      "classification": "review-required",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "wrong@example.org",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] b@example.com",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "wrong@example.org",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-non-string",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": null
+      },
+      "expected": {
+        "error": {
+          "type": "TypeError",
+          "message": "text must be a string"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-invalid-engine",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "test",
+        "engine": "unknown"
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "engine must be one of: regex, spacy, gliner, smart"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-invalid-pattern",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "",
+        "allowlist_patterns": ["["]
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "allowlist_patterns contains an invalid regex: '[' (unterminated character set at position 0)"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-unsafe-pattern",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "",
+        "allowlist_patterns": ["(a+)+"]
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "allowlist_patterns contains a quantified group with a nested quantifier ('(a+)+'), which risks catastrophic backtracking; rewrite the pattern without nesting quantifiers"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-oversized-pattern",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "",
+        "allowlist_patterns": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ]
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "allowlist_patterns entries must be at most 512 characters"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-strategy",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "strategy": "tokenize"
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "strategy must be one of: token, mask, hash, pseudonymize"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-preset",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "alice@example.com",
+        "preset": "unknown"
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "preset must be one of: default, hash, llm, mask, pseudonymize, replace"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-explicit-allowlist",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ],
+        "allowlist": ["a@example.com"]
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "allowlist/allowlist_patterns cannot be combined with explicit entities; filter the entities before calling redact"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "error-explicit-pattern",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "a@example.com b@example.com",
+        "entities": [
+          {
+            "type": "EMAIL",
+            "text": "a@example.com",
+            "start": 0,
+            "end": 13,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ],
+        "allowlist_patterns": [".*"]
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "allowlist/allowlist_patterns cannot be combined with explicit entities; filter the entities before calling redact"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "facade-sanitize",
+      "classification": "compatibility",
+      "target": "datafog:sanitize",
+      "kwargs": {
+        "text": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": "[EMAIL_1] [EMAIL_2]",
+        "warnings": []
+      }
+    },
+    {
+      "id": "facade-filter_output",
+      "classification": "compatibility",
+      "target": "datafog:filter_output",
+      "kwargs": {
+        "output": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2]",
+            "mapping": {
+              "[EMAIL_1]": "alice@example.com",
+              "[EMAIL_2]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 18,
+                  "end": 35,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "facade-scan_prompt",
+      "classification": "compatibility",
+      "target": "datafog:scan_prompt",
+      "kwargs": {
+        "prompt": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 18,
+                  "end": 35,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com alice@example.com",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "facade-detect",
+      "classification": "compatibility",
+      "target": "datafog:detect",
+      "kwargs": {
+        "text": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": [
+          {
+            "type": "EMAIL",
+            "value": "alice@example.com",
+            "start": 0,
+            "end": 17
+          },
+          {
+            "type": "EMAIL",
+            "value": "alice@example.com",
+            "start": 18,
+            "end": 35
+          }
+        ],
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.detect() is deprecated for v5. Use datafog.scan() instead. This compatibility shim will remain through the v5.x line."
+          }
+        ]
+      }
+    },
+    {
+      "id": "facade-detect_pii",
+      "classification": "compatibility",
+      "target": "datafog:detect_pii",
+      "kwargs": {
+        "text": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "EMAIL": ["alice@example.com", "alice@example.com"]
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "facade-scan_text",
+      "classification": "compatibility",
+      "target": "datafog:scan_text",
+      "kwargs": {
+        "text": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": true,
+        "warnings": []
+      }
+    },
+    {
+      "id": "facade-anonymize_text",
+      "classification": "compatibility",
+      "target": "datafog:anonymize_text",
+      "kwargs": {
+        "text": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": "[EMAIL_1] [EMAIL_2]",
+        "warnings": []
+      }
+    },
+    {
+      "id": "facade-process",
+      "classification": "compatibility",
+      "target": "datafog:process",
+      "kwargs": {
+        "text": "alice@example.com alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "original": "alice@example.com alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            },
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 18,
+              "end": 35
+            }
+          ]
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated for v5. Use datafog.scan() or datafog.redact() instead. This compatibility shim will remain through the v5.x line."
+          }
+        ]
+      }
+    },
+    {
+      "id": "process-redact",
+      "classification": "compatibility",
+      "target": "datafog:process",
+      "kwargs": {
+        "text": "alice@example.com",
+        "method": "redact",
+        "anonymize": true
+      },
+      "expected": {
+        "value": {
+          "original": "alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            }
+          ],
+          "anonymized": "[EMAIL_REDACTED]"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated for v5. Use datafog.scan() or datafog.redact() instead. This compatibility shim will remain through the v5.x line."
+          }
+        ]
+      }
+    },
+    {
+      "id": "process-replace",
+      "classification": "compatibility",
+      "target": "datafog:process",
+      "kwargs": {
+        "text": "alice@example.com",
+        "method": "replace",
+        "anonymize": true
+      },
+      "expected": {
+        "value": {
+          "original": "alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            }
+          ],
+          "anonymized": "[EMAIL_XXXXX]"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated for v5. Use datafog.scan() or datafog.redact() instead. This compatibility shim will remain through the v5.x line."
+          }
+        ]
+      }
+    },
+    {
+      "id": "process-hash",
+      "classification": "compatibility",
+      "target": "datafog:process",
+      "kwargs": {
+        "text": "alice@example.com",
+        "method": "hash",
+        "anonymize": true
+      },
+      "expected": {
+        "value": {
+          "original": "alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            }
+          ],
+          "anonymized": "[EMAIL_c160f8cc]"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated for v5. Use datafog.scan() or datafog.redact() instead. This compatibility shim will remain through the v5.x line."
+          }
+        ]
+      }
+    },
+    {
+      "id": "process-invalid",
+      "classification": "review-required",
+      "target": "datafog:process",
+      "kwargs": {
+        "text": "alice@example.com",
+        "method": "invalid",
+        "anonymize": true
+      },
+      "expected": {
+        "value": {
+          "original": "alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            }
+          ],
+          "anonymized": "[EMAIL]"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated for v5. Use datafog.scan() or datafog.redact() instead. This compatibility shim will remain through the v5.x line."
+          }
+        ]
+      }
+    },
+    {
+      "id": "guardrail-redact",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "operation": "guardrail",
+      "method": "filter",
+      "constructor": {
+        "on_detect": "redact"
+      },
+      "kwargs": {
+        "text": "alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1]",
+            "mapping": {
+              "[EMAIL_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "guardrail-block",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "operation": "guardrail",
+      "method": "filter",
+      "constructor": {
+        "on_detect": "block"
+      },
+      "kwargs": {
+        "text": "alice@example.com"
+      },
+      "expected": {
+        "error": {
+          "type": "GuardrailBlockedError",
+          "message": "Guardrail blocked text containing 1 PII entities."
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "guardrail-clean",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "operation": "guardrail",
+      "method": "filter",
+      "constructor": {
+        "on_detect": "block"
+      },
+      "kwargs": {
+        "text": "nothing sensitive here"
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "nothing sensitive here",
+            "mapping": {},
+            "entities": []
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "service-default",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "operation": "service",
+      "constructor": {},
+      "method": "annotate_text_sync",
+      "kwargs": {
+        "text": "alice@example.com"
+      },
+      "expected": {
+        "value": {
+          "EMAIL": ["alice@example.com"],
+          "PHONE": [],
+          "SSN": [],
+          "CREDIT_CARD": [],
+          "IP_ADDRESS": [],
+          "DOB": [],
+          "ZIP": [],
+          "DE_VAT_ID": [],
+          "DE_IBAN": [],
+          "DE_TAX_ID": [],
+          "DE_SOCIAL_SECURITY_NUMBER": [],
+          "DE_POSTAL_CODE": [],
+          "DE_PASSPORT_NUMBER": [],
+          "DE_RESIDENCE_PERMIT_NUMBER": []
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "service-german",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "operation": "service",
+      "constructor": {
+        "locales": ["de"]
+      },
+      "method": "annotate_text_sync",
+      "kwargs": {
+        "text": "Steuer-ID 12345678901 liegt vor."
+      },
+      "expected": {
+        "value": {
+          "EMAIL": [],
+          "PHONE": ["12345678901"],
+          "SSN": [],
+          "CREDIT_CARD": [],
+          "IP_ADDRESS": [],
+          "DOB": [],
+          "ZIP": [],
+          "DE_VAT_ID": [],
+          "DE_IBAN": [],
+          "DE_TAX_ID": ["12345678901"],
+          "DE_SOCIAL_SECURITY_NUMBER": [],
+          "DE_POSTAL_CODE": [],
+          "DE_PASSPORT_NUMBER": [],
+          "DE_RESIDENCE_PERMIT_NUMBER": []
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "service-batch",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "operation": "service",
+      "constructor": {},
+      "method": "batch_annotate_text_sync",
+      "kwargs": {
+        "texts": ["alice@example.com", "no pii"]
+      },
+      "expected": {
+        "value": [
+          {
+            "EMAIL": ["alice@example.com"],
+            "PHONE": [],
+            "SSN": [],
+            "CREDIT_CARD": [],
+            "IP_ADDRESS": [],
+            "DOB": [],
+            "ZIP": [],
+            "DE_VAT_ID": [],
+            "DE_IBAN": [],
+            "DE_TAX_ID": [],
+            "DE_SOCIAL_SECURITY_NUMBER": [],
+            "DE_POSTAL_CODE": [],
+            "DE_PASSPORT_NUMBER": [],
+            "DE_RESIDENCE_PERMIT_NUMBER": []
+          },
+          {
+            "EMAIL": [],
+            "PHONE": [],
+            "SSN": [],
+            "CREDIT_CARD": [],
+            "IP_ADDRESS": [],
+            "DOB": [],
+            "ZIP": [],
+            "DE_VAT_ID": [],
+            "DE_IBAN": [],
+            "DE_TAX_ID": [],
+            "DE_SOCIAL_SECURITY_NUMBER": [],
+            "DE_POSTAL_CODE": [],
+            "DE_PASSPORT_NUMBER": [],
+            "DE_RESIDENCE_PERMIT_NUMBER": []
+          }
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "public-signatures",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "operation": "schema",
+      "targets": [
+        "datafog:scan",
+        "datafog:redact",
+        "datafog:protect",
+        "datafog:detect",
+        "datafog:process",
+        "datafog:sanitize",
+        "datafog:scan_prompt",
+        "datafog:filter_output",
+        "datafog:create_guardrail",
+        "datafog.engine:Entity",
+        "datafog.engine:ScanResult",
+        "datafog.engine:RedactResult",
+        "datafog.engine:scan",
+        "datafog.engine:redact",
+        "datafog.engine:scan_and_redact"
+      ],
+      "expected": {
+        "value": {
+          "datafog:scan": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog:redact": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "preset",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog:protect": {
+            "parameters": [
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "on_detect",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "redact"
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog:detect": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:process": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "anonymize",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": false
+              },
+              {
+                "name": "method",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "redact"
+              }
+            ]
+          },
+          "datafog:sanitize": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "kwargs",
+                "kind": "VAR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:scan_prompt": {
+            "parameters": [
+              {
+                "name": "prompt",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "kwargs",
+                "kind": "VAR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:filter_output": {
+            "parameters": [
+              {
+                "name": "output",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "kwargs",
+                "kind": "VAR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:create_guardrail": {
+            "parameters": [
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "on_detect",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "redact"
+              }
+            ]
+          },
+          "datafog.engine:Entity": {
+            "parameters": [
+              {
+                "name": "type",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "start",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "end",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "confidence",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ],
+            "fields": ["type", "text", "start", "end", "confidence", "engine"]
+          },
+          "datafog.engine:ScanResult": {
+            "parameters": [
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine_used",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ],
+            "fields": ["entities", "text", "engine_used"]
+          },
+          "datafog.engine:RedactResult": {
+            "parameters": [
+              {
+                "name": "redacted_text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "mapping",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ],
+            "fields": ["redacted_text", "mapping", "entities"]
+          },
+          "datafog.engine:scan": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "smart"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog.engine:redact": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              }
+            ]
+          },
+          "datafog.engine:scan_and_redact": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "smart"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "anonymize-text-replace",
+      "classification": "compatibility",
+      "target": "datafog:anonymize_text",
+      "kwargs": {
+        "text": "alice@example.com",
+        "method": "replace"
+      },
+      "expected": {
+        "value": "[EMAIL_PSEUDO_1]",
+        "warnings": []
+      }
+    },
+    {
+      "id": "anonymize-text-hash",
+      "classification": "compatibility",
+      "target": "datafog:anonymize_text",
+      "kwargs": {
+        "text": "alice@example.com",
+        "method": "hash"
+      },
+      "expected": {
+        "value": "[EMAIL_ff8d9819fc0e]",
+        "warnings": []
+      }
+    },
+    {
+      "id": "anonymize-text-invalid",
+      "classification": "compatibility",
+      "target": "datafog:anonymize_text",
+      "kwargs": {
+        "text": "alice@example.com",
+        "method": "invalid"
+      },
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "Invalid method: invalid. Use 'redact', 'replace', or 'hash'"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-alias-de-DE",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Steuer-ID 12345678901 liegt vor.",
+        "locales": ["de-DE"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_TAX_ID",
+                  "text": "12345678901",
+                  "start": 10,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Steuer-ID 12345678901 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "locale-alias-de_de",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "Steuer-ID 12345678901 liegt vor.",
+        "locales": ["de_de"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "DE_TAX_ID",
+                  "text": "12345678901",
+                  "start": 10,
+                  "end": 21,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "Steuer-ID 12345678901 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "allowlist-lookahead",
+      "classification": "compatibility",
+      "target": "datafog:scan",
+      "kwargs": {
+        "text": "alice@example.com bob@example.org",
+        "allowlist_patterns": ["(?=alice).*"]
+      },
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "bob@example.org",
+                  "start": 18,
+                  "end": 33,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ],
+            "text": "alice@example.com bob@example.org",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "redact-unicode-explicit-mask",
+      "classification": "compatibility",
+      "target": "datafog:redact",
+      "kwargs": {
+        "text": "👩🏽‍💻é",
+        "strategy": "mask",
+        "entities": [
+          {
+            "type": "PERSON",
+            "text": "👩🏽‍💻é",
+            "start": 0,
+            "end": 6,
+            "confidence": 1.0,
+            "engine": "regex"
+          }
+        ]
+      },
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "******",
+            "mapping": {
+              "[PERSON_MASK_1]": "👩🏽‍💻é"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "PERSON",
+                  "text": "👩🏽‍💻é",
+                  "start": 0,
+                  "end": 6,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    }
+  ],
+  "capture_environment": {
+    "python": "3.12.13",
+    "implementation": "CPython",
+    "dependencies": {
+      "pydantic": "2.13.5",
+      "pydantic-core": "2.46.5",
+      "pydantic-settings": "2.15.0",
+      "typing-extensions": "4.16.0",
+      "annotated-types": "0.8.0",
+      "python-dotenv": "1.2.3",
+      "typing-inspection": "0.4.4"
+    }
+  }
+}

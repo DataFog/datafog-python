@@ -70,6 +70,9 @@ pip install datafog[distributed]
 pip install datafog[all]
 ```
 
+The `nlp-advanced` extra includes SentencePiece and protobuf for GLiNER's
+multilingual tokenizer; installing the OCR extra is not required for GLiNER.
+
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
 `nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
 that is available locally before runtime use. `distributed` and `all` remain
@@ -252,6 +255,10 @@ export DO_NOT_TRACK=1
 Telemetry does not include input text or detected PII values.
 
 ## Development
+
+The [4.8.1 compatibility contract](docs/migration-4.8.1-contract.md) records
+published Python behavior for the Rust migration, with frozen fixtures and
+instructions for independently reproducing them from the release wheel.
 
 ```bash
 git clone https://github.com/datafog/datafog-python

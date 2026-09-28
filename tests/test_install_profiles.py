@@ -35,12 +35,17 @@ def test_install_profile_import_surface() -> None:
         assert SpacyPIIAnnotator is not None
     elif profile == "nlp-advanced":
         import gliner  # noqa: F401
+        import sentencepiece  # noqa: F401
         import torch  # noqa: F401
         import transformers  # noqa: F401
+        from transformers.convert_slow_tokenizer import import_protobuf
 
         from datafog.processing.text_processing.gliner_annotator import GLiNERAnnotator
 
         assert GLiNERAnnotator is not None
+        # GLiNER's multilingual DeBERTa tokenizer needs the protobuf schema,
+        # even when no OCR extra is installed.
+        assert import_protobuf().ModelProto is not None
     elif profile == "ocr":
         import numpy  # noqa: F401
         import pytesseract  # noqa: F401
