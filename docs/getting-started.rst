@@ -1,8 +1,8 @@
 ================================
-Getting Started With DataFog 4.5
+Getting Started With DataFog
 ================================
 
-DataFog 4.5 focuses on lightweight text PII screening. A core install should
+DataFog focuses on lightweight text PII screening. A core install should
 let you scan and redact common structured PII without installing OCR, Spark,
 large NLP models, or middleware integrations.
 
@@ -45,10 +45,43 @@ Optional extras are explicit:
      - ``pip install "datafog[all]"``
      - You are developing or deliberately want every optional surface.
 
+Unreleased 4.9 bridge
+=====================
+
+The following APIs are development previews, not a claim that 4.9 is published.
+From a checkout containing the 4.9 implementation, install the explicit Rust
+extra to evaluate them:
+
+.. code-block:: bash
+
+   python -m pip install -e ".[rust]"
+
+The extra pins ``datafog-core==0.3.1``. It does not change the default Python
+backend, and the existing ``all`` extra does not include Rust. To opt in:
+
+.. code-block:: python
+
+   import datafog
+
+   result = datafog.scan("Contact jane@example.com", engine="regex", backend="rust")
+   print(result.entities)
+
+Only ``engine="regex"`` supports this backend. German locales and ``DE_*`` entity
+selections are unsupported by the pinned Core version and explicitly rejected
+by the legacy Rust adapter; use the Python backend for German detection. Other
+detector differences remain, so this is an experimental comparison path.
+
+For native Core types use ``datafog.v5``; for the explicit legacy facade use
+``datafog.compat.v4``. See :doc:`python-sdk` and the
+:download:`complete migration guide <migration-4.9.md>` before switching schemas.
+``detect()`` and ``process()`` remain available in 4.9 with revised 5.0 removal
+warnings. OCR and Spark are also deprecated in 4.9 for removal in 5.0; existing
+extras remain available during 4.9.
+
 Python Usage
 ============
 
-Use the top-level helpers for the 4.5 core path:
+Use the top-level helpers for the core text path:
 
 .. code-block:: python
 
@@ -120,7 +153,8 @@ The CLI core path is text-first:
    datafog hash-text "Contact jane@example.com"
    datafog redact-text "Steuer-ID 12345678901" --locale de
 
-Image commands are optional. Install ``datafog[ocr]`` for local OCR and
+Image commands are optional and scheduled for deprecation in 4.9 and removal
+in 5.0. They remain functional in 4.9. Install ``datafog[ocr]`` for local OCR and
 ``datafog[web,ocr]`` when the CLI needs to download image inputs.
 
 What 4.x Is Not

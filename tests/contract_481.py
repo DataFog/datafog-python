@@ -105,7 +105,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture", type=Path, default=FIXTURE)
     args = parser.parse_args()
-    fixture = json.loads(args.fixture.read_text())
+    fixture = json.loads(args.fixture.read_text(encoding="utf-8"))
     failures = []
     for case in fixture["cases"]:
         actual = observe(case)

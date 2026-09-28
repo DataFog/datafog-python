@@ -1,0 +1,222 @@
+{
+  "core_version": "0.3.1",
+  "cases": {
+    "scan-observation-invalid-card": {
+      "classification": "detector-difference",
+      "reason": "Core validates card checksums; Python 4.8.1 accepts this card-shaped value. Experimental precision difference, not a claim of full parity.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "4111 1111 1111 1112",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    "scan-observation-boundary": {
+      "classification": "detector-difference",
+      "reason": "Core rejects the SSN embedded in an ASCII alphanumeric token; Python 4.8.1 detects the numeric substring.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "x123-45-6789y",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    "locale-de-DE_VAT_ID": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-explicit-DE_VAT_ID": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-de-DE_IBAN": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-explicit-DE_IBAN": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-de-DE_TAX_ID": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-explicit-DE_TAX_ID": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-de-DE_SOCIAL_SECURITY_NUMBER": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-explicit-DE_SOCIAL_SECURITY_NUMBER": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-de-DE_POSTAL_CODE": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-explicit-DE_POSTAL_CODE": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-de-DE_PASSPORT_NUMBER": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-explicit-DE_PASSPORT_NUMBER": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-de-DE_RESIDENCE_PERMIT_NUMBER": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-explicit-DE_RESIDENCE_PERMIT_NUMBER": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-negative-context": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-alias-de-DE": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    },
+    "locale-alias-de_de": {
+      "classification": "unsupported",
+      "reason": "Published Core 0.3.1 lacks German detection. The adapter rejects the request instead of silently returning incomplete findings.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "backend='rust' does not yet support German locales or DE_* entity types; use backend='python' for German detection"
+        },
+        "warnings": []
+      }
+    }
+  }
+}

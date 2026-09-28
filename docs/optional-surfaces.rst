@@ -2,7 +2,7 @@
 Optional OCR And Spark
 =========================
 
-DataFog 4.5 keeps the core package focused on lightweight text PII screening.
+DataFog 4.9 keeps the core package focused on lightweight text PII screening.
 The default path is:
 
 .. code-block:: bash
@@ -16,7 +16,16 @@ The default path is:
    result = datafog.redact("Email jane@example.com", engine="regex")
    print(result.redacted_text)
 
-OCR and Spark are supported optional surfaces. They are useful for image and
+OCR and Spark are deprecated optional surfaces in 4.9 and will be removed in 5.0.
+Their APIs, installation extras, and existing behavior remain available throughout
+4.9. Remain on the final 4.x release if you need continued OCR or Spark support.
+No replacement package is introduced by this migration.
+
+Use sites emit ``FutureWarning`` notices, visible with Python's default warning
+filters, including the ``scan-image`` CLI command. Importing DataFog or using
+its text APIs does not emit OCR/Spark retirement notices.
+
+These optional surfaces They are useful for image and
 distributed workflows, but they should not be treated as required for the core
 install, package import, text scanning, text redaction, or guardrail helpers.
 
@@ -51,8 +60,8 @@ Notes:
   and system Tesseract smoke checks.
 * Donut OCR requires a model that is already available locally. DataFog should
   not download models implicitly during normal runtime usage.
-* OCR is not deprecated. A broader OCR API and packaging overhaul is deferred
-  beyond the 4.5 focus release.
+* OCR APIs, image download/processing helpers, and the ``scan-image`` CLI
+  command are scheduled for removal in 5.0, along with OCR-only dependencies.
 
 Example local OCR flow:
 
@@ -89,8 +98,8 @@ Notes:
 
 * ``SparkService`` requires PySpark and a Java runtime.
 * Spark PII UDF helpers also require spaCy and an installed spaCy model.
-* Spark is not deprecated. A broader Spark overhaul is deferred beyond the 4.5
-  focus release.
+* Spark services, PII UDF helpers, and the ``distributed`` extra are scheduled
+  for removal in 5.0.
 
 Example local Spark flow:
 

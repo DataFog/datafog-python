@@ -12,6 +12,8 @@ import os
 import re
 from typing import TYPE_CHECKING, Any
 
+from datafog._legacy_retirement import LegacySurfaceWarning, warn_legacy_surface
+
 from .image_downloader import ImageDownloader
 
 if TYPE_CHECKING:
@@ -35,6 +37,7 @@ class DonutProcessor:
     """
 
     def __init__(self, model_path="naver-clova-ix/donut-base-finetuned-cord-v2"):
+        warn_legacy_surface("OCR")
         # Store model path for lazy loading
         self.model_path = model_path
         self.downloader = ImageDownloader()
@@ -47,6 +50,7 @@ class DonutProcessor:
         )
 
     def preprocess_image(self, image: "Image.Image") -> Any:
+        warn_legacy_surface("OCR")
         import numpy as np
 
         # Convert to RGB if the image is not already in RGB mode
@@ -65,6 +69,7 @@ class DonutProcessor:
 
     async def extract_text_from_image(self, image: "Image.Image") -> str:
         """Extract text from an image using the Donut model"""
+        warn_legacy_surface("OCR")
         logging.info("DonutProcessor.extract_text_from_image called")
 
         # If we're in a test environment and PYTEST_DONUT is not enabled, return a mock response
@@ -148,6 +153,8 @@ class DonutProcessor:
             result = processor.token2json(sequence)
             return json.dumps(result)
 
+        except LegacySurfaceWarning:
+            raise
         except (ImportError, RuntimeError):
             raise
         except Exception as e:

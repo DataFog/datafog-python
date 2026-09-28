@@ -10,6 +10,8 @@ import logging
 import pytesseract
 from PIL import Image
 
+from datafog._legacy_retirement import warn_legacy_surface
+
 
 class PytesseractProcessor:
     """
@@ -20,6 +22,7 @@ class PytesseractProcessor:
     """
 
     async def extract_text_from_image(self, image: Image.Image) -> str:
+        warn_legacy_surface("OCR")
         try:
             return pytesseract.image_to_string(image)
         except Exception as e:

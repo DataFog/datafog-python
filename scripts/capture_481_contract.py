@@ -25,7 +25,7 @@ def main():
     fixture_path = root / "tests/contracts/4.8.1.json"
     if args.output.resolve() == fixture_path:
         parser.error("Capture to a separate candidate file for review")
-    fixture = json.loads(fixture_path.read_text())
+    fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
     provenance = fixture["provenance"]
     digest = hashlib.sha256(args.wheel.read_bytes()).hexdigest()
     if digest != provenance["sha256"]:
@@ -69,7 +69,7 @@ def main():
     runner = runpy.run_path(str(root / "tests/contract_481.py"))
     for case in fixture["cases"]:
         case["expected"] = runner["observe"](case)
-    with args.output.open("x") as output:
+    with args.output.open("x", encoding="utf-8") as output:
         output.write(json.dumps(fixture, indent=2, ensure_ascii=False) + "\n")
     print(f"Captured {len(fixture['cases'])} cases to {args.output}")
 

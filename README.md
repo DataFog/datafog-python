@@ -188,9 +188,10 @@ scan/redact helpers, or guardrail helpers.
     model.
   - A Java runtime is required by PySpark.
 
-OCR and Spark are not deprecated. Their broader API and packaging overhaul is
-deferred; the 4.x goal is to keep them explicit, documented, and isolated from
-the lightweight core path.
+The upcoming 4.9 release deprecates OCR and Spark with visible use-time
+warnings; their APIs and extras will be removed in 5.0. They remain functional
+in 4.9. Users who need these features can stay on the final 4.x release. See
+the [4.9 migration guide](docs/migration-4.9.md) for the transition plan.
 
 ## Backward-Compatible APIs
 
@@ -255,6 +256,10 @@ export DO_NOT_TRACK=1
 Telemetry does not include input text or detected PII values.
 
 ## Development
+
+The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
+the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
+`detect`/`process`, OCR, and Spark. The Python detector remains the default.
 
 The [4.8.1 compatibility contract](docs/migration-4.8.1-contract.md) records
 published Python behavior for the Rust migration, with frozen fixtures and

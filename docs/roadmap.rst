@@ -2,6 +2,14 @@
 Release Roadmap
 ================
 
+.. note::
+
+   This earlier planning document is retained for context. The upcoming 4.9
+   bridge revises its compatibility commitments: ``detect``/``process``, OCR,
+   and Spark are deprecated in 4.9 and removed in 5.0. The former promise to
+   retain the shims through 5.x no longer applies. See the
+   :download:`current migration plan <migration-4.9.md>` for the agreed scope.
+
 Where DataFog is today (4.8.x) and where it is going (v5.0.0). The 4.x
 line delivered the lightweight-core architecture and, from 4.6.0 on, an
 offline PII firewall for AI agents and gateways. The v5 cycle turns that

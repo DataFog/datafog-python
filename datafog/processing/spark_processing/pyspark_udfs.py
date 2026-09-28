@@ -9,6 +9,8 @@ annotation on text data.
 
 import importlib
 
+from datafog._legacy_retirement import warn_legacy_surface
+
 PII_ANNOTATION_LABELS = ["DATE_TIME", "LOC", "NRP", "ORG", "PER"]
 MAXIMAL_STRING_SIZE = 1000000
 DEFAULT_SPACY_MODEL = "en_core_web_lg"
@@ -20,6 +22,7 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
     Returns:
         list[list[str]]: Values as arrays in order defined in the PII_ANNOTATION_LABELS.
     """
+    warn_legacy_surface("Spark")
     ensure_installed("pyspark")
     ensure_installed("spacy")
 
@@ -47,6 +50,7 @@ def broadcast_pii_annotator_udf(
     spark_session=None, spacy_model: str = DEFAULT_SPACY_MODEL
 ):
     """Broadcast PII annotator across Spark cluster and create UDF"""
+    warn_legacy_surface("Spark")
     ensure_installed("pyspark")
     ensure_installed("spacy")
     import spacy

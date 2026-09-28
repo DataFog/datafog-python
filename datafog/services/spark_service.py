@@ -9,6 +9,8 @@ import importlib
 import os
 from typing import List
 
+from datafog._legacy_retirement import warn_legacy_surface
+
 
 class SparkService:
     """
@@ -19,6 +21,7 @@ class SparkService:
     """
 
     def __init__(self, master=None):
+        warn_legacy_surface("Spark")
         self.master = master
 
         self.ensure_installed("pyspark")

@@ -9,6 +9,8 @@ import asyncio
 from io import BytesIO
 from typing import TYPE_CHECKING, List
 
+from datafog._legacy_retirement import warn_legacy_surface
+
 if TYPE_CHECKING:
     from PIL import Image
 
@@ -26,6 +28,7 @@ class ImageDownloader:
 
     async def download_image(self, image_url: str) -> "Image.Image":
         """Download a single image from a URL."""
+        warn_legacy_surface("OCR")
         try:
             import aiohttp
             from PIL import Image
@@ -45,4 +48,5 @@ class ImageDownloader:
 
     async def download_images(self, urls: List[str]) -> List["Image.Image"]:
         """Download multiple images from a list of URLs concurrently."""
+        warn_legacy_surface("OCR")
         return await asyncio.gather(*[self.download_image(url) for url in urls])
