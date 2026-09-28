@@ -1,18 +1,21 @@
-# Migrating incrementally with DataFog 4.9
+# Migrating incrementally with DataFog 4.9.0
 
-> **Unreleased:** This guide describes the upcoming 4.9 bridge. Until it is
-> published, install the development checkout with `python -m pip install -e
-".[rust]"`. Core 0.4.0 is available on PyPI. A normal released DataFog Python
-> install does not include this follow-up.
-
-4.9 is a bridge to the Rust-backed 5.0 API. The default Python detector, existing
+4.9.0 is a bridge to the Rust-backed 5.0 API. The default Python detector, existing
 imports, result objects, and redaction strategies continue to work. The optional
 Rust backend and native API preview are experimental and explicitly selected.
 
-## Opt into Rust detection
+## Upgrade and opt into Rust detection
+
+Upgrade the base package while retaining Python detection and no native dependency:
 
 ```bash
-pip install "datafog[rust]"
+python -m pip install --upgrade "datafog==4.9.0"
+```
+
+Install the optional native dependency explicitly to evaluate Rust detection:
+
+```bash
+python -m pip install --upgrade "datafog[rust]==4.9.0"
 ```
 
 The extra requires `datafog-core>=0.4.0,<0.5` and capability contract version 1.
@@ -204,3 +207,16 @@ for the short payload, 39.50 versus 7.58 microseconds for mixed PII, and 121.91
 versus 5.33 milliseconds for the large sparse payload (Python versus Rust).
 Fresh-process import plus first scan was approximately 81 milliseconds for both.
 These are local measurements, not release performance guarantees.
+
+## Detector upgrades and overlapping labels
+
+Capability discovery allows new Core labels to pass through the adapter without
+a Python inventory update; it does not guarantee unchanged selected results.
+The legacy adapter resolves overlaps before applying `entity_types`. A new
+detector can therefore suppress a previously selected label, leaving an explicit
+selection empty. The NPI/PHONE case above is one concrete example.
+
+Pin `datafog-core==0.4.0` alongside `datafog==4.9.0` for reproducibility against
+this release's validated detector set. Test detector upgrades against your own
+selection policies. Use `datafog.v5.scan()` to retain native candidates and
+native transformation entity selection when overlapping label identity matters.

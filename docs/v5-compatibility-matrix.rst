@@ -4,7 +4,7 @@ v5 Compatibility Matrix
 
 .. note::
 
-   This earlier planning document is retained for context. The upcoming 4.9
+   This earlier planning document is retained for context. The 4.9.0
    bridge revises its compatibility commitments: ``detect``/``process``, OCR,
    and Spark are deprecated in 4.9 and removed in 5.0. The former promise to
    retain the shims through 5.x no longer applies. See the

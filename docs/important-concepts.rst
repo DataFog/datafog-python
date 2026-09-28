@@ -9,7 +9,7 @@ Overview
 Data Models
 ^^^^^^^^^^^
 Existing models support legacy PII annotation and optional OCR analysis.
-The unreleased 4.9 bridge retains them and adds ``datafog.compat.v4`` for the
+The 4.9.0 bridge retains them and adds ``datafog.compat.v4`` for the
 legacy scan/redact result classes (``Entity``, ``ScanResult``, ``RedactResult``).
 ``datafog.v5`` separately previews native Core ``Finding`` and ``TransformResult``
 objects; these have different fields and transformation semantics. See
@@ -25,7 +25,7 @@ objects; these have different fields and transformation semantics. See
 Processors
 ^^^^^^^^^^^
 Text processors remain available. OCR processors below are deprecated in the
-unreleased 4.9 bridge and scheduled for removal in 5.0:
+4.9.0 bridge and scheduled for removal in 5.0:
 
 * SpacyAnnotator
     Text annotation with spaCy

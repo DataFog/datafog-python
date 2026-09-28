@@ -27,11 +27,11 @@ available for existing users. ``TextService(engine="regex")`` is the
 dependency-light service path; ``spacy``, ``gliner``, ``smart``, OCR, and Spark
 surfaces require their explicit extras.
 
-4.9 compatibility and Core preview (unreleased)
------------------------------------------------
+4.9.0 compatibility and Core preview
+------------------------------------
 
-These additions describe development work for 4.9; they do not indicate a
-published release. Existing top-level ``scan``/``redact`` functions retain their
+DataFog 4.9.0 provides an experimental Rust backend and native schema preview.
+Existing top-level ``scan``/``redact`` functions retain their
 result shapes and use the Python backend by default. They delegate through the
 new facade, whose classes are the same objects as the established result types:
 
@@ -44,9 +44,10 @@ continue to work at the top level in 4.9 but warn of removal in 5.0, revising th
 previous promise to retain them throughout 5.x. Moving from ``process`` to
 ``redact`` can change old placeholder and hash output; compare results explicitly.
 
-The unreleased adapter requires ``datafog-core>=0.4.0,<0.5``. Core 0.4.0 is
-available on PyPI. Install ``.[rust]`` from the development checkout to evaluate
-Rust detection; DataFog Python 4.9 itself is not yet released:
+The adapter requires ``datafog-core>=0.4.0,<0.5``. Install with
+``python -m pip install --upgrade "datafog[rust]==4.9.0"`` to evaluate Rust.
+A base install of ``datafog==4.9.0`` has no native dependency; installing the
+extra does not change the default Python backend:
 
 .. code-block:: python
 
@@ -155,7 +156,7 @@ OCR and Spark remain available as optional surfaces throughout 4.9:
 * Use ``datafog[distributed,nlp]`` plus an installed spaCy model for Spark PII
   UDF helpers.
 
-The unreleased 4.9 bridge deprecates OCR and Spark for removal in 5.0. Use-time
+DataFog 4.9.0 deprecates OCR and Spark for removal in 5.0. Use-time
 ``FutureWarning`` notices are visible under normal Python warning filters. Users
 needing these features can remain on the final 4.x release; this migration does
 not introduce successor packages or promise indefinite maintenance. See
