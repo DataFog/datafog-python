@@ -8,7 +8,7 @@ translation is applied. Install ``datafog[rust]`` to use this module. Importing
 from importlib import import_module
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover - static imports are never executed at runtime
     from datafog_core import DataFogConfigurationError as DataFogConfigurationError
     from datafog_core import DataFogFindingError as DataFogFindingError
     from datafog_core import DataFogInternalError as DataFogInternalError

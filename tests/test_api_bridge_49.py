@@ -1,9 +1,11 @@
 """Compatibility facade and native-schema preview release gates."""
 
+import importlib.util
 import inspect
 import subprocess
 import sys
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -102,3 +104,38 @@ def test_real_native_exports_and_transformation():
     )
     assert isinstance(result, v5.TransformResult)
     assert result.text == "Email [EMAIL]"
+
+
+def test_preview_discovery_is_lazy_and_exports_are_cached(monkeypatch):
+    # A separate module object avoids cached exports from native integration tests.
+    spec = importlib.util.spec_from_file_location("isolated_preview", v5.__file__)
+    preview = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(preview)
+    core = SimpleNamespace(**{name: object() for name in preview.__all__})
+    loader = Mock(return_value=core)
+    monkeypatch.setattr(preview, "import_module", loader)
+
+    assert set(preview.__all__) <= set(dir(preview))
+    with pytest.raises(AttributeError, match="unrecognized"):
+        preview.unrecognized
+    loader.assert_not_called()
+
+    for name in preview.__all__:
+        assert getattr(preview, name) is getattr(core, name)
+    assert loader.call_count == len(preview.__all__)
+    loader.reset_mock()
+    for name in preview.__all__:
+        assert getattr(preview, name) is getattr(core, name)
+    loader.assert_not_called()
+
+
+@pytest.mark.parametrize("redact", [datafog.redact, v4.redact])
+def test_compatibility_facade_rejects_unknown_preset(redact):
+    with pytest.raises(ValueError, match="preset must be one of"):
+        redact("plain text", preset="unknown")
+
+
+@pytest.mark.parametrize("option", ["allowlist", "allowlist_patterns"])
+def test_compatibility_facade_rejects_allowlists_with_explicit_entities(option):
+    with pytest.raises(ValueError, match="cannot be combined with explicit entities"):
+        v4.redact("plain text", entities=[], **{option: ["plain text"]})
