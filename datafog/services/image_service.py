@@ -13,6 +13,8 @@ import os
 import ssl
 from typing import TYPE_CHECKING, Any, List, Union
 
+from datafog._legacy_retirement import LegacySurfaceWarning, warn_legacy_surface
+
 if TYPE_CHECKING:
     from PIL import Image
 
@@ -24,6 +26,7 @@ class ImageDownloader:
     """Asynchronous image downloader with SSL support."""
 
     async def download_image(self, url: str) -> "Image.Image":
+        warn_legacy_surface("OCR")
         try:
             import aiohttp
             import certifi
@@ -57,6 +60,7 @@ class ImageService:
     """
 
     def __init__(self, use_donut: bool = False, use_tesseract: bool = True):
+        warn_legacy_surface("OCR")
         self.downloader = ImageDownloader()
 
         # Check if we're in a test environment
@@ -133,12 +137,14 @@ class ImageService:
     async def download_images(
         self, urls: List[str]
     ) -> List[Union["Image.Image", BaseException]]:
+        warn_legacy_surface("OCR")
         tasks = [
             asyncio.create_task(self.downloader.download_image(url)) for url in urls
         ]
         return await asyncio.gather(*tasks, return_exceptions=True)
 
     async def ocr_extract(self, image_paths: List[str]) -> List[str]:
+        warn_legacy_surface("OCR")
         from PIL import Image
 
         results = []
@@ -167,6 +173,8 @@ class ImageService:
                     raise ValueError("No OCR processor selected")
 
                 results.append(text)
+            except LegacySurfaceWarning:
+                raise
             except Exception as e:
                 error_msg = f"Error processing image {path}: {str(e)}"
                 logging.error(error_msg)
@@ -175,6 +183,7 @@ class ImageService:
         return results
 
     async def process_images(self, image_urls, operation):
+        warn_legacy_surface("OCR")
         results = []
         for url in image_urls:
             logging.info(f"Fetching image from {url}")
@@ -185,6 +194,7 @@ class ImageService:
         return results
 
     async def process_image(self, image, operation):
+        warn_legacy_surface("OCR")
         # Implement image processing logic
         logging.info(f"Processed image with operation: {operation}")
         pass

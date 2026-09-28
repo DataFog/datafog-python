@@ -209,6 +209,56 @@ def _regex_entities(
     return _suppress_overlapping_entities(entities)
 
 
+def _rust_entities(
+    text: str,
+    entity_types: Optional[list[str]] = None,
+    locales: Optional[list[str]] = None,
+) -> list[Entity]:
+    """Adapt native findings to the legacy regex result contract.
+
+    Core supplies candidate findings. Python applies the legacy overlap
+    suppression before entity selection and allowlists, preserving that order
+    without duplicating the native detectors.
+    """
+    normalized_locales = RegexAnnotator._normalize_locales(locales)
+    requested = {_canonical_type(value) for value in entity_types or []}
+    if normalized_locales or any(value.startswith("DE_") for value in requested):
+        raise ValueError(
+            "backend='rust' does not yet support German locales or DE_* entity "
+            "types; use backend='python' for German detection"
+        )
+
+    try:
+        import datafog_core
+    except ImportError as exc:
+        raise ImportError(
+            "The Rust backend requires datafog-core. "
+            'Install with: pip install "datafog[rust]"'
+        ) from exc
+
+    entities: list[Entity] = []
+    for finding in datafog_core.scan(text):
+        canonical_type = _canonical_type(finding.entity_type)
+        if canonical_type not in ALL_ENTITY_TYPES:
+            raise RuntimeError(
+                f"Rust backend returned unsupported entity type: "
+                f"{finding.entity_type!r}; check the installed datafog-core version"
+            )
+        if not finding.matched_text.strip():
+            continue
+        entities.append(
+            Entity(
+                type=canonical_type,
+                text=finding.matched_text,
+                start=finding.codepoint_range.start,
+                end=finding.codepoint_range.end,
+                confidence=1.0,
+                engine="regex",
+            )
+        )
+    return _suppress_overlapping_entities(entities)
+
+
 def _spacy_entities(text: str) -> list[Entity]:
     annotator = _get_spacy_annotator()
     if isinstance(annotator, _UnavailableAnnotator):
@@ -357,6 +407,13 @@ def _needs_ner(entity_types: Optional[list[str]]) -> bool:
     return bool(requested & NER_ENTITY_TYPES)
 
 
+def _validate_backend(backend: str, engine: str) -> None:
+    if backend not in {"python", "rust"}:
+        raise ValueError("backend must be one of: python, rust")
+    if backend == "rust" and engine != "regex":
+        raise ValueError("backend='rust' supports only engine='regex'")
+
+
 def scan(
     text: str,
     engine: str = "smart",
@@ -364,8 +421,14 @@ def scan(
     locales: Optional[list[str]] = None,
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
+    *,
+    backend: str = "python",
 ) -> ScanResult:
     """Scan text for PII entities.
+
+    ``backend="rust"`` opts into experimental native detection for
+    ``engine="regex"``. Results retain legacy regex provenance and confidence;
+    these are compatibility values, not native confidence estimates.
 
     ``allowlist`` exempts exact entity texts (e.g. your own support email);
     ``allowlist_patterns`` exempts entities whose full text matches a regex
@@ -377,11 +440,14 @@ def scan(
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
 
+    _validate_backend(backend, engine)
+
     # Validate patterns up front so config errors fail fast even when the
     # text contains no entities.
     _compile_allowlist_patterns(allowlist_patterns)
 
-    regex_entities = _regex_entities(
+    detector = _rust_entities if backend == "rust" else _regex_entities
+    regex_entities = detector(
         text,
         entity_types=entity_types,
         locales=locales,
@@ -547,8 +613,10 @@ def scan_and_redact(
     locales: Optional[list[str]] = None,
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
+    *,
+    backend: str = "python",
 ) -> RedactResult:
-    """Convenience wrapper: scan then redact."""
+    """Scan with the selected backend, then apply legacy Python redaction."""
     scan_result = scan(
         text=text,
         engine=engine,
@@ -556,5 +624,6 @@ def scan_and_redact(
         locales=locales,
         allowlist=allowlist,
         allowlist_patterns=allowlist_patterns,
+        backend=backend,
     )
     return redact(text=text, entities=scan_result.entities, strategy=strategy)

@@ -12,6 +12,8 @@ import json
 import logging
 from typing import List
 
+from datafog._legacy_retirement import warn_legacy_surface
+
 from .config import OperationType
 from .engine import scan, scan_and_redact
 from .models.anonymizer import Anonymizer, AnonymizerType, HashType
@@ -79,6 +81,7 @@ class DataFog:
 
     async def run_ocr_pipeline(self, image_urls: List[str]) -> List[str]:
         """Run OCR + text pipeline for CLI/backward compatibility."""
+        warn_legacy_surface("OCR")
         from .services.image_service import ImageService
 
         image_service = ImageService()

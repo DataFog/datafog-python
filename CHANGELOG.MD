@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+#### Added
+
+- Experimental `datafog[rust]` detection with keyword-only `backend="rust"`
+  on scan/redact entry points; Python remains the default. Core 0.3.1 is pinned,
+  German requests are explicitly unsupported, and ML composition is unchanged.
+- `datafog.compat.v4` preserves the existing scan/redact facade and result classes;
+  `datafog.v5` previews actual Core types and transformation APIs.
+- Native parity tests, installed-wheel CI checks, and public-call benchmarks.
+
+#### Deprecated
+
+- `detect()` and `process()` are now scheduled for removal in 5.0. This explicitly
+  revises the earlier promise to retain these shims throughout 5.x. They continue
+  working in 4.9; migrate to scan/redact and review transformation differences.
+- OCR/image and Spark/distributed surfaces remain available in 4.9 with use-time
+  notices and are scheduled for removal in 5.0. Users needing those features can
+  remain on the final 4.x release.
+
 #### Fixed
 
 - Allow installation on Python 3.14 and certify the core SDK and CLI with

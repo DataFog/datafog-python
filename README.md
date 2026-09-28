@@ -256,6 +256,10 @@ Telemetry does not include input text or detected PII values.
 
 ## Development
 
+The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
+the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
+`detect`/`process`, OCR, and Spark. The Python detector remains the default.
+
 The [4.8.1 compatibility contract](docs/migration-4.8.1-contract.md) records
 published Python behavior for the Rust migration, with frozen fixtures and
 instructions for independently reproducing them from the release wheel.
