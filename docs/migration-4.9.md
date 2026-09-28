@@ -1,5 +1,9 @@
 # Migrating incrementally with DataFog 4.9
 
+> **Unreleased:** This guide describes the upcoming 4.9 bridge. Until it is
+> published, evaluate these APIs from the development checkout with
+> `python -m pip install -e ".[rust]"`; a normal PyPI install does not include them.
+
 4.9 is a bridge to the Rust-backed 5.0 API. The default Python detector, existing
 imports, result objects, and redaction strategies continue to work. The optional
 Rust backend and native API preview are experimental and explicitly selected.

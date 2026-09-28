@@ -8,7 +8,12 @@ Overview
 
 Data Models
 ^^^^^^^^^^^
-Key data models to support PII annotation and OCR analysis.
+Existing models support legacy PII annotation and optional OCR analysis.
+The unreleased 4.9 bridge retains them and adds ``datafog.compat.v4`` for the
+legacy scan/redact result classes (``Entity``, ``ScanResult``, ``RedactResult``).
+``datafog.v5`` separately previews native Core ``Finding`` and ``TransformResult``
+objects; these have different fields and transformation semantics. See
+:doc:`python-sdk` and the :download:`migration guide <migration-4.9.md>`.
 
 * AnalysisExplanation
 * AnnotationResult
@@ -19,7 +24,8 @@ Key data models to support PII annotation and OCR analysis.
 
 Processors
 ^^^^^^^^^^^
-Main processors:
+Text processors remain available. OCR processors below are deprecated in the
+unreleased 4.9 bridge and scheduled for removal in 5.0:
 
 * SpacyAnnotator
     Text annotation with spaCy
@@ -30,7 +36,12 @@ Main processors:
 
 Services
 ^^^^^^^^^^^
-Core services:
+``TextService`` remains available. ``ImageService`` and ``SparkService`` are
+optional legacy services, deprecated in 4.9 for removal in 5.0. They remain
+functional throughout 4.9; users requiring them after the cutover can remain on
+the final 4.x release. See :doc:`optional-surfaces`.
+
+Existing services:
 
 * ImageService
     Image handling and OCR
