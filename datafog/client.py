@@ -10,6 +10,8 @@ from typing import List, Optional
 
 import typer
 
+from datafog._legacy_retirement import LegacySurfaceWarning, warn_legacy_surface
+
 from .config import OperationType, get_config
 from .engine import scan_and_redact
 from .main import DataFog
@@ -63,6 +65,7 @@ def scan_image(
 
     Prints results or exits with error on failure.
     """
+    warn_legacy_surface("OCR")
     if not image_urls:
         typer.echo("No image URLs or file paths provided. Please provide at least one.")
         raise typer.Exit(code=1)
@@ -87,6 +90,8 @@ def scan_image(
         except Exception:
             pass
     except Exception as e:
+        if isinstance(e, LegacySurfaceWarning):
+            raise
         logging.exception("Error in run_ocr_pipeline")
         try:
             from .telemetry import track_error

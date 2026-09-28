@@ -11,6 +11,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  rust-bridge:
+    name: Rust bridge (${{ matrix.os }}, ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.10"
+          - os: ubuntu-latest
+            python-version: "3.14"
+          - os: macos-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Build and install the wheel with native extra
+        shell: bash
+        run: |
+          python -m pip install build
+          python -m build --wheel
+          python -c "import glob, subprocess, sys; wheel = glob.glob('dist/*.whl')[0]; subprocess.check_call([sys.executable, '-m', 'pip', 'install', wheel + '[test,cli,rust]'])"
+      - name: Verify installed package outside checkout imports
+        run: python -I scripts/check_rust_install.py
+      - name: Test compatibility, routing, preview and native parity
+        run: python -m pytest tests/test_contract_481.py tests/test_rust_backend.py tests/test_api_bridge_49.py tests/test_rust_contract.py tests/test_core_capability_adapter.py tests/test_core04_integration.py -q
+      - name: Generate native parity report
+        run: python -m tests.rust_contract --output rust-parity.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rust-parity-${{ matrix.os }}-${{ matrix.python-version }}
+          path: rust-parity.json
+
   lint:
     runs-on: ubuntu-latest
     steps:

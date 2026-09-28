@@ -1,8 +1,8 @@
 ================================
-Getting Started With DataFog 4.5
+Getting Started With DataFog
 ================================
 
-DataFog 4.5 focuses on lightweight text PII screening. A core install should
+DataFog focuses on lightweight text PII screening. A core install should
 let you scan and redact common structured PII without installing OCR, Spark,
 large NLP models, or middleware integrations.
 
@@ -45,10 +45,53 @@ Optional extras are explicit:
      - ``pip install "datafog[all]"``
      - You are developing or deliberately want every optional surface.
 
+4.9.0 migration bridge
+======================
+
+The native API preview and Rust backend are experimental additions in 4.9.0.
+Upgrade the base package with ``python -m pip install --upgrade datafog==4.9.0``
+to keep using Python detection without a native dependency. To evaluate Rust,
+install the optional extra explicitly:
+
+.. code-block:: bash
+
+   python -m pip install --upgrade "datafog[rust]==4.9.0"
+
+The extra requires ``datafog-core>=0.4.0,<0.5`` and capability contract 1.
+The extra
+does not change the default Python backend, and the existing ``all`` extra does
+not include Rust. To opt in:
+
+.. code-block:: python
+
+   import datafog
+
+   result = datafog.scan("Contact jane@example.com", engine="regex", backend="rust")
+   print(result.entities)
+
+Only ``engine="regex"`` supports this backend. The adapter discovers entities and
+activation settings from Core capabilities. German detection is enabled by
+``locales=["de"]`` (also ``de-DE`` or ``de_DE``), or explicit German entity
+selection. ``en-US`` and ``fr`` are accepted base-only locales; other explicit
+locales fail validation. Select ``entity_types=["UUID"]`` to enable UUID.
+Core's structured-only ``PERSON`` cannot be explicitly selected for text scanning.
+
+Future Core labels pass through, but detection output may change across compatible
+updates. The preserved legacy overlap policy may retain ``PHONE`` instead of a
+same-span ``NPI``, including when filtering for NPI. See the migration guide for
+this limitation and native alternatives.
+
+For native Core types use ``datafog.v5``; for the explicit legacy facade use
+``datafog.compat.v4``. See :doc:`python-sdk` and the
+:download:`complete migration guide <migration-4.9.md>` before switching schemas.
+``detect()`` and ``process()`` remain available in 4.9 with revised 5.0 removal
+warnings. OCR and Spark are also deprecated in 4.9 for removal in 5.0; existing
+extras remain available during 4.9.
+
 Python Usage
 ============
 
-Use the top-level helpers for the 4.5 core path:
+Use the top-level helpers for the core text path:
 
 .. code-block:: python
 
@@ -120,7 +163,8 @@ The CLI core path is text-first:
    datafog hash-text "Contact jane@example.com"
    datafog redact-text "Steuer-ID 12345678901" --locale de
 
-Image commands are optional. Install ``datafog[ocr]`` for local OCR and
+Image commands are optional, deprecated in 4.9, and scheduled for removal
+in 5.0. They remain functional in 4.9. Install ``datafog[ocr]`` for local OCR and
 ``datafog[web,ocr]`` when the CLI needs to download image inputs.
 
 What 4.x Is Not

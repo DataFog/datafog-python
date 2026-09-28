@@ -15,11 +15,9 @@ from .__about__ import __version__
 from .agent import create_guardrail, filter_output, sanitize, scan_prompt
 
 # Core API functions - always available (lightweight)
+from .compat import v4 as _compat_v4
 from .core import anonymize_text, detect_pii, get_supported_entities, scan_text
 from .engine import Entity, RedactResult, ScanResult
-from .engine import redact as _redact_entities
-from .engine import scan as _scan
-from .engine import scan_and_redact as _scan_and_redact
 
 # Essential models - always available
 from .models.common import EntityTypes
@@ -130,20 +128,10 @@ _LAZY_EXPORTS = {
 }
 
 
-_REDACT_PRESETS = {
-    "default": "token",
-    "llm": "token",
-    "mask": "mask",
-    "hash": "hash",
-    "replace": "pseudonymize",
-    "pseudonymize": "pseudonymize",
-}
-
-
 def _warn_v5_replacement(old_api: str, replacement: str) -> None:
     warnings.warn(
-        f"datafog.{old_api}() is deprecated for v5. Use {replacement} instead. "
-        "This compatibility shim will remain through the v5.x line.",
+        f"datafog.{old_api}() is deprecated and will be removed in 5.0. Use {replacement} instead. "
+        "The earlier promise to retain this shim through 5.x has been revised.",
         FutureWarning,
         stacklevel=3,
     )
@@ -156,25 +144,18 @@ def scan(
     locales: list[str] | None = None,
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
+    *,
+    backend: str = "python",
 ) -> ScanResult:
-    """
-    v5-preview scan entrypoint.
-
-    Defaults to the lightweight regex engine so the core install works without
-    optional dependency fallback warnings.
-
-    ``allowlist`` exempts exact entity texts (your own support address, doc
-    placeholders); ``allowlist_patterns`` exempts entities whose full text
-    matches a regex (e.g. ``^\\d{10}$`` so unix timestamps stop matching as
-    phone numbers).
-    """
-    return _scan(
-        text=text,
-        engine=engine,
-        entity_types=entity_types,
-        locales=locales,
-        allowlist=allowlist,
-        allowlist_patterns=allowlist_patterns,
+    """Scan using the 4.x compatibility API; Rust detection is opt-in."""
+    return _compat_v4.scan(
+        text,
+        engine,
+        entity_types,
+        locales,
+        allowlist,
+        allowlist_patterns,
+        backend=backend,
     )
 
 
@@ -188,39 +169,21 @@ def redact(
     locales: list[str] | None = None,
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
+    *,
+    backend: str = "python",
 ) -> RedactResult:
-    """
-    v5-preview redaction entrypoint.
-
-    If entities are provided, redact those spans. Otherwise, scan text first
-    using the selected engine and redact the detected entities. ``allowlist``
-    and ``allowlist_patterns`` exempt findings from redaction (exact text and
-    full-text regex match respectively); they apply to the scan path and are
-    rejected when explicit ``entities`` are supplied.
-    """
-    if preset is not None:
-        try:
-            strategy = _REDACT_PRESETS[preset]
-        except KeyError as exc:
-            allowed = ", ".join(sorted(_REDACT_PRESETS))
-            raise ValueError(f"preset must be one of: {allowed}") from exc
-
-    if entities is not None:
-        if allowlist or allowlist_patterns:
-            raise ValueError(
-                "allowlist/allowlist_patterns cannot be combined with explicit "
-                "entities; filter the entities before calling redact"
-            )
-        return _redact_entities(text=text, entities=entities, strategy=strategy)
-
-    return _scan_and_redact(
-        text=text,
-        engine=engine,
-        entity_types=entity_types,
-        strategy=strategy,
-        locales=locales,
-        allowlist=allowlist,
-        allowlist_patterns=allowlist_patterns,
+    """Redact using the 4.x compatibility API and legacy strategies."""
+    return _compat_v4.redact(
+        text,
+        entities,
+        engine,
+        entity_types,
+        strategy,
+        preset,
+        locales,
+        allowlist,
+        allowlist_patterns,
+        backend=backend,
     )
 
 

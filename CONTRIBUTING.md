@@ -105,6 +105,8 @@ Before requesting review:
 - Keep public API changes explicit in the PR description.
 - Note any optional dependency profile you tested, such as `core`, `nlp`, or
   `nlp-advanced`.
+- Complete the CLA Assistant check. First-time contributors receive a comment
+  on the pull request with a link to review and accept the agreement.
 
 ## Commit Messages
 
@@ -117,9 +119,23 @@ but not required, for example:
 
 ## Legal
 
-By submitting a pull request, you license your contribution under the project
-[license](LICENSE). You also affirm that you authored the contribution or have
-the right to submit it under the project license.
+DataFog requires each contributor to accept the
+[Individual Contributor License Agreement](CLA.md). CLA Assistant handles the
+signature directly from the pull request:
+
+1. Open your pull request against `dev`.
+2. Follow the link in the CLA Assistant comment and sign in with the same
+   GitHub account that authored the commits.
+3. Review the agreement, complete the short signing form, and accept it. The
+   `cla-assistant` check updates automatically; no document upload is needed.
+
+You normally sign once. A new signature is requested only when DataFog updates
+the agreement. If a commit has multiple authors, every human co-author must
+sign. Bot accounts are handled separately by maintainers.
+
+If your employer or another organization may own your work, confirm that you
+are allowed to contribute before signing. Questions can be sent to
+`sid@datafog.ai`.
 
 ## Contributors
 

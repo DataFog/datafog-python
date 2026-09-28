@@ -1,6 +1,32 @@
 # ChangeLog
 
-## [Unreleased]
+## [4.9.0]
+
+#### Added
+
+- Experimental `datafog[rust]` detection with keyword-only `backend="rust"`
+  on scan/redact entry points; Python remains the default. Requires
+  `datafog-core>=0.4.0,<0.5` and capability contract 1. The base installation
+  does not install or import Core. ML composition is unchanged.
+- Capability-driven entity and locale discovery, German locale activation,
+  explicit UUID activation, and forward-compatible finding labels. Core's
+  structured-only PERSON is rejected for explicit Rust text selection.
+- Core 0.4.0 adds JWT, private-key, contextual routing-number, and contextual NPI
+  detection, plus stricter explicit locale validation. The legacy overlap policy
+  still prefers PHONE over a same-span NPI; NPI filtering can return no entities.
+  Use native scanning/transformation when NPI must be retained.
+- `datafog.compat.v4` preserves the existing scan/redact facade and result classes;
+  `datafog.v5` previews actual Core types and transformation APIs.
+- Native parity tests, installed-wheel CI checks, and public-call benchmarks.
+
+#### Deprecated
+
+- `detect()` and `process()` are now scheduled for removal in 5.0. This explicitly
+  revises the earlier promise to retain these shims throughout 5.x. They continue
+  working in 4.9; migrate to scan/redact and review transformation differences.
+- OCR/image and Spark/distributed surfaces remain available in 4.9 with use-time
+  notices and are scheduled for removal in 5.0. Users needing those features can
+  remain on the final 4.x release.
 
 #### Fixed
 
@@ -15,7 +41,7 @@
 
 - **Redaction token numbering now follows document order**: `redact()`
   previously assigned per-type counters while replacing spans right-to-left,
-  so with multiple entities of the same type the *last* occurrence received
+  so with multiple entities of the same type the _last_ occurrence received
   `_1` (two emails redacted as `[EMAIL_2] ... [EMAIL_1]`). Tokens for the
   `token` and `pseudonymize` strategies are now numbered left-to-right, so
   the first occurrence is always `_1`. This changes redacted output text for
@@ -320,6 +346,7 @@ opt-in. No changes to the core library or its dependencies.
 #### Migration Guide
 
 For users upgrading from v4.1.1:
+
 - All existing functionality remains unchanged
 - To use GLiNER: `pip install datafog[nlp-advanced]`
 - Smart cascading: `TextService(engine="smart")` for best balance

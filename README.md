@@ -70,6 +70,9 @@ pip install datafog[distributed]
 pip install datafog[all]
 ```
 
+The `nlp-advanced` extra includes SentencePiece and protobuf for GLiNER's
+multilingual tokenizer; installing the OCR extra is not required for GLiNER.
+
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
 `nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
 that is available locally before runtime use. `distributed` and `all` remain
@@ -185,9 +188,10 @@ scan/redact helpers, or guardrail helpers.
     model.
   - A Java runtime is required by PySpark.
 
-OCR and Spark are not deprecated. Their broader API and packaging overhaul is
-deferred; the 4.x goal is to keep them explicit, documented, and isolated from
-the lightweight core path.
+DataFog 4.9.0 deprecates OCR and Spark with visible use-time
+warnings; their APIs and extras will be removed in 5.0. They remain functional
+in 4.9. Users who need these features can stay on the final 4.x release. See
+the [4.9 migration guide](docs/migration-4.9.md) for the transition plan.
 
 ## Backward-Compatible APIs
 
@@ -252,6 +256,27 @@ export DO_NOT_TRACK=1
 Telemetry does not include input text or detected PII values.
 
 ## Development
+
+The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
+the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
+`detect`/`process`, OCR, and Spark. The Python detector remains the default.
+
+The experimental Rust adapter in 4.9.0 requires Core `>=0.4.0,<0.5` and capability
+contract 1. Upgrade with `python -m pip install --upgrade "datafog[rust]==4.9.0"`
+to evaluate it. Base-only users can install `datafog==4.9.0` without Core;
+installing the Rust extra does not change the default backend. See the
+[4.9.0 release notes](RELEASE_NOTES_4.9.0.md).
+Entity labels, locales, and activation settings come from the installed
+Core, allowing compatible releases to add detectors without a Python update.
+German detection is opt-in through locale or entity selection; UUID is opt-in
+through `entity_types=["UUID"]`. Core's structured-only `PERSON` is unavailable
+for explicit Rust text selection. The legacy overlap policy can suppress NPI in
+favor of PHONE; the migration guide explains native alternatives. Lock the Core
+version if detection output must remain reproducible.
+
+The [4.8.1 compatibility contract](docs/migration-4.8.1-contract.md) records
+published Python behavior for the Rust migration, with frozen fixtures and
+instructions for independently reproducing them from the release wheel.
 
 ```bash
 git clone https://github.com/datafog/datafog-python

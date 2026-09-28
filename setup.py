@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 # Read README for the long description
-with open("README.md", "r") as f:
+with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 # Use a single source of truth for the version from __about__.py
@@ -34,6 +34,8 @@ nlp_advanced_deps = [
     "torch>=2.1.0,<2.7",
     "transformers>=4.20.0",
     "huggingface-hub>=0.16.0",
+    "sentencepiece>=0.2.0",
+    "protobuf>=4.0.0",
 ]
 
 ocr_deps = [
@@ -82,6 +84,7 @@ benchmark_deps = [
 ]
 
 extras_require = {
+    "rust": ["datafog-core>=0.4.0,<0.5"],
     "nlp": nlp_deps,
     "nlp-advanced": nlp_advanced_deps,
     "ocr": ocr_deps,
