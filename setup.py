@@ -83,6 +83,12 @@ benchmark_deps = [
     "pytest-benchmark>=4.0.0",
 ]
 
+# Convenience pin for the Sentry integration; apps that already ship
+# sentry-sdk can import datafog.integrations.sentry without this extra.
+sentry_deps = [
+    "sentry-sdk>=2.0,<3.0",
+]
+
 extras_require = {
     "rust": ["datafog-core>=0.4.0,<0.5"],
     "nlp": nlp_deps,
@@ -92,6 +98,7 @@ extras_require = {
     "web": web_deps,
     "cli": cli_deps,
     "crypto": crypto_deps,
+    "sentry": sentry_deps,
     "test": test_deps,
     "docs": docs_deps,
     "benchmark": benchmark_deps,
