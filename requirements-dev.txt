@@ -10,7 +10,7 @@ just==0.8.162
 isort==5.13.2
 black==26.3.1
 blacken-docs==1.13.0
-certifi==2025.4.26
+certifi==2026.10.19
 flake8==7.0.0
 prettier==0.0.7
 tox==4.14.2
