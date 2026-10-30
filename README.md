@@ -1,6 +1,6 @@
-﻿# DataFog Python
+﻿# datafog Python
 
-DataFog is a Python library for detecting and redacting personally identifiable information (PII).
+datafog is a Python library for detecting and redacting personally identifiable information (PII).
 
 It provides:
 
@@ -13,7 +13,7 @@ It provides:
 
 ## Agent & Gateway Firewall
 
-DataFog includes two ready-made enforcement points that catch PII at the
+datafog includes two ready-made enforcement points that catch PII at the
 moment it would leave your machine — offline, in microseconds, with matched
 values never echoed into logs or transcripts:
 
@@ -188,7 +188,7 @@ scan/redact helpers, or guardrail helpers.
     model.
   - A Java runtime is required by PySpark.
 
-DataFog 4.9.0 deprecates OCR and Spark with visible use-time
+datafog 4.9.0 deprecates OCR and Spark with visible use-time
 warnings; their APIs and extras will be removed in 5.0. They remain functional
 in 4.9. Users who need these features can stay on the final 4.x release. See
 the [4.9 migration guide](docs/migration-4.9.md) for the transition plan.
@@ -237,7 +237,7 @@ datafog redact-text "Steuer-ID 12345678901" --locale de
 
 ## Telemetry
 
-DataFog telemetry is disabled by default.
+datafog telemetry is disabled by default.
 
 To opt in:
 
