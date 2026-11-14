@@ -11,6 +11,7 @@ Optional extras available for advanced features:
 
 import warnings
 
+from ._legacy_retirement import LAST_SUPPORTED as _LAST_SUPPORTED
 from .__about__ import __version__
 from .agent import create_guardrail, filter_output, sanitize, scan_prompt
 
@@ -81,6 +82,13 @@ def __getattr__(name: str):
 
     elif name in _LAZY_EXPORTS:
         module_path, attr_name, extra_name = _LAZY_EXPORTS[name]
+        if attr_name is None:
+            # Submodule export (``datafog.native``): return the module itself.
+            import importlib
+
+            value = importlib.import_module(module_path)
+            globals()[name] = value
+            return value
         try:
             module = __import__(module_path, fromlist=[attr_name])
             value = getattr(module, attr_name)
@@ -104,6 +112,7 @@ def __getattr__(name: str):
 
 
 _LAZY_EXPORTS = {
+    "native": ("datafog.native", None, None),
     "app": ("datafog.client", "app", None),
     "DataFog": ("datafog.main", "DataFog", None),
     "TextPIIAnnotator": ("datafog.main", "TextPIIAnnotator", None),
@@ -131,7 +140,8 @@ _LAZY_EXPORTS = {
 def _warn_v5_replacement(old_api: str, replacement: str) -> None:
     warnings.warn(
         f"datafog.{old_api}() is deprecated and will be removed in 5.0. Use {replacement} instead. "
-        "The earlier promise to retain this shim through 5.x has been revised.",
+        f'Last supported version is {_LAST_SUPPORTED}. Pin it with: pip install "datafog=={_LAST_SUPPORTED}". '
+        "The earlier promise to retain this shim through 5.x has been revised. See docs/retirement.rst.",
         FutureWarning,
         stacklevel=3,
     )
@@ -145,7 +155,7 @@ def scan(
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
     *,
-    backend: str = "python",
+    backend: str | None = None,
 ) -> ScanResult:
     """Scan using the 4.x compatibility API; Rust detection is opt-in."""
     return _compat_v4.scan(
@@ -170,7 +180,7 @@ def redact(
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
     *,
-    backend: str = "python",
+    backend: str | None = None,
 ) -> RedactResult:
     """Redact using the 4.x compatibility API and legacy strategies."""
     return _compat_v4.redact(

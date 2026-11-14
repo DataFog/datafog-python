@@ -6,13 +6,20 @@ import json
 import pytest
 
 from tests.contract_481 import FIXTURE, observe
+from tests.rust_contract import DEVIATIONS
 
 CONTRACT = json.loads(FIXTURE.read_text(encoding="utf-8"))
+# The default backend is native from 4.10.0, so the reviewed native
+# differences are the published 4.10 observations for those cases.
+REVIEWED = json.loads(DEVIATIONS.read_text(encoding="utf-8"))
 
 
 def expected_49(case):
-    """Allow only the four added backend parameters and revised shim notices."""
-    expected = copy.deepcopy(case["expected"])
+    """Allow only the added backend parameter, revised shim notices and the
+    reviewed native differences."""
+
+    deviation = REVIEWED["cases"].get(case["id"])
+    expected = copy.deepcopy(deviation["expected"]) if deviation else copy.deepcopy(case["expected"])
     if case["id"] == "public-signatures":
         for target in (
             "datafog:scan",
@@ -25,7 +32,7 @@ def expected_49(case):
                     "name": "backend",
                     "kind": "KEYWORD_ONLY",
                     "required": False,
-                    "default": "python",
+                    "default": None,
                 }
             )
     if case.get("target") in {"datafog:detect", "datafog:process"}:
@@ -41,7 +48,9 @@ def expected_49(case):
                 "message": (
                     f"datafog.{name}() is deprecated and will be removed in 5.0. "
                     f"Use {replacement} instead. "
-                    "The earlier promise to retain this shim through 5.x has been revised."
+                    'Last supported version is 4.10.0. Pin it with: pip install "datafog==4.10.0". '
+                    "The earlier promise to retain this shim through 5.x has been revised. "
+                    "See docs/retirement.rst."
                 ),
             }
         ]

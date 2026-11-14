@@ -1,5 +1,31 @@
 # ChangeLog
 
+## [4.10.0]
+
+#### Added
+
+- Native engine is the default: `backend` resolves through `auto`, which uses
+  `datafog-core` when it imports and the pure-Python engine otherwise. One
+  warning on fallback, `DATAFOG_BACKEND` and `backend="python"` to opt out.
+- Prose `PERSON` and `ADDRESS` from the model embedded in `datafog-core`; no
+  spaCy, GLiNER, download or interpreter.
+- `API_KEY`, `BEARER_TOKEN`, `JWT`, `PRIVATE_KEY`, `CREDENTIAL_URI`,
+  `ACCOUNT_NUMBER`, `US_ROUTING_NUMBER`, `NPI` and `UUID` entity types, plus the
+  German set behind the `de` locale.
+- `datafog.native` native schema access and `VERSIONING.md`.
+
+#### Changed
+
+- `datafog-core>=1.2.0,<2` is a normal dependency; `[rust]` remains as an
+  explicit spelling.
+- `Development Status: 5 - Production/Stable`.
+- Retirement warnings name `4.10.0` as the last supported version with an exact
+  pin, replacing "the final 4.x release".
+
+#### Fixed
+
+- `redact(..., entities=[...])` validates `backend` instead of ignoring it.
+
 ## [4.9.0]
 
 #### Added

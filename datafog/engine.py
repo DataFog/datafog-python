@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import warnings
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Optional
 
-from .exceptions import EngineNotAvailable
+from .exceptions import CoreUnavailableWarning, EngineNotAvailable
 from .processing.text_processing.regex_annotator import RegexAnnotator
 
 CANONICAL_TYPE_MAP = {
@@ -27,6 +28,13 @@ CANONICAL_TYPE_MAP = {
     # Presidio-compatible aliases, so configs migrate without renames.
     "EMAIL_ADDRESS": "EMAIL",
     "US_SSN": "SSN",
+    # Credential detectors are native-only; these spellings keep one vocabulary.
+    "APIKEY": "API_KEY",
+    "API-KEY": "API_KEY",
+    "TOKEN": "BEARER_TOKEN",
+    "BEARER": "BEARER_TOKEN",
+    "PRIVATEKEY": "PRIVATE_KEY",
+    "CREDENTIAL_URI": "CREDENTIAL_URI",
 }
 
 ALL_ENTITY_TYPES = {
@@ -48,7 +56,27 @@ ALL_ENTITY_TYPES = {
     "ORGANIZATION",
     "LOCATION",
     "ADDRESS",
+    "API_KEY",
+    "BEARER_TOKEN",
+    "JWT",
+    "PRIVATE_KEY",
+    "CREDENTIAL_URI",
+    "ACCOUNT_NUMBER",
+    "STREET_ADDRESS",
+    "US_ROUTING_NUMBER",
+    "NPI",
+    "UUID",
 }
+
+#: Labels the native rule engine reports as structured-only, served for text by
+#: the embedded model instead.
+MODEL_ENTITY_TYPES = {"PERSON", "ADDRESS"}
+
+#: Environment override for the default backend: ``auto``, ``python`` or ``rust``.
+BACKEND_ENV = "DATAFOG_BACKEND"
+
+_core_warned = False
+_cnn_cache: tuple[object, object] | None = None
 
 NER_ENTITY_TYPES = {"PERSON", "ORGANIZATION", "LOCATION", "ADDRESS"}
 
@@ -209,6 +237,81 @@ def _regex_entities(
     return _suppress_overlapping_entities(entities)
 
 
+def _core_module_or_none() -> object | None:
+    """Return the importable ``datafog_core`` module, or ``None``.
+
+    Deliberately uncached: after the first import this is a ``sys.modules``
+    lookup, and not caching keeps ``sys.modules`` patching in tests honest.
+    """
+    try:
+        import datafog_core
+    except ImportError:
+        return None
+    return datafog_core
+
+
+def _require_core() -> object:
+    core = _core_module_or_none()
+    if core is None:
+        raise ImportError(
+            "The Rust backend requires datafog-core. "
+            'Install with: pip install "datafog[rust]"'
+        )
+    return core
+
+
+def core_available() -> bool:
+    """Whether the native engine can serve this interpreter."""
+    return _core_module_or_none() is not None
+
+
+def _set_core(module: object | None) -> None:
+    """Test seam: reset cached state derived from the core module."""
+    global _cnn_cache
+    _cnn_cache = None
+
+
+def _cnn_detector_or_none() -> object | None:
+    """Cached embedded detector, keyed on the module object it came from."""
+    global _cnn_cache
+    core = _core_module_or_none()
+    if core is None:
+        return None
+    if _cnn_cache is not None and _cnn_cache[0] is core:
+        return _cnn_cache[1]
+    factory = getattr(core, "EmbeddedCnnDetector", None)
+    if factory is None:
+        return None
+    detector = factory()
+    _cnn_cache = (core, detector)
+    return detector
+
+
+def _cnn_findings(
+    detector: object, requested: set[str], text: str
+) -> list[tuple[dict, object]]:
+    """Serve prose names and address blocks from the embedded model."""
+    try:
+        result = detector.scan_model(text)
+    except Exception as exc:  # relative-path/limit errors surface to the caller
+        raise _model_error(exc) from exc
+    return [
+        ({}, finding)
+        for finding in result.findings
+        if finding.entity_type in requested
+    ]
+
+
+def _model_error(exc: Exception) -> Exception:
+    """Re-raise a model failure as a ValueError with its native code attached."""
+    code = getattr(exc, "code", "model_error")
+    reason = getattr(exc, "reason", None)
+    detail = f"{code}/{reason}" if reason else code
+    error = ValueError(f"Native model detection failed ({detail}): {exc}")
+    error.code = code  # type: ignore[attr-defined]
+    return error
+
+
 def _rust_entities(
     text: str,
     entity_types: Optional[list[str]] = None,
@@ -220,22 +323,30 @@ def _rust_entities(
     suppression before entity selection and allowlists, preserving that order
     without duplicating the native detectors.
     """
-    try:
-        import datafog_core
-    except ImportError as exc:
-        raise ImportError(
-            "The Rust backend requires datafog-core. "
-            'Install with: pip install "datafog[rust]"'
-        ) from exc
+    datafog_core = _require_core()
 
     from ._core_capabilities import scan_configs
 
     requested = {_canonical_type(value) for value in entity_types or []}
-    configs = scan_configs(datafog_core, requested, locales)
+    model_requested = requested & MODEL_ENTITY_TYPES
+    detector = _cnn_detector_or_none() if model_requested else None
+    if model_requested and detector is None:
+        raise ValueError(
+            f"Entity {', '.join(sorted(model_requested))} needs the embedded model, "
+            "which this datafog-core build does not provide. Upgrade it with: "
+            'pip install --upgrade "datafog-core"'
+        )
+    configs = scan_configs(datafog_core, requested - MODEL_ENTITY_TYPES, locales)
     entities: list[Entity] = []
     seen: set[tuple[str, int, int]] = set()
-    for config in configs:
-        for finding in datafog_core.scan(text, config=config):
+    findings = [
+        (config, finding)
+        for config in configs
+        for finding in datafog_core.scan(text, config=config)
+    ]
+    if detector is not None:
+        findings.extend(_cnn_findings(detector, model_requested, text))
+    for config, finding in findings:
             canonical_type = _canonical_type(finding.entity_type)
             start = finding.codepoint_range.start
             end = finding.codepoint_range.end
@@ -404,6 +515,42 @@ def _needs_ner(entity_types: Optional[list[str]]) -> bool:
     return bool(requested & NER_ENTITY_TYPES)
 
 
+def _warn_core_missing() -> None:
+    global _core_warned
+    if _core_warned:
+        return
+    _core_warned = True
+    warnings.warn(
+        "datafog-core is not installed, so detection falls back to the pure-Python "
+        f"engine. Install it to use the native engine, or set {BACKEND_ENV}=python "
+        "to silence this warning.",
+        CoreUnavailableWarning,
+        stacklevel=4,
+    )
+
+
+def resolve_backend(backend: str | None = None, engine: str = "regex") -> str:
+    """Resolve ``auto`` to a concrete backend without importing Core eagerly.
+
+    An explicit ``backend`` wins over ``DATAFOG_BACKEND``. ``auto`` uses the
+    native engine whenever Core is importable and degrades to Python otherwise.
+    Non-``regex`` engines always take the Python path, because the native
+    backend serves ``regex`` and model findings only.
+    """
+    requested = backend or os.environ.get(BACKEND_ENV) or "auto"
+    normalized = requested.strip().lower()
+    if normalized not in {"auto", "python", "rust"}:
+        raise ValueError(
+            f"backend must be one of: auto, python, rust (from {BACKEND_ENV} or the "
+            "backend argument)"
+        )
+    if normalized == "auto":
+        if engine != "regex":
+            return "python"
+        return "rust" if core_available() else "python"
+    return normalized
+
+
 def _validate_backend(backend: str, engine: str) -> None:
     if backend not in {"python", "rust"}:
         raise ValueError("backend must be one of: python, rust")
@@ -419,13 +566,19 @@ def scan(
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
     *,
-    backend: str = "python",
+    backend: Optional[str] = None,
 ) -> ScanResult:
     """Scan text for PII entities.
 
-    ``backend="rust"`` opts into experimental native detection for
-    ``engine="regex"``. Results retain legacy regex provenance and confidence;
-    these are compatibility values, not native confidence estimates.
+    ``backend`` defaults to ``auto``: the native engine when ``datafog-core`` is
+    importable, otherwise the pure-Python engine with a one-time warning. Set
+    ``DATAFOG_BACKEND`` or pass ``backend="python"`` to force the fallback. The
+    native path serves ``engine="regex"``; non-regex engines always use Python.
+    Probe names and address blocks come from the embedded model on the native
+    path, so ``PERSON`` and ``ADDRESS`` work without spaCy or a model download.
+
+    Results retain legacy regex provenance and confidence; these are
+    compatibility values, not native confidence estimates.
 
     ``allowlist`` exempts exact entity texts (e.g. your own support email);
     ``allowlist_patterns`` exempts entities whose full text matches a regex
@@ -437,7 +590,11 @@ def scan(
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
 
+    requested_backend = (backend or os.environ.get(BACKEND_ENV) or "auto").strip().lower()
+    backend = resolve_backend(backend, engine)
     _validate_backend(backend, engine)
+    if backend == "python" and requested_backend == "auto" and not core_available():
+        _warn_core_missing()
 
     # Validate patterns up front so config errors fail fast even when the
     # text contains no entities.
@@ -611,9 +768,12 @@ def scan_and_redact(
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
     *,
-    backend: str = "python",
+    backend: Optional[str] = None,
 ) -> RedactResult:
-    """Scan with the selected backend, then apply legacy Python redaction."""
+    """Scan with the selected backend, then apply legacy Python redaction.
+
+    Backend selection matches :func:`scan`.
+    """
     scan_result = scan(
         text=text,
         engine=engine,

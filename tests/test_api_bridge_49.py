@@ -32,7 +32,7 @@ def test_existing_positional_calls_match_compatibility_facade():
 def test_backend_is_additive_keyword_only(function):
     parameter = inspect.signature(function).parameters["backend"]
     assert parameter.kind is inspect.Parameter.KEYWORD_ONLY
-    assert parameter.default == "python"
+    assert parameter.default is None
 
 
 @pytest.mark.parametrize("name", ["scan", "redact"])

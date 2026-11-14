@@ -29,7 +29,10 @@ def test_optional_service_notice_precedes_dependencies(monkeypatch, surface):
         warnings.simplefilter("error", LegacySurfaceWarning)
         with pytest.raises(
             LegacySurfaceWarning,
-            match=f"{surface} support is deprecated in 4.9 and will be removed in 5.0",
+            match=(
+                f"{surface} support is deprecated in 4.9 and will be removed in 5.0. "
+                'Last supported version is 4.10.0. Pin it with: pip install "datafog==4.10.0".'
+            ),
         ):
             (ImageService if surface == "OCR" else SparkService)()
 
@@ -40,7 +43,7 @@ def test_spark_missing_dependency_error_is_preserved(monkeypatch):
 
     monkeypatch.setattr(importlib, "import_module", unavailable)
     with (
-        pytest.warns(LegacySurfaceWarning, match="final 4.x release"),
+        pytest.warns(LegacySurfaceWarning, match="Last supported version is 4.10.0"),
         pytest.raises(ImportError, match=r"datafog\[distributed\]"),
     ):
         SparkService()
@@ -82,7 +85,7 @@ def test_donut_mock_output_is_preserved(monkeypatch):
     monkeypatch.setattr(donut_processor, "DONUT_TESTING_ENABLED", False)
     with pytest.warns(LegacySurfaceWarning):
         processor = DonutProcessor()
-    with pytest.warns(LegacySurfaceWarning, match="final 4.x release"):
+    with pytest.warns(LegacySurfaceWarning, match="Last supported version is 4.10.0"):
         assert asyncio.run(processor.extract_text_from_image(object())) == (
             '{"text": "Mock OCR text for testing"}'
         )
@@ -242,7 +245,7 @@ if sys.argv[1] == "True":
     args.append("image.png")
 result = CliRunner().invoke(client.app, args)
 assert "deprecated in 4.9 and will be removed in 5.0" in result.stderr, result.output
-assert "final 4.x release" in result.stderr, result.output
+assert 'Last supported version is 4.10.0' in result.stderr, result.output
 if sys.argv[1] == "True":
     assert result.exit_code == 0, result.output
     assert "OCR Pipeline Results: ['OCR text']" in result.stdout

@@ -85,7 +85,7 @@ def _requested_locales(locales: Any, lookup: dict[str, str]) -> set[str]:
     return {_resolve_locale(locale, lookup) for locale in locales or []}
 
 
-def _activation_config(label: str, metadata: dict) -> dict:
+def _activation_config(label: str, metadata: dict) -> dict | None:
     details = metadata.get(label)
     if not isinstance(details, dict):
         raise _invalid(f"missing entity metadata for {label!r}")
@@ -95,10 +95,9 @@ def _activation_config(label: str, metadata: dict) -> dict:
     ):
         raise _invalid(f"invalid scopes for {label!r}")
     if "text" not in scopes:
-        raise ValueError(
-            f"Entity {label!r} is not available for Rust text scanning "
-            "(structured-only entity)"
-        )
+        # Structured-only labels are served by the caller, usually from the
+        # embedded model, so a mixed selection is not an error.
+        return None
     activation = details.get("activation")
     if not isinstance(activation, dict):
         raise _invalid(f"missing activation metadata for {label!r}")
@@ -120,13 +119,15 @@ def scan_configs(core: Any, requested: set[str], locales: Any) -> list[dict]:
     capabilities = getattr(core, "capabilities", None)
     if not callable(capabilities):
         raise _invalid(
-            "contract version 1 is required; install a compatible Core 0.4.x"
+            "contract version 1 is required; install a compatible datafog-core"
         )
     supported, lookup, metadata = _read_capabilities(capabilities)
     selected_locales = _requested_locales(locales, lookup)
     common: dict[str, Any] = {}
     for label in sorted(requested & supported):
         config = _activation_config(label, metadata)
+        if config is None:
+            continue
         for key, value in config.items():
             if key == "locale":
                 selected_locales.add(_resolve_locale(value, lookup))

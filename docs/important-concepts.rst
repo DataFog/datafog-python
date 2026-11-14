@@ -39,7 +39,7 @@ Services
 ``TextService`` remains available. ``ImageService`` and ``SparkService`` are
 optional legacy services, deprecated in 4.9 for removal in 5.0. They remain
 functional throughout 4.9; users requiring them after the cutover can remain on
-the final 4.x release. See :doc:`optional-surfaces`.
+:doc:`retirement`.
 
 Existing services:
 

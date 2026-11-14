@@ -179,8 +179,9 @@ They are now scheduled for removal in 5.0. Use `scan` or `redact` in 4.9 and eva
 the native preview before upgrading to 5.0. `process(anonymize=True)` used older
 placeholder/hash semantics; migrating to `redact` can intentionally change output.
 
-Users needing OCR/Spark can remain on the final 4.x release. No successor package
-or indefinite support commitment is introduced here. Deprecation notices do not
+Users needing OCR/Spark can pin `pip install "datafog==4.10.0"`, the last
+supported version. No successor package is introduced here. See
+[the retirement schedule](retirement.md). Deprecation notices do not
 trigger downloads or import heavy dependencies during ordinary text imports.
 
 ## Verification and performance

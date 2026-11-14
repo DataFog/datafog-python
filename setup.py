@@ -18,6 +18,9 @@ project_urls = {
 
 # Core lightweight dependencies only
 core_deps = [
+    # Native engine, the default detection path. Exact upper bound: detection
+    # output is contract-versioned and must stay reproducible.
+    "datafog-core>=1.2.0,<2",
     "pydantic>=2.0,<3.0",
     "pydantic-settings>=2.0.0",
     "typing-extensions>=4.0",
@@ -84,7 +87,8 @@ benchmark_deps = [
 ]
 
 extras_require = {
-    "rust": ["datafog-core>=0.4.0,<0.5"],
+    # Retained for explicitness; the base install already pulls Core.
+    "rust": ["datafog-core>=1.2.0,<2"],
     "nlp": nlp_deps,
     "nlp-advanced": nlp_advanced_deps,
     "ocr": ocr_deps,
@@ -128,7 +132,7 @@ setup(
         ],
     },
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",

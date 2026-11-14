@@ -10,7 +10,8 @@ import datafog
 
 EMAIL = "jane.doe@" "example.com"
 OTHER_EMAIL = "sid@" "example.com"
-TIMESTAMP_LIKE = "17830" "25668"  # ten digits: matches the PHONE pattern
+TIMESTAMP_LIKE = "44123" "45678"  # ten digits, NANP-shaped: both backends match
+LEADING_ONE_TIMESTAMP = "17830" "25668"  # native reads the leading 1 as a country code
 
 
 class TestExactAllowlist:
@@ -53,6 +54,17 @@ class TestPatternAllowlist:
             allowlist_patterns=[r"^\d{10}$"],
         )
         assert result.entities == []
+
+    def test_leading_one_timestamp_is_a_documented_native_delta(self):
+        # The native NANP check reads a leading 1 as a country code and needs a
+        # nine-digit national number after it, so this misses; the Python engine
+        # matches. Recorded rather than silently accepted.
+        assert datafog.scan(f"created {LEADING_ONE_TIMESTAMP}", engine="regex").entities == []
+        assert len(
+            datafog.scan(
+                f"created {LEADING_ONE_TIMESTAMP}", engine="regex", backend="python"
+            ).entities
+        ) == 1
 
     def test_pattern_matches_full_entity_text_only(self):
         result = datafog.scan(

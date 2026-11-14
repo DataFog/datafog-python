@@ -153,9 +153,12 @@ def test_nonregex_engine_rejected(native, name):
     assert not calls
 
 
-def test_bad_backend_rejected():
+def test_bad_backend_rejected(monkeypatch):
     with pytest.raises(ValueError, match="backend must be one of"):
-        engine.scan("", "regex", backend="auto")
+        engine.scan("", "regex", backend="unknown")
+    monkeypatch.setenv(engine.BACKEND_ENV, "unknown")
+    with pytest.raises(ValueError, match="backend must be one of"):
+        engine.scan("", "regex")
 
 
 def test_no_native_import_on_python_path_and_actionable_missing_error(monkeypatch):
@@ -198,7 +201,9 @@ def test_all_legacy_transformations_use_native_findings(native, strategy):
             finding("EMAIL", "a@example.com", 14, 27),
         ]
     )
-    expected = engine.scan_and_redact(text, "regex", strategy=strategy)
+    expected = engine.scan_and_redact(
+        text, "regex", strategy=strategy, backend="python"
+    )
     actual = engine.scan_and_redact(text, "regex", strategy=strategy, backend="rust")
     assert actual == expected
     assert calls == [text]
@@ -208,7 +213,9 @@ def test_all_legacy_transformations_use_native_findings(native, strategy):
 def test_real_native_unicode_and_transformations(strategy):
     pytest.importorskip("datafog_core")
     text = "😀 München a@example.com and a@example.com"
-    python_result = engine.scan_and_redact(text, "regex", strategy=strategy)
+    python_result = engine.scan_and_redact(
+        text, "regex", strategy=strategy, backend="python"
+    )
     native_result = engine.scan_and_redact(
         text, "regex", strategy=strategy, backend="rust"
     )
