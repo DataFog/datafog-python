@@ -45,6 +45,16 @@ of ignoring them.
 `(555) 123-4567` and similar form data now match: Core keeps the area-code check
 and accepts exchange codes starting with 1.
 
+## Accuracy corpus
+
+The frozen corpus runs twice in CI now: once against the Python engine, whose
+expectations it encodes, and once against the native engine with its twelve
+recorded divergences in
+[tests/contracts/native-corpus.json](tests/contracts/native-corpus.json). The
+native divergences are strictness differences (Core validates more) plus email
+boundary handling that Core currently exposes through `format: "env"` /
+`"sql"` settings — flagged for a default decision in Core 1.4.
+
 ## Deprecations unchanged
 
 `detect()`, `process()`, OCR and Spark still work and still warn; all are removed

@@ -119,6 +119,16 @@ jobs:
             --cov-report=xml \
             --cov-report=term-missing
 
+      - name: Run detection accuracy corpus on the native engine
+        if: matrix.python-version == '3.11' && matrix.install-profile == 'nlp-advanced'
+        env:
+          DATAFOG_ACCURACY_BACKEND: rust
+        run: |
+          pytest tests/test_detection_accuracy.py \
+            --tb=short \
+            --ignore=tests/test_spark_integration.py \
+            --ignore=tests/test_text_service_integration.py
+
       - name: Run tests (nlp)
         if: matrix.install-profile == 'nlp'
         run: |

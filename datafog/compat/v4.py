@@ -5,8 +5,8 @@ not include the deprecated detect/process shims.
 """
 
 from ..engine import Entity, RedactResult, ScanResult
-from ..engine import resolve_backend
 from ..engine import redact as _redact_entities
+from ..engine import resolve_backend
 from ..engine import scan as _scan
 from ..engine import scan_and_redact as _scan_and_redact
 

@@ -11,8 +11,8 @@ Optional extras available for advanced features:
 
 import warnings
 
-from ._legacy_retirement import LAST_SUPPORTED as _LAST_SUPPORTED
 from .__about__ import __version__
+from ._legacy_retirement import LAST_SUPPORTED as _LAST_SUPPORTED
 from .agent import create_guardrail, filter_output, sanitize, scan_prompt
 
 # Core API functions - always available (lightweight)

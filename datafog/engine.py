@@ -296,9 +296,7 @@ def _cnn_findings(
     except Exception as exc:  # relative-path/limit errors surface to the caller
         raise _model_error(exc) from exc
     return [
-        ({}, finding)
-        for finding in result.findings
-        if finding.entity_type in requested
+        ({}, finding) for finding in result.findings if finding.entity_type in requested
     ]
 
 
@@ -347,23 +345,23 @@ def _rust_entities(
     if detector is not None:
         findings.extend(_cnn_findings(detector, model_requested, text))
     for config, finding in findings:
-            canonical_type = _canonical_type(finding.entity_type)
-            start = finding.codepoint_range.start
-            end = finding.codepoint_range.end
-            key = (canonical_type, start, end)
-            if key in seen or not finding.matched_text.strip():
-                continue
-            seen.add(key)
-            entities.append(
-                Entity(
-                    type=canonical_type,
-                    text=finding.matched_text,
-                    start=start,
-                    end=end,
-                    confidence=1.0,
-                    engine="regex",
-                )
+        canonical_type = _canonical_type(finding.entity_type)
+        start = finding.codepoint_range.start
+        end = finding.codepoint_range.end
+        key = (canonical_type, start, end)
+        if key in seen or not finding.matched_text.strip():
+            continue
+        seen.add(key)
+        entities.append(
+            Entity(
+                type=canonical_type,
+                text=finding.matched_text,
+                start=start,
+                end=end,
+                confidence=1.0,
+                engine="regex",
             )
+        )
     return _suppress_overlapping_entities(entities)
 
 
@@ -590,7 +588,9 @@ def scan(
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
 
-    requested_backend = (backend or os.environ.get(BACKEND_ENV) or "auto").strip().lower()
+    requested_backend = (
+        (backend or os.environ.get(BACKEND_ENV) or "auto").strip().lower()
+    )
     backend = resolve_backend(backend, engine)
     _validate_backend(backend, engine)
     if backend == "python" and requested_backend == "auto" and not core_available():

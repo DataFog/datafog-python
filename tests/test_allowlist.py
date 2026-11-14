@@ -59,12 +59,18 @@ class TestPatternAllowlist:
         # The native NANP check reads a leading 1 as a country code and needs a
         # nine-digit national number after it, so this misses; the Python engine
         # matches. Recorded rather than silently accepted.
-        assert datafog.scan(f"created {LEADING_ONE_TIMESTAMP}", engine="regex").entities == []
-        assert len(
-            datafog.scan(
-                f"created {LEADING_ONE_TIMESTAMP}", engine="regex", backend="python"
-            ).entities
-        ) == 1
+        assert (
+            datafog.scan(f"created {LEADING_ONE_TIMESTAMP}", engine="regex").entities
+            == []
+        )
+        assert (
+            len(
+                datafog.scan(
+                    f"created {LEADING_ONE_TIMESTAMP}", engine="regex", backend="python"
+                ).entities
+            )
+            == 1
+        )
 
     def test_pattern_matches_full_entity_text_only(self):
         result = datafog.scan(

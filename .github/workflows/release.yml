@@ -167,6 +167,11 @@ jobs:
       - name: Run detection accuracy corpus
         run: python -m pytest tests/test_detection_accuracy.py -v --tb=short
 
+      - name: Run detection accuracy corpus on the native engine
+        env:
+          DATAFOG_ACCURACY_BACKEND: rust
+        run: python -m pytest tests/test_detection_accuracy.py --tb=short
+
       - name: Run performance validation
         run: |
           OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python tests/simple_performance_test.py

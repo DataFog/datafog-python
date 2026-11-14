@@ -193,9 +193,10 @@ def test_contextual_npi_survives_the_legacy_overlap_policy():
     assert [(item.type, item.text) for item in legacy.entities] == [
         ("NPI", "1234567893")
     ]
-    assert [item.type for item in datafog.scan(text, entity_types=["NPI"], backend="rust").entities] == [
-        "NPI"
-    ]
+    assert [
+        item.type
+        for item in datafog.scan(text, entity_types=["NPI"], backend="rust").entities
+    ] == ["NPI"]
     assert datafog.redact(text, backend="rust").redacted_text == "😀 café NPI [NPI_1]"
     # Native selection occurs before transformation overlap resolution, exposing
     # the NPI-specific route without changing the 4.x compatibility contract.
@@ -209,7 +210,9 @@ def test_contextual_npi_survives_the_legacy_overlap_policy():
 def test_structured_only_person_served_by_the_embedded_model():
     """`PERSON` is structured-only in the rule inventory but the embedded CNN
     covers prose, so text selection succeeds instead of raising."""
-    assert not datafog.scan("Jane Doe", entity_types=["PERSON"], backend="python").entities
+    assert not datafog.scan(
+        "Jane Doe", entity_types=["PERSON"], backend="python"
+    ).entities
     result = datafog.scan("Jane Doe\n14 Penny Lane", entity_types=["PERSON", "ADDRESS"])
     assert [item.type for item in result.entities] == ["PERSON", "ADDRESS"]
 
@@ -221,7 +224,5 @@ def test_unsupported_locale_rejected_explicitly():
 
 def test_native_backend_is_the_default():
     assert [item.type for item in datafog.scan(JWT).entities] == ["JWT"]
-    assert [item.type for item in datafog.scan(JWT, backend="rust").entities] == [
-        "JWT"
-    ]
+    assert [item.type for item in datafog.scan(JWT, backend="rust").entities] == ["JWT"]
     assert not datafog.scan(JWT, backend="python").entities

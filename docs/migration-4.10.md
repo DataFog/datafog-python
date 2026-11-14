@@ -55,6 +55,23 @@ no download and no interpreter. `PERSON` for a text scan on `backend="python"`
 is still Python-engine territory: the pure-Python regex engine has no name
 detection, so select `PERSON` without forcing `backend="python"`.
 
+## The accuracy corpus
+
+`tests/corpus` is the frozen accuracy corpus, and its expectations describe the
+Python engine, which is what they were written against. `pytest
+tests/test_detection_accuracy.py` pins `backend="python"`. Set
+`DATAFOG_ACCURACY_BACKEND=rust` to score the native engine; its twelve known
+divergences — eight misses, one added finding and three shifted email
+boundaries — are enumerated with reasons in
+[tests/contracts/native-corpus.json](../tests/contracts/native-corpus.json), and
+CI runs both variants.
+
+The three shifted email boundaries are the one worth filing a follow-up for:
+Core finds `alice@example.com` inside ``email=alice@example.com`` only under its
+`format: "env"` setting, and inside a quoted value only under
+`format: "sql"`. Log-shaped input wants that behaviour by default; Core 1.4
+should decide that rather than leaving it to each caller.
+
 ## If the output must not move
 
 Pin the backend, not just the version:

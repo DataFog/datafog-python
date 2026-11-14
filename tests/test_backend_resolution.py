@@ -41,8 +41,8 @@ def test_auto_keeps_non_regex_engines_on_python():
 
 def test_python_fallback_warns_once_then_stays_quiet(without_core):
     with pytest.warns(CoreUnavailableWarning) as caught:
-        datafog.scan("mail jane@example.com")
-        datafog.scan("mail jane@example.com")
+        for _ in range(2):
+            datafog.scan("mail jane@example.com")
     assert len(caught) == 1
 
 
@@ -92,7 +92,10 @@ def test_person_selection_without_model_raises_a_pin(monkeypatch):
         "default_entities": ["EMAIL"],
         "locales": {"en-US": {"enabled_entities": []}},
         "entities": {
-            "EMAIL": {"scopes": ["structured", "text"], "activation": {"kind": "default"}},
+            "EMAIL": {
+                "scopes": ["structured", "text"],
+                "activation": {"kind": "default"},
+            },
             "PERSON": {"scopes": ["structured"], "activation": {"kind": "default"}},
         },
     }

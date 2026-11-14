@@ -19,7 +19,11 @@ def expected_49(case):
     reviewed native differences."""
 
     deviation = REVIEWED["cases"].get(case["id"])
-    expected = copy.deepcopy(deviation["expected"]) if deviation else copy.deepcopy(case["expected"])
+    expected = (
+        copy.deepcopy(deviation["expected"])
+        if deviation
+        else copy.deepcopy(case["expected"])
+    )
     if case["id"] == "public-signatures":
         for target in (
             "datafog:scan",
