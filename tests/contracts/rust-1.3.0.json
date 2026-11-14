@@ -1,5 +1,5 @@
 {
-  "core_version": "0.4.0",
+  "core_version": "1.3.0",
   "cases": {
     "scan-observation-invalid-card": {
       "classification": "detector-difference",
@@ -38,6 +38,21 @@
         "error": {
           "type": "ValueError",
           "message": "Unsupported locale for the Rust backend: 'xx'"
+        },
+        "warnings": []
+      }
+    },
+    "scan-observation-ambiguous-number": {
+      "classification": "detector-difference",
+      "reason": "Core's North American area-code check requires a leading digit of 2-9, so a bare 10-digit run starting with 1 stays undetected. This is the deliberate Unix-timestamp protection; Python 4.8.1 matches it.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "Invoice 1234567890",
+            "engine_used": "regex"
+          }
         },
         "warnings": []
       }

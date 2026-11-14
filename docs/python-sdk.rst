@@ -27,10 +27,11 @@ available for existing users. ``TextService(engine="regex")`` is the
 dependency-light service path; ``spacy``, ``gliner``, ``smart``, OCR, and Spark
 surfaces require their explicit extras.
 
-4.9.0 compatibility and Core preview
-------------------------------------
+4.10.0 native default and Core preview
+--------------------------------------
 
-DataFog 4.9.0 provides an experimental Rust backend and native schema preview.
+DataFog 4.10.0 uses the native engine by default and keeps the native schema
+preview at ``datafog.v5`` and ``datafog.native``.
 Existing top-level ``scan``/``redact`` functions retain their
 result shapes and use the Python backend by default. They delegate through the
 new facade, whose classes are the same objects as the established result types:
@@ -44,9 +45,9 @@ continue to work at the top level in 4.9 but warn of removal in 5.0, revising th
 previous promise to retain them throughout 5.x. Moving from ``process`` to
 ``redact`` can change old placeholder and hash output; compare results explicitly.
 
-The adapter requires ``datafog-core>=0.4.0,<0.5``. Install with
-``python -m pip install --upgrade "datafog[rust]==4.9.0"`` to evaluate Rust.
-A base install of ``datafog==4.9.0`` has no native dependency; installing the
+The adapter requires ``datafog-core>=1.3.0,<2``, which the base install pulls. Install with
+``datafog-core`` is installed by every ``datafog`` install; ``backend="python"``
+or ``DATAFOG_BACKEND=python`` forces the pure-Python engine. Installing the
 extra does not change the default Python backend:
 
 .. code-block:: python
@@ -89,7 +90,7 @@ a separate decision.
 
 The adapter requires capability contract version 1 and discovers supported labels,
 locales, and activation settings from the installed Core. Future finding labels
-are preserved. Core 0.4.x updates may change detection output; lock the version
+are preserved. Core 1.x updates may change detection output; lock the version
 when reproducibility is required. German aliases ``de``, ``de-DE``, and ``de_DE``
 activate German detectors; ``en-US`` and ``fr`` activate only base detectors.
 Locale validation trims ASCII whitespace and ignores ASCII case; unsupported
@@ -101,7 +102,7 @@ through Core metadata. Core's ``PERSON`` is structured-only and explicitly
 selecting it for Rust text scanning raises an error. The Python default backend
 keeps its existing behavior.
 
-Core 0.4.0 adds JWT, private-key, contextual routing-number, and contextual NPI
+Core 1.2 adds the same JWT, private-key, contextual routing-number and NPI
 findings. The legacy overlap policy can prefer ``PHONE`` over a same-span ``NPI``;
 filtering for NPI then returns no entities. Native ``datafog.v5.scan`` retains NPI,
 and native transformation can select it. Legacy result and transformation
@@ -158,7 +159,8 @@ OCR and Spark remain available as optional surfaces throughout 4.9:
 
 DataFog 4.9.0 deprecates OCR and Spark for removal in 5.0. Use-time
 ``FutureWarning`` notices are visible under normal Python warning filters. Users
-needing these features can remain on the final 4.x release; this migration does
+needing these features can pin ``datafog==4.10.0``, the last supported version;
+this migration does
 not introduce successor packages or promise indefinite maintenance. See
 :doc:`optional-surfaces` for install notes and limitations.
 

@@ -1,0 +1,7 @@
+# Only the delta from the default ruff rules. Rule selection stays ruff's
+# default so this hook behaves like pre-4.10; flake8 config is in .flake8.
+
+[lint.per-file-ignores]
+# datafog/native.py re-exports the installed datafog-core surface through a
+# dynamic __getattr__, so its __all__ names resolve at runtime.
+"datafog/native.py" = ["F822"]

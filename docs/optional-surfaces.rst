@@ -18,7 +18,8 @@ The default path is:
 
 OCR and Spark are deprecated optional surfaces in 4.9 and will be removed in 5.0.
 Their APIs, installation extras, and existing behavior remain available throughout
-4.9. Remain on the final 4.x release if you need continued OCR or Spark support.
+4.9. The last supported version is 4.10.0 — pin it with ``pip install
+"datafog==4.10.0"``. See :doc:`retirement`.
 No replacement package is introduced by this migration.
 
 Use sites emit ``FutureWarning`` notices, visible with Python's default warning

@@ -70,6 +70,10 @@ class EngineNotAvailable(DataFogException):
         super().__init__(message, status_code=None)
 
 
+class CoreUnavailableWarning(RuntimeWarning):
+    """Emitted once when ``backend="auto"`` falls back to the pure-Python engine."""
+
+
 def raise_for_status_code(status_code: int, error_message: str):
     """
     Raise the appropriate exception based on the status code.

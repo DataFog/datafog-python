@@ -19,8 +19,9 @@ values never echoed into logs or transcripts:
 
 - **Claude Code hook** (`datafog-hook`): gates agent tool calls (shell
   commands, web requests, file writes, MCP tools) and warns the model when
-  prompts or tool results carry PII. ~70–90ms per invocation including
-  process startup. Easiest install is the
+  prompts or tool results carry PII. ~105–110ms per invocation including
+  process startup and the native engine load (`DATAFOG_BACKEND=python` trims
+  ~20ms at the cost of detection coverage). Easiest install is the
   [Claude Code plugin](https://github.com/DataFog/datafog-claude-plugin):
 
   ```
@@ -32,8 +33,8 @@ values never echoed into logs or transcripts:
 
 - **LiteLLM guardrail** (`DataFogGuardrail`): redacts or blocks PII in
   requests and responses at the gateway, for any LiteLLM-proxied provider.
-  In-process (~40µs per message scanned; a request clears the guardrail in
-  well under a millisecond), no sidecar service. Setup:
+  In-process (tens of microseconds per message scanned on the native engine),
+  no sidecar service. Setup:
   [examples/litellm_guardrail/](examples/litellm_guardrail/).
 
 Both default to the high-precision entity set (`EMAIL`, `PHONE`,
@@ -51,7 +52,7 @@ NER live in [benchmarks/](benchmarks/).
 ## Installation
 
 ```bash
-# Core install (regex engine)
+# Core install: native engine, no extra packages needed
 pip install datafog
 
 # Add spaCy support
@@ -70,8 +71,32 @@ pip install datafog[distributed]
 pip install datafog[all]
 ```
 
+`pip install datafog` pulls `datafog-core`, which is the native engine. Wheels
+exist for Linux (glibc and musl, x86_64/aarch64/s390x/ppc64le), macOS and
+Windows (amd64/arm64); anywhere else the source build needs a Rust toolchain.
+If Core cannot be imported, detection falls back to the pure-Python engine and
+warns once — `DATAFOG_BACKEND=python` selects that path deliberately.
+
 The `nlp-advanced` extra includes SentencePiece and protobuf for GLiNER's
 multilingual tokenizer; installing the OCR extra is not required for GLiNER.
+
+## Backends
+
+`backend` defaults to `auto`: the native engine when `datafog-core` is
+importable, the pure-Python regex engine otherwise. `DATAFOG_BACKEND` sets the
+default and `backend="python"` / `backend="rust"` override it per call.
+`auto` never selects the native engine for `engine="spacy"`, `"gliner"` or
+`"smart"`, which stay on the Python ML path.
+
+The native engine adds detectors the Python engine never had — `API_KEY`,
+`BEARER_TOKEN`, `JWT`, `PRIVATE_KEY`, `CREDENTIAL_URI`, `ACCOUNT_NUMBER`,
+`US_ROUTING_NUMBER`, `NPI`, `UUID` and a German set — and serves prose `PERSON`
+and `ADDRESS` from an embedded model, so name and address detection needs no
+spaCy and no model download. Findings keep `engine="regex"` provenance and
+`confidence=1.0` as compatibility values, not native confidence estimates.
+Reviewed differences from the Python engine are listed in
+[tests/contracts/rust-1.3.0.json](tests/contracts/rust-1.3.0.json).
+`datafog.native` exposes the native schema directly.
 
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
 `nlp-advanced`, and `ocr` install profiles. Donut OCR still requires a model
@@ -188,10 +213,12 @@ scan/redact helpers, or guardrail helpers.
     model.
   - A Java runtime is required by PySpark.
 
-DataFog 4.9.0 deprecates OCR and Spark with visible use-time
-warnings; their APIs and extras will be removed in 5.0. They remain functional
-in 4.9. Users who need these features can stay on the final 4.x release. See
-the [4.9 migration guide](docs/migration-4.9.md) for the transition plan.
+DataFog deprecates OCR and Spark with visible use-time
+warnings; their APIs and extras will be removed in 5.0. The last supported
+version is 4.10.0 — pin it with `pip install "datafog==4.10.0"` — and every
+retired surface is tracked in the [retirement schedule](docs/retirement.rst).
+See the [4.9 migration guide](docs/migration-4.9.md) for the transition plan,
+and [VERSIONING.md](VERSIONING.md) for what a version number promises.
 
 ## Backward-Compatible APIs
 
@@ -261,11 +288,9 @@ The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
 the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
 `detect`/`process`, OCR, and Spark. The Python detector remains the default.
 
-The experimental Rust adapter in 4.9.0 requires Core `>=0.4.0,<0.5` and capability
-contract 1. Upgrade with `python -m pip install --upgrade "datafog[rust]==4.9.0"`
-to evaluate it. Base-only users can install `datafog==4.9.0` without Core;
-installing the Rust extra does not change the default backend. See the
-[4.9.0 release notes](RELEASE_NOTES_4.9.0.md).
+4.10.0 requires Core `>=1.3.0,<2` and capability contract 1, and installs it by
+default. See the [4.10.0 release notes](RELEASE_NOTES_4.10.0.md) and the
+[4.10 migration guide](docs/migration-4.10.md).
 Entity labels, locales, and activation settings come from the installed
 Core, allowing compatible releases to add detectors without a Python update.
 German detection is opt-in through locale or entity selection; UUID is opt-in

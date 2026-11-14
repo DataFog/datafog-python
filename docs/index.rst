@@ -11,13 +11,30 @@ Start with :doc:`getting-started` if you want the shortest route from install
 to scanning text. The roadmap and historical planning pages remain available,
 but the live user docs are the first path for current text APIs.
 
+4.10.0 native default
+=====================
+
+DataFog 4.10.0 turns the native engine on by default. ``pip install datafog``
+now installs ``datafog-core``, and detection uses it whenever it imports; the
+pure-Python engine remains the fallback and ``DATAFOG_BACKEND=python`` forces
+it. No public API is removed in 4.10.0 and no existing call changes shape — the
+``backend`` keyword is still accepted, and now also accepts ``auto``.
+
+:download:`Complete 4.10 migration guide <migration-4.10.md>`.
+
+Prose ``PERSON`` and ``ADDRESS`` detection now comes from an embedded model, so
+names and addresses no longer need spaCy or a model download. The native engine
+adds credential, account and German detectors. Reviewed differences from the
+Python engine are recorded in ``tests/contracts/rust-1.2.0.json`` and the
+migration guide below.
+
 4.9.0 migration bridge
 ======================
 
-DataFog 4.9.0 is the migration bridge to the planned Rust-backed 5.0 API.
-Upgrade the base package with ``python -m pip install --upgrade datafog==4.9.0``;
-the native dependency remains optional. The ``rust`` extra requires
-``datafog-core>=0.4.0,<0.5`` and capability contract version 1.
+DataFog 4.9.0 was the migration bridge to the Rust-backed 5.0 API. It added the
+explicit ``backend="rust"`` opt-in, the ``datafog.compat.v4`` facade and the
+``datafog.v5`` preview. 4.10.0 built on it by making the native path the
+default.
 
 4.9 preserves existing imports, result classes, Python detection defaults, and
 redaction behavior. It adds explicit experimental Rust detection through
@@ -28,7 +45,7 @@ Core schema preview. See :doc:`python-sdk` and the
 DataFog 4.9.0 deprecates ``detect()``/``process()``, OCR, and Spark for
 removal in 5.0. The earlier promise to retain ``detect()``/``process()`` throughout
 5.x is revised. OCR/Spark remain functional in 4.9; users needing them after the
-cutover can remain on the final 4.x release. See :doc:`optional-surfaces`.
+cutover can pin :doc:`retirement`.
 
 Use DataFog
 ===========
@@ -42,6 +59,7 @@ Use DataFog
    cli
    optional-surfaces
    important-concepts
+   retirement
 
 Reference
 =========

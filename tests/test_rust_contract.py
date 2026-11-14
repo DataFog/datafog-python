@@ -15,7 +15,9 @@ CASES = [case for case in CONTRACT["cases"] if applicable(case)]
 
 
 def test_native_version_and_review_inventory():
-    assert importlib.metadata.version("datafog-core").startswith("0.4.")
+    installed = importlib.metadata.version("datafog-core")
+    major, minor = REVIEWED["core_version"].split(".")[:2]
+    assert installed.split(".")[:2] == [major, minor]
     assert set(REVIEWED["cases"]) <= {case["id"] for case in CASES}
     for item in REVIEWED["cases"].values():
         assert item["classification"] in {
