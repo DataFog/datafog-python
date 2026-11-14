@@ -16,7 +16,7 @@
 
 #### Changed
 
-- `datafog-core>=1.2.0,<2` is a normal dependency; `[rust]` remains as an
+- `datafog-core>=1.3.0,<2` is a normal dependency; `[rust]` remains as an
   explicit spelling.
 - `Development Status: 5 - Production/Stable`.
 - Retirement warnings name `4.10.0` as the last supported version with an exact

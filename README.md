@@ -95,7 +95,7 @@ and `ADDRESS` from an embedded model, so name and address detection needs no
 spaCy and no model download. Findings keep `engine="regex"` provenance and
 `confidence=1.0` as compatibility values, not native confidence estimates.
 Reviewed differences from the Python engine are listed in
-[tests/contracts/rust-1.2.0.json](tests/contracts/rust-1.2.0.json).
+[tests/contracts/rust-1.3.0.json](tests/contracts/rust-1.3.0.json).
 `datafog.native` exposes the native schema directly.
 
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
@@ -288,7 +288,7 @@ The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
 the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
 `detect`/`process`, OCR, and Spark. The Python detector remains the default.
 
-4.10.0 requires Core `>=1.2.0,<2` and capability contract 1, and installs it by
+4.10.0 requires Core `>=1.3.0,<2` and capability contract 1, and installs it by
 default. See the [4.10.0 release notes](RELEASE_NOTES_4.10.0.md) and the
 [4.10 migration guide](docs/migration-4.10.md).
 Entity labels, locales, and activation settings come from the installed

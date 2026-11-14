@@ -31,12 +31,12 @@ once.
   stay opt-in.
 - `datafog.native` exposes the native schema, `capabilities()`, the embedded
   detector and version reporting. Experimental until 5.0.
-- `datafog-core` is pinned `>=1.2.0,<2`. Detection output is contract-versioned.
+- `datafog-core` is pinned `>=1.3.0,<2`. Detection output is contract-versioned.
 
 ## Detection differences
 
 Four reviewed differences from the Python engine are recorded in
-[tests/contracts/rust-1.2.0.json](tests/contracts/rust-1.2.0.json) and asserted
+[tests/contracts/rust-1.3.0.json](tests/contracts/rust-1.3.0.json) and asserted
 by the suite: Core validates card checksums, requires non-alphanumeric SSN
 boundaries, requires a North American area code starting 2-9 (which is what
 keeps Unix timestamps out of `PHONE`), and rejects unadvertised locales instead

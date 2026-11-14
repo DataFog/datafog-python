@@ -40,7 +40,7 @@ The native engine finds things the Python regex engine never did: `API_KEY`,
 stay opt-in.
 
 These differences go the other way and are recorded, not hidden, in
-[tests/contracts/rust-1.2.0.json](../tests/contracts/rust-1.2.0.json):
+[tests/contracts/rust-1.3.0.json](../tests/contracts/rust-1.3.0.json):
 
 | Input | Python | Native | Why |
 | --- | --- | --- | --- |
@@ -77,7 +77,7 @@ Core versions independently. If output must be byte-identical across machines,
 lock it:
 
 ```bash
-pip install "datafog==4.10.0" "datafog-core==1.2.0"
+pip install "datafog==4.10.0" "datafog-core==1.3.0"
 ```
 
 `datafog.native.version()` reports the installed engine version and

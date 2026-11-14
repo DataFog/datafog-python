@@ -45,7 +45,7 @@ continue to work at the top level in 4.9 but warn of removal in 5.0, revising th
 previous promise to retain them throughout 5.x. Moving from ``process`` to
 ``redact`` can change old placeholder and hash output; compare results explicitly.
 
-The adapter requires ``datafog-core>=1.2.0,<2``, which the base install pulls. Install with
+The adapter requires ``datafog-core>=1.3.0,<2``, which the base install pulls. Install with
 ``datafog-core`` is installed by every ``datafog`` install; ``backend="python"``
 or ``DATAFOG_BACKEND=python`` forces the pure-Python engine. Installing the
 extra does not change the default Python backend:
