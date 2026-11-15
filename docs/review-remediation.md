@@ -50,14 +50,18 @@ result = datafog.redact("mail jane@example.com", strategy="hash", hash_key=key)
 
 ## Release sequence and qualification
 
-The Python candidate is 4.12.0. Its standalone CI uses the published Core 1.4
-minor series, pinned with `~=1.4.0`. Core 2.0.0 is prepared separately because
-safe mask-reveal and automatic-overlap transformation semantics are incompatible
-changes under Core's version policy. Both use capability contract 1. Before
-shipping the combined fixes, publish the qualified Core candidate, then raise
-both Python dependency declarations to `~=2.0.0`, update the reviewed native
-contract/corpus, and run Python's installed-wheel and release qualification
-against the published artifacts. Source-candidate integration is additional
+The Python 4.12.0 candidate declares `datafog-core~=2.0.0` in its base
+requirements and `rust` extra. Its reviewed native contract is
+[`tests/contracts/rust-2.0.0.json`](../tests/contracts/rust-2.0.0.json).
+Core 2.0.0 is prepared separately because safe mask-reveal and automatic-overlap
+transformation semantics are incompatible changes under Core's version policy.
+Both packages continue to use capability contract 1.
+
+This branch prepares the dependent package without publishing either project.
+Its local source wheel is qualified with the source-built Core 2.0.0 wheel.
+Merge and publication remain blocked until Core 2.0.0 is published and this
+exact Python candidate passes installed-wheel and release qualification against
+the actual published Core artifacts. Source-candidate integration is additional
 evidence; it does not substitute for that post-publication gate.
 
 Scheduled Python jobs only qualify candidates. Manual `release.yml` runs default
@@ -82,7 +86,8 @@ build requirements are documented in Core's platform policy.
 
 All 35 Python findings have a concrete resolution below. Core-owned fixes are
 separately tracked in Core's `docs/reviews/2026-11-core-findings.md`; their combined
-release still requires the Core publication and Python dependency update above.
+release still requires Core publication and the published-artifact qualification
+above.
 
 | Finding | Resolution and proof                                                                                                                                                                                               |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

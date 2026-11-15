@@ -23,7 +23,12 @@
 - Reuse tokens for repeated values, avoid existing token collisions, reject
   invalid explicit ranges and unsupported entity selections, and report backend
   entity capabilities. Async decorators await results before filtering.
-- Keep Core within the reviewed minor series, raise the Pydantic floor to 2.1,
+- Require the reviewed Core 2.0 minor series (`datafog-core~=2.0.0`) in the base
+  package and `rust` extra; review native differences in `rust-2.0.0.json`.
+  Core's complete mapped-IPv6 spans, email boundaries, Unicode mailboxes and
+  phone-plus-ZIP classification are available through the wrapper. Published
+  Core artifacts must pass dependent qualification before this candidate ships.
+- Raise the Pydantic floor to 2.1,
   include spaCy in `nlp-advanced`, and allow Torch 2.x versions compatible with
   `datafog-core[gliner2]`. Add an isolated build declaration and runnable sdist
   tests; remove unused duplicate implementation modules.

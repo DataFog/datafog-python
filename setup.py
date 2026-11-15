@@ -19,7 +19,7 @@ project_urls = {
 # Core lightweight dependencies only
 core_deps = [
     # Core minor releases may change findings; stay on this reviewed minor.
-    "datafog-core~=1.4.0",
+    "datafog-core~=2.0.0",
     "pydantic>=2.1,<3.0",
     "pydantic-settings>=2.0.0",
     "typing-extensions>=4.0",
@@ -89,7 +89,7 @@ benchmark_deps = [
 
 extras_require = {
     # Retained for explicitness; the base install already pulls Core.
-    "rust": ["datafog-core~=1.4.0"],
+    "rust": ["datafog-core~=2.0.0"],
     "nlp": nlp_deps,
     "nlp-advanced": nlp_deps + nlp_advanced_deps,
     "ocr": ocr_deps,
