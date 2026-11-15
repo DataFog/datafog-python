@@ -304,3 +304,23 @@ def test_hash_marker_cannot_collide_with_literal_input():
     result = engine.scan_and_redact(text, engine="regex", strategy="hash")
     assert result.mapping == {f"[EMAIL_{digest}_2]": value}
     assert result.redacted_text == f"{marker} [EMAIL_{digest}_2] [EMAIL_{digest}_2]"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "?" * 11 + "xiaoming@example.cn",
+        '{"note":"email=alice@example.com"}',
+        "email = 'dev@example.com'",
+        "phone=415-555-2671&email=bob@example.com",
+    ],
+)
+def test_fallback_email_context_is_trimmed_without_losing_mailboxes(text):
+    result = engine.scan(text, engine="regex", backend="python", entity_types=["EMAIL"])
+    assert len(result.entities) == 1
+    assert result.entities[0].text in {
+        "xiaoming@example.cn",
+        "alice@example.com",
+        "dev@example.com",
+        "bob@example.com",
+    }

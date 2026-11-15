@@ -67,8 +67,7 @@ class RegexAnnotator:
             "EMAIL": re.compile(
                 r"""
                 (?<![\w.!#$%&\x27*+\-/=?^_`{|}~@])
-                (?![A-Za-z_]{2,20}=)
-                [\w!#$%&*+\-/=^`{|}~]
+                [\w!#$%&'*+\-/=?^`{|}~.]
                 [\w!#$%&'*+\-/=?^`{|}~.]*
                 @
                 (?:\.?[\w-]+\.)+
@@ -363,15 +362,27 @@ class RegexAnnotator:
             active.update(label.strip().upper() for label in enabled_labels)
         return [label for label in cls.LABELS if label in active]
 
-    @staticmethod
-    def _match_text(match: Match[str]) -> str:
-        return match.groupdict().get("value") or match.group()
+    @classmethod
+    def _match_text(cls, match: Match[str]) -> str:
+        start, end = cls._match_span(match)
+        return match.string[start:end]
 
     @staticmethod
     def _match_span(match: Match[str]) -> tuple[int, int]:
         if "value" in match.groupdict() and match.group("value") is not None:
             return match.start("value"), match.end("value")
-        return match.start(), match.end()
+        start, end = match.start(), match.end()
+        value = match.group()
+        if "@" in value and any(char.isalnum() for char in value[: value.rfind("@")]):
+            local = value[: value.rfind("@")]
+            # Query/assignment separators and prose wrappers are context,
+            # not part of the mailbox. Consume the whole lexical run before
+            # trimming so failed candidates never retry every suffix.
+            boundary = max((local.rfind(char) for char in "&?=|/"), default=-1)
+            start += boundary + 1
+            while start < end and match.string[start] in ".!?'*{}`":
+                start += 1
+        return start, end
 
     @classmethod
     def create(cls, **kwargs) -> "RegexAnnotator":
