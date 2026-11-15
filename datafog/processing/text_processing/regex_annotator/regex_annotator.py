@@ -40,11 +40,14 @@ class RegexAnnotator:
     ]
     LABELS = BASE_LABELS + GERMAN_LABELS
     DEFAULT_LABELS = BASE_LABELS
-    SUPPORTED_LOCALES = {"de", "de-de", "de_de"}
+    SUPPORTED_LOCALES = {"de", "de-de", "de_de", "en", "en-us", "fr"}
     LOCALE_LABELS = {
         "de": GERMAN_LABELS,
         "de-de": GERMAN_LABELS,
         "de_de": GERMAN_LABELS,
+        "en": [],
+        "en-us": [],
+        "fr": [],
     }
 
     def __init__(
@@ -63,14 +66,14 @@ class RegexAnnotator:
             # Note: This is broader than the spec to catch more potential emails
             "EMAIL": re.compile(
                 r"""
-                (?<![A-Za-z0-9._%+\-@])
+                (?<![\w.!#$%&\x27*+\-/=?^_`{|}~@])
                 (?![A-Za-z_]{2,20}=)
-                [A-Za-z0-9!#$%&*+\-/=^_`{|}~]
-                [A-Za-z0-9!#$%&'*+\-/=?^_`{|}~.]*
+                [\w!#$%&*+\-/=^`{|}~]
+                [\w!#$%&'*+\-/=?^`{|}~.]*
                 @
-                (?:\.?[A-Za-z0-9-]+\.)+
-                [A-Za-z]{2,}
-                (?=$|[^A-Za-z])
+                (?:\.?[\w-]+\.)+
+                [^\W\d_]{2,}
+                (?=$|\W|\d|_)
                 """,
                 re.IGNORECASE | re.MULTILINE | re.VERBOSE,
             ),
@@ -236,7 +239,7 @@ class RegexAnnotator:
                     IdNr\.? |
                     Tax[\s-]?ID
                 )
-                \s*[:#-]?\s*
+                \s*(?:[:#-]\s*)?
                 (?P<value>
                     (?<![A-Za-z0-9])
                     (?:\d{11}|\d{2}\s?\d{3}\s?\d{3}\s?\d{3})
@@ -254,7 +257,7 @@ class RegexAnnotator:
                     RVNR |
                     SVNR
                 )
-                \s*[:#-]?\s*
+                \s*(?:[:#-]\s*)?
                 (?P<value>
                     (?<![A-Za-z0-9])
                     \d{2}
@@ -293,7 +296,7 @@ class RegexAnnotator:
                     Reisepass(?:nummer)? |
                     Passport(?:\s+No\.?|\s+Number)?
                 )
-                \s*[:#-]?\s*
+                \s*(?:[:#-]\s*)?
                 (?P<value>
                     (?<![A-Za-z0-9])
                     [A-Z]
@@ -312,7 +315,7 @@ class RegexAnnotator:
                     Residence\s+Permit |
                     eAT
                 )
-                \s*[:#-]?\s*
+                \s*(?:[:#-]\s*)?
                 (?P<value>
                     (?<![A-Za-z0-9])
                     AT
@@ -337,9 +340,9 @@ class RegexAnnotator:
             locales = [locales]
         normalized = []
         for locale in locales:
+            if not isinstance(locale, str) or not locale.strip():
+                raise ValueError("locales must contain nonempty locale identifiers")
             value = locale.strip().lower()
-            if not value:
-                continue
             if value not in cls.SUPPORTED_LOCALES:
                 allowed = ", ".join(sorted(cls.SUPPORTED_LOCALES))
                 raise ValueError(f"locale must be one of: {allowed}")

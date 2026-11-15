@@ -210,9 +210,8 @@ def test_contextual_npi_survives_the_legacy_overlap_policy():
 def test_structured_only_person_served_by_the_embedded_model():
     """`PERSON` is structured-only in the rule inventory but the embedded CNN
     covers prose, so text selection succeeds instead of raising."""
-    assert not datafog.scan(
-        "Jane Doe", entity_types=["PERSON"], backend="python"
-    ).entities
+    with pytest.raises(ValueError, match="Unsupported entity_types"):
+        datafog.scan("Jane Doe", entity_types=["PERSON"], backend="python")
     result = datafog.scan("Jane Doe\n14 Penny Lane", entity_types=["PERSON", "ADDRESS"])
     assert [item.type for item in result.entities] == ["PERSON", "ADDRESS"]
 

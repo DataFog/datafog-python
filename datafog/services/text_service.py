@@ -61,10 +61,17 @@ class TextService:
                 German structured identifiers.
 
         Raises:
-            AssertionError: If an invalid engine type is provided
+            ValueError: If the engine or text_chunk_length is invalid
             ImportError: If spacy/gliner engine is requested but corresponding extra is not installed
         """
-        assert engine in {"regex", "spacy", "gliner", "auto", "smart"}, "Invalid engine"
+        if engine not in {"regex", "spacy", "gliner", "auto", "smart"}:
+            raise ValueError("engine must be one of: regex, spacy, gliner, auto, smart")
+        if (
+            not isinstance(text_chunk_length, int)
+            or isinstance(text_chunk_length, bool)
+            or text_chunk_length <= 0
+        ):
+            raise ValueError("text_chunk_length must be a positive integer")
         self.engine = engine
         self.text_chunk_length = text_chunk_length
         self.gliner_model = gliner_model
@@ -379,17 +386,32 @@ class TextService:
 
         _start = _time.monotonic()
 
-        if len(text) <= self.text_chunk_length:
-            # Single chunk processing
-            result = self._annotate_single_chunk(text, structured)
-        else:
-            # Multi-chunk processing
-            chunks = self._chunk_text(text)
+        from datafog.engine import scan
 
-            if structured:
-                result = self._annotate_multiple_chunks_structured(chunks)
-            else:
-                result = self._annotate_multiple_chunks_dict(chunks)
+        # Structured PII is scanned as a complete document. Fixed-size chunks
+        # lose entities at their boundaries; native model work chunks separately.
+        options = {
+            "engine": "smart" if self.engine == "auto" else self.engine,
+            "locales": self.locales,
+        }
+        if self.gliner_model != "urchade/gliner_multi_pii-v1":
+            options["gliner_model"] = self.gliner_model
+        entities = scan(text, **options).entities
+        if structured:
+            SpanClass = _get_span_class()
+            result = [
+                SpanClass(
+                    label=entity.type,
+                    start=entity.start,
+                    end=entity.end,
+                    text=entity.text,
+                )
+                for entity in entities
+            ]
+        else:
+            result = {}
+            for entity in entities:
+                result.setdefault(entity.type, []).append(entity.text)
 
         try:
             from datafog.telemetry import (

@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from .regex_annotator.regex_annotator import AnnotationResult, Span
+
 # Default entity types for PII detection using GLiNER
 # These can be customized based on specific use cases
 DEFAULT_PII_ENTITIES = [
@@ -92,55 +94,37 @@ class GLiNERAnnotator(BaseModel):
                 f"datafog download-model {model_name} --engine gliner"
             ) from e
 
-    def annotate(self, text: str) -> Dict[str, List[str]]:
-        """
-        Annotate text for PII entities using GLiNER.
-
-        Args:
-            text: Text to analyze for PII entities
-
-        Returns:
-            Dictionary mapping entity types to lists of detected entities
-        """
-        try:
-            if not text:
-                return {
-                    entity_type.upper().replace(" ", "_"): []
-                    for entity_type in self.entity_types
-                }
-
-            if len(text) > MAXIMAL_STRING_SIZE:
-                text = text[:MAXIMAL_STRING_SIZE]
-                logging.warning(f"Text truncated to {MAXIMAL_STRING_SIZE} characters")
-
-            # Predict entities using GLiNER
-            entities = self.model.predict_entities(text, self.entity_types)
-
-            # Organize results by entity type
-            classified_entities: Dict[str, List[str]] = {
-                entity_type.upper().replace(" ", "_"): []
-                for entity_type in self.entity_types
-            }
-
+    def annotate_with_spans(self, text: str):
+        if not isinstance(text, str):
+            raise TypeError("text must be a string")
+        if len(text) > MAXIMAL_STRING_SIZE:
+            raise ValueError(
+                f"GLiNER input exceeds {MAXIMAL_STRING_SIZE} characters; split the document before scanning"
+            )
+        classified_entities = {
+            label.upper().replace(" ", "_"): [] for label in self.entity_types
+        }
+        spans = []
+        if text:
+            try:
+                entities = self.model.predict_entities(text, self.entity_types)
+            except Exception as exc:
+                raise RuntimeError("GLiNER annotation failed") from exc
             for entity in entities:
-                entity_label = entity["label"].upper().replace(" ", "_")
-                entity_text = entity["text"]
+                label = entity["label"].upper().replace(" ", "_")
+                classified_entities.setdefault(label, []).append(entity["text"])
+                spans.append(
+                    Span(
+                        label=label,
+                        start=entity["start"],
+                        end=entity["end"],
+                        text=entity["text"],
+                    )
+                )
+        return classified_entities, AnnotationResult(text=text, spans=spans)
 
-                if entity_label in classified_entities:
-                    classified_entities[entity_label].append(entity_text)
-                else:
-                    # Handle cases where GLiNER returns entity types not in our list
-                    classified_entities[entity_label] = [entity_text]
-
-            return classified_entities
-
-        except Exception as e:
-            logging.error(f"Error processing text with GLiNER: {str(e)}")
-            # Return empty annotations in case of error
-            return {
-                entity_type.upper().replace(" ", "_"): []
-                for entity_type in self.entity_types
-            }
+    def annotate(self, text: str) -> Dict[str, List[str]]:
+        return self.annotate_with_spans(text)[0]
 
     def set_entity_types(self, entity_types: List[str]) -> None:
         """
