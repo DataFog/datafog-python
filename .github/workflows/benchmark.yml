@@ -27,6 +27,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[nlp]"
+          python -m spacy download en_core_web_lg
           pip install -r requirements-benchmark.txt
           # Verify pytest-benchmark is installed and working
           python -c "import pytest_benchmark; print('pytest-benchmark version:', pytest_benchmark.__version__)"
@@ -54,13 +55,7 @@ jobs:
           # Run benchmarks with optimal performance settings (no memory debugging)
           echo "Running benchmarks with performance-optimized settings..."
           
-          # Try pytest-benchmark first
-          if python -m pytest tests/benchmark_text_service.py -v --benchmark-autosave --benchmark-json=benchmark-results.json --tb=short -p no:cacheprovider; then
-            echo "✅ pytest-benchmark tests completed successfully"
-          else
-            echo "⚠️ pytest-benchmark failed, running simple performance test as fallback"
-            python tests/simple_performance_test.py
-          fi
+          python -m pytest tests/benchmark_text_service.py -v --benchmark-autosave --benchmark-json=benchmark-results.json --tb=short -p no:cacheprovider
 
       - name: Check for performance regression
         run: |
