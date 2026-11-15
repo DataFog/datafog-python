@@ -404,7 +404,7 @@ class DataFogGuardrail(CustomGuardrail):
             ]
             session = _RedactionSession(texts)
             changes = []
-            for group, text in zip(groups.values(), texts):
+            for group, text in zip(groups.values(), texts, strict=True):
                 redacted, _ = self._process_content(text, session)
                 changes.extend(
                     (target, field, redacted if i == 0 else "")
