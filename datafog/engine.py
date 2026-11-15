@@ -85,6 +85,8 @@ BACKEND_ENV = "DATAFOG_BACKEND"
 _core_warned = False
 _cnn_cache: tuple[object, object] | None = None
 
+SPACY_ENTITY_TYPES = {"PERSON", "ORGANIZATION", "LOCATION", "ADDRESS"}
+
 NER_ENTITY_TYPES = {
     "PERSON",
     "ORGANIZATION",
@@ -455,7 +457,7 @@ def _spacy_entities(text: str) -> list[Entity]:
     return [
         entity
         for entity in _annotator_entities(text, annotator, "spacy", 0.7)
-        if entity.type in NER_ENTITY_TYPES
+        if entity.type in SPACY_ENTITY_TYPES
     ]
 
 
@@ -648,7 +650,9 @@ def _validate_entity_types(
         supported = supported | MODEL_ENTITY_TYPES
     else:
         supported = {_canonical_type(label) for label in RegexAnnotator.LABELS}
-    if engine != "regex":
+    if engine == "spacy":
+        supported |= SPACY_ENTITY_TYPES
+    elif engine in {"smart", "gliner"}:
         supported |= NER_ENTITY_TYPES | {"DATE"}
     unsupported = set(requested) - supported
     if unsupported:
@@ -676,7 +680,7 @@ def scan(
     ``DATAFOG_BACKEND`` or pass ``backend="python"`` to force the fallback. The
     selected backend supplies structured PII for every engine mode; optional
     NER engines add entity spans.
-    Probe names and address blocks come from the embedded model on the native
+    Prose names and address blocks come from the embedded model on the native
     path, so ``PERSON`` and ``ADDRESS`` work without spaCy or a model download.
 
     Results retain legacy regex provenance and confidence; these are

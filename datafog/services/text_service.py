@@ -1,8 +1,8 @@
 """Lean text processing service for PII annotation.
 
-Provides synchronous and asynchronous methods for annotating text with personally
-identifiable information (PII) using regex patterns. Supports chunking long texts
-and batch processing. SpaCy integration available as optional extra.
+Provides synchronous, asynchronous and batch access to the shared PII engine.
+Structured PII spans are scanned across complete documents; optional NLP engines
+add spans with their original character coordinates.
 """
 
 import asyncio
@@ -31,8 +31,8 @@ class TextService:
     Lightweight service for annotating text with PII entities using regex patterns.
 
     This service provides methods to detect and annotate personally identifiable information (PII)
-    in text using fast regex patterns. It supports chunking long texts for efficient processing
-    and combining annotations from multiple chunks.
+    in text through the shared engine. Complete-document structured scanning preserves
+    entities across boundaries, and optional NLP engines add canonical entity spans.
 
     For advanced NLP-based detection using spaCy, install the 'nlp' extra:
     pip install datafog[nlp]
@@ -49,7 +49,8 @@ class TextService:
         Initialize the TextService with specified chunk length and annotation engine.
 
         Args:
-            text_chunk_length: Maximum length of text chunks for processing. Default is 1000 characters.
+            text_chunk_length: Positive compatibility setting. Structured detection scans the
+                complete document; the shared engine bounds native model chunks separately.
             engine: The annotation engine to use. Options are:
                 - "regex": (Default) Use RegexAnnotator for fast pattern-based entity detection
                 - "spacy": Use SpacyPIIAnnotator for NLP-based entity detection (requires nlp extra)

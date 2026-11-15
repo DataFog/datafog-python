@@ -324,3 +324,8 @@ def test_fallback_email_context_is_trimmed_without_losing_mailboxes(text):
         "dev@example.com",
         "bob@example.com",
     }
+
+
+def test_spacy_selection_rejects_gliner_only_labels():
+    with pytest.raises(ValueError, match="PASSPORT_NUMBER"):
+        engine.scan("passport SECRET", engine="spacy", entity_types=["PASSPORT_NUMBER"])
