@@ -96,7 +96,7 @@ and `ADDRESS` from an embedded model, so name and address detection needs no
 spaCy and no model download. Findings keep `engine="regex"` provenance and
 `confidence=1.0` as compatibility values, not native confidence estimates.
 Reviewed differences from the Python engine are listed in
-[tests/contracts/rust-2.0.0.json](tests/contracts/rust-2.0.0.json).
+[tests/contracts/rust-1.5.0.json](tests/contracts/rust-1.5.0.json).
 `datafog.native` exposes the native schema directly.
 
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
@@ -288,10 +288,10 @@ Telemetry does not include input text or detected PII values.
 
 The native engine is the default, with a warned Python fallback. The 4.12
 review fixes preserve structured detection across every engine and legacy API.
-This release candidate declares the reviewed Core 2.0 minor series
-(`datafog-core~=2.0.0`) in the base package and the `rust` extra. Core 2.0 is a
+This release candidate declares the reviewed Core 1.5 minor series
+(`datafog-core~=1.5.0`) in the base package and the `rust` extra. Core 1.5 is a
 separate release candidate; this branch does not publish it. Merge and release
-require Core 2.0 publication followed by qualification against its actual
+require Core 1.5 publication followed by qualification against its actual
 published artifacts. Local source-wheel results are additional evidence.
 See [release preparation](docs/review-remediation.md).
 

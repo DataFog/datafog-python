@@ -6,11 +6,11 @@ native card, IP and credential findings as the regex mode, then add NER spans.
 TextService scans complete documents, and spaCy/GLiNER character offsets prevent
 an earlier substring or repeated name from receiving the wrong redaction.
 
-This candidate requires `datafog-core~=2.0.0` in the base package and the `rust`
-extra. Core 2.0 supplies complete IPv4-mapped IPv6 redaction, corrected email
+This candidate requires `datafog-core~=1.5.0` in the base package and the `rust`
+extra. Core 1.5 supplies complete IPv4-mapped IPv6 redaction, corrected email
 field boundaries and Unicode mailboxes, and phone-plus-ZIP classification that
 does not suppress the phone behind a false card finding. Native differences
-are recorded in `tests/contracts/rust-2.0.0.json`. Capability contract 1 remains
+are recorded in `tests/contracts/rust-1.5.0.json`. Capability contract 1 remains
 unchanged; Python and Core have independent version numbers.
 
 Lone surrogate characters no longer disable native scans. Dense overlap
@@ -51,7 +51,7 @@ Scheduled release jobs qualify candidates without publishing. Manual jobs
 default to dry runs, reject stale or occupied versions, and record immutable
 release refs before uploading artifacts.
 
-This is a release candidate prepared for review. Core 2.0 publication and
+This is a release candidate prepared for review. Core 1.5 publication and
 qualification of this Python candidate against the actual published Core
 artifacts remain mandatory before merge and release. Local source-wheel
 qualification does not claim either package has been published.

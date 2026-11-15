@@ -23,8 +23,8 @@
 - Reuse tokens for repeated values, avoid existing token collisions, reject
   invalid explicit ranges and unsupported entity selections, and report backend
   entity capabilities. Async decorators await results before filtering.
-- Require the reviewed Core 2.0 minor series (`datafog-core~=2.0.0`) in the base
-  package and `rust` extra; review native differences in `rust-2.0.0.json`.
+- Require the reviewed Core 1.5 minor series (`datafog-core~=1.5.0`) in the base
+  package and `rust` extra; review native differences in `rust-1.5.0.json`.
   Core's complete mapped-IPv6 spans, email boundaries, Unicode mailboxes and
   phone-plus-ZIP classification are available through the wrapper. Published
   Core artifacts must pass dependent qualification before this candidate ships.

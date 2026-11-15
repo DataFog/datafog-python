@@ -50,16 +50,17 @@ result = datafog.redact("mail jane@example.com", strategy="hash", hash_key=key)
 
 ## Release sequence and qualification
 
-The Python 4.12.0 candidate declares `datafog-core~=2.0.0` in its base
+The Python 4.12.0 candidate declares `datafog-core~=1.5.0` in its base
 requirements and `rust` extra. Its reviewed native contract is
-[`tests/contracts/rust-2.0.0.json`](../tests/contracts/rust-2.0.0.json).
-Core 2.0.0 is prepared separately because safe mask-reveal and automatic-overlap
-transformation semantics are incompatible changes under Core's version policy.
-Both packages continue to use capability contract 1.
+[`tests/contracts/rust-1.5.0.json`](../tests/contracts/rust-1.5.0.json).
+Core 1.5.0 is prepared separately with the detector and transformation safety
+fixes from the review, including bounded mask reveal and complete scanner
+coverage for automatic overlap handling. Both packages continue to use
+capability contract 1.
 
 This branch prepares the dependent package without publishing either project.
-Its local source wheel is qualified with the source-built Core 2.0.0 wheel.
-Merge and publication remain blocked until Core 2.0.0 is published and this
+Its local source wheel is qualified with the source-built Core 1.5.0 wheel.
+Merge and publication remain blocked until Core 1.5.0 is published and this
 exact Python candidate passes installed-wheel and release qualification against
 the actual published Core artifacts. Source-candidate integration is additional
 evidence; it does not substitute for that post-publication gate.
@@ -111,9 +112,9 @@ above.
 | PY-M13  | Optional Pydantic fields have defaults, labels use canonical names, enum filters work and overlaps merge before replacement. Model/anonymizer regressions pass.                                                    |
 | PY-M14  | Preserve supported GLiNER labels, use exact offsets, exclude relative spaCy DATE mentions, propagate model failures and reject oversized annotator input explicitly.                                               |
 | PY-M15  | Embedded model calls use bounded overlapping chunks. Large PERSON/ADDRESS plus structured-PII tests succeed with published and candidate Core. Native model limits remain enforced.                                |
-| PY-M16  | Core 2 excludes phone-plus-ZIP card candidates. Candidate seam tests assert PHONE/ZIP labels and no false card.                                                                                                    |
+| PY-M16  | Core 1.5 excludes phone-plus-ZIP card candidates. Candidate seam tests assert PHONE/ZIP labels and no false card.                                                                                                  |
 | PY-L1   | Console bootstrap prints the CLI-extra install hint on a base install. A clean installed-wheel check confirms no traceback.                                                                                        |
-| PY-L2   | Remove README BOM and stale backend statements, repair contract links and make the German example explicitly select its locale/entity. Core 2 suppresses the labelled-tax-ID PHONE false positive.                 |
+| PY-L2   | Remove README BOM and stale backend statements, repair contract links and make the German example explicitly select its locale/entity. Core 1.5 suppresses the labelled-tax-ID PHONE false positive.               |
 | PY-L3   | Retirement notices derive the current supported release version, and the native install hint no longer names an older release.                                                                                     |
 | PY-L4   | Supported-entity reporting follows the selected native/Python capability inventory, including opt-in labels. Tests separate supported from default-active labels.                                                  |
 | PY-L5   | Document actual token/pseudonym outputs and reject invalid methods in both process APIs.                                                                                                                           |
@@ -121,7 +122,7 @@ above.
 | PY-L7   | Tokens reuse values and avoid existing markers; invalid explicit ranges/text raise errors. Collision, repeated-value and validation tests pass.                                                                    |
 | PY-L8   | Remove unused implementation copies, declare an isolated build, include test packages/corpora/scripts in sdists, align formatter pins and extend tox through 3.14. Optional OCR imports skip cleanly when absent.  |
 | PY-L9   | CLI configuration hides API keys; import and commands preserve host logging levels. CLI/logger regressions pass.                                                                                                   |
-| PY-L10  | Unicode emails are supported in fallback and candidate Core; Core 2 trims embedded PERSON trailing punctuation. Candidate seam tests cover both.                                                                   |
+| PY-L10  | Unicode emails are supported in fallback and candidate Core; Core 1.5 trims embedded PERSON trailing punctuation. Candidate seam tests cover both.                                                                 |
 | PY-L11  | TextService validates positive chunk lengths and engine names with explicit exceptions, including optimized Python execution.                                                                                      |
 | PY-L12  | Remove incompatible Torch upper bound and include spaCy in nlp-advanced. Resolving it with Core GLiNER2 succeeds with Torch 2.12.0.                                                                                |
 | PY-L13  | Declare Pydantic 2.1 minimum. A clean Python 3.10 base install with Pydantic 2.1 imports and scans successfully.                                                                                                   |
