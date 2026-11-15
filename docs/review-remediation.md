@@ -71,3 +71,47 @@ with an existing release tag. A changed branch must be qualified again.
 Core's individual registries have separate availability; never infer that a
 Python version is present on npm or crates.io. Native wheel coverage and source
 build requirements are documented in Core's platform policy.
+
+## Python finding disposition
+
+All 35 Python findings have a concrete resolution below. Core-owned fixes are
+separately tracked in Core's `docs/reviews/2026-11-core-findings.md`; their combined
+release still requires the Core publication and Python dependency update above.
+
+| Finding | Resolution and proof                                                                                                                                                                                               |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| PY-H1   | Replace lone surrogates only for native transport, preserving source coordinates. Engine and hook/LiteLLM block regressions cover mixed payloads.                                                                  |
+| PY-H2   | Interval queries replace pairwise overlap checks; redaction and legacy assembly are linear after sorting. Dense scan/redaction benchmarks and overlap tests cover the change.                                      |
+| PY-H3   | TextService scans complete documents through the shared engine. Boundary-crossing email/SSN tests pass.                                                                                                            |
+| PY-H4   | spaCy/GLiNER return actual character spans. Stub and real-spaCy tests distinguish Ann from Annual and repeated names.                                                                                              |
+| PY-H5   | Every engine and legacy/CLI path uses the same structured layer before optional NER. Discover/IPv6/credential tests cover the paths.                                                                               |
+| PY-M1   | Coroutine decorators await results; non-string results raise a documented TypeError rather than silently escaping inspection.                                                                                      |
+| PY-M2   | Redact, replace and hash pipeline operations imply scanning. All three are tested without an explicit SCAN operation.                                                                                              |
+| PY-M3   | Fallback email consumes each lexical run once; German separator expressions avoid ambiguous repetition. Adversarial 80K-character measurements and positive matches pass.                                          |
+| PY-M4   | Native backend selection also supplies the structured stage of smart/spaCy/GLiNER. CLI commands work with DATAFOG_BACKEND=rust.                                                                                    |
+| PY-M5   | Request-scoped tokens, nested tool/function arguments, prompt/input fields and buffered streaming protect all tested request/response shapes. Live proxy deployment is not claimed.                                |
+| PY-M6   | Bare strings, invalid labels and labels unavailable to the selected backend/engine raise explicit errors. Supported aliases remain accepted.                                                                       |
+| PY-M7   | APIs and CLI honor hash_type, use full digests and support keyed HMAC. Plain-hash guessing limitations are documented; algorithm/key tests pass.                                                                   |
+| PY-M8   | Hook per-string/total budget exhaustion emits review/deny or an incomplete-scan notice. Tests put PII past the cap.                                                                                                |
+| PY-M9   | Allowlist expressions run with match timeouts; timed-out expressions retain findings. Adversarial patterns and safe quantified groups are tested.                                                                  |
+| PY-M10  | Dependency resolution stays within the explicitly reviewed Core minor, replacing the broad less-than-2 range. Exact output locks should still pin patch versions.                                                  |
+| PY-M11  | Reconcile stable history, reject stale/PyPI-occupied versions, gate 3.13, sync version metadata and push immutable refs before upload. Scheduled runs are nonpublishing; selector tests and actionlint pass.       |
+| PY-M12  | Spark maps ordinary PERSON/ORG/GPE/NORP/DATE labels into its fixed output schema. Stub tests cover real spaCy label spellings and oversized input errors.                                                          |
+| PY-M13  | Optional Pydantic fields have defaults, labels use canonical names, enum filters work and overlaps merge before replacement. Model/anonymizer regressions pass.                                                    |
+| PY-M14  | Preserve supported GLiNER labels, use exact offsets, exclude relative spaCy DATE mentions, propagate model failures and reject oversized annotator input explicitly.                                               |
+| PY-M15  | Embedded model calls use bounded overlapping chunks. Large PERSON/ADDRESS plus structured-PII tests succeed with published and candidate Core. Native model limits remain enforced.                                |
+| PY-M16  | Core 2 excludes phone-plus-ZIP card candidates. Candidate seam tests assert PHONE/ZIP labels and no false card.                                                                                                    |
+| PY-L1   | Console bootstrap prints the CLI-extra install hint on a base install. A clean installed-wheel check confirms no traceback.                                                                                        |
+| PY-L2   | Remove README BOM and stale backend statements, repair contract links and make the German example explicitly select its locale/entity. Core 2 suppresses the labelled-tax-ID PHONE false positive.                 |
+| PY-L3   | Retirement notices derive the current supported release version, and the native install hint no longer names an older release.                                                                                     |
+| PY-L4   | Supported-entity reporting follows the selected native/Python capability inventory, including opt-in labels. Tests separate supported from default-active labels.                                                  |
+| PY-L5   | Document actual token/pseudonym outputs and reject invalid methods in both process APIs.                                                                                                                           |
+| PY-L6   | Legacy APIs and TextPIIAnnotator route through the shared engine; service/engine integration covers native-only entities and locale behavior. Explicit Python fallback remains a narrower documented detector set. |
+| PY-L7   | Tokens reuse values and avoid existing markers; invalid explicit ranges/text raise errors. Collision, repeated-value and validation tests pass.                                                                    |
+| PY-L8   | Remove unused implementation copies, declare an isolated build, include test packages/corpora/scripts in sdists, align formatter pins and extend tox through 3.14. Optional OCR imports skip cleanly when absent.  |
+| PY-L9   | CLI configuration hides API keys; import and commands preserve host logging levels. CLI/logger regressions pass.                                                                                                   |
+| PY-L10  | Unicode emails are supported in fallback and candidate Core; Core 2 trims embedded PERSON trailing punctuation. Candidate seam tests cover both.                                                                   |
+| PY-L11  | TextService validates positive chunk lengths and engine names with explicit exceptions, including optimized Python execution.                                                                                      |
+| PY-L12  | Remove incompatible Torch upper bound and include spaCy in nlp-advanced. Resolving it with Core GLiNER2 succeeds with Torch 2.12.0.                                                                                |
+| PY-L13  | Declare Pydantic 2.1 minimum. A clean Python 3.10 base install with Pydantic 2.1 imports and scans successfully.                                                                                                   |
+| PY-L14  | Correct native-default documentation, normalize missing native metadata to ImportError, clarify missing-model hints, validate locales consistently and surface invalid CLI operations as usage errors.             |

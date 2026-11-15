@@ -232,3 +232,18 @@ def test_release_version_positive_and_duplicate_paths():
 def test_release_skips_published_prereleases_without_tags():
     select = _version_selector()
     assert select("4.12.0", "alpha", [], "4.11.0", published=["4.12.0a1"]) == "4.12.0a2"
+
+
+def test_native_version_uses_import_error_when_metadata_is_missing(monkeypatch):
+    import importlib.metadata
+
+    import datafog.native
+
+    assert datafog.native.version()
+
+    def missing(_):
+        raise importlib.metadata.PackageNotFoundError("datafog-core")
+
+    monkeypatch.setattr(importlib.metadata, "version", missing)
+    with pytest.raises(ImportError, match="metadata is missing"):
+        datafog.native.version()
