@@ -1,5 +1,5 @@
 {
-  "core_version": "2.0.0",
+  "core_version": "1.5.0",
   "cases": {
     "scan-observation-invalid-card": {
       "classification": "detector-difference",
@@ -73,5 +73,5 @@
       }
     }
   },
-  "review": "Core 2.0 candidate qualifications retain the four reviewed historical differences below. Wrapper 4.12 fixes are layered separately in wrapper-4.12.0.json."
+  "review": "Core 1.5 candidate qualification retains reviewed historical differences and documents the contextual tax-ID correction. Wrapper 4.12 fixes are layered separately in wrapper-4.12.0.json."
 }

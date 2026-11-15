@@ -289,7 +289,7 @@ Telemetry does not include input text or detected PII values.
 The native engine is the default, with a warned Python fallback. The 4.12
 review fixes preserve structured detection across every engine and legacy API.
 The dependency stays within the reviewed Core 1.4 minor series (`~=1.4.0`);
-Core 2.0 is a separate release candidate that must be published and qualified
+Core 1.5 is a separate release candidate that must be published and qualified
 before this SDK raises its floor. See [release preparation](docs/review-remediation.md).
 
 Entity labels, locales and activation settings come from the installed Core.
