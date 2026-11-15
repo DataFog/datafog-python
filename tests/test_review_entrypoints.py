@@ -144,6 +144,16 @@ def test_enum_filter_and_date_replacement():
 
 
 @pytest.mark.parametrize("strategy", list(AnonymizerType))
+def test_legacy_empty_entity_selection_keeps_protecting_all(strategy):
+    annotation = AnnotationResult(start=0, end=len(EMAIL), entity_type="EMAIL")
+    result = Anonymizer(anonymizer_type=strategy, entities=[]).anonymize(
+        EMAIL, [annotation]
+    )
+    assert EMAIL not in result.anonymized_text
+    assert len(result.anonymized_entities) == 1
+
+
+@pytest.mark.parametrize("strategy", list(AnonymizerType))
 def test_legacy_overlaps_never_leave_partial_value(strategy):
     text = "abcdefghij"
     spans = [

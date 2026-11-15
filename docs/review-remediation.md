@@ -53,10 +53,10 @@ result = datafog.redact("mail jane@example.com", strategy="hash", hash_key=key)
 The Python 4.12.0 candidate declares `datafog-core~=1.5.0` in its base
 requirements and `rust` extra. Its reviewed native contract is
 [`tests/contracts/rust-1.5.0.json`](../tests/contracts/rust-1.5.0.json).
-Core 1.5.0 is prepared separately with the detector and transformation safety
-fixes from the review, including bounded mask reveal and complete scanner
-coverage for automatic overlap handling. Both packages continue to use
-capability contract 1.
+Core 1.5.0 is prepared separately as a minor release with the detector and
+transformation safety fixes from the review, including bounded mask reveal
+and complete scanner coverage for automatic overlap handling. Public APIs
+remain available and both packages continue to use capability contract 1.
 
 This branch prepares the dependent package without publishing either project.
 Its local source wheel is qualified with the source-built Core 1.5.0 wheel.

@@ -1,4 +1,4 @@
-"""Core 2 candidate seam regressions; exercised before the dependency floor moves."""
+"""Core 1.5 candidate seam regressions; exercised before the dependency floor moves."""
 
 import importlib.metadata
 
@@ -7,8 +7,8 @@ import pytest
 import datafog
 
 pytestmark = pytest.mark.skipif(
-    importlib.metadata.version("datafog-core").split(".")[0] != "2",
-    reason="qualifies the separately built Core 2 candidate before publication",
+    importlib.metadata.version("datafog-core").split(".")[:2] != ["1", "5"],
+    reason="qualifies the separately built Core 1.5 candidate before publication",
 )
 
 

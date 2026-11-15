@@ -1,6 +1,6 @@
 {
   "wrapper_version": "4.12.0",
-  "core_versions": ["1.4.0", "2.0.0"],
+  "core_versions": ["1.4.0", "1.5.0"],
   "source_oracle": "4.8.1.json (unchanged)",
   "review": "2026-11-15 PDF remediation: explicit reviewed wrapper changes, not a regenerated historical oracle",
   "cases": {
