@@ -55,7 +55,7 @@ class Anonymizer(BaseModel):
 
         selected = (
             None
-            if self.entities is None
+            if not self.entities
             else {
                 CANONICAL_TYPE_MAP.get(entity.name, entity.name)
                 for entity in self.entities
