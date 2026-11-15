@@ -6,7 +6,12 @@ import json
 import pytest
 
 from tests.contract_481 import FIXTURE
-from tests.rust_contract import DEVIATIONS, applicable, native_observation
+from tests.rust_contract import (
+    DEVIATIONS,
+    applicable,
+    expected_observation,
+    native_observation,
+)
 
 pytest.importorskip("datafog_core")
 CONTRACT = json.loads(FIXTURE.read_text(encoding="utf-8"))
@@ -30,6 +35,4 @@ def test_native_version_and_review_inventory():
 
 @pytest.mark.parametrize("case", CASES, ids=lambda case: case["id"])
 def test_native_contract(case):
-    deviation = REVIEWED["cases"].get(case["id"])
-    expected = deviation["expected"] if deviation else case["expected"]
-    assert native_observation(case) == expected, case["id"]
+    assert native_observation(case) == expected_observation(case), case["id"]

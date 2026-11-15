@@ -793,6 +793,35 @@ def scan(
     )
 
 
+def _validate_hash_parameters(
+    strategy: str, hash_type: str, hash_key: bytes | None
+) -> None:
+    if hash_key is not None and (not isinstance(hash_key, bytes) or len(hash_key) < 32):
+        raise ValueError("hash_key must contain at least 32 bytes")
+    if strategy == "hash":
+        try:
+            hashlib.new(hash_type).hexdigest()
+        except (ValueError, TypeError):
+            raise ValueError(f"Unsupported hash_type: {hash_type!r}") from None
+
+
+def _validated_redaction_entities(text: str, entities: list[Entity]) -> list[Entity]:
+    valid_entities = []
+    for entity in entities:
+        if (
+            not 0 <= entity.start < entity.end <= len(text)
+            or not entity.text
+            or text[entity.start : entity.end] != entity.text
+        ):
+            raise ValueError(
+                "entities must contain valid ranges whose text matches the source"
+            )
+        if not re.fullmatch(r"[A-Z][A-Z0-9_]*", entity.type):
+            raise ValueError("entity types must be uppercase labels")
+        valid_entities.append(entity)
+    return _suppress_overlapping_entities(valid_entities)
+
+
 def redact(
     text: str,
     entities: list[Entity],
@@ -809,6 +838,8 @@ def redact(
     type priority and then confidence. Suppressed spans are omitted from
     ``RedactResult.entities`` and ``mapping``.
 
+    Invalid ranges, mismatched source text, and malformed labels raise ValueError.
+
     ``mapping`` for the ``mask`` strategy is keyed by per-type indexed keys
     (``[EMAIL_MASK_1]``) rather than the mask string, because distinct
     same-length values produce identical masks and would collide.
@@ -818,39 +849,19 @@ def redact(
     if strategy not in {"token", "mask", "hash", "pseudonymize"}:
         raise ValueError("strategy must be one of: token, mask, hash, pseudonymize")
 
-    if hash_key is not None and (not isinstance(hash_key, bytes) or len(hash_key) < 32):
-        raise ValueError("hash_key must contain at least 32 bytes")
-    if strategy == "hash":
-        try:
-            hashlib.new(hash_type).hexdigest()
-        except (ValueError, TypeError):
-            raise ValueError(f"Unsupported hash_type: {hash_type!r}") from None
+    _validate_hash_parameters(strategy, hash_type, hash_key)
 
     mapping: dict[str, str] = {}
     counters: dict[str, int] = {}
     pseudonym_by_value: dict[tuple[str, str], str] = {}
 
-    valid_entities = []
-    for entity in entities:
-        if (
-            not 0 <= entity.start < entity.end <= len(text)
-            or not entity.text
-            or text[entity.start : entity.end] != entity.text
-        ):
-            raise ValueError(
-                "entities must contain valid ranges whose text matches the source"
-            )
-        if not re.fullmatch(r"[A-Z][A-Z0-9_]*", entity.type):
-            raise ValueError("entity types must be uppercase labels")
-        valid_entities.append(entity)
-    # Returns non-overlapping spans sorted by document position.
-    valid_entities = _suppress_overlapping_entities(valid_entities)
+    valid_entities = _validated_redaction_entities(text, entities)
 
     occupied_tokens = set(re.findall(r"\[[A-Z][A-Za-z0-9_]*\]", text))
 
     # Assign replacements in document order so the per-type counters used by
-    # the token/pseudonymize strategies number the first occurrence _1; spans
-    # are applied right-to-left below so earlier offsets stay valid.
+    # the token/pseudonymize strategies number the first occurrence _1.
+    # Assemble the result in one pass without repeated document copies.
     replacements: list[tuple[Entity, str]] = []
     for entity in valid_entities:
         original = text[entity.start : entity.end]

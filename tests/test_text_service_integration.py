@@ -6,6 +6,15 @@ from datafog.services.text_service import TextService
 
 
 @pytest.fixture
+def require_spacy_model():
+    spacy = pytest.importorskip("spacy")
+    try:
+        spacy.load("en_core_web_lg")
+    except OSError:
+        pytest.skip("en_core_web_lg must be provisioned for trained-model integration")
+
+
+@pytest.fixture
 def real_text_service():
     """Create a real TextService instance for integration testing."""
     return TextService(text_chunk_length=1000)  # Larger chunk to avoid multiple calls
@@ -32,7 +41,7 @@ def test_engine_regex_detects_simple_entities():
 
 
 @pytest.mark.integration
-def test_engine_auto_fallbacks_to_spacy():
+def test_engine_auto_fallbacks_to_spacy(require_spacy_model):
     """Test that auto mode works correctly with entity detection."""
     # We need to test the auto mode in a more controlled way
     # Create a text that contains only named entities (no emails, phones, etc.)
@@ -45,7 +54,7 @@ def test_engine_auto_fallbacks_to_spacy():
 
     # Verify spaCy finds named entities
     assert "PERSON" in spacy_result and spacy_result["PERSON"]
-    assert "ORG" in spacy_result and spacy_result["ORG"]
+    assert "ORGANIZATION" in spacy_result and spacy_result["ORGANIZATION"]
 
     # Now create a special text that contains both regex-detectable and spaCy-detectable entities
     mixed_text = "John Smith's email is john.smith@example.com"
@@ -61,7 +70,7 @@ def test_engine_auto_fallbacks_to_spacy():
 
 
 @pytest.mark.integration
-def test_engine_spacy_only():
+def test_engine_spacy_adds_to_structured_pii(require_spacy_model):
     """Test that spaCy engine is always used regardless of regex potential hits."""
     # Sample text with both regex-detectable and spaCy-detectable entities
     text = """John Smith's email is john.smith@example.com.
@@ -79,11 +88,10 @@ def test_engine_spacy_only():
 
     # Verify spaCy detected named entities
     assert "PERSON" in spacy_result and spacy_result["PERSON"]
-    assert "ORG" in spacy_result and spacy_result["ORG"]
+    assert "ORGANIZATION" in spacy_result and spacy_result["ORGANIZATION"]
 
-    # Verify spaCy did NOT detect the email (which confirms it's using spaCy only)
-    # This is because spaCy doesn't have a built-in EMAIL entity type
-    assert "EMAIL" not in spacy_result or not spacy_result["EMAIL"]
+    # NER augments the shared structured detector.
+    assert "john.smith@example.com" in spacy_result["EMAIL"]
 
 
 @pytest.mark.integration
@@ -130,7 +138,7 @@ def test_structured_annotation_output():
 
 
 @pytest.mark.integration
-def test_debug_entity_types():
+def test_spacy_entity_labels_are_canonical(require_spacy_model):
     """Debug test to print the actual entity types returned by spaCy."""
     # Sample text with named entities
     text = """John Smith works at Microsoft Corporation in Seattle.
@@ -146,8 +154,8 @@ def test_debug_entity_types():
         if values:  # Only print non-empty lists
             print(f"  {entity_type}: {values}")
 
-    # No assertion needed, this is just for debugging
-    assert True
+    assert "ORGANIZATION" in spacy_result
+    assert "ORG" not in spacy_result
 
 
 @pytest.mark.skip(reason="Performance benchmarking requires more setup")

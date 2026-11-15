@@ -1,4 +1,4 @@
-"""Exercise actual Core 0.4 wheels through the Python compatibility adapter.
+"""Exercise reviewed native wheels through the Python compatibility adapter.
 
 Examples originate in Core's fixtures/{german,jwt,private-key,npi,
 us-routing-number,uuid}.jsonl. Payloads are synthetic detector fixtures,
@@ -6,6 +6,7 @@ including a nonfunctional PEM block; no credentials are used.
 """
 
 import importlib.metadata
+import json
 import re
 
 import pytest
@@ -13,6 +14,7 @@ import pytest
 import datafog
 from datafog import engine, v5
 from datafog.compat import v4
+from tests.rust_contract import DEVIATIONS
 
 core = pytest.importorskip("datafog_core")
 
@@ -50,7 +52,8 @@ COMPAT_NEW_DEFAULTS = [sample for sample in NEW_DEFAULTS if sample[0] != "NPI"]
 
 def test_supported_wheel_version_and_capability_contract():
     version = importlib.metadata.version("datafog-core")
-    assert version.split(".")[:1] == ["1"], version
+    reviewed = json.loads(DEVIATIONS.read_text())["core_version"]
+    assert version.split(".")[:2] == reviewed.split(".")[:2], version
     capabilities = core.capabilities()
     assert capabilities["contract_version"] == 1
     supported = capabilities["supported_entities"]

@@ -1,64 +1,33 @@
 """Frozen observations from the published 4.8.1 wheel; never regenerate in CI."""
 
-import copy
 import json
 
 import pytest
 
 from tests.contract_481 import FIXTURE, observe
-from tests.rust_contract import DEVIATIONS
+from tests.rust_contract import WRAPPER_DEVIATIONS, expected_observation
 
 CONTRACT = json.loads(FIXTURE.read_text(encoding="utf-8"))
-# The default backend is native from 4.10.0, so the reviewed native
-# differences are the published 4.10 observations for those cases.
-REVIEWED = json.loads(DEVIATIONS.read_text(encoding="utf-8"))
+REVIEWED_WRAPPER = json.loads(WRAPPER_DEVIATIONS.read_text(encoding="utf-8"))
 
 
 def expected_49(case):
-    """Allow only the added backend parameter, revised shim notices and the
-    reviewed native differences."""
+    """The immutable oracle plus individually explained native/wrapper fixes."""
+    return expected_observation(case)
 
-    deviation = REVIEWED["cases"].get(case["id"])
-    expected = (
-        copy.deepcopy(deviation["expected"])
-        if deviation
-        else copy.deepcopy(case["expected"])
-    )
-    if case["id"] == "public-signatures":
-        for target in (
-            "datafog:scan",
-            "datafog:redact",
-            "datafog.engine:scan",
-            "datafog.engine:scan_and_redact",
-        ):
-            expected["value"][target]["parameters"].append(
-                {
-                    "name": "backend",
-                    "kind": "KEYWORD_ONLY",
-                    "required": False,
-                    "default": None,
-                }
-            )
-    if case.get("target") in {"datafog:detect", "datafog:process"}:
-        name = case["target"].split(":")[1]
-        replacement = (
-            "datafog.scan()"
-            if name == "detect"
-            else "datafog.scan() or datafog.redact()"
-        )
-        expected["warnings"] = [
-            {
-                "type": "FutureWarning",
-                "message": (
-                    f"datafog.{name}() is deprecated and will be removed in 5.0. "
-                    f"Use {replacement} instead. "
-                    'Last supported version is 4.10.0. Pin it with: pip install "datafog==4.10.0". '
-                    "The earlier promise to retain this shim through 5.x has been revised. "
-                    "See docs/retirement.rst."
-                ),
-            }
-        ]
-    return expected
+
+def test_reviewed_wrapper_deviations_are_explicit_and_in_scope():
+    cases = {case["id"]: case for case in CONTRACT["cases"]}
+    assert set(REVIEWED_WRAPPER["cases"]) <= set(cases)
+    for case_id, deviation in REVIEWED_WRAPPER["cases"].items():
+        assert deviation["reason"]
+        assert deviation["classification"] in {
+            "behavioral-fix",
+            "validation-difference",
+            "diagnostic-difference",
+            "signature-addition",
+        }
+        assert deviation["expected"] != cases[case_id]["expected"]
 
 
 @pytest.mark.parametrize("case", CONTRACT["cases"], ids=lambda case: case["id"])
