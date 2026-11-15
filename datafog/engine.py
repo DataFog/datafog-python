@@ -789,7 +789,9 @@ def scan(
 
     filtered = _filter_entity_types(combined, entity_types)
     filtered = _apply_allowlist(filtered, allowlist, allowlist_patterns)
-    deduped = _suppress_overlapping_entities(_dedupe_entities(filtered))
+    # Optional NER adds candidates without suppressing structured findings.
+    # Transformation resolves overlaps after selection, preserving scan labels.
+    deduped = _dedupe_entities(filtered)
     return ScanResult(
         entities=deduped,
         text=text,

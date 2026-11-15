@@ -342,3 +342,19 @@ def test_shared_hash_helper_retains_legacy_widths_and_full_hmac(algorithm):
         engine._hash_value(value, algorithm, key, plain_length=8)
         == hmac.new(key, value.encode(), algorithm).hexdigest()
     )
+
+
+@pytest.mark.parametrize("mode", ["smart", "spacy", "gliner"])
+def test_optional_ner_cannot_remove_overlapping_structured_scan_findings(
+    monkeypatch, mode
+):
+    text = "Ping 127.0.0.1"
+    candidates = [engine.Entity("PERSON", text, 0, len(text), 0.8, mode)]
+    monkeypatch.setattr(engine, "_spacy_entities", lambda _: candidates)
+    monkeypatch.setattr(engine, "_gliner_entities", lambda _: candidates)
+    result = engine.scan(text, engine=mode)
+    assert any(
+        item.type == "IP_ADDRESS" and item.text == "127.0.0.1"
+        for item in result.entities
+    )
+    assert any(item.type == "PERSON" for item in result.entities)
