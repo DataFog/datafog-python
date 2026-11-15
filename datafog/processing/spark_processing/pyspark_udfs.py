@@ -28,8 +28,9 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
 
     if text:
         if len(text) > MAXIMAL_STRING_SIZE:
-            # Cut the strings for required sizes
-            text = text[:MAXIMAL_STRING_SIZE]
+            raise ValueError(
+                "Spark PII input exceeds the maximum supported string length"
+            )
         nlp = broadcasted_nlp.value
         doc = nlp(text)
 
@@ -38,8 +39,15 @@ def pii_annotator(text: str, broadcasted_nlp) -> list[list[str]]:
             _label: [] for _label in PII_ANNOTATION_LABELS
         }
         for ent in doc.ents:
-            # Add entities from extracted values
-            classified_entities[ent.label_].append(ent.text)
+            label = {
+                "PERSON": "PER",
+                "GPE": "LOC",
+                "NORP": "NRP",
+                "DATE": "DATE_TIME",
+                "TIME": "DATE_TIME",
+            }.get(ent.label_, ent.label_)
+            if label in classified_entities:
+                classified_entities[label].append(ent.text)
 
         return [_ent for _ent in classified_entities.values()]
     else:

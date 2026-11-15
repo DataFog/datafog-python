@@ -2,8 +2,10 @@
 
 import warnings
 
+from .__about__ import __version__
+
 #: Final release on which retired optional surfaces still work.
-LAST_SUPPORTED = "4.10.0"
+LAST_SUPPORTED = __version__
 
 
 class LegacySurfaceWarning(FutureWarning):

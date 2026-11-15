@@ -46,6 +46,15 @@ except ImportError:
 app = typer.Typer()
 
 
+def _operations(value: str) -> list[OperationType]:
+    try:
+        return [OperationType(op.strip()) for op in value.split(",")]
+    except ValueError:
+        raise typer.BadParameter(
+            "operations must use scan, extract, redact, replace, or hash"
+        ) from None
+
+
 @app.command()
 def scan_image(
     image_urls: List[str] = typer.Argument(
@@ -70,9 +79,8 @@ def scan_image(
         typer.echo("No image URLs or file paths provided. Please provide at least one.")
         raise typer.Exit(code=1)
 
-    logging.basicConfig(level=logging.INFO)
     # Convert comma-separated string operations to a list of OperationType objects
-    operation_list = [OperationType(op.strip()) for op in operations.split(",")]
+    operation_list = _operations(operations)
     ocr_client = DataFog(operations=operation_list)
     try:
         results = asyncio.run(ocr_client.run_ocr_pipeline(image_urls=image_urls))
@@ -130,9 +138,8 @@ def scan_text(
         typer.echo("No texts provided.")
         raise typer.Exit(code=1)
 
-    logging.basicConfig(level=logging.INFO)
     # Convert comma-separated string operations to a list of OperationType objects
-    operation_list = [OperationType(op.strip()) for op in operations.split(",")]
+    operation_list = _operations(operations)
     text_client = DataFog(operations=operation_list, locales=locale)
     try:
         results = text_client.run_text_pipeline_sync(str_list=str_list)
@@ -179,7 +186,11 @@ def show_config():
 
     Prints the current DataFog configuration.
     """
-    typer.echo(get_config())
+    config = get_config()
+    values = dict(config) if isinstance(config, dict) else config.model_dump()
+    if values.get("api_key"):
+        values["api_key"] = "[REDACTED]"
+    typer.echo(values)
 
 
 @app.command()
@@ -432,12 +443,11 @@ def hash_text(
         typer.echo("No text provided to hash.")
         raise typer.Exit(code=1)
 
-    # HashType is retained for backward-compatible CLI signature.
-    _ = hash_type
     result = scan_and_redact(
         text=text,
         engine="smart",
         strategy="hash",
+        hash_type=hash_type.value,
         locales=locale,
     )
     typer.echo(result.redacted_text)

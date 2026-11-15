@@ -2,9 +2,9 @@ name: Release
 
 on:
   schedule:
-    # Monday-Wednesday at 2 AM UTC: alpha builds from dev
+    # Scheduled runs validate candidates without publishing.
     - cron: "0 2 * * 1-3"
-    # Thursday at 2 AM UTC: beta builds from dev
+    # Thursday beta qualification also stops before publication.
     - cron: "0 2 * * 4"
   workflow_dispatch:
     inputs:
@@ -19,7 +19,7 @@ on:
       dry_run:
         description: "Dry run (skip PyPI publish)"
         required: false
-        default: false
+        default: true
         type: boolean
       dry_run_ref:
         description: "Candidate ref to validate (allowed only with dry_run)"
@@ -86,6 +86,15 @@ jobs:
           fetch-depth: 0
           ref: ${{ steps.resolve.outputs.checkout_ref }}
 
+      - name: Reject a development branch missing stable changes
+        if: steps.resolve.outputs.release_type != 'stable'
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor origin/main HEAD || {
+            echo "Development source is missing stable changes; merge main into dev first"
+            exit 1
+          }
+
       - name: Freeze source commit
         id: source
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -125,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -272,7 +281,7 @@ jobs:
           pip install build twine bump2version
 
       - name: Configure git
-        if: inputs.dry_run != true
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run != true
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -282,57 +291,20 @@ jobs:
         env:
           VERSION_OVERRIDE: ${{ inputs.version_override }}
         run: |
-          set -e
+          set -euo pipefail
           git fetch --tags
-
           TYPE="${{ needs.determine-release.outputs.release_type }}"
-          CURRENT=$(sed -n 's/^__version__ = "\([^"]*\)"/\1/p' datafog/__about__.py)
-          if [ -z "$CURRENT" ]; then
-            echo "Failed to parse current version from datafog/__about__.py"
-            exit 1
-          fi
-          echo "Current version: $CURRENT"
-
-          # Strip any pre-release suffix to get base version
-          BASE=$(echo "$CURRENT" | sed -E 's/(a|b)[0-9]+([.][0-9A-Za-z]+)?$//')
-          if [ -n "$VERSION_OVERRIDE" ]; then
-            BASE="$VERSION_OVERRIDE"
-            if echo "$BASE" | grep -Eq '(a|b)[0-9]+([.][0-9A-Za-z]+)?$'; then
-              echo "version_override must be a stable base version like 4.4.0, not a prerelease"
-              exit 1
-            fi
-          fi
-          if ! echo "$BASE" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "Release base must have numeric major.minor.patch format"
-            exit 1
-          fi
-          echo "Base version: $BASE"
-
-          if [ "$TYPE" = "alpha" ]; then
-            ALPHA_NUM=1
-            while git tag -l "v${BASE}a${ALPHA_NUM}" | grep -q .; do
-              ALPHA_NUM=$((ALPHA_NUM + 1))
-            done
-            VERSION="${BASE}a${ALPHA_NUM}"
-
-          elif [ "$TYPE" = "beta" ]; then
-            BETA_NUM=1
-            while git tag -l "v${BASE}b${BETA_NUM}" | grep -q .; do
-              BETA_NUM=$((BETA_NUM + 1))
-            done
-            VERSION="${BASE}b${BETA_NUM}"
-
-          else
-            VERSION="$BASE"
-          fi
-
+          VERSION=$(python scripts/release_version.py --type "$TYPE" --override "$VERSION_OVERRIDE")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Publishing version: $VERSION"
-
-          sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" datafog/__about__.py
-          if grep -q 'version="' setup.py 2>/dev/null; then
-            sed -i "s/version=\".*\"/version=\"$VERSION\"/" setup.py
-          fi
+          RELEASE_VERSION="$VERSION" python - <<'PYCODE'
+          import os, re
+          from pathlib import Path
+          version = os.environ["RELEASE_VERSION"]
+          about = Path("datafog/__about__.py")
+          about.write_text(re.sub(r'^__version__ = ".*"', f'__version__ = "{version}"', about.read_text(), flags=re.M))
+          config = Path(".bumpversion.cfg")
+          config.write_text(re.sub(r'^current_version = .*', f'current_version = {version}', config.read_text(), flags=re.M))
+          PYCODE
 
       - name: Generate changelog
         env:
@@ -371,7 +343,7 @@ jobs:
           if-no-files-found: error
 
       - name: Verify release branch still matches tested source
-        if: inputs.dry_run != true
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run != true
         env:
           RELEASE_BRANCH: ${{ needs.determine-release.outputs.target_branch }}
           TESTED_SHA: ${{ needs.determine-release.outputs.source_sha }}
@@ -382,30 +354,35 @@ jobs:
             exit 1
           fi
 
+      - name: Commit and tag the validated release before publication
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run != true
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          BRANCH: ${{ needs.determine-release.outputs.target_branch }}
+        run: |
+          set -euo pipefail
+          git add datafog/__about__.py .bumpversion.cfg
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: bump version to $VERSION [skip ci]"
+          fi
+          git tag -a "v$VERSION" -m "Release $VERSION"
+          git push --atomic origin "HEAD:$BRANCH" "v$VERSION"
+
       - name: Publish to PyPI
-        if: inputs.dry_run != true
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run != true
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           python -m twine upload dist/* --verbose
 
-      - name: Commit version bump & create release
-        if: inputs.dry_run != true
+      - name: Create GitHub release
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run != true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TYPE: ${{ needs.determine-release.outputs.release_type }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          TYPE="${{ needs.determine-release.outputs.release_type }}"
-          BRANCH="${{ needs.determine-release.outputs.target_branch }}"
-
-          git add datafog/__about__.py setup.py
-          git commit -m "chore: bump version to $VERSION [skip ci]" || echo "No version changes to commit"
-          git push origin "HEAD:$BRANCH"
-
-          git tag -a "v$VERSION" -m "Release $VERSION"
-          git push origin "v$VERSION"
-
           PRERELEASE_FLAG=""
           TITLE=""
           if [ "$TYPE" = "alpha" ]; then
@@ -426,7 +403,7 @@ jobs:
             dist/*
 
       - name: Dry run summary
-        if: inputs.dry_run == true
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run == true
         run: |
           echo "DRY RUN COMPLETE"
           echo "Would have published: ${{ steps.version.outputs.version }}"
@@ -434,9 +411,25 @@ jobs:
           ls -la dist/
 
   # ── 4. Cleanup old pre-releases ───────────────────────────────────────
+  sync-development:
+    needs: [determine-release, publish]
+    if: github.event_name == 'workflow_dispatch' && inputs.dry_run != true && needs.determine-release.outputs.release_type == 'stable'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: dev
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+      - name: Bring stable release metadata back to development
+        run: |
+          git fetch origin main
+          git merge --ff-only origin/main
+          git push origin HEAD:dev
+
   cleanup:
     needs: [determine-release, publish]
-    if: needs.determine-release.outputs.release_type != 'stable' && inputs.dry_run != true
+    if: github.event_name == 'workflow_dispatch' && inputs.dry_run != true && needs.determine-release.outputs.release_type != 'stable'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

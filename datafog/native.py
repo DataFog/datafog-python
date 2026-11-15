@@ -40,7 +40,7 @@ def _core() -> Any:
     except ImportError as exc:  # pragma: no cover - base install always has it
         raise ImportError(
             "datafog.native requires datafog-core. Install with: "
-            'pip install "datafog==4.10.0"'
+            'pip install "datafog[rust]"'
         ) from exc
 
 
@@ -52,7 +52,13 @@ def __getattr__(name: str) -> Any:
 
 def version() -> str:
     """Installed Core version, for bug reports and reproducibility locks."""
-    return importlib.metadata.version("datafog-core")
+    _core()
+    try:
+        return importlib.metadata.version("datafog-core")
+    except importlib.metadata.PackageNotFoundError as exc:
+        raise ImportError(
+            "datafog-core distribution metadata is missing; reinstall datafog[rust]"
+        ) from exc
 
 
 def contract_version() -> int:

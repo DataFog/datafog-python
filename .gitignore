@@ -63,6 +63,7 @@ docs/*
 !docs/migration-4.8.1-contract.md
 !docs/migration-4.9.md
 !docs/core-0.4-integration.md
+!docs/review-remediation.md
 !docs/agents/
 !docs/agents/**
 !docs/audit/

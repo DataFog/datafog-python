@@ -165,7 +165,7 @@ def test_anonymizer_outputs():
         ),
         AnnotationResult(
             start=33,
-            end=41,
+            end=len(text),
             score=1.0,
             entity_type=EntityTypes.LOCATION,
             recognition_metadata=AnnotatorMetadata(),

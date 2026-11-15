@@ -18,12 +18,13 @@ project_urls = {
 
 # Core lightweight dependencies only
 core_deps = [
-    # Native engine, the default detection path. Exact upper bound: detection
-    # output is contract-versioned and must stay reproducible.
-    "datafog-core>=1.4.0,<2",
-    "pydantic>=2.0,<3.0",
+    # Core minor releases may change findings; stay on this reviewed minor.
+    "datafog-core~=1.4.0",
+    "pydantic>=2.1,<3.0",
     "pydantic-settings>=2.0.0",
     "typing-extensions>=4.0",
+    # Match timeouts bound untrusted allowlist expressions.
+    "regex>=2024.11.6",
 ]
 
 # Optional heavy dependencies
@@ -34,7 +35,7 @@ nlp_deps = [
 
 nlp_advanced_deps = [
     "gliner>=0.2.5",
-    "torch>=2.1.0,<2.7",
+    "torch>=2.1.0,<3",
     "transformers>=4.20.0",
     "huggingface-hub>=0.16.0",
     "sentencepiece>=0.2.0",
@@ -88,9 +89,9 @@ benchmark_deps = [
 
 extras_require = {
     # Retained for explicitness; the base install already pulls Core.
-    "rust": ["datafog-core>=1.4.0,<2"],
+    "rust": ["datafog-core~=1.4.0"],
     "nlp": nlp_deps,
-    "nlp-advanced": nlp_advanced_deps,
+    "nlp-advanced": nlp_deps + nlp_advanced_deps,
     "ocr": ocr_deps,
     "distributed": distributed_deps,
     "web": web_deps,
@@ -117,6 +118,8 @@ setup(
     version=version,
     author="Sid Mohan",
     author_email="sid@datafog.ai",
+    license="MIT",
+    license_files=["LICENSE"],
     description="Lightning-fast PII detection and anonymization library, 100x+ faster than NER-based detection (see benchmarks/)",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -127,14 +130,13 @@ setup(
     python_requires=">=3.10",
     entry_points={
         "console_scripts": [
-            "datafog=datafog.client:app [cli]",  # Requires cli extra
+            "datafog=datafog.cli:main",
             "datafog-hook=datafog.integrations.claude_code:main",  # Core only
         ],
     },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",

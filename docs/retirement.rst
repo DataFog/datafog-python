@@ -21,37 +21,37 @@ Removed or scheduled
      - Removed in
      - Deprecated in
    * - ``OCRMService``
-     - ``4.10.0``
+     - ``4.12.0``
      - none
      - ``5.0.0``
      - ``4.9.0``
    * - ``DonutProcessor``
-     - ``4.10.0``
+     - ``4.12.0``
      - none
      - ``5.0.0``
      - ``4.9.0``
    * - ``[ocr]`` extra (Donut, Tesseract, Pillow)
-     - ``4.10.0``
+     - ``4.12.0``
      - none
      - ``5.0.0``
      - ``4.9.0``
    * - ``[distributed]`` extra (PySpark, pandas)
-     - ``4.10.0``
+     - ``4.12.0``
      - :ref:`spark-recipe`
      - ``5.0.0``
      - ``4.9.0``
    * - ``detect()``
-     - ``4.10.0``
+     - ``4.12.0``
      - ``scan()``
      - ``5.0.0``
      - ``4.9.0``
    * - ``process()``
-     - ``4.10.0``
+     - ``4.12.0``
      - ``redact()``
      - ``5.0.0``
      - ``4.9.0``
 
-Installing ``pip install "datafog==4.10.0"`` keeps every row above working.
+After the 4.12.0 release is published, installing ``pip install "datafog==4.12.0"`` keeps every row above working.
 That version stays installable on PyPI permanently.
 
 OCR
@@ -63,9 +63,9 @@ pin.
 
 .. code-block:: bash
 
-   pip install "datafog==4.10.0[ocr]"
+   pip install "datafog[ocr]==4.12.0"
 
-If you need continued OCR support beyond that, stay on ``4.10.0``. Track the
+If you need continued OCR support beyond that, stay on ``4.12.0``. Track the
 surfaces you depend on by name, not by staying on a major version range, so a
 lock file review shows the pin.
 

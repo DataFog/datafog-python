@@ -22,12 +22,12 @@ class AnnotatorRequest(BaseModel):
 
     text: str
     language: str
-    correlation_id: Optional[str]
-    score_threshold: Optional[float]
-    entities: Optional[List[EntityTypes]]
-    return_decision_process: Optional[bool]
-    ad_hoc_recognizers: Optional[List[PatternRecognizer]]
-    context: Optional[List[str]]
+    correlation_id: Optional[str] = None
+    score_threshold: Optional[float] = None
+    entities: Optional[List[EntityTypes]] = None
+    return_decision_process: Optional[bool] = None
+    ad_hoc_recognizers: Optional[List[PatternRecognizer]] = None
+    context: Optional[List[str]] = None
 
 
 class AnnotationResult(BaseModel):
@@ -39,16 +39,19 @@ class AnnotationResult(BaseModel):
 
     start: int
     end: int
-    score: Optional[float]
+    score: Optional[float] = None
     entity_type: str
-    recognition_metadata: Optional[AnnotatorMetadata]
+    recognition_metadata: Optional[AnnotatorMetadata] = None
 
-    @field_validator("entity_type")
+    @field_validator("entity_type", mode="before")
     @classmethod
     def validate_entity_type(cls, v):
-        if v not in EntityTypes.__members__:
-            return "UNKNOWN"
-        return v
+        from datafog.engine import ALL_ENTITY_TYPES, CANONICAL_TYPE_MAP
+
+        if isinstance(v, EntityTypes):
+            v = v.name
+        v = CANONICAL_TYPE_MAP.get(v, v)
+        return v if v in ALL_ENTITY_TYPES else "UNKNOWN"
 
 
 class AnalysisExplanation(BaseModel):
@@ -60,14 +63,14 @@ class AnalysisExplanation(BaseModel):
     """
 
     recognizer: str
-    pattern_name: Optional[str]
-    pattern: Optional[str]
+    pattern_name: Optional[str] = None
+    pattern: Optional[str] = None
     original_score: float
     score: float
-    textual_explanation: Optional[str]
+    textual_explanation: Optional[str] = None
     score_context_improvement: float
     supportive_context_word: str
-    validation_result: Optional[float]
+    validation_result: Optional[float] = None
 
 
 class AnnotationResultWithAnaysisExplanation(AnnotationResult):
@@ -75,4 +78,4 @@ class AnnotationResultWithAnaysisExplanation(AnnotationResult):
     Extends AnnotationResult with detailed analysis explanation.
     """
 
-    analysis_explanation: Optional[AnalysisExplanation]
+    analysis_explanation: Optional[AnalysisExplanation] = None

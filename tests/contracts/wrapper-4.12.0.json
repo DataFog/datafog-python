@@ -1,9 +1,6 @@
 {
   "wrapper_version": "4.12.0",
-  "core_versions": [
-    "1.4.0",
-    "2.0.0"
-  ],
+  "core_versions": ["1.4.0", "2.0.0"],
   "source_oracle": "4.8.1.json (unchanged)",
   "review": "2026-11-15 PDF remediation: explicit reviewed wrapper changes, not a regenerated historical oracle",
   "cases": {
@@ -542,9 +539,7 @@
       "reason": "PY-H3/PY-L6 route TextService through shared native detection and return populated canonical labels.",
       "expected": {
         "value": {
-          "EMAIL": [
-            "alice@example.com"
-          ]
+          "EMAIL": ["alice@example.com"]
         },
         "warnings": []
       }
@@ -554,9 +549,7 @@
       "reason": "PY-H3/PY-L6 route TextService through shared native detection with overlap resolution and populated canonical labels.",
       "expected": {
         "value": {
-          "DE_TAX_ID": [
-            "12345678901"
-          ]
+          "DE_TAX_ID": ["12345678901"]
         },
         "warnings": []
       }
@@ -567,9 +560,7 @@
       "expected": {
         "value": [
           {
-            "EMAIL": [
-              "alice@example.com"
-            ]
+            "EMAIL": ["alice@example.com"]
           },
           {}
         ],
@@ -920,14 +911,7 @@
                 "default": null
               }
             ],
-            "fields": [
-              "type",
-              "text",
-              "start",
-              "end",
-              "confidence",
-              "engine"
-            ]
+            "fields": ["type", "text", "start", "end", "confidence", "engine"]
           },
           "datafog.engine:ScanResult": {
             "parameters": [
@@ -950,11 +934,7 @@
                 "default": null
               }
             ],
-            "fields": [
-              "entities",
-              "text",
-              "engine_used"
-            ]
+            "fields": ["entities", "text", "engine_used"]
           },
           "datafog.engine:RedactResult": {
             "parameters": [
@@ -977,11 +957,7 @@
                 "default": null
               }
             ],
-            "fields": [
-              "redacted_text",
-              "mapping",
-              "entities"
-            ]
+            "fields": ["redacted_text", "mapping", "entities"]
           },
           "datafog.engine:scan": {
             "parameters": [

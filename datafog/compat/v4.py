@@ -66,6 +66,8 @@ def redact(
     allowlist_patterns: list[str] | None = None,
     *,
     backend: str | None = None,
+    hash_type: str = "sha256",
+    hash_key: bytes | None = None,
 ) -> RedactResult:
     """
     Redact with legacy strategies and result schema.
@@ -92,7 +94,13 @@ def redact(
                 "allowlist/allowlist_patterns cannot be combined with explicit "
                 "entities; filter the entities before calling redact"
             )
-        return _redact_entities(text=text, entities=entities, strategy=strategy)
+        return _redact_entities(
+            text=text,
+            entities=entities,
+            strategy=strategy,
+            hash_type=hash_type,
+            hash_key=hash_key,
+        )
 
     return _scan_and_redact(
         text=text,
@@ -103,4 +111,6 @@ def redact(
         allowlist=allowlist,
         allowlist_patterns=allowlist_patterns,
         backend=backend,
+        hash_type=hash_type,
+        hash_key=hash_key,
     )

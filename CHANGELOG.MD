@@ -1,5 +1,38 @@
 # ChangeLog
 
+## [Unreleased]
+
+#### Security
+
+- Preserve native structured PII detection in smart, spaCy, GLiNER, legacy and
+  CLI paths. Normalize lone surrogates without moving source spans; retain
+  structured findings on bounded model inputs. Require review when hook payloads
+  exceed scan budgets, rather than silently allowing unscanned tails.
+- Bound user allowlist matching with timeouts and remove quadratic overlap and
+  Python fallback regex behavior. Redact exact NER offsets and whole TextService
+  inputs so repeated names and chunk boundaries cannot expose PII.
+- Cover LiteLLM tool arguments, prompt/input requests and complete streamed
+  responses, with request-scoped tokens. Hide configured API keys in CLI output.
+
+#### Changed
+
+- Hash APIs honor the selected algorithm and emit full digests. Optional
+  `hash_key` enables HMAC with a key of at least 32 bytes. Plain hashes provide
+  deterministic pseudonyms and do not resist guessing of low-entropy PII.
+- Reuse tokens for repeated values, avoid existing token collisions, reject
+  invalid explicit ranges and unsupported entity selections, and report backend
+  entity capabilities. Async decorators await results before filtering.
+- Keep Core within the reviewed minor series, raise the Pydantic floor to 2.1,
+  include spaCy in `nlp-advanced`, and allow Torch 2.x versions compatible with
+  `datafog-core[gliner2]`. Add an isolated build declaration and runnable sdist
+  tests; remove unused duplicate implementation modules.
+- Repair Pydantic optional defaults, legacy anonymizer enum filters and overlaps,
+  Spark label aliases, implicit pipeline scanning and invalid CLI operations.
+- Scheduled release jobs qualify candidates without publication. Manual runs
+  default to dry runs, reject stale version bases and development history, gate
+  Python 3.13, record release refs before upload, and synchronize stable metadata
+  back to development after publication.
+
 ## [4.11.0]
 
 #### Changed

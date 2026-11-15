@@ -40,7 +40,7 @@ The native engine finds things the Python regex engine never did: `API_KEY`,
 stay opt-in.
 
 These differences go the other way and are recorded, not hidden, in
-[tests/contracts/rust-1.3.0.json](../tests/contracts/rust-1.3.0.json):
+[tests/contracts/rust-1.4.0.json](../tests/contracts/rust-1.4.0.json):
 
 | Input | Python | Native | Why |
 | --- | --- | --- | --- |
@@ -105,5 +105,5 @@ a contract bump is a Core MAJOR and raises the floor here.
 ## What is not changing yet
 
 `detect()`, `process()`, OCR and Spark all still work and still warn. They are
-removed in 5.0, not here. The last supported version is 4.10.0 — see the
+removed in 5.0, not here. The last supported version in the current release train is 4.12.0 — see the
 [retirement schedule](retirement.rst).

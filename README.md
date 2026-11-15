@@ -1,4 +1,4 @@
-﻿# DataFog Python
+# DataFog Python
 
 DataFog is a Python library for detecting and redacting personally identifiable information (PII).
 
@@ -85,8 +85,9 @@ multilingual tokenizer; installing the OCR extra is not required for GLiNER.
 `backend` defaults to `auto`: the native engine when `datafog-core` is
 importable, the pure-Python regex engine otherwise. `DATAFOG_BACKEND` sets the
 default and `backend="python"` / `backend="rust"` override it per call.
-`auto` never selects the native engine for `engine="spacy"`, `"gliner"` or
-`"smart"`, which stay on the Python ML path.
+Every engine uses this backend for structured PII. `engine="spacy"`,
+`"gliner"` and `"smart"` add model spans to the same structured findings;
+selecting an ML engine does not disable native card or credential detection.
 
 The native engine adds detectors the Python engine never had — `API_KEY`,
 `BEARER_TOKEN`, `JWT`, `PRIVATE_KEY`, `CREDENTIAL_URI`, `ACCOUNT_NUMBER`,
@@ -95,7 +96,7 @@ and `ADDRESS` from an embedded model, so name and address detection needs no
 spaCy and no model download. Findings keep `engine="regex"` provenance and
 `confidence=1.0` as compatibility values, not native confidence estimates.
 Reviewed differences from the Python engine are listed in
-[tests/contracts/rust-1.3.0.json](tests/contracts/rust-1.3.0.json).
+[tests/contracts/rust-1.4.0.json](tests/contracts/rust-1.4.0.json).
 `datafog.native` exposes the native schema directly.
 
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
@@ -151,10 +152,8 @@ import datafog
 
 text = "Steuer-ID 12345678901 liegt vor."
 
-print(datafog.scan(text, engine="regex").entities)
-# []
-
-print(datafog.scan(text, engine="regex", locales=["de"]).entities)
+print(datafog.scan(text, engine="regex", locales=["de"],
+                   entity_types=["DE_TAX_ID"]).entities)
 # [Entity(type='DE_TAX_ID', text='12345678901', ...)]
 ```
 
@@ -215,7 +214,8 @@ scan/redact helpers, or guardrail helpers.
 
 DataFog deprecates OCR and Spark with visible use-time
 warnings; their APIs and extras will be removed in 5.0. The last supported
-version is 4.10.0 — pin it with `pip install "datafog==4.10.0"` — and every
+version in this release train is 4.12.0 — after publication, pin it with
+`pip install "datafog==4.12.0"` — and every
 retired surface is tracked in the [retirement schedule](docs/retirement.rst).
 See the [4.9 migration guide](docs/migration-4.9.md) for the transition plan,
 and [VERSIONING.md](VERSIONING.md) for what a version number promises.
@@ -244,6 +244,8 @@ print(result["PHONE"])
 ```
 
 ## CLI
+
+Install the command dependencies with `pip install "datafog[cli]"`.
 
 ```bash
 # Scan text
@@ -284,20 +286,18 @@ Telemetry does not include input text or detected PII values.
 
 ## Development
 
-The [4.9 migration guide](docs/migration-4.9.md) explains opt-in Rust detection,
-the native `datafog.v5` preview, and the revised 5.0 retirement schedule for
-`detect`/`process`, OCR, and Spark. The Python detector remains the default.
+The native engine is the default, with a warned Python fallback. The 4.12
+review fixes preserve structured detection across every engine and legacy API.
+The dependency stays within the reviewed Core 1.4 minor series (`~=1.4.0`);
+Core 2.0 is a separate release candidate that must be published and qualified
+before this SDK raises its floor. See [release preparation](docs/review-remediation.md).
 
-4.10.0 requires Core `>=1.3.0,<2` and capability contract 1, and installs it by
-default. See the [4.10.0 release notes](RELEASE_NOTES_4.10.0.md) and the
-[4.10 migration guide](docs/migration-4.10.md).
-Entity labels, locales, and activation settings come from the installed
-Core, allowing compatible releases to add detectors without a Python update.
-German detection is opt-in through locale or entity selection; UUID is opt-in
-through `entity_types=["UUID"]`. Core's structured-only `PERSON` is unavailable
-for explicit Rust text selection. The legacy overlap policy can suppress NPI in
-favor of PHONE; the migration guide explains native alternatives. Lock the Core
-version if detection output must remain reproducible.
+Entity labels, locales and activation settings come from the installed Core.
+`get_supported_entities()` reports that backend's supported inventory, including
+opt-in labels; it does not mean every label is enabled by default. German
+detection is opt-in through locale or entity selection. `UUID`, `PERSON` and
+`ADDRESS` can be selected explicitly. Unsupported labels and invalid arguments
+raise errors instead of silently disabling detection.
 
 The [4.8.1 compatibility contract](docs/migration-4.8.1-contract.md) records
 published Python behavior for the Rust migration, with frozen fixtures and

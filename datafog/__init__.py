@@ -157,7 +157,7 @@ def scan(
     *,
     backend: str | None = None,
 ) -> ScanResult:
-    """Scan using the 4.x compatibility API; Rust detection is opt-in."""
+    """Scan using the 4.x compatibility API; native detection is the default."""
     return _compat_v4.scan(
         text,
         engine,
@@ -181,6 +181,8 @@ def redact(
     allowlist_patterns: list[str] | None = None,
     *,
     backend: str | None = None,
+    hash_type: str = "sha256",
+    hash_key: bytes | None = None,
 ) -> RedactResult:
     """Redact using the 4.x compatibility API and legacy strategies."""
     return _compat_v4.redact(
@@ -194,6 +196,8 @@ def redact(
         allowlist,
         allowlist_patterns,
         backend=backend,
+        hash_type=hash_type,
+        hash_key=hash_key,
     )
 
 
@@ -242,18 +246,15 @@ def _detect_impl(text: str) -> list:
 
     _start = _time.monotonic()
 
-    _lazy_import_regex_annotator()
-    annotator = RegexAnnotator()
-    # Use the structured output to get proper positions
-    _, result = annotator.annotate_with_spans(text)
+    result = scan(text)
 
     # Convert to simple format, filtering out empty matches
     entities = []
-    for span in result.spans:
+    for span in result.entities:
         if span.text.strip():  # Only include non-empty matches
             entities.append(
                 {
-                    "type": span.label,
+                    "type": span.type,
                     "value": span.text,
                     "start": span.start,
                     "end": span.end,
@@ -284,7 +285,14 @@ def _detect_impl(text: str) -> list:
     return entities
 
 
-def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
+def process(
+    text: str,
+    anonymize: bool = False,
+    method: str = "redact",
+    *,
+    hash_type: str = "sha256",
+    hash_key: bytes | None = None,
+) -> dict:
     """
     Process text to detect and optionally anonymize PII.
 
@@ -311,31 +319,37 @@ def process(text: str, anonymize: bool = False, method: str = "redact") -> dict:
 
     _start = _time.monotonic()
 
+    if method not in {"redact", "replace", "hash"}:
+        raise ValueError("method must be 'redact', 'replace', or 'hash'")
     findings = _detect_impl(text)
 
     result = {"original": text, "findings": findings}
 
-    if anonymize:
-        anonymized = text
-        # Simple anonymization - replace from end to start to preserve positions
-        for finding in sorted(findings, key=lambda x: x["start"], reverse=True):
-            start, end = finding["start"], finding["end"]
-            entity_type = finding["type"]
-
-            if method == "redact":
-                replacement = f"[{entity_type}_REDACTED]"
-            elif method == "replace":
-                replacement = f"[{entity_type}_XXXXX]"
-            elif method == "hash":
-                import hashlib
-
-                replacement = f"[{entity_type}_{hashlib.md5(finding['value'].encode()).hexdigest()[:8]}]"
-            else:
-                replacement = f"[{entity_type}]"
-
-            anonymized = anonymized[:start] + replacement + anonymized[end:]
-
-        result["anonymized"] = anonymized
+    if anonymize and method == "hash":
+        entities = [
+            Entity(
+                item["type"], item["value"], item["start"], item["end"], 1.0, "regex"
+            )
+            for item in findings
+        ]
+        result["anonymized"] = redact(
+            text,
+            entities=entities,
+            strategy="hash",
+            hash_type=hash_type,
+            hash_key=hash_key,
+        ).redacted_text
+    elif anonymize:
+        parts = []
+        cursor = 0
+        suffix = "REDACTED" if method == "redact" else "XXXXX"
+        for finding in sorted(findings, key=lambda item: item["start"]):
+            parts.extend(
+                (text[cursor : finding["start"]], f"[{finding['type']}_{suffix}]")
+            )
+            cursor = finding["end"]
+        parts.append(text[cursor:])
+        result["anonymized"] = "".join(parts)
 
     try:
         from .telemetry import _get_duration_bucket, track_function_call

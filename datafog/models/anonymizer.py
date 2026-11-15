@@ -50,6 +50,33 @@ class Anonymizer(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
 
+    def _selected_annotations(self, text, annotations):
+        from datafog.engine import CANONICAL_TYPE_MAP
+
+        selected = (
+            None
+            if self.entities is None
+            else {
+                CANONICAL_TYPE_MAP.get(entity.name, entity.name)
+                for entity in self.entities
+            }
+        )
+        merged = []
+        for annotation in sorted(annotations, key=lambda a: (a.start, -a.end)):
+            if not 0 <= annotation.start < annotation.end <= len(text):
+                raise ValueError(
+                    "Annotation range must be nonempty and inside the text"
+                )
+            if selected is not None and annotation.entity_type not in selected:
+                continue
+            if merged and annotation.start < merged[-1].end:
+                merged[-1] = merged[-1].model_copy(
+                    update={"end": max(merged[-1].end, annotation.end)}
+                )
+            else:
+                merged.append(annotation)
+        return reversed(merged)
+
     def anonymize(
         self, text: str, annotations: List[AnnotationResult]
     ) -> AnonymizationResult:
@@ -68,19 +95,18 @@ class Anonymizer(BaseModel):
     ) -> AnonymizationResult:
         """Replace PII in text with anonymized values."""
         replacements = []
-        for annotation in sorted(annotations, key=lambda x: x.start, reverse=True):
-            if not self.entities or annotation.entity_type in self.entities:
-                replacement = self._generate_replacement(
-                    text[annotation.start : annotation.end], annotation.entity_type
-                )
-                replacements.append(
-                    {
-                        "original": text[annotation.start : annotation.end],
-                        "replacement": replacement,
-                        "entity_type": annotation.entity_type,
-                    }
-                )
-                text = text[: annotation.start] + replacement + text[annotation.end :]
+        for annotation in self._selected_annotations(text, annotations):
+            replacement = self._generate_replacement(
+                text[annotation.start : annotation.end], annotation.entity_type
+            )
+            replacements.append(
+                {
+                    "original": text[annotation.start : annotation.end],
+                    "replacement": replacement,
+                    "entity_type": annotation.entity_type,
+                }
+            )
+            text = text[: annotation.start] + replacement + text[annotation.end :]
 
         return AnonymizationResult(
             anonymized_text=text, anonymized_entities=replacements
@@ -88,13 +114,13 @@ class Anonymizer(BaseModel):
 
     def _generate_replacement(self, original: str, entity_type: EntityTypes) -> str:
         """Generate a replacement for the given entity."""
-        if entity_type == EntityTypes.PERSON:
+        if entity_type == "PERSON":
             return f"[PERSON_{secrets.token_hex(4).upper()}]"
-        elif entity_type == EntityTypes.ORGANIZATION:
+        elif entity_type == "ORGANIZATION":
             return f"[ORGANIZATION_{secrets.token_hex(4).upper()}]"
-        elif entity_type == EntityTypes.LOCATION:
+        elif entity_type == "LOCATION":
             return f"[LOCATION_{secrets.token_hex(4).upper()}]"
-        elif entity_type == EntityTypes.DATE:
+        elif entity_type == "DATE":
             return "[REDACTED_DATE]"
         else:
             return f"[{entity_type}_{secrets.token_hex(4).upper()}]"
@@ -104,10 +130,7 @@ class Anonymizer(BaseModel):
     ) -> AnonymizationResult:
         """Hash PII in text."""
         replacements = []
-        for annotation in sorted(annotations, key=lambda x: x.start, reverse=True):
-            if self.entities and annotation.entity_type not in self.entities:
-                continue
-
+        for annotation in self._selected_annotations(text, annotations):
             start, end = annotation.start, annotation.end
             original = text[start:end]
             replacement = self._hash_text(original)
@@ -139,10 +162,7 @@ class Anonymizer(BaseModel):
         self, text: str, annotations: List[AnnotationResult]
     ) -> AnonymizationResult:
         replacements = []
-        for annotation in sorted(annotations, key=lambda x: x.start, reverse=True):
-            if self.entities and annotation.entity_type not in self.entities:
-                continue
-
+        for annotation in self._selected_annotations(text, annotations):
             start, end = annotation.start, annotation.end
             original = text[start:end]
             replacement = "[REDACTED]"
