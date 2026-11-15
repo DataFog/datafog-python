@@ -20,7 +20,7 @@ project_urls = {
 core_deps = [
     # Native engine, the default detection path. Exact upper bound: detection
     # output is contract-versioned and must stay reproducible.
-    "datafog-core>=1.3.0,<2",
+    "datafog-core>=1.4.0,<2",
     "pydantic>=2.0,<3.0",
     "pydantic-settings>=2.0.0",
     "typing-extensions>=4.0",
@@ -88,7 +88,7 @@ benchmark_deps = [
 
 extras_require = {
     # Retained for explicitness; the base install already pulls Core.
-    "rust": ["datafog-core>=1.3.0,<2"],
+    "rust": ["datafog-core>=1.4.0,<2"],
     "nlp": nlp_deps,
     "nlp-advanced": nlp_advanced_deps,
     "ocr": ocr_deps,

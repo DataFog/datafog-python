@@ -1,5 +1,19 @@
 # ChangeLog
 
+## [4.11.0]
+
+#### Changed
+
+- Requires `datafog-core>=1.4.0`. Core's text-mode email scanning trims label
+  syntax by default, so `email=alice@example.com` reports `alice@example.com`,
+  quoted values drop the wrapping quote, and `SUPPORT_EMAIL=` labels stay out
+  of the span. Two recorded native-corpus divergences (`json-escaped`,
+  `markdown-code-block`) resolve and are removed from the reviewed deltas. The
+  `unicode-chinese-name` delta stays: its corpus fixture contains literal `?`
+  characters, which are valid local-part characters, so the reviewed
+  expectation remains overlap-only. The Rust contract review file moves to
+  `rust-1.4.0.json` with no new deviations: every recorded case still matches.
+
 ## [4.10.0]
 
 #### Added

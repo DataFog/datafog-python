@@ -41,15 +41,7 @@
     },
     "unicode-chinese-name": {
       "offsets_shifted": true,
-      "reason": "Core's default email boundary set does not include a CJK prefix; ENV/SQL format handling covers the Latin cases it ships today"
-    },
-    "json-escaped": {
-      "offsets_shifted": true,
-      "reason": "Core treats '=' as an assignment boundary under format: env, not by default"
-    },
-    "markdown-code-block": {
-      "offsets_shifted": true,
-      "reason": "Core treats the opening quote as part of the token under format: sql, not by default"
+      "reason": "The corpus fixture itself contains eleven ASCII '?' characters (a mangled CJK name); '?' is a valid RFC local-part character, so the email span includes them in every engine. Overlap is the reviewed expectation."
     }
   }
 }
