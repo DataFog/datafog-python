@@ -227,3 +227,8 @@ def test_release_version_positive_and_duplicate_paths():
     assert select("4.12.0", "stable", [], "4.11.0") == "4.12.0"
     with pytest.raises(ValueError, match="already exists"):
         select("4.12.0", "stable", ["v4.12.0"], "4.11.0")
+
+
+def test_release_skips_published_prereleases_without_tags():
+    select = _version_selector()
+    assert select("4.12.0", "alpha", [], "4.11.0", published=["4.12.0a1"]) == "4.12.0a2"

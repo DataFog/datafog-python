@@ -382,6 +382,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           VERSION: ${{ steps.version.outputs.version }}
           TYPE: ${{ needs.determine-release.outputs.release_type }}
+          BRANCH: ${{ needs.determine-release.outputs.target_branch }}
         run: |
           PRERELEASE_FLAG=""
           TITLE=""
