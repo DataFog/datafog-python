@@ -239,11 +239,11 @@ except ImportError:
 
 ### Workflow Architecture (3 workflows)
 
-| Workflow        | Purpose                             | Trigger                    |
-| --------------- | ----------------------------------- | -------------------------- |
-| `ci.yml`        | Lint + Test + Coverage + Wheel size | Push/PR to main/dev        |
+| Workflow        | Purpose                                | Trigger                                       |
+| --------------- | -------------------------------------- | --------------------------------------------- |
+| `ci.yml`        | Lint + Test + Coverage + Wheel size    | Push/PR to main/dev                           |
 | `release.yml`   | Candidate qualification and publishing | Schedule validates; manual dispatch publishes |
-| `benchmark.yml` | Performance benchmarks              | Push/PR/weekly             |
+| `benchmark.yml` | Performance benchmarks                 | Push/PR/weekly                                |
 
 ### Release Cadence
 
