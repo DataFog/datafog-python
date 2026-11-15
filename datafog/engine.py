@@ -809,6 +809,26 @@ def _validate_hash_parameters(
             raise ValueError(f"Unsupported hash_type: {hash_type!r}") from None
 
 
+def _hash_value(
+    text: str,
+    hash_type: str,
+    hash_key: bytes | None,
+    *,
+    plain_length: int = 12,
+) -> str:
+    """Retain legacy plain-hash widths; keyed HMAC always uses its full digest.
+
+    Unkeyed hashes are deterministic pseudonyms and remain vulnerable to
+    dictionary attacks regardless of digest width. Supply a private key to
+    prevent direct enumeration of low-entropy identifiers.
+    """
+    _validate_hash_parameters("hash", hash_type, hash_key)
+    encoded = text.encode("utf-8", "surrogatepass")
+    if hash_key is not None:
+        return hmac.new(hash_key, encoded, hash_type).hexdigest()
+    return hashlib.new(hash_type, encoded).hexdigest()[:plain_length]
+
+
 def _validated_redaction_entities(text: str, entities: list[Entity]) -> list[Entity]:
     valid_entities = []
     for entity in entities:
@@ -841,6 +861,10 @@ def redact(
     group only one span is redacted — the longest, breaking ties by entity
     type priority and then confidence. Suppressed spans are omitted from
     ``RedactResult.entities`` and ``mapping``.
+
+    Plain hashes retain the historical 12-character digest prefix and provide
+    deterministic pseudonymization. With ``hash_key`` (at least 32 bytes), HMAC
+    uses the complete digest. Unkeyed hashes do not resist dictionary attacks.
 
     Invalid ranges, mismatched source text, and malformed labels raise ValueError.
 
@@ -881,12 +905,7 @@ def redact(
                     break
             occupied_tokens.add(mapping_key)
         elif strategy == "hash":
-            encoded = original.encode("utf-8", "surrogatepass")
-            digest = (
-                hmac.new(hash_key, encoded, hash_type).hexdigest()
-                if hash_key is not None
-                else hashlib.new(hash_type, encoded).hexdigest()
-            )
+            digest = _hash_value(original, hash_type, hash_key)
             key = (entity.type, original)
             if key not in pseudonym_by_value:
                 candidate = f"[{entity.type}_{digest}]"

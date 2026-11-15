@@ -55,14 +55,14 @@ def test_anonymizing_operations_imply_scan(operation):
 def test_hash_algorithm_honored_across_api_and_cli(algorithm):
     digest = hashlib.new(algorithm.value, EMAIL.encode()).hexdigest()
     assert (
-        digest
-        in DataFog(hash_type=algorithm).process(EMAIL, anonymize=True, method="hash")[
+        f"[EMAIL_{digest[:12]}]"
+        == DataFog(hash_type=algorithm).process(EMAIL, anonymize=True, method="hash")[
             "anonymized"
         ]
     )
     assert (
-        digest
-        in datafog.process(
+        f"[EMAIL_{digest[:8]}]"
+        == datafog.process(
             EMAIL, anonymize=True, method="hash", hash_type=algorithm.value
         )["anonymized"]
     )
@@ -70,7 +70,18 @@ def test_hash_algorithm_honored_across_api_and_cli(algorithm):
         app, ["hash-text", EMAIL, "--hash-type", algorithm.value]
     )
     assert result.exit_code == 0, result.output
-    assert digest in result.stdout
+    assert result.stdout.strip() == f"[EMAIL_{digest[:12]}]"
+
+
+def test_existing_plain_hash_defaults_remain_compatible():
+    assert (
+        datafog.redact(EMAIL, strategy="hash").redacted_text
+        == f"[EMAIL_{hashlib.sha256(EMAIL.encode()).hexdigest()[:12]}]"
+    )
+    assert (
+        datafog.process(EMAIL, anonymize=True, method="hash")["anonymized"]
+        == f"[EMAIL_{hashlib.md5(EMAIL.encode()).hexdigest()[:8]}]"
+    )
 
 
 def test_keyed_hash_public_facades():

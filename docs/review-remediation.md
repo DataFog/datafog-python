@@ -30,8 +30,14 @@ nonblocking events receive an explicit incomplete-scan notice. Unexpected hook
 failures retain the documented fail-open contract and log exception types only.
 
 `hash_type` selects md5, sha256 or sha3_256 on the CLI and legacy model APIs.
-The engine also accepts algorithms provided by hashlib. Digests use full hex
-lengths. Plain deterministic hashes are pseudonymization: SSNs, phones and
+The engine also accepts fixed-length algorithms provided by hashlib. Existing
+plain-hash marker formats remain compatible: engine, class facade and CLI
+markers use 12 hex characters with SHA256 as their default; deprecated top-level
+`process` uses eight hex characters and retains its MD5 default. Its explicit
+`hash_type` option uses that same legacy width. The legacy Anonymizer model keeps
+its existing full plain digests. Explicit keyed hashes use the full HMAC digest;
+an omitted algorithm selects SHA256 for this new keyed mode.
+Plain deterministic hashes are pseudonymization: SSNs, phones and
 other guessable inputs can be enumerated. Use `hash_key` (at least 32 random
 bytes) for keyed HMAC and keep the key outside logs and source control:
 
@@ -91,7 +97,7 @@ release still requires the Core publication and Python dependency update above.
 | PY-M4   | Native backend selection also supplies the structured stage of smart/spaCy/GLiNER. CLI commands work with DATAFOG_BACKEND=rust.                                                                                    |
 | PY-M5   | Request-scoped tokens, nested tool/function arguments, prompt/input fields and buffered streaming protect all tested request/response shapes. Live proxy deployment is not claimed.                                |
 | PY-M6   | Bare strings, invalid labels and labels unavailable to the selected backend/engine raise explicit errors. Supported aliases remain accepted.                                                                       |
-| PY-M7   | APIs and CLI honor hash_type, use full digests and support keyed HMAC. Plain-hash guessing limitations are documented; algorithm/key tests pass.                                                                   |
+| PY-M7   | APIs and CLI honor hash_type, preserve existing plain-hash formats and support full-length keyed HMAC. Plain-hash guessing limitations are documented; algorithm/key and compatibility tests pass.                 |
 | PY-M8   | Hook per-string/total budget exhaustion emits review/deny or an incomplete-scan notice. Tests put PII past the cap.                                                                                                |
 | PY-M9   | Allowlist expressions run with match timeouts; timed-out expressions retain findings. Adversarial patterns and safe quantified groups are tested.                                                                  |
 | PY-M10  | Dependency resolution stays within the explicitly reviewed Core minor, replacing the broad less-than-2 range. Exact output locks should still pin patch versions.                                                  |

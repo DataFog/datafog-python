@@ -236,7 +236,7 @@ def test_hash_algorithm_and_hmac_are_honored(algorithm):
     text = "a@b.com"
     entities = engine.scan(text, engine="regex").entities
     plain = engine.redact(text, entities, strategy="hash", hash_type=algorithm)
-    assert hashlib.new(algorithm, text.encode()).hexdigest() in plain.redacted_text
+    assert hashlib.new(algorithm, text.encode()).hexdigest()[:12] in plain.redacted_text
     key = bytes(range(32))
     keyed = engine.redact(
         text, entities, strategy="hash", hash_type=algorithm, hash_key=key
@@ -298,7 +298,7 @@ def test_fallback_adversarial_patterns_complete():
 
 def test_hash_marker_cannot_collide_with_literal_input():
     value = "a@b.com"
-    digest = hashlib.sha256(value.encode()).hexdigest()
+    digest = hashlib.sha256(value.encode()).hexdigest()[:12]
     marker = f"[EMAIL_{digest}]"
     text = f"{marker} {value} {value}"
     result = engine.scan_and_redact(text, engine="regex", strategy="hash")
@@ -329,3 +329,16 @@ def test_fallback_email_context_is_trimmed_without_losing_mailboxes(text):
 def test_spacy_selection_rejects_gliner_only_labels():
     with pytest.raises(ValueError, match="PASSPORT_NUMBER"):
         engine.scan("passport SECRET", engine="spacy", entity_types=["PASSPORT_NUMBER"])
+
+
+@pytest.mark.parametrize("algorithm", ["md5", "sha256", "sha3_256"])
+def test_shared_hash_helper_retains_legacy_widths_and_full_hmac(algorithm):
+    value = "a@b.com"
+    digest = hashlib.new(algorithm, value.encode()).hexdigest()
+    assert engine._hash_value(value, algorithm, None) == digest[:12]
+    assert engine._hash_value(value, algorithm, None, plain_length=8) == digest[:8]
+    key = bytes(range(32))
+    assert (
+        engine._hash_value(value, algorithm, key, plain_length=8)
+        == hmac.new(key, value.encode(), algorithm).hexdigest()
+    )

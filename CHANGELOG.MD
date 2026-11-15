@@ -16,9 +16,10 @@
 
 #### Changed
 
-- Hash APIs honor the selected algorithm and emit full digests. Optional
-  `hash_key` enables HMAC with a key of at least 32 bytes. Plain hashes provide
-  deterministic pseudonyms and do not resist guessing of low-entropy PII.
+- Hash APIs honor the selected algorithm while preserving existing plain-hash
+  marker widths and defaults. Optional `hash_key` enables full-length HMAC with
+  a key of at least 32 bytes. Plain hashes provide deterministic pseudonyms and
+  do not resist guessing of low-entropy PII.
 - Reuse tokens for repeated values, avoid existing token collisions, reject
   invalid explicit ranges and unsupported entity selections, and report backend
   entity capabilities. Async decorators await results before filtering.

@@ -290,7 +290,7 @@ def process(
     anonymize: bool = False,
     method: str = "redact",
     *,
-    hash_type: str = "sha256",
+    hash_type: str | None = None,
     hash_key: bytes | None = None,
 ) -> dict:
     """
@@ -300,6 +300,9 @@ def process(
         text: Input text to process
         anonymize: Whether to anonymize detected PII
         method: Anonymization method ('redact', 'replace', 'hash')
+        hash_type: Optional algorithm. The legacy plain-hash default is MD5;
+            keyed hashes default to SHA256.
+        hash_key: At least 32 bytes for a full keyed HMAC digest.
 
     Returns:
         Dictionary with original text, anonymized text (if requested), and findings
@@ -321,32 +324,32 @@ def process(
 
     if method not in {"redact", "replace", "hash"}:
         raise ValueError("method must be 'redact', 'replace', or 'hash'")
+    if anonymize and method == "hash":
+        from .engine import _hash_value, _validate_hash_parameters
+
+        algorithm = (
+            hash_type
+            if hash_type is not None
+            else ("sha256" if hash_key is not None else "md5")
+        )
+        _validate_hash_parameters("hash", algorithm, hash_key)
     findings = _detect_impl(text)
 
     result = {"original": text, "findings": findings}
 
-    if anonymize and method == "hash":
-        entities = [
-            Entity(
-                item["type"], item["value"], item["start"], item["end"], 1.0, "regex"
-            )
-            for item in findings
-        ]
-        result["anonymized"] = redact(
-            text,
-            entities=entities,
-            strategy="hash",
-            hash_type=hash_type,
-            hash_key=hash_key,
-        ).redacted_text
-    elif anonymize:
+    if anonymize:
         parts = []
         cursor = 0
         suffix = "REDACTED" if method == "redact" else "XXXXX"
         for finding in sorted(findings, key=lambda item: item["start"]):
-            parts.extend(
-                (text[cursor : finding["start"]], f"[{finding['type']}_{suffix}]")
-            )
+            if method == "hash":
+                digest = _hash_value(
+                    finding["value"], algorithm, hash_key, plain_length=8
+                )
+                replacement = f"[{finding['type']}_{digest}]"
+            else:
+                replacement = f"[{finding['type']}_{suffix}]"
+            parts.extend((text[cursor : finding["start"]], replacement))
             cursor = finding["end"]
         parts.append(text[cursor:])
         result["anonymized"] = "".join(parts)

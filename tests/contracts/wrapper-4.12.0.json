@@ -131,151 +131,6 @@
         "warnings": []
       }
     },
-    "redact-hash": {
-      "classification": "behavioral-fix",
-      "reason": "PY-M7 emits the complete chosen digest and supports keyed HMAC.",
-      "expected": {
-        "value": {
-          "result_type": "RedactResult",
-          "fields": {
-            "redacted_text": "[EMAIL_08168cd80dfd534ab0f10af10f1303fe00af2d43ab5c1432360d137f8197e17a] [EMAIL_e8f39b3e1382367d6d41ab34dc270d4e7533f978c9e9a775dfe2185b2f96b96c] [EMAIL_08168cd80dfd534ab0f10af10f1303fe00af2d43ab5c1432360d137f8197e17a] [SSN_01a54629efb952287e554eb23ef69c52097a75aecc0e3a93ca0855ab6d7a31a0]",
-            "mapping": {
-              "[EMAIL_08168cd80dfd534ab0f10af10f1303fe00af2d43ab5c1432360d137f8197e17a]": "a@example.com",
-              "[EMAIL_e8f39b3e1382367d6d41ab34dc270d4e7533f978c9e9a775dfe2185b2f96b96c]": "b@example.com",
-              "[SSN_01a54629efb952287e554eb23ef69c52097a75aecc0e3a93ca0855ab6d7a31a0]": "123-45-6789"
-            },
-            "entities": [
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "EMAIL",
-                  "text": "a@example.com",
-                  "start": 0,
-                  "end": 13,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              },
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "EMAIL",
-                  "text": "b@example.com",
-                  "start": 14,
-                  "end": 27,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              },
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "EMAIL",
-                  "text": "a@example.com",
-                  "start": 28,
-                  "end": 41,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              },
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "SSN",
-                  "text": "123-45-6789",
-                  "start": 42,
-                  "end": 53,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              }
-            ]
-          }
-        },
-        "warnings": []
-      }
-    },
-    "engine-redact-hash": {
-      "classification": "behavioral-fix",
-      "reason": "PY-M7 emits the complete chosen digest and supports keyed HMAC.",
-      "expected": {
-        "value": {
-          "result_type": "RedactResult",
-          "fields": {
-            "redacted_text": "[EMAIL_08168cd80dfd534ab0f10af10f1303fe00af2d43ab5c1432360d137f8197e17a] [EMAIL_e8f39b3e1382367d6d41ab34dc270d4e7533f978c9e9a775dfe2185b2f96b96c] [EMAIL_08168cd80dfd534ab0f10af10f1303fe00af2d43ab5c1432360d137f8197e17a]",
-            "mapping": {
-              "[EMAIL_08168cd80dfd534ab0f10af10f1303fe00af2d43ab5c1432360d137f8197e17a]": "a@example.com",
-              "[EMAIL_e8f39b3e1382367d6d41ab34dc270d4e7533f978c9e9a775dfe2185b2f96b96c]": "b@example.com"
-            },
-            "entities": [
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "EMAIL",
-                  "text": "a@example.com",
-                  "start": 0,
-                  "end": 13,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              },
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "EMAIL",
-                  "text": "b@example.com",
-                  "start": 14,
-                  "end": 27,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              },
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "EMAIL",
-                  "text": "a@example.com",
-                  "start": 28,
-                  "end": 41,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              }
-            ]
-          }
-        },
-        "warnings": []
-      }
-    },
-    "preset-hash": {
-      "classification": "behavioral-fix",
-      "reason": "PY-M7 emits the complete chosen digest and supports keyed HMAC.",
-      "expected": {
-        "value": {
-          "result_type": "RedactResult",
-          "fields": {
-            "redacted_text": "[EMAIL_ff8d9819fc0e12bf0d24892e45987e249a28dce836a85cad60e28eaaa8c6d976]",
-            "mapping": {
-              "[EMAIL_ff8d9819fc0e12bf0d24892e45987e249a28dce836a85cad60e28eaaa8c6d976]": "alice@example.com"
-            },
-            "entities": [
-              {
-                "result_type": "Entity",
-                "fields": {
-                  "type": "EMAIL",
-                  "text": "alice@example.com",
-                  "start": 0,
-                  "end": 17,
-                  "confidence": 1.0,
-                  "engine": "regex"
-                }
-              }
-            ]
-          }
-        },
-        "warnings": []
-      }
-    },
     "explicit-invalid-bounds": {
       "classification": "validation-difference",
       "reason": "PY-L7 rejects malformed explicit spans rather than silently skipping them.",
@@ -495,8 +350,8 @@
       }
     },
     "process-hash": {
-      "classification": "behavioral-fix",
-      "reason": "PY-M7 replaces legacy truncated MD5 with the complete selected digest; PY-L3 updates the retirement notice.",
+      "classification": "diagnostic-difference",
+      "reason": "PY-L3 retirement notices identify the current release. Legacy default MD5 and its eight-character prefix remain compatible; explicit algorithms and keyed HMAC are additional options.",
       "expected": {
         "value": {
           "original": "alice@example.com",
@@ -508,7 +363,7 @@
               "end": 17
             }
           ],
-          "anonymized": "[EMAIL_ff8d9819fc0e12bf0d24892e45987e249a28dce836a85cad60e28eaaa8c6d976]"
+          "anonymized": "[EMAIL_c160f8cc]"
         },
         "warnings": [
           {
@@ -569,7 +424,7 @@
     },
     "public-signatures": {
       "classification": "signature-addition",
-      "reason": "PY-M7 adds keyword-only hash_type/hash_key; TextService custom models use the engine gliner_model keyword; backend remains keyword-only.",
+      "reason": "PY-M7 adds keyword-only hash_type/hash_key while preserving existing unkeyed output widths and omitted legacy hash defaults; TextService custom models use the engine gliner_model keyword; backend remains keyword-only.",
       "expected": {
         "value": {
           "datafog:scan": {
@@ -762,7 +617,7 @@
                 "name": "hash_type",
                 "kind": "KEYWORD_ONLY",
                 "required": false,
-                "default": "sha256"
+                "default": null
               },
               {
                 "name": "hash_key",
@@ -1110,14 +965,6 @@
             ]
           }
         },
-        "warnings": []
-      }
-    },
-    "anonymize-text-hash": {
-      "classification": "behavioral-fix",
-      "reason": "PY-M7 emits the complete chosen digest rather than a truncated unsalted token.",
-      "expected": {
-        "value": "[EMAIL_ff8d9819fc0e12bf0d24892e45987e249a28dce836a85cad60e28eaaa8c6d976]",
         "warnings": []
       }
     }
