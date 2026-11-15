@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tests.contract_481 import FIXTURE, observe
 
-DEVIATIONS = Path(__file__).parent / "contracts" / "rust-1.3.0.json"
+DEVIATIONS = Path(__file__).parent / "contracts" / "rust-1.4.0.json"
 TARGETS = {
     "datafog:scan",
     "datafog:redact",
