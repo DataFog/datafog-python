@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [4.12.0]
+
 #### Security
 
 - Preserve native structured PII detection in smart, spaCy, GLiNER, legacy and
@@ -27,7 +29,7 @@
   package and `rust` extra; review native differences in `rust-1.5.0.json`.
   Core's complete mapped-IPv6 spans, email boundaries, Unicode mailboxes and
   phone-plus-ZIP classification are available through the wrapper. Published
-  Core artifacts must pass dependent qualification before this candidate ships.
+  Core artifacts passed dependent installed-wheel qualification.
 - Raise the Pydantic floor to 2.1,
   include spaCy in `nlp-advanced`, and allow Torch 2.x versions compatible with
   `datafog-core[gliner2]`. Add an isolated build declaration and runnable sdist

@@ -6,7 +6,7 @@ native card, IP and credential findings as the regex mode, then add NER spans.
 TextService scans complete documents, and spaCy/GLiNER character offsets prevent
 an earlier substring or repeated name from receiving the wrong redaction.
 
-This candidate requires `datafog-core~=1.5.0` in the base package and the `rust`
+This release requires `datafog-core~=1.5.0` in the base package and the `rust`
 extra. Core 1.5 supplies complete IPv4-mapped IPv6 redaction, corrected email
 field boundaries and Unicode mailboxes, and phone-plus-ZIP classification that
 does not suppress the phone behind a false card finding. Native differences
@@ -51,7 +51,6 @@ Scheduled release jobs qualify candidates without publishing. Manual jobs
 default to dry runs, reject stale or occupied versions, and record immutable
 release refs before uploading artifacts.
 
-This is a release candidate prepared for review. Core 1.5 publication and
-qualification of this Python candidate against the actual published Core
-artifacts remain mandatory before merge and release. Local source-wheel
-qualification does not claim either package has been published.
+The published Core 1.5.0 dependency passed installed-wheel qualification with
+this Python release, including the native bridge and compatibility contracts.
+The Python and Core versions are published independently.

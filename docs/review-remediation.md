@@ -1,6 +1,6 @@
 # November 2026 review remediation
 
-This candidate addresses the review of DataFog 4.11.0 and Core 1.4.0. The
+DataFog 4.12.0 addresses the review of DataFog 4.11.0 and Core 1.4.0. The
 review's suggested fixes were assessed against the local implementations;
 regression tests cover the implemented behavior.
 
@@ -50,20 +50,26 @@ result = datafog.redact("mail jane@example.com", strategy="hash", hash_key=key)
 
 ## Release sequence and qualification
 
-The Python 4.12.0 candidate declares `datafog-core~=1.5.0` in its base
+Python 4.12.0 declares `datafog-core~=1.5.0` in its base
 requirements and `rust` extra. Its reviewed native contract is
 [`tests/contracts/rust-1.5.0.json`](../tests/contracts/rust-1.5.0.json).
-Core 1.5.0 is prepared separately as a minor release with the detector and
+Core 1.5.0 is published separately as a minor release with the detector and
 transformation safety fixes from the review, including bounded mask reveal
 and complete scanner coverage for automatic overlap handling. Public APIs
 remain available and both packages continue to use capability contract 1.
 
-This branch prepares the dependent package without publishing either project.
-Its local source wheel is qualified with the source-built Core 1.5.0 wheel.
-Merge and publication remain blocked until Core 1.5.0 is published and this
-exact Python candidate passes installed-wheel and release qualification against
-the actual published Core artifacts. Source-candidate integration is additional
-evidence; it does not substitute for that post-publication gate.
+The actual PyPI Core 1.5.0 macOS ARM wheel was downloaded and verified against
+its registry SHA-256,
+`b3ebaca3c7751ec0288ffebec154ffbb6ba73e54b340f3c4e287e1946bbe5e87`.
+All five runtime package files, including the native library, exactly match
+the final qualified Core build from source `b183bede189ac35413120b995efcb9a29256b4b0`;
+only the build SBOM and RECORD differ. Installing that published wheel into
+the isolated Python 4.12 environment passes `pip check`, the installed native
+bridge smoke test, and the complete non-slow suite: 1,143 passed, 21 skipped,
+19 expected failures. The 726-pass real-model/native corpus qualification
+continues to apply through the verified byte-identical runtime payload.
+Hosted release gates independently qualify published Core on all required
+Python and platform combinations before publishing Python 4.12.
 
 Scheduled Python jobs only qualify candidates. Manual `release.yml` runs default
 to `dry_run: true`; explicitly selecting false is the publication boundary.
@@ -87,8 +93,7 @@ build requirements are documented in Core's platform policy.
 
 All 35 Python findings have a concrete resolution below. Core-owned fixes are
 separately tracked in Core's `docs/reviews/2026-11-core-findings.md`; their combined
-release still requires Core publication and the published-artifact qualification
-above.
+release includes the published-artifact qualification above.
 
 | Finding | Resolution and proof                                                                                                                                                                                               |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
