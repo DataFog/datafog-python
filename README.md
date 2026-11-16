@@ -96,7 +96,7 @@ and `ADDRESS` from an embedded model, so name and address detection needs no
 spaCy and no model download. Findings keep `engine="regex"` provenance and
 `confidence=1.0` as compatibility values, not native confidence estimates.
 Reviewed differences from the Python engine are listed in
-[tests/contracts/rust-1.4.0.json](tests/contracts/rust-1.4.0.json).
+[tests/contracts/rust-1.5.0.json](tests/contracts/rust-1.5.0.json).
 `datafog.native` exposes the native schema directly.
 
 Python 3.13 support is certified for the core SDK, CLI, `nlp`,
@@ -214,7 +214,7 @@ scan/redact helpers, or guardrail helpers.
 
 DataFog deprecates OCR and Spark with visible use-time
 warnings; their APIs and extras will be removed in 5.0. The last supported
-version in this release train is 4.12.0 — after publication, pin it with
+version in this release train is 4.12.0 — pin it with
 `pip install "datafog==4.12.0"` — and every
 retired surface is tracked in the [retirement schedule](docs/retirement.rst).
 See the [4.9 migration guide](docs/migration-4.9.md) for the transition plan,
@@ -288,9 +288,11 @@ Telemetry does not include input text or detected PII values.
 
 The native engine is the default, with a warned Python fallback. The 4.12
 review fixes preserve structured detection across every engine and legacy API.
-The dependency stays within the reviewed Core 1.4 minor series (`~=1.4.0`);
-Core 1.5 is a separate release candidate that must be published and qualified
-before this SDK raises its floor. See [release preparation](docs/review-remediation.md).
+DataFog 4.12 requires the reviewed Core 1.5 minor series
+(`datafog-core~=1.5.0`) in the base package and the `rust` extra. The published
+Core 1.5.0 wheel passed installed integration and compatibility qualification
+with this release. Python and Core have independent release versions.
+See [release preparation](docs/review-remediation.md).
 
 Entity labels, locales and activation settings come from the installed Core.
 `get_supported_entities()` reports that backend's supported inventory, including
