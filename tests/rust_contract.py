@@ -9,7 +9,11 @@ from pathlib import Path
 
 from tests.contract_481 import FIXTURE, observe
 
-DEVIATIONS = Path(__file__).parent / "contracts" / "rust-1.4.0.json"
+CORE_VERSION = importlib.metadata.version("datafog-core")
+CORE_LINE = ".".join(CORE_VERSION.split(".")[:2])
+DEVIATIONS = Path(__file__).parent / "contracts" / f"rust-{CORE_LINE}.0.json"
+WRAPPER_DEVIATIONS = Path(__file__).parent / "contracts" / "wrapper-4.12.0.json"
+
 TARGETS = {
     "datafog:scan",
     "datafog:redact",
@@ -18,6 +22,18 @@ TARGETS = {
     "datafog:scan_prompt",
     "datafog:filter_output",
 }
+
+
+def reviewed_deviation(case):
+    """Layer explicit wrapper fixes on the unchanged historical wheel oracle."""
+    wrapper = json.loads(WRAPPER_DEVIATIONS.read_text(encoding="utf-8"))
+    native = json.loads(DEVIATIONS.read_text(encoding="utf-8"))
+    return native["cases"].get(case["id"]) or wrapper["cases"].get(case["id"])
+
+
+def expected_observation(case):
+    deviation = reviewed_deviation(case)
+    return copy.deepcopy(deviation["expected"] if deviation else case["expected"])
 
 
 def applicable(case):
@@ -39,15 +55,14 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     contract = json.loads(FIXTURE.read_text(encoding="utf-8"))
-    deviations = json.loads(DEVIATIONS.read_text(encoding="utf-8"))
     results = []
     for case in contract["cases"]:
         if not applicable(case):
             results.append({"id": case["id"], "status": "outside-backend-scope"})
             continue
         actual = native_observation(case)
-        deviation = deviations["cases"].get(case["id"])
-        expected = deviation["expected"] if deviation else case["expected"]
+        deviation = reviewed_deviation(case)
+        expected = expected_observation(case)
         status = "regression" if actual != expected else "match"
         if status == "match" and deviation:
             status = deviation["classification"]

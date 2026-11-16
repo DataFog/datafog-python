@@ -20,8 +20,7 @@ def _run_isolated_python(script: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_import_scan_and_redact_do_not_open_network() -> None:
-    _run_isolated_python(
-        """
+    _run_isolated_python("""
 import socket
 import urllib.request
 
@@ -39,8 +38,7 @@ assert {entity.type for entity in scan_result.entities} >= {"EMAIL", "PHONE"}
 redact_result = datafog.redact("Email jane@example.com or call 415-555-1212")
 assert "jane@example.com" not in redact_result.redacted_text
 assert "415-555-1212" not in redact_result.redacted_text
-"""
-    )
+""")
 
 
 def test_core_defaults_do_not_initialize_optional_engines(monkeypatch) -> None:
@@ -78,8 +76,7 @@ def test_core_defaults_do_not_initialize_optional_engines(monkeypatch) -> None:
 
 
 def test_import_probes_do_not_load_optional_models() -> None:
-    _run_isolated_python(
-        """
+    _run_isolated_python("""
 import sys
 import types
 
@@ -105,13 +102,11 @@ sys.modules["gliner"] = gliner
 import datafog
 
 assert datafog.scan("Email jane@example.com").entities
-"""
-    )
+""")
 
 
 def test_core_path_does_not_import_optional_dependency_modules() -> None:
-    _run_isolated_python(
-        """
+    _run_isolated_python("""
 import importlib.abc
 import sys
 
@@ -144,5 +139,4 @@ assert datafog.sanitize("Email jane@example.com") == "Email [EMAIL_1]"
 assert datafog.scan_prompt("Email jane@example.com").entities
 assert datafog.filter_output("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
 assert datafog.create_guardrail().filter("Email jane@example.com").redacted_text == "Email [EMAIL_1]"
-"""
-    )
+""")

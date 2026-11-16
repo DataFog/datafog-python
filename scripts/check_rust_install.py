@@ -3,6 +3,8 @@
 import importlib.metadata
 import sys
 
+from packaging.requirements import Requirement
+
 
 def main():
     assert sys.flags.isolated, "Run with python -I"
@@ -14,7 +16,20 @@ def main():
     from datafog.compat import v4
 
     installed = importlib.metadata.version("datafog-core")
-    assert installed.split(".")[0] == "1", installed
+    requirements = [
+        Requirement(value) for value in importlib.metadata.requires("datafog") or []
+    ]
+    core_requirements = [
+        requirement
+        for requirement in requirements
+        if requirement.name == "datafog-core" and requirement.marker is None
+    ]
+    assert (
+        core_requirements
+    ), "Installed DataFog must declare its Core compatibility range"
+    assert all(
+        installed in requirement.specifier for requirement in core_requirements
+    ), installed
     assert datafog_core.capabilities()["contract_version"] == 1
     assert v4.Entity is datafog.Entity
     assert v5.Finding is datafog_core.Finding

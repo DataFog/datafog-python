@@ -9,10 +9,11 @@ import io
 from unittest.mock import patch
 
 import pytest
-from PIL import Image
 
 from datafog.processing.image_processing.donut_processor import DonutProcessor
 from datafog.services.image_service import ImageService
+
+Image = pytest.importorskip("PIL.Image", reason="OCR tests require datafog[ocr]")
 
 # Mark all tests in this file as integration tests
 pytestmark = pytest.mark.integration

@@ -93,13 +93,15 @@ class TestPatternAllowlist:
 
 
 class TestReDoSGuards:
-    def test_catastrophic_pattern_rejected(self):
-        with pytest.raises(ValueError, match="catastrophic backtracking"):
-            datafog.scan("text", engine="regex", allowlist_patterns=[r"(a+)+$"])
+    def test_nested_quantifier_uses_bounded_matching(self):
+        assert datafog.scan(
+            "a@b.com", engine="regex", allowlist_patterns=[r"(a+)+$"]
+        ).entities
 
-    def test_nested_star_rejected(self):
-        with pytest.raises(ValueError, match="catastrophic backtracking"):
-            datafog.scan("text", engine="regex", allowlist_patterns=[r"(.*)*"])
+    def test_safe_nested_star_is_supported(self):
+        assert not datafog.scan(
+            "a@b.com", engine="regex", allowlist_patterns=[r"(.*)*"]
+        ).entities
 
     def test_overlong_pattern_rejected(self):
         with pytest.raises(ValueError, match="at most"):

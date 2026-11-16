@@ -15,12 +15,12 @@ from typing import List
 from datafog._legacy_retirement import warn_legacy_surface
 
 from .config import OperationType
+from .core import get_supported_entities
 from .engine import scan, scan_and_redact
 from .models.anonymizer import Anonymizer, AnonymizerType, HashType
 from .processing.text_processing.regex_annotator import RegexAnnotator
 
 logger = logging.getLogger("datafog_logger")
-logger.setLevel(logging.INFO)
 
 
 class DataFog:
@@ -42,6 +42,7 @@ class DataFog:
         hash_type: HashType = HashType.SHA256,
         anonymizer_type: AnonymizerType = AnonymizerType.REPLACE,
         locales: List[str] | None = None,
+        hash_key: bytes | None = None,
     ):
         self.locales = locales
         self.regex_annotator = RegexAnnotator(locales=locales)
@@ -59,6 +60,7 @@ class DataFog:
             hash_type=hash_type, anonymizer_type=anonymizer_type
         )
         self.hash_type = hash_type
+        self.hash_key = hash_key
         self.anonymizer_type = anonymizer_type
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initializing lightweight DataFog class with regex engine")
@@ -106,7 +108,15 @@ class DataFog:
         _start = _time.monotonic()
         try:
             self.logger.info(f"Starting text pipeline with {len(str_list)} texts.")
-            if OperationType.SCAN in self.operations:
+            if any(
+                op in self.operations
+                for op in (
+                    OperationType.SCAN,
+                    OperationType.REDACT,
+                    OperationType.REPLACE,
+                    OperationType.HASH,
+                )
+            ):
                 annotated_text = [self.detect(text) for text in str_list]
 
                 self.logger.info(
@@ -190,8 +200,11 @@ class DataFog:
         # Only pre-populate keys for labels active under the configured
         # locales so the default output shape matches v4.4.0 (no DE_* keys
         # unless German locale support is enabled).
-        result = {label: [] for label in RegexAnnotator.active_labels_for(self.locales)}
         legacy_map = {"DATE": "DOB", "ZIP_CODE": "ZIP"}
+        result = {
+            legacy_map.get(label, label): []
+            for label in get_supported_entities(self.locales)
+        }
         for entity in scan_result.entities:
             label = legacy_map.get(entity.type, entity.type)
             result.setdefault(label, []).append(entity.text)
@@ -239,6 +252,8 @@ class DataFog:
 
         _start = _time.monotonic()
 
+        if method not in {"redact", "replace", "hash"}:
+            raise ValueError("method must be 'redact', 'replace', or 'hash'")
         annotations_dict = self.detect(text)
 
         result = {"original": text, "findings": annotations_dict}
@@ -249,12 +264,18 @@ class DataFog:
                 "replace": "pseudonymize",
                 "hash": "hash",
             }
-            strategy = strategy_map.get(method, "token")
+            strategy = strategy_map[method]
             redact_result = scan_and_redact(
                 text=text,
                 engine="regex",
                 strategy=strategy,
                 locales=self.locales,
+                hash_type=(
+                    self.hash_type.value
+                    if isinstance(self.hash_type, HashType)
+                    else self.hash_type
+                ),
+                hash_key=self.hash_key,
             )
             result["anonymized"] = redact_result.redacted_text
 
@@ -298,6 +319,7 @@ class TextPIIAnnotator:
     """
 
     def __init__(self, locales: List[str] | None = None):
+        self.locales = locales
         self.regex_annotator = RegexAnnotator(locales=locales)
 
     def run(self, text, output_path=None):
@@ -312,7 +334,13 @@ class TextPIIAnnotator:
             Dictionary mapping entity types to lists of found entities
         """
         try:
-            annotated_text = self.regex_annotator.annotate(text)
+            result = scan(text=text, engine="regex", locales=self.locales)
+            legacy = {"DATE": "DOB", "ZIP_CODE": "ZIP"}
+            annotated_text = {}
+            for entity in result.entities:
+                annotated_text.setdefault(
+                    legacy.get(entity.type, entity.type), []
+                ).append(entity.text)
 
             # Optionally, output the results to a JSON file
             if output_path:

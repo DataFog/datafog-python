@@ -13,9 +13,9 @@
 
 ## Current Project Status
 
-**Stable version: 4.9.0**
+**Stable version: 4.11.0**
 
-**Development version: 4.9.0**
+**Development candidate: 4.12.0**
 
 **Next major target: 5.0.0**
 
@@ -239,17 +239,17 @@ except ImportError:
 
 ### Workflow Architecture (3 workflows)
 
-| Workflow        | Purpose                             | Trigger                    |
-| --------------- | ----------------------------------- | -------------------------- |
-| `ci.yml`        | Lint + Test + Coverage + Wheel size | Push/PR to main/dev        |
-| `release.yml`   | Alpha/Beta/Stable publishing        | Schedule + manual dispatch |
-| `benchmark.yml` | Performance benchmarks              | Push/PR/weekly             |
+| Workflow        | Purpose                                | Trigger                                       |
+| --------------- | -------------------------------------- | --------------------------------------------- |
+| `ci.yml`        | Lint + Test + Coverage + Wheel size    | Push/PR to main/dev                           |
+| `release.yml`   | Candidate qualification and publishing | Schedule validates; manual dispatch publishes |
+| `benchmark.yml` | Performance benchmarks                 | Push/PR/weekly                                |
 
 ### Release Cadence
 
-- **Alpha** (Mon-Wed 2AM UTC): Automatic from `dev`, date+commit versioning
-- **Beta** (Thursday 2AM UTC): Automatic from `dev`, incremental beta numbers
-- **Stable** (manual dispatch): From `main`, base version or override
+- **Alpha** (Mon-Wed 2AM UTC): Candidate qualification from `dev`, without publication
+- **Beta** (Thursday 2AM UTC): Candidate qualification from `dev`, without publication
+- **Publication** (manual dispatch): Dry run by default; explicit non-dry runs publish alpha/beta from `dev` or stable from `main`
 
 ### Release Pipeline
 
@@ -320,7 +320,7 @@ Before beginning any task please checkout a branch from `dev` and create a pull 
 
 ### Release Preparation
 
-- Alpha/beta releases are automated via `release.yml` schedule
+- Alpha/beta candidate qualification is automated via `release.yml`; publication requires an explicit manual dispatch
 - Stable releases: merge `dev` → `main`, then trigger `release.yml` with `stable` type
 - Use `dry_run: true` to validate before actual publish
 - Performance validation on realistic data sets

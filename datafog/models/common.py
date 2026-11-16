@@ -40,8 +40,8 @@ class PatternRecognizer(BaseModel):
     name: str
     supported_language: str
     patterns: List[Pattern]
-    deny_list: Optional[List[str]]
-    context: Optional[List[str]]
+    deny_list: Optional[List[str]] = None
+    context: Optional[List[str]] = None
     supported_entity: str
 
 

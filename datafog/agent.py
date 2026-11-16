@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -101,14 +102,27 @@ class Guardrail:
         return result
 
     def __call__(self, fn: F) -> F:
-        """Decorator that applies guardrail filtering to string return values."""
+        """Filter string results, awaiting coroutine functions before scanning.
+
+        Other result types raise TypeError rather than escaping unscanned.
+        """
+
+        def filtered(output: Any) -> str:
+            if not isinstance(output, str):
+                raise TypeError("A guarded function must return a string")
+            return self.filter(output).redacted_text
+
+        if inspect.iscoroutinefunction(fn):
+
+            @wraps(fn)
+            async def async_wrapped(*args: Any, **kwargs: Any) -> str:
+                return filtered(await fn(*args, **kwargs))
+
+            return async_wrapped  # type: ignore[return-value]
 
         @wraps(fn)
         def wrapped(*args: Any, **kwargs: Any) -> Any:
-            output = fn(*args, **kwargs)
-            if isinstance(output, str):
-                return self.filter(output).redacted_text
-            return output
+            return filtered(fn(*args, **kwargs))
 
         return wrapped  # type: ignore[return-value]
 

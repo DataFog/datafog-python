@@ -33,10 +33,10 @@ def test_auto_resolves_to_python_without_core(without_core):
     assert engine.resolve_backend(None, "regex") == "python"
 
 
-def test_auto_keeps_non_regex_engines_on_python():
+def test_auto_uses_native_structured_layer_for_every_engine():
     pytest.importorskip("datafog_core")
     for engine_name in ("smart", "spacy", "gliner"):
-        assert engine.resolve_backend(None, engine_name) == "python"
+        assert engine.resolve_backend(None, engine_name) == "rust"
 
 
 def test_python_fallback_warns_once_then_stays_quiet(without_core):

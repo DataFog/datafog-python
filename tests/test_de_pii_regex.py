@@ -166,7 +166,10 @@ def test_german_vat_redaction_suppresses_inner_generic_ssn_match(
 
 def test_top_level_helpers_and_supported_entities_respect_locale() -> None:
     default_entities = get_supported_entities()
-    assert all(not entity.startswith("DE_") for entity in default_entities)
+    assert {"EMAIL", "DE_VAT_ID", "DE_IBAN", "JWT", "PERSON"} <= set(default_entities)
+    assert "JWT" not in get_supported_entities(backend="python")
+    # Supported inventory includes opt-in labels; scanning still requires locale activation.
+    assert "DE_TAX_ID" in default_entities
 
     german_entities = get_supported_entities(locales=["de"])
     assert "DE_VAT_ID" in german_entities

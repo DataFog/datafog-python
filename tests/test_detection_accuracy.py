@@ -453,6 +453,33 @@ def _assert_expected_found(
     return actual, expected
 
 
+def _unexpected_negative_entities(
+    case: dict[str, Any], actual: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Keep legacy negative PII checks while recognizing two reviewed URL spans.
+
+    PY-M14 restores GLiNER's URL output. Only exact, source-aligned URL candidates
+    from that model are permitted; other labels and malformed offsets still fail.
+    These added label checks are outside the historical PII metric inventory.
+    """
+    permitted = case.get("permitted_gliner_entities", [])
+    return [
+        entity
+        for entity in actual
+        if not (
+            entity.get("engine") == "gliner"
+            and any(
+                all(
+                    entity.get(key) == span[key]
+                    for key in ("type", "text", "start", "end")
+                )
+                and case["input"][span["start"] : span["end"]] == span["text"]
+                for span in permitted
+            )
+        )
+    ]
+
+
 def _compute_metrics(
     engines: list[str], corpora: list[tuple[str, list[dict[str, Any]]]]
 ) -> dict[str, Any]:
@@ -471,6 +498,8 @@ def _compute_metrics(
                     locales=case.get("locales"),
                     backend=_corpus_backend(engine),
                 )
+                if corpus_kind == "negative":
+                    actual = _unexpected_negative_entities(case, actual)
                 expected = _required_expected(
                     case["expected_entities"], engine, corpus_kind
                 )
@@ -569,6 +598,7 @@ def test_negative_cases_fast(case: dict[str, Any], engine: str) -> None:
             for pair in _native_deltas()["extra"].get(case["id"], {}).get("added", [])
         }
         actual = [e for e in actual if (e["type"], e["text"]) not in added]
+    actual = _unexpected_negative_entities(case, actual)
     assert not actual, f"{case['id']} ({engine}) false positives: {actual}"
 
 
@@ -591,6 +621,7 @@ def test_negative_cases_slow(case: dict[str, Any], engine: str) -> None:
             for pair in _native_deltas()["extra"].get(case["id"], {}).get("added", [])
         }
         actual = [e for e in actual if (e["type"], e["text"]) not in added]
+    actual = _unexpected_negative_entities(case, actual)
     assert not actual, f"{case['id']} ({engine}) false positives: {actual}"
 
 
@@ -666,3 +697,36 @@ def test_accuracy_metrics_snapshot() -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     assert "overall" in metrics and metrics["overall"]
+
+
+def test_reviewed_url_candidates_require_exact_label_origin_and_offsets():
+    case = next(
+        case
+        for case in load_corpus("negative_cases.json")
+        if case["id"] == "markdown-link"
+    )
+    permitted = dict(case["permitted_gliner_entities"][0], engine="gliner")
+    assert _unexpected_negative_entities(case, [permitted]) == []
+    for altered in [
+        dict(permitted, type="EMAIL"),
+        dict(permitted, type="PHONE"),
+        dict(permitted, type="IP_ADDRESS"),
+        dict(permitted, start=14),
+        dict(permitted, end=41),
+        dict(permitted, engine="spacy"),
+        dict(permitted, text="example.com"),
+    ]:
+        assert _unexpected_negative_entities(case, [altered]) == [altered]
+
+
+def test_reviewed_url_permission_is_confined_to_the_two_named_cases():
+    permitted_cases = [
+        case
+        for case in load_corpus("negative_cases.json")
+        if case.get("permitted_gliner_entities")
+    ]
+    assert {case["id"] for case in permitted_cases} == {"markdown-link", "url-with-at"}
+    for case in permitted_cases:
+        assert case["permitted_gliner_reason"].startswith("PY-M14")
+        assert len(case["permitted_gliner_entities"]) == 1
+        assert case["permitted_gliner_entities"][0]["type"] == "URL"

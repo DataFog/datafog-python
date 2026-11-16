@@ -20,8 +20,7 @@ def _run_isolated_python(script: str) -> subprocess.CompletedProcess[str]:
 
 def test_no_torch_import_when_donut_disabled():
     """Test that torch is not imported when use_donut is False"""
-    _run_isolated_python(
-        """
+    _run_isolated_python("""
 import sys
 from datafog.services.image_service import ImageService
 
@@ -29,8 +28,7 @@ _ = ImageService(use_donut=False, use_tesseract=True)
 
 assert "torch" not in sys.modules
 assert "transformers" not in sys.modules
-"""
-    )
+""")
 
 
 def test_lazy_import_mechanism():
@@ -39,8 +37,7 @@ def test_lazy_import_mechanism():
     # to use lazy imports. We don't need to actually test the imports themselves,
     # just that the structure is correct.
 
-    _run_isolated_python(
-        """
+    _run_isolated_python("""
 import sys
 from datafog.processing.image_processing.donut_processor import DonutProcessor
 
@@ -50,5 +47,4 @@ assert "torch" not in sys.modules
 assert "transformers" not in sys.modules
 assert hasattr(processor, "extract_text_from_image")
 assert not hasattr(processor, "ensure_installed")
-"""
-    )
+""")

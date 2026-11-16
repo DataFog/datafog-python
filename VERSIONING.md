@@ -96,9 +96,9 @@ for `datafog-core`, and requires a matching floor in `datafog`.
 Both are exposed separately so a bug report is attributable:
 
 ```python
-import datafog, datafog.core
+import datafog, datafog.native
 datafog.__version__         # application version
-datafog.core.__version__    # engine version
+datafog.native.version()    # engine version
 ```
 
 ## Yanking

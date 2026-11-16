@@ -1,5 +1,46 @@
 # ChangeLog
 
+## [Unreleased]
+
+## [4.12.0]
+
+#### Security
+
+- Preserve native structured PII detection in smart, spaCy, GLiNER, legacy and
+  CLI paths. Normalize lone surrogates without moving source spans; retain
+  structured findings on bounded model inputs. Require review when hook payloads
+  exceed scan budgets, rather than silently allowing unscanned tails.
+- Bound user allowlist matching with timeouts and remove quadratic overlap and
+  Python fallback regex behavior. Redact exact NER offsets and whole TextService
+  inputs so repeated names and chunk boundaries cannot expose PII.
+- Cover LiteLLM tool arguments, prompt/input requests and complete streamed
+  responses, with request-scoped tokens. Hide configured API keys in CLI output.
+
+#### Changed
+
+- Hash APIs honor the selected algorithm while preserving existing plain-hash
+  marker widths and defaults. Optional `hash_key` enables full-length HMAC with
+  a key of at least 32 bytes. Plain hashes provide deterministic pseudonyms and
+  do not resist guessing of low-entropy PII.
+- Reuse tokens for repeated values, avoid existing token collisions, reject
+  invalid explicit ranges and unsupported entity selections, and report backend
+  entity capabilities. Async decorators await results before filtering.
+- Require the reviewed Core 1.5 minor series (`datafog-core~=1.5.0`) in the base
+  package and `rust` extra; review native differences in `rust-1.5.0.json`.
+  Core's complete mapped-IPv6 spans, email boundaries, Unicode mailboxes and
+  phone-plus-ZIP classification are available through the wrapper. Published
+  Core artifacts passed dependent installed-wheel qualification.
+- Raise the Pydantic floor to 2.1,
+  include spaCy in `nlp-advanced`, and allow Torch 2.x versions compatible with
+  `datafog-core[gliner2]`. Add an isolated build declaration and runnable sdist
+  tests; remove unused duplicate implementation modules.
+- Repair Pydantic optional defaults, legacy anonymizer enum filters and overlaps,
+  Spark label aliases, implicit pipeline scanning and invalid CLI operations.
+- Scheduled release jobs qualify candidates without publication. Manual runs
+  default to dry runs, reject stale version bases and development history, gate
+  Python 3.13, record release refs before upload, and synchronize stable metadata
+  back to development after publication.
+
 ## [4.11.0]
 
 #### Changed
