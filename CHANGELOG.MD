@@ -1,5 +1,79 @@
 # ChangeLog
 
+## [Unreleased]
+
+#### Security
+
+- Preserve native structured PII detection in smart, spaCy, GLiNER, legacy and
+  CLI paths. Normalize lone surrogates without moving source spans; retain
+  structured findings on bounded model inputs. Require review when hook payloads
+  exceed scan budgets, rather than silently allowing unscanned tails.
+- Bound user allowlist matching with timeouts and remove quadratic overlap and
+  Python fallback regex behavior. Redact exact NER offsets and whole TextService
+  inputs so repeated names and chunk boundaries cannot expose PII.
+- Cover LiteLLM tool arguments, prompt/input requests and complete streamed
+  responses, with request-scoped tokens. Hide configured API keys in CLI output.
+
+#### Changed
+
+- Hash APIs honor the selected algorithm while preserving existing plain-hash
+  marker widths and defaults. Optional `hash_key` enables full-length HMAC with
+  a key of at least 32 bytes. Plain hashes provide deterministic pseudonyms and
+  do not resist guessing of low-entropy PII.
+- Reuse tokens for repeated values, avoid existing token collisions, reject
+  invalid explicit ranges and unsupported entity selections, and report backend
+  entity capabilities. Async decorators await results before filtering.
+- Keep Core within the reviewed minor series, raise the Pydantic floor to 2.1,
+  include spaCy in `nlp-advanced`, and allow Torch 2.x versions compatible with
+  `datafog-core[gliner2]`. Add an isolated build declaration and runnable sdist
+  tests; remove unused duplicate implementation modules.
+- Repair Pydantic optional defaults, legacy anonymizer enum filters and overlaps,
+  Spark label aliases, implicit pipeline scanning and invalid CLI operations.
+- Scheduled release jobs qualify candidates without publication. Manual runs
+  default to dry runs, reject stale version bases and development history, gate
+  Python 3.13, record release refs before upload, and synchronize stable metadata
+  back to development after publication.
+
+## [4.11.0]
+
+#### Changed
+
+- Requires `datafog-core>=1.4.0`. Core's text-mode email scanning trims label
+  syntax by default, so `email=alice@example.com` reports `alice@example.com`,
+  quoted values drop the wrapping quote, and `SUPPORT_EMAIL=` labels stay out
+  of the span. Two recorded native-corpus divergences (`json-escaped`,
+  `markdown-code-block`) resolve and are removed from the reviewed deltas. The
+  `unicode-chinese-name` delta stays: its corpus fixture contains literal `?`
+  characters, which are valid local-part characters, so the reviewed
+  expectation remains overlap-only. The Rust contract review file moves to
+  `rust-1.4.0.json` with no new deviations: every recorded case still matches.
+
+## [4.10.0]
+
+#### Added
+
+- Native engine is the default: `backend` resolves through `auto`, which uses
+  `datafog-core` when it imports and the pure-Python engine otherwise. One
+  warning on fallback, `DATAFOG_BACKEND` and `backend="python"` to opt out.
+- Prose `PERSON` and `ADDRESS` from the model embedded in `datafog-core`; no
+  spaCy, GLiNER, download or interpreter.
+- `API_KEY`, `BEARER_TOKEN`, `JWT`, `PRIVATE_KEY`, `CREDENTIAL_URI`,
+  `ACCOUNT_NUMBER`, `US_ROUTING_NUMBER`, `NPI` and `UUID` entity types, plus the
+  German set behind the `de` locale.
+- `datafog.native` native schema access and `VERSIONING.md`.
+
+#### Changed
+
+- `datafog-core>=1.3.0,<2` is a normal dependency; `[rust]` remains as an
+  explicit spelling.
+- `Development Status: 5 - Production/Stable`.
+- Retirement warnings name `4.10.0` as the last supported version with an exact
+  pin, replacing "the final 4.x release".
+
+#### Fixed
+
+- `redact(..., entities=[...])` validates `backend` instead of ignoring it.
+
 ## [4.9.0]
 
 #### Added

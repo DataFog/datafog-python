@@ -90,7 +90,7 @@ def test_simple_spacy_performance():
 
         # Verify functionality
         assert "PERSON" in stats["result"] or "PER" in stats["result"]
-        assert "ORG" in stats["result"]
+        assert "ORGANIZATION" in stats["result"]
 
         return stats
 

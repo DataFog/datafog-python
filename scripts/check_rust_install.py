@@ -1,7 +1,9 @@
-"""Smoke-test installed 4.9 bridge wheels with python -I, outside checkout imports."""
+"""Smoke-test an installed wheel with python -I, outside checkout imports."""
 
 import importlib.metadata
 import sys
+
+from packaging.requirements import Requirement
 
 
 def main():
@@ -13,18 +15,33 @@ def main():
     from datafog import v5
     from datafog.compat import v4
 
-    assert importlib.metadata.version("datafog-core").startswith("0.4.")
+    installed = importlib.metadata.version("datafog-core")
+    requirements = [
+        Requirement(value) for value in importlib.metadata.requires("datafog") or []
+    ]
+    core_requirements = [
+        requirement
+        for requirement in requirements
+        if requirement.name == "datafog-core" and requirement.marker is None
+    ]
+    assert (
+        core_requirements
+    ), "Installed DataFog must declare its Core compatibility range"
+    assert all(
+        installed in requirement.specifier for requirement in core_requirements
+    ), installed
     assert datafog_core.capabilities()["contract_version"] == 1
     assert v4.Entity is datafog.Entity
     assert v5.Finding is datafog_core.Finding
     text = "👋 Contact alice@example.com"
-    legacy = datafog.scan(text, backend="rust")
+    # No explicit backend: the native engine must be the resolved default.
+    legacy = datafog.scan(text)
     assert isinstance(legacy, datafog.ScanResult)
     assert legacy.entities[0].text == "alice@example.com"
     assert (
         text[legacy.entities[0].start : legacy.entities[0].end] == "alice@example.com"
     )
-    assert datafog.redact(text, backend="rust").redacted_text == "👋 Contact [EMAIL_1]"
+    assert datafog.redact(text).redacted_text == "👋 Contact [EMAIL_1]"
     native = v5.scan(text)
     assert isinstance(native[0], datafog_core.Finding)
     assert (

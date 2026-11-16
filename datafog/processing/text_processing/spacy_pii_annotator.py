@@ -1,7 +1,8 @@
-import logging
 from typing import Any, Dict, List
 
 from pydantic import BaseModel, ConfigDict
+
+from .regex_annotator.regex_annotator import AnnotationResult, Span
 
 PII_ANNOTATION_LABELS = [
     "CARDINAL",
@@ -28,7 +29,7 @@ DEFAULT_SPACY_MODEL = "en_core_web_lg"
 
 
 class SpacyPIIAnnotator(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, protected_namespaces=())
 
     nlp: Any
     model_name: str = DEFAULT_SPACY_MODEL
@@ -53,22 +54,32 @@ class SpacyPIIAnnotator(BaseModel):
 
         return cls(nlp=nlp, model_name=model_name)
 
-    def annotate(self, text: str) -> Dict[str, List[str]]:
-        try:
-            if not text:
-                return {label: [] for label in PII_ANNOTATION_LABELS}
-            if len(text) > MAXIMAL_STRING_SIZE:
-                text = text[:MAXIMAL_STRING_SIZE]
-            doc = self.nlp(text)
-            classified_entities: Dict[str, List[str]] = {
-                label: [] for label in PII_ANNOTATION_LABELS
-            }
+    def annotate_with_spans(self, text: str):
+        if not isinstance(text, str):
+            raise TypeError("text must be a string")
+        if len(text) > MAXIMAL_STRING_SIZE:
+            raise ValueError(
+                f"spaCy input exceeds {MAXIMAL_STRING_SIZE} characters; split the document before scanning"
+            )
+        classified_entities = {label: [] for label in PII_ANNOTATION_LABELS}
+        spans = []
+        if text:
+            try:
+                doc = self.nlp(text)
+            except Exception as exc:
+                raise RuntimeError("spaCy annotation failed") from exc
             for ent in doc.ents:
                 if ent.label_ in classified_entities:
                     classified_entities[ent.label_].append(ent.text)
-            return classified_entities
-        except Exception as e:
-            logging.error(f"Error processing text for PII annotations: {str(e)}")
-            return {
-                label: [] for label in PII_ANNOTATION_LABELS
-            }  # Return empty annotations in case of error
+                    spans.append(
+                        Span(
+                            label=ent.label_,
+                            start=ent.start_char,
+                            end=ent.end_char,
+                            text=ent.text,
+                        )
+                    )
+        return classified_entities, AnnotationResult(text=text, spans=spans)
+
+    def annotate(self, text: str) -> Dict[str, List[str]]:
+        return self.annotate_with_spans(text)[0]

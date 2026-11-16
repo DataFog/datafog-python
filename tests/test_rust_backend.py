@@ -66,15 +66,11 @@ def test_selection_alias_and_empty_selection(native, selection):
     assert len(result.entities) == 1
 
 
-def test_unknown_selection_preserves_legacy_empty_result(native):
+def test_unknown_selection_is_rejected(native):
     findings, _ = native
     findings.append(finding("EMAIL", "a@example.com", 0, 13))
-    assert (
-        engine.scan(
-            "a@example.com", "regex", entity_types=["UNKNOWN"], backend="rust"
-        ).entities
-        == []
-    )
+    with pytest.raises(ValueError, match="Unsupported entity_types"):
+        engine.scan("a@example.com", "regex", entity_types=["UNKNOWN"], backend="rust")
 
 
 def test_unknown_native_label_preserved_without_silently_dropping_pii(native):
@@ -84,7 +80,15 @@ def test_unknown_native_label_preserved_without_silently_dropping_pii(native):
     assert [item.type for item in result.entities] == ["FUTURE_LABEL"]
 
 
-def test_python_overlap_priority_precedes_selection(native):
+def test_python_overlap_priority_precedes_selection(native, monkeypatch):
+    metadata = capability_fixture()
+    metadata["supported_entities"].extend(["PHONE", "CREDIT_CARD"])
+    for label in ("PHONE", "CREDIT_CARD"):
+        metadata["entities"][label] = {
+            "scopes": ["text"],
+            "activation": {"kind": "default"},
+        }
+    monkeypatch.setattr(sys.modules["datafog_core"], "capabilities", lambda: metadata)
     findings, _ = native
     text = "1234567890123456"
     findings.extend(
@@ -116,7 +120,7 @@ def test_python_allowlist_semantics(native, kwargs, count):
     )
 
 
-@pytest.mark.parametrize("pattern", ["[", "(a+)+", "x" * 513])
+@pytest.mark.parametrize("pattern", ["[", "x" * 513])
 def test_allowlist_validation_before_native(native, pattern):
     _, calls = native
     with pytest.raises(ValueError):
@@ -146,16 +150,20 @@ def test_unknown_locale_validation_preserved(native):
 
 
 @pytest.mark.parametrize("name", ["smart", "spacy", "gliner"])
-def test_nonregex_engine_rejected(native, name):
+def test_nonregex_engines_use_native_structured_stage(native, name, monkeypatch):
     _, calls = native
-    with pytest.raises(ValueError, match="only engine='regex'"):
-        engine.scan("", name, backend="rust")
-    assert not calls
+    monkeypatch.setattr(engine, "_spacy_entities", lambda _: [])
+    monkeypatch.setattr(engine, "_gliner_entities", lambda _: [])
+    assert not engine.scan("", name, backend="rust").entities
+    assert calls == [""]
 
 
-def test_bad_backend_rejected():
+def test_bad_backend_rejected(monkeypatch):
     with pytest.raises(ValueError, match="backend must be one of"):
-        engine.scan("", "regex", backend="auto")
+        engine.scan("", "regex", backend="unknown")
+    monkeypatch.setenv(engine.BACKEND_ENV, "unknown")
+    with pytest.raises(ValueError, match="backend must be one of"):
+        engine.scan("", "regex")
 
 
 def test_no_native_import_on_python_path_and_actionable_missing_error(monkeypatch):
@@ -198,7 +206,9 @@ def test_all_legacy_transformations_use_native_findings(native, strategy):
             finding("EMAIL", "a@example.com", 14, 27),
         ]
     )
-    expected = engine.scan_and_redact(text, "regex", strategy=strategy)
+    expected = engine.scan_and_redact(
+        text, "regex", strategy=strategy, backend="python"
+    )
     actual = engine.scan_and_redact(text, "regex", strategy=strategy, backend="rust")
     assert actual == expected
     assert calls == [text]
@@ -208,7 +218,9 @@ def test_all_legacy_transformations_use_native_findings(native, strategy):
 def test_real_native_unicode_and_transformations(strategy):
     pytest.importorskip("datafog_core")
     text = "😀 München a@example.com and a@example.com"
-    python_result = engine.scan_and_redact(text, "regex", strategy=strategy)
+    python_result = engine.scan_and_redact(
+        text, "regex", strategy=strategy, backend="python"
+    )
     native_result = engine.scan_and_redact(
         text, "regex", strategy=strategy, backend="rust"
     )

@@ -3,9 +3,10 @@
 import asyncio
 
 import pytest
-from PIL import Image
 
 from datafog.services.image_service import ImageService
+
+Image = pytest.importorskip("PIL.Image", reason="Image tests require datafog[ocr]")
 
 urls = [
     "https://www.pdffiller.com/preview/101/35/101035394.png",

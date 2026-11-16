@@ -1,0 +1,5 @@
+include LICENSE README.md pyproject.toml tox.ini requirements-test.txt
+recursive-include tests *.py *.json *.txt
+recursive-include scripts *.py
+prune tests/.datafog_env
+global-exclude __pycache__ *.py[cod]

@@ -152,13 +152,14 @@ class TestPostCall:
 
 @pytest.mark.asyncio
 class TestEdgeShapes:
-    async def test_data_without_messages_passes_through(self):
+    async def test_embedding_input_is_redacted(self):
         guardrail = DataFogGuardrail(guardrail_name="datafog-pii")
         data = {"input": f"embed {EMAIL}"}
         result = await guardrail.async_pre_call_hook(
             user_api_key_dict=None, cache=None, data=data, call_type="aembedding"
         )
-        assert result == data
+        assert EMAIL not in result["input"]
+        assert result["input"].startswith("embed [EMAIL_")
 
     async def test_message_without_content_key_passes_through(self):
         guardrail = DataFogGuardrail(guardrail_name="datafog-pii")

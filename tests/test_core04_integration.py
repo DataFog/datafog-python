@@ -1,4 +1,4 @@
-"""Exercise actual Core 0.4 wheels through the Python compatibility adapter.
+"""Exercise reviewed native wheels through the Python compatibility adapter.
 
 Examples originate in Core's fixtures/{german,jwt,private-key,npi,
 us-routing-number,uuid}.jsonl. Payloads are synthetic detector fixtures,
@@ -6,6 +6,7 @@ including a nonfunctional PEM block; no credentials are used.
 """
 
 import importlib.metadata
+import json
 import re
 
 import pytest
@@ -13,6 +14,7 @@ import pytest
 import datafog
 from datafog import engine, v5
 from datafog.compat import v4
+from tests.rust_contract import DEVIATIONS
 
 core = pytest.importorskip("datafog_core")
 
@@ -50,7 +52,8 @@ COMPAT_NEW_DEFAULTS = [sample for sample in NEW_DEFAULTS if sample[0] != "NPI"]
 
 def test_supported_wheel_version_and_capability_contract():
     version = importlib.metadata.version("datafog-core")
-    assert version.split(".")[:2] == ["0", "4"], version
+    reviewed = json.loads(DEVIATIONS.read_text())["core_version"]
+    assert version.split(".")[:2] == reviewed.split(".")[:2], version
     capabilities = core.capabilities()
     assert capabilities["contract_version"] == 1
     supported = capabilities["supported_entities"]
@@ -174,12 +177,16 @@ def test_contextual_identifiers_do_not_activate_without_context(label, raw):
     assert not result.entities
 
 
-def test_npi_retains_native_identity_but_legacy_overlap_prefers_phone():
-    """4.x suppresses overlaps before selection; this is a reviewed difference."""
+def test_contextual_npi_survives_the_legacy_overlap_policy():
+    """A leading-1 national number is not PHONE, so NPI is no longer suppressed.
+
+    Core 1.2 accepts exchange codes starting with 1 but keeps the area-code
+    2-9 check, so `1234567893` is NPI only. Under Core 0.4 the same span was
+    ambiguous and the legacy overlap policy dropped the NPI.
+    """
     text = "😀 café NPI 1234567893"
     native = v5.scan(text)
     assert [(item.entity_type, item.matched_text) for item in native] == [
-        ("PHONE", "1234567893"),
         ("NPI", "1234567893"),
     ]
     assert {
@@ -187,10 +194,13 @@ def test_npi_retains_native_identity_but_legacy_overlap_prefers_phone():
     } == {(11, 21)}
     legacy = datafog.scan(text, backend="rust")
     assert [(item.type, item.text) for item in legacy.entities] == [
-        ("PHONE", "1234567893")
+        ("NPI", "1234567893")
     ]
-    assert not datafog.scan(text, entity_types=["NPI"], backend="rust").entities
-    assert datafog.redact(text, backend="rust").redacted_text == "😀 café NPI [PHONE_1]"
+    assert [
+        item.type
+        for item in datafog.scan(text, entity_types=["NPI"], backend="rust").entities
+    ] == ["NPI"]
+    assert datafog.redact(text, backend="rust").redacted_text == "😀 café NPI [NPI_1]"
     # Native selection occurs before transformation overlap resolution, exposing
     # the NPI-specific route without changing the 4.x compatibility contract.
     result = v5.scan_and_transform(
@@ -200,9 +210,13 @@ def test_npi_retains_native_identity_but_legacy_overlap_prefers_phone():
     assert result.text == "😀 café NPI [NPI]"
 
 
-def test_structured_only_person_rejected_by_text_adapter():
-    with pytest.raises(ValueError, match="PERSON"):
-        datafog.scan("Jane Doe", entity_types=["PERSON"], backend="rust")
+def test_structured_only_person_served_by_the_embedded_model():
+    """`PERSON` is structured-only in the rule inventory but the embedded CNN
+    covers prose, so text selection succeeds instead of raising."""
+    with pytest.raises(ValueError, match="Unsupported entity_types"):
+        datafog.scan("Jane Doe", entity_types=["PERSON"], backend="python")
+    result = datafog.scan("Jane Doe\n14 Penny Lane", entity_types=["PERSON", "ADDRESS"])
+    assert [item.type for item in result.entities] == ["PERSON", "ADDRESS"]
 
 
 def test_unsupported_locale_rejected_explicitly():
@@ -210,6 +224,7 @@ def test_unsupported_locale_rejected_explicitly():
         datafog.scan("a@example.com", locales=["unsupported"], backend="rust")
 
 
-def test_python_default_backend_remains_unchanged():
-    assert not datafog.scan(JWT).entities
+def test_native_backend_is_the_default():
+    assert [item.type for item in datafog.scan(JWT).entities] == ["JWT"]
     assert [item.type for item in datafog.scan(JWT, backend="rust").entities] == ["JWT"]
+    assert not datafog.scan(JWT, backend="python").entities

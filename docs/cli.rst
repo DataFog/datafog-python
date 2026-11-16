@@ -24,7 +24,8 @@ dependencies are:
 Spark/distributed workflows are Python SDK surfaces rather than first-path CLI
 commands. Spark support is also deprecated in 4.9 for removal in 5.0. Install
 ``datafog[distributed]`` when using ``SparkService`` during 4.x. Users needing
-OCR/Spark after the cutover can remain on the final 4.x release. See
+OCR/Spark after the cutover should pin ``datafog==4.10.0``, the last supported
+version. See :doc:`retirement` and
 :doc:`optional-surfaces` and the
 :download:`4.9 migration guide <migration-4.9.md>`.
 

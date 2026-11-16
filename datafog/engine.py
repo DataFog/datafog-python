@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
+import os
 import re
 import warnings
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Optional
 
-from .exceptions import EngineNotAvailable
+import regex as bounded_re
+
+from .exceptions import CoreUnavailableWarning, EngineNotAvailable
 from .processing.text_processing.regex_annotator import RegexAnnotator
 
 CANONICAL_TYPE_MAP = {
@@ -27,6 +31,13 @@ CANONICAL_TYPE_MAP = {
     # Presidio-compatible aliases, so configs migrate without renames.
     "EMAIL_ADDRESS": "EMAIL",
     "US_SSN": "SSN",
+    # Credential detectors are native-only; these spellings keep one vocabulary.
+    "APIKEY": "API_KEY",
+    "API-KEY": "API_KEY",
+    "TOKEN": "BEARER_TOKEN",
+    "BEARER": "BEARER_TOKEN",
+    "PRIVATEKEY": "PRIVATE_KEY",
+    "CREDENTIAL_URI": "CREDENTIAL_URI",
 }
 
 ALL_ENTITY_TYPES = {
@@ -48,9 +59,44 @@ ALL_ENTITY_TYPES = {
     "ORGANIZATION",
     "LOCATION",
     "ADDRESS",
+    "API_KEY",
+    "BEARER_TOKEN",
+    "JWT",
+    "PRIVATE_KEY",
+    "CREDENTIAL_URI",
+    "ACCOUNT_NUMBER",
+    "STREET_ADDRESS",
+    "US_ROUTING_NUMBER",
+    "NPI",
+    "UUID",
+    "PASSPORT_NUMBER",
+    "MEDICAL_RECORD_NUMBER",
+    "LICENSE_NUMBER",
+    "URL",
 }
 
-NER_ENTITY_TYPES = {"PERSON", "ORGANIZATION", "LOCATION", "ADDRESS"}
+#: Labels the native rule engine reports as structured-only, served for text by
+#: the embedded model instead.
+MODEL_ENTITY_TYPES = {"PERSON", "ADDRESS"}
+
+#: Environment override for the default backend: ``auto``, ``python`` or ``rust``.
+BACKEND_ENV = "DATAFOG_BACKEND"
+
+_core_warned = False
+_cnn_cache: tuple[object, object] | None = None
+
+SPACY_ENTITY_TYPES = {"PERSON", "ORGANIZATION", "LOCATION", "ADDRESS"}
+
+NER_ENTITY_TYPES = {
+    "PERSON",
+    "ORGANIZATION",
+    "LOCATION",
+    "ADDRESS",
+    "PASSPORT_NUMBER",
+    "MEDICAL_RECORD_NUMBER",
+    "LICENSE_NUMBER",
+    "URL",
+}
 
 ENTITY_TYPE_PRIORITY = {
     "DE_IBAN": 100,
@@ -127,9 +173,13 @@ def _find_all_occurrences(text: str, needle: str) -> list[tuple[int, int]]:
 def _entities_from_dict(
     text: str, payload: dict[str, list[str]], engine: str, confidence: float
 ) -> list[Entity]:
+    """Compatibility for third-party annotators without offset support.
+
+    Whole-word matching avoids interpreting "Ann" inside "Annual" as a name.
+    First-party annotators use their original character ranges instead.
+    """
     entities: list[Entity] = []
     value_offsets: dict[str, int] = {}
-
     for raw_type, values in payload.items():
         canonical_type = _canonical_type(raw_type)
         if canonical_type not in ALL_ENTITY_TYPES:
@@ -137,22 +187,44 @@ def _entities_from_dict(
         for value in values:
             if not isinstance(value, str) or not value.strip():
                 continue
-            search_start = value_offsets.get(value, 0)
-            idx = text.find(value, search_start)
-            if idx < 0:
-                idx = text.find(value)
-            end = idx + len(value) if idx >= 0 else -1
-            value_offsets[value] = end if end >= 0 else search_start + 1
+            pattern = re.compile(r"(?<!\w)" + re.escape(value) + r"(?!\w)")
+            match = pattern.search(text, value_offsets.get(value, 0))
+            if match is None:
+                continue
+            value_offsets[value] = match.end()
             entities.append(
                 Entity(
-                    type=canonical_type,
-                    text=value,
-                    start=idx,
-                    end=end,
-                    confidence=confidence,
-                    engine=engine,
+                    canonical_type,
+                    value,
+                    match.start(),
+                    match.end(),
+                    confidence,
+                    engine,
                 )
             )
+    return entities
+
+
+def _annotator_entities(
+    text: str, annotator: object, engine: str, confidence: float
+) -> list[Entity]:
+    method = getattr(annotator, "annotate_with_spans", None)
+    if not callable(method):
+        return _entities_from_dict(text, annotator.annotate(text), engine, confidence)
+    _, result = method(text)
+    entities = []
+    for span in result.spans:
+        label = _canonical_type(span.label)
+        if label not in ALL_ENTITY_TYPES:
+            continue
+        if (
+            not 0 <= span.start < span.end <= len(text)
+            or text[span.start : span.end] != span.text
+        ):
+            raise ValueError(f"{engine} returned an invalid entity span")
+        entities.append(
+            Entity(label, span.text, span.start, span.end, confidence, engine)
+        )
     return entities
 
 
@@ -167,7 +239,31 @@ def _entities_overlap(left: Entity, right: Entity) -> bool:
 
 
 def _suppress_overlapping_entities(entities: list[Entity]) -> list[Entity]:
-    selected: list[Entity] = []
+    """Preserve longest-span precedence with O(n log n) interval queries."""
+    coordinates = {
+        value: index + 1
+        for index, value in enumerate(
+            sorted(
+                {value for entity in entities for value in (entity.start, entity.end)}
+            )
+        )
+    }
+    starts = [0] * (len(coordinates) + 1)
+    ends = [0] * (len(coordinates) + 1)
+
+    def add(tree: list[int], index: int) -> None:
+        while index < len(tree):
+            tree[index] += 1
+            index += index & -index
+
+    def count(tree: list[int], index: int) -> int:
+        total = 0
+        while index > 0:
+            total += tree[index]
+            index -= index & -index
+        return total
+
+    selected = []
     for entity in sorted(
         entities,
         key=lambda item: (
@@ -179,9 +275,12 @@ def _suppress_overlapping_entities(entities: list[Entity]) -> list[Entity]:
             item.type,
         ),
     ):
-        if any(_entities_overlap(entity, kept) for kept in selected):
+        start, end = coordinates[entity.start], coordinates[entity.end]
+        if count(starts, end - 1) > count(ends, start):
             continue
         selected.append(entity)
+        add(starts, start)
+        add(ends, end)
     return sorted(selected, key=lambda item: (item.start, item.end, item.type))
 
 
@@ -209,6 +308,92 @@ def _regex_entities(
     return _suppress_overlapping_entities(entities)
 
 
+def _core_module_or_none() -> object | None:
+    """Return the importable ``datafog_core`` module, or ``None``.
+
+    Deliberately uncached: after the first import this is a ``sys.modules``
+    lookup, and not caching keeps ``sys.modules`` patching in tests honest.
+    """
+    try:
+        import datafog_core
+    except ImportError:
+        return None
+    return datafog_core
+
+
+def _require_core() -> object:
+    core = _core_module_or_none()
+    if core is None:
+        raise ImportError(
+            "The Rust backend requires datafog-core. "
+            'Install with: pip install "datafog[rust]"'
+        )
+    return core
+
+
+def core_available() -> bool:
+    """Whether the native engine can serve this interpreter."""
+    return _core_module_or_none() is not None
+
+
+def _set_core(module: object | None) -> None:
+    """Test seam: reset cached state derived from the core module."""
+    global _cnn_cache
+    _cnn_cache = None
+
+
+def _cnn_detector_or_none() -> object | None:
+    """Cached embedded detector, keyed on the module object it came from."""
+    global _cnn_cache
+    core = _core_module_or_none()
+    if core is None:
+        return None
+    if _cnn_cache is not None and _cnn_cache[0] is core:
+        return _cnn_cache[1]
+    factory = getattr(core, "EmbeddedCnnDetector", None)
+    if factory is None:
+        return None
+    detector = factory()
+    _cnn_cache = (core, detector)
+    return detector
+
+
+def _cnn_findings(
+    detector: object, requested: set[str], text: str
+) -> list[tuple[int, object]]:
+    """Bound model work while retaining document character coordinates.
+
+    4096 characters fit the native byte/token caps even for four-byte Unicode.
+    Overlap gives names and address blocks context on either side of a seam.
+    """
+    chunk_length, overlap = 4096, 256
+    findings = []
+    for offset in range(0, max(len(text), 1), chunk_length - overlap):
+        chunk = text[offset : offset + chunk_length]
+        try:
+            result = detector.scan_model(chunk)
+        except Exception as exc:
+            raise _model_error(exc) from exc
+        findings.extend(
+            (offset, finding)
+            for finding in result.findings
+            if finding.entity_type in requested
+        )
+        if offset + chunk_length >= len(text):
+            break
+    return findings
+
+
+def _model_error(exc: Exception) -> Exception:
+    """Re-raise a model failure as a ValueError with its native code attached."""
+    code = getattr(exc, "code", "model_error")
+    reason = getattr(exc, "reason", None)
+    detail = f"{code}/{reason}" if reason else code
+    error = ValueError(f"Native model detection failed ({detail}): {exc}")
+    error.code = code  # type: ignore[attr-defined]
+    return error
+
+
 def _rust_entities(
     text: str,
     entity_types: Optional[list[str]] = None,
@@ -220,39 +405,48 @@ def _rust_entities(
     suppression before entity selection and allowlists, preserving that order
     without duplicating the native detectors.
     """
-    try:
-        import datafog_core
-    except ImportError as exc:
-        raise ImportError(
-            "The Rust backend requires datafog-core. "
-            'Install with: pip install "datafog[rust]"'
-        ) from exc
+    datafog_core = _require_core()
 
     from ._core_capabilities import scan_configs
 
     requested = {_canonical_type(value) for value in entity_types or []}
-    configs = scan_configs(datafog_core, requested, locales)
+    model_requested = requested & MODEL_ENTITY_TYPES
+    detector = _cnn_detector_or_none() if model_requested else None
+    if model_requested and detector is None:
+        raise ValueError(
+            f"Entity {', '.join(sorted(model_requested))} needs the embedded model, "
+            "which this datafog-core build does not provide. Upgrade it with: "
+            'pip install --upgrade "datafog-core"'
+        )
+    configs = scan_configs(datafog_core, requested - MODEL_ENTITY_TYPES, locales)
     entities: list[Entity] = []
     seen: set[tuple[str, int, int]] = set()
-    for config in configs:
-        for finding in datafog_core.scan(text, config=config):
-            canonical_type = _canonical_type(finding.entity_type)
-            start = finding.codepoint_range.start
-            end = finding.codepoint_range.end
-            key = (canonical_type, start, end)
-            if key in seen or not finding.matched_text.strip():
-                continue
-            seen.add(key)
-            entities.append(
-                Entity(
-                    type=canonical_type,
-                    text=finding.matched_text,
-                    start=start,
-                    end=end,
-                    confidence=1.0,
-                    engine="regex",
-                )
+    native_text = re.sub(r"[\ud800-\udfff]", "\ufffd", text)
+    findings = [
+        (0, finding)
+        for config in configs
+        for finding in datafog_core.scan(native_text, config=config)
+    ]
+    if detector is not None:
+        findings.extend(_cnn_findings(detector, model_requested, native_text))
+    for offset, finding in findings:
+        canonical_type = _canonical_type(finding.entity_type)
+        start = offset + finding.codepoint_range.start
+        end = offset + finding.codepoint_range.end
+        key = (canonical_type, start, end)
+        if key in seen or not finding.matched_text.strip():
+            continue
+        seen.add(key)
+        entities.append(
+            Entity(
+                type=canonical_type,
+                text=text[start:end],
+                start=start,
+                end=end,
+                confidence=1.0,
+                engine="regex",
             )
+        )
     return _suppress_overlapping_entities(entities)
 
 
@@ -260,16 +454,22 @@ def _spacy_entities(text: str) -> list[Entity]:
     annotator = _get_spacy_annotator()
     if isinstance(annotator, _UnavailableAnnotator):
         raise EngineNotAvailable(annotator.message)
-    payload = annotator.annotate(text)
-    return _entities_from_dict(text, payload, engine="spacy", confidence=0.7)
+    return [
+        entity
+        for entity in _annotator_entities(text, annotator, "spacy", 0.7)
+        if entity.type in SPACY_ENTITY_TYPES
+    ]
 
 
-def _gliner_entities(text: str) -> list[Entity]:
-    annotator = _get_gliner_annotator()
+def _gliner_entities(text: str, model_name: str | None = None) -> list[Entity]:
+    annotator = (
+        _get_gliner_annotator()
+        if model_name is None
+        else _get_gliner_annotator(model_name)
+    )
     if isinstance(annotator, _UnavailableAnnotator):
         raise EngineNotAvailable(annotator.message)
-    payload = annotator.annotate(text)
-    return _entities_from_dict(text, payload, engine="gliner", confidence=0.8)
+    return _annotator_entities(text, annotator, "gliner", 0.8)
 
 
 @lru_cache(maxsize=1)
@@ -289,15 +489,15 @@ def _get_spacy_annotator():
         )
 
 
-@lru_cache(maxsize=1)
-def _get_gliner_annotator():
+@lru_cache(maxsize=4)
+def _get_gliner_annotator(model_name: str = "urchade/gliner_multi_pii-v1"):
     try:
         from .processing.text_processing.gliner_annotator import GLiNERAnnotator
     except ImportError as exc:
         return _UnavailableAnnotator(str(exc))
 
     try:
-        annotator = GLiNERAnnotator.create()
+        annotator = GLiNERAnnotator.create(model_name=model_name)
     except ImportError as exc:
         return _UnavailableAnnotator(str(exc))
     except Exception as exc:
@@ -329,42 +529,37 @@ def _filter_entity_types(
     return [entity for entity in entities if entity.type in allowed]
 
 
-# Python's re module backtracks; a quantified group containing another
-# quantifier (e.g. ``(a+)+``) can take exponential time on adversarial
-# input, and entity text can be attacker-influenced (LLM messages, tool
-# output). Reject that construct outright rather than matching under it.
-_NESTED_QUANTIFIER = re.compile(
-    r"\((?:[^()\\]|\\.)*(?<!\\)[+*}](?:[^()\\]|\\.)*\)\s*[+*{]"
-)
 MAX_ALLOWLIST_PATTERN_LENGTH = 512
-# Entities longer than this skip pattern matching (fail-safe: the finding
-# is kept, never suppressed) so match time stays bounded.
 MAX_PATTERN_SUBJECT_LENGTH = 512
+ALLOWLIST_MATCH_TIMEOUT = 0.01
 
 
-def _compile_allowlist_patterns(
-    allowlist_patterns: Optional[list[str]],
-) -> list["re.Pattern[str]"]:
+def _compile_allowlist_patterns(allowlist_patterns: Optional[list[str]]) -> list:
     compiled = []
+    if isinstance(allowlist_patterns, str):
+        raise ValueError("allowlist_patterns must be a list of patterns")
     for raw in allowlist_patterns or []:
-        if len(raw) > MAX_ALLOWLIST_PATTERN_LENGTH:
+        if not isinstance(raw, str) or len(raw) > MAX_ALLOWLIST_PATTERN_LENGTH:
             raise ValueError(
-                "allowlist_patterns entries must be at most "
-                f"{MAX_ALLOWLIST_PATTERN_LENGTH} characters"
-            )
-        if _NESTED_QUANTIFIER.search(raw):
-            raise ValueError(
-                "allowlist_patterns contains a quantified group with a nested "
-                f"quantifier ({raw!r}), which risks catastrophic backtracking; "
-                "rewrite the pattern without nesting quantifiers"
+                "allowlist_patterns entries must be strings of at most 512 characters"
             )
         try:
-            compiled.append(re.compile(raw))
-        except re.error as exc:
+            compiled.append(bounded_re.compile(raw))
+        except bounded_re.error as exc:
             raise ValueError(
                 f"allowlist_patterns contains an invalid regex: {raw!r} ({exc})"
             ) from None
     return compiled
+
+
+def _allowlist_matches(pattern: object, value: str) -> bool:
+    if len(value) > MAX_PATTERN_SUBJECT_LENGTH:
+        return False
+    try:
+        return pattern.fullmatch(value, timeout=ALLOWLIST_MATCH_TIMEOUT) is not None
+    except TimeoutError:
+        # A slow exemption must never suppress a sensitive finding.
+        return False
 
 
 def _apply_allowlist(
@@ -389,11 +584,7 @@ def _apply_allowlist(
         entity
         for entity in entities
         if entity.text not in exact
-        and not any(
-            pattern.fullmatch(entity.text)
-            for pattern in patterns
-            if len(entity.text) <= MAX_PATTERN_SUBJECT_LENGTH
-        )
+        and not any(_allowlist_matches(pattern, entity.text) for pattern in patterns)
     ]
 
 
@@ -404,11 +595,71 @@ def _needs_ner(entity_types: Optional[list[str]]) -> bool:
     return bool(requested & NER_ENTITY_TYPES)
 
 
+def _warn_core_missing() -> None:
+    global _core_warned
+    if _core_warned:
+        return
+    _core_warned = True
+    warnings.warn(
+        "datafog-core is not installed, so detection falls back to the pure-Python "
+        f"engine. Install it to use the native engine, or set {BACKEND_ENV}=python "
+        "to silence this warning.",
+        CoreUnavailableWarning,
+        stacklevel=4,
+    )
+
+
+def resolve_backend(backend: str | None = None, engine: str = "regex") -> str:
+    """Resolve ``auto`` to a concrete backend without importing Core eagerly.
+
+    An explicit ``backend`` wins over ``DATAFOG_BACKEND``. ``auto`` uses the
+    native engine whenever Core is importable and degrades to Python otherwise.
+    Every engine uses this backend for structured PII; NER adds spans.
+    """
+    requested = backend or os.environ.get(BACKEND_ENV) or "auto"
+    normalized = requested.strip().lower()
+    if normalized not in {"auto", "python", "rust"}:
+        raise ValueError(
+            f"backend must be one of: auto, python, rust (from {BACKEND_ENV} or the "
+            "backend argument)"
+        )
+    if normalized == "auto":
+        return "rust" if core_available() else "python"
+    return normalized
+
+
 def _validate_backend(backend: str, engine: str) -> None:
     if backend not in {"python", "rust"}:
         raise ValueError("backend must be one of: python, rust")
-    if backend == "rust" and engine != "regex":
-        raise ValueError("backend='rust' supports only engine='regex'")
+
+
+def _validate_entity_types(
+    entity_types: Optional[list[str]], backend: str, engine: str
+) -> Optional[list[str]]:
+    if entity_types is None:
+        return None
+    if not isinstance(entity_types, (list, tuple)) or any(
+        not isinstance(value, str) or not value.strip() for value in entity_types
+    ):
+        raise ValueError("entity_types must be a list of entity labels")
+    requested = [_canonical_type(value) for value in entity_types]
+    if backend == "rust":
+        from ._core_capabilities import _read_capabilities
+
+        supported, _, _ = _read_capabilities(_require_core().capabilities)
+        supported = supported | MODEL_ENTITY_TYPES
+    else:
+        supported = {_canonical_type(label) for label in RegexAnnotator.LABELS}
+    if engine == "spacy":
+        supported |= SPACY_ENTITY_TYPES
+    elif engine in {"smart", "gliner"}:
+        supported |= NER_ENTITY_TYPES | {"DATE"}
+    unsupported = set(requested) - supported
+    if unsupported:
+        raise ValueError(
+            f"Unsupported entity_types for {backend}/{engine}: {', '.join(sorted(unsupported))}"
+        )
+    return requested
 
 
 def scan(
@@ -419,13 +670,21 @@ def scan(
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
     *,
-    backend: str = "python",
+    backend: Optional[str] = None,
+    gliner_model: Optional[str] = None,
 ) -> ScanResult:
     """Scan text for PII entities.
 
-    ``backend="rust"`` opts into experimental native detection for
-    ``engine="regex"``. Results retain legacy regex provenance and confidence;
-    these are compatibility values, not native confidence estimates.
+    ``backend`` defaults to ``auto``: the native engine when ``datafog-core`` is
+    importable, otherwise the pure-Python engine with a one-time warning. Set
+    ``DATAFOG_BACKEND`` or pass ``backend="python"`` to force the fallback. The
+    selected backend supplies structured PII for every engine mode; optional
+    NER engines add entity spans.
+    Prose names and address blocks come from the embedded model on the native
+    path, so ``PERSON`` and ``ADDRESS`` work without spaCy or a model download.
+
+    Results retain legacy regex provenance and confidence; these are
+    compatibility values, not native confidence estimates.
 
     ``allowlist`` exempts exact entity texts (e.g. your own support email);
     ``allowlist_patterns`` exempts entities whose full text matches a regex
@@ -437,7 +696,14 @@ def scan(
     if engine not in {"regex", "spacy", "gliner", "smart"}:
         raise ValueError("engine must be one of: regex, spacy, gliner, smart")
 
+    requested_backend = (
+        (backend or os.environ.get(BACKEND_ENV) or "auto").strip().lower()
+    )
+    backend = resolve_backend(backend, engine)
     _validate_backend(backend, engine)
+    entity_types = _validate_entity_types(entity_types, backend, engine)
+    if backend == "python" and requested_backend == "auto" and not core_available():
+        _warn_core_missing()
 
     # Validate patterns up front so config errors fail fast even when the
     # text contains no entities.
@@ -477,7 +743,11 @@ def scan(
 
     if engine == "gliner" and _needs_ner(entity_types):
         try:
-            gliner_entities = _gliner_entities(text)
+            gliner_entities = (
+                _gliner_entities(text)
+                if gliner_model is None
+                else _gliner_entities(text, gliner_model)
+            )
             combined.extend(gliner_entities)
             engines_used.add("gliner")
         except EngineNotAvailable:
@@ -492,13 +762,16 @@ def scan(
 
     if engine == "smart" and _needs_ner(entity_types):
         try:
-            gliner_entities = _gliner_entities(text)
+            gliner_entities = (
+                _gliner_entities(text)
+                if gliner_model is None
+                else _gliner_entities(text, gliner_model)
+            )
             combined.extend(gliner_entities)
             engines_used.add("gliner")
-        except EngineNotAvailable:
+        except EngineNotAvailable as exc:
             warnings.warn(
-                "GLiNER not available, smart scan falling back to spaCy. "
-                "Install with: pip install datafog[nlp-advanced]",
+                f"GLiNER unavailable; smart scan falling back to spaCy. {exc}",
                 UserWarning,
                 stacklevel=2,
             )
@@ -516,6 +789,8 @@ def scan(
 
     filtered = _filter_entity_types(combined, entity_types)
     filtered = _apply_allowlist(filtered, allowlist, allowlist_patterns)
+    # Optional NER adds candidates without suppressing structured findings.
+    # Transformation resolves overlaps after selection, preserving scan labels.
     deduped = _dedupe_entities(filtered)
     return ScanResult(
         entities=deduped,
@@ -524,10 +799,62 @@ def scan(
     )
 
 
+def _validate_hash_parameters(
+    strategy: str, hash_type: str, hash_key: bytes | None
+) -> None:
+    if hash_key is not None and (not isinstance(hash_key, bytes) or len(hash_key) < 32):
+        raise ValueError("hash_key must contain at least 32 bytes")
+    if strategy == "hash":
+        try:
+            hashlib.new(hash_type).hexdigest()
+        except (ValueError, TypeError):
+            raise ValueError(f"Unsupported hash_type: {hash_type!r}") from None
+
+
+def _hash_value(
+    text: str,
+    hash_type: str,
+    hash_key: bytes | None,
+    *,
+    plain_length: int = 12,
+) -> str:
+    """Retain legacy plain-hash widths; keyed HMAC always uses its full digest.
+
+    Unkeyed hashes are deterministic pseudonyms and remain vulnerable to
+    dictionary attacks regardless of digest width. Supply a private key to
+    prevent direct enumeration of low-entropy identifiers.
+    """
+    _validate_hash_parameters("hash", hash_type, hash_key)
+    encoded = text.encode("utf-8", "surrogatepass")
+    if hash_key is not None:
+        return hmac.new(hash_key, encoded, hash_type).hexdigest()
+    return hashlib.new(hash_type, encoded).hexdigest()[:plain_length]
+
+
+def _validated_redaction_entities(text: str, entities: list[Entity]) -> list[Entity]:
+    valid_entities = []
+    for entity in entities:
+        if (
+            not 0 <= entity.start < entity.end <= len(text)
+            or not entity.text
+            or text[entity.start : entity.end] != entity.text
+        ):
+            raise ValueError(
+                "entities must contain valid ranges whose text matches the source"
+            )
+        if not re.fullmatch(r"[A-Z][A-Z0-9_]*", entity.type):
+            raise ValueError("entity types must be uppercase labels")
+        valid_entities.append(entity)
+    return _suppress_overlapping_entities(valid_entities)
+
+
 def redact(
     text: str,
     entities: list[Entity],
     strategy: str = "token",
+    *,
+    hash_type: str = "sha256",
+    hash_key: bytes | None = None,
 ) -> RedactResult:
     """Redact PII entities from text.
 
@@ -536,6 +863,12 @@ def redact(
     group only one span is redacted — the longest, breaking ties by entity
     type priority and then confidence. Suppressed spans are omitted from
     ``RedactResult.entities`` and ``mapping``.
+
+    Plain hashes retain the historical 12-character digest prefix and provide
+    deterministic pseudonymization. With ``hash_key`` (at least 32 bytes), HMAC
+    uses the complete digest. Unkeyed hashes do not resist dictionary attacks.
+
+    Invalid ranges, mismatched source text, and malformed labels raise ValueError.
 
     ``mapping`` for the ``mask`` strategy is keyed by per-type indexed keys
     (``[EMAIL_MASK_1]``) rather than the mask string, because distinct
@@ -546,22 +879,19 @@ def redact(
     if strategy not in {"token", "mask", "hash", "pseudonymize"}:
         raise ValueError("strategy must be one of: token, mask, hash, pseudonymize")
 
-    redacted_text = text
+    _validate_hash_parameters(strategy, hash_type, hash_key)
+
     mapping: dict[str, str] = {}
     counters: dict[str, int] = {}
     pseudonym_by_value: dict[tuple[str, str], str] = {}
 
-    valid_entities = [
-        entity
-        for entity in entities
-        if 0 <= entity.start < entity.end <= len(text) and entity.text
-    ]
-    # Returns non-overlapping spans sorted by document position.
-    valid_entities = _suppress_overlapping_entities(valid_entities)
+    valid_entities = _validated_redaction_entities(text, entities)
+
+    occupied_tokens = set(re.findall(r"\[[A-Z][A-Za-z0-9_]*\]", text))
 
     # Assign replacements in document order so the per-type counters used by
-    # the token/pseudonymize strategies number the first occurrence _1; spans
-    # are applied right-to-left below so earlier offsets stay valid.
+    # the token/pseudonymize strategies number the first occurrence _1.
+    # Assemble the result in one pass without repeated document copies.
     replacements: list[tuple[Entity, str]] = []
     for entity in valid_entities:
         original = text[entity.start : entity.end]
@@ -570,30 +900,57 @@ def redact(
             replacement = "*" * max(len(original), 1)
             # Distinct same-length values share a mask, so the mask string
             # cannot key the mapping without collisions.
-            counters[entity.type] = counters.get(entity.type, 0) + 1
-            mapping_key = f"[{entity.type}_MASK_{counters[entity.type]}]"
+            while True:
+                counters[entity.type] = counters.get(entity.type, 0) + 1
+                mapping_key = f"[{entity.type}_MASK_{counters[entity.type]}]"
+                if mapping_key not in occupied_tokens:
+                    break
+            occupied_tokens.add(mapping_key)
         elif strategy == "hash":
-            digest = hashlib.sha256(original.encode("utf-8")).hexdigest()[:12]
-            replacement = f"[{entity.type}_{digest}]"
+            digest = _hash_value(original, hash_type, hash_key)
+            key = (entity.type, original)
+            if key not in pseudonym_by_value:
+                candidate = f"[{entity.type}_{digest}]"
+                suffix = 1
+                while candidate in occupied_tokens:
+                    suffix += 1
+                    candidate = f"[{entity.type}_{digest}_{suffix}]"
+                pseudonym_by_value[key] = candidate
+                occupied_tokens.add(candidate)
+            replacement = pseudonym_by_value[key]
         elif strategy == "pseudonymize":
             key = (entity.type, original)
             if key not in pseudonym_by_value:
-                counters[entity.type] = counters.get(entity.type, 0) + 1
-                pseudonym_by_value[key] = (
-                    f"[{entity.type}_PSEUDO_{counters[entity.type]}]"
-                )
+                while True:
+                    counters[entity.type] = counters.get(entity.type, 0) + 1
+                    candidate = f"[{entity.type}_PSEUDO_{counters[entity.type]}]"
+                    if candidate not in occupied_tokens:
+                        break
+                pseudonym_by_value[key] = candidate
+                occupied_tokens.add(candidate)
             replacement = pseudonym_by_value[key]
         else:  # token
-            counters[entity.type] = counters.get(entity.type, 0) + 1
-            replacement = f"[{entity.type}_{counters[entity.type]}]"
+            key = (entity.type, original)
+            if key not in pseudonym_by_value:
+                while True:
+                    counters[entity.type] = counters.get(entity.type, 0) + 1
+                    candidate = f"[{entity.type}_{counters[entity.type]}]"
+                    if candidate not in occupied_tokens:
+                        break
+                pseudonym_by_value[key] = candidate
+                occupied_tokens.add(candidate)
+            replacement = pseudonym_by_value[key]
 
         replacements.append((entity, replacement))
         mapping[mapping_key if mapping_key is not None else replacement] = original
 
-    for entity, replacement in reversed(replacements):
-        redacted_text = (
-            redacted_text[: entity.start] + replacement + redacted_text[entity.end :]
-        )
+    parts = []
+    offset = 0
+    for entity, replacement in replacements:
+        parts.extend((text[offset : entity.start], replacement))
+        offset = entity.end
+    parts.append(text[offset:])
+    redacted_text = "".join(parts)
 
     return RedactResult(
         redacted_text=redacted_text,
@@ -611,9 +968,14 @@ def scan_and_redact(
     allowlist: Optional[list[str]] = None,
     allowlist_patterns: Optional[list[str]] = None,
     *,
-    backend: str = "python",
+    backend: Optional[str] = None,
+    hash_type: str = "sha256",
+    hash_key: bytes | None = None,
 ) -> RedactResult:
-    """Scan with the selected backend, then apply legacy Python redaction."""
+    """Scan with the selected backend, then apply legacy Python redaction.
+
+    Backend selection matches :func:`scan`.
+    """
     scan_result = scan(
         text=text,
         engine=engine,
@@ -623,4 +985,10 @@ def scan_and_redact(
         allowlist_patterns=allowlist_patterns,
         backend=backend,
     )
-    return redact(text=text, entities=scan_result.entities, strategy=strategy)
+    return redact(
+        text=text,
+        entities=scan_result.entities,
+        strategy=strategy,
+        hash_type=hash_type,
+        hash_key=hash_key,
+    )

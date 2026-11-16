@@ -22,8 +22,9 @@ Configuration (environment variables):
   whose full text matches are exempt (note: a pattern containing a comma
   cannot be expressed here).
 
-Failure policy: fail open. A hook bug must never brick a Claude Code
-session, so any unexpected error exits non-blocking with no output.
+Oversized inputs receive the configured ask/deny decision rather than proceeding
+with an unscanned tail. Unexpected hook errors fail open with a non-blocking
+error, so a hook bug does not prevent using the Claude Code session.
 """
 
 import json
@@ -48,6 +49,10 @@ _EXIT_OK = 0
 # Exit 1 is Claude Code's non-blocking error: stderr is shown to the user,
 # the tool call proceeds. Never exit 2 (blocking) on our own failures.
 _EXIT_FAIL_OPEN = 1
+
+
+class ScanLimitExceeded(ValueError):
+    """The payload cannot be fully inspected within the configured budget."""
 
 
 def _entity_types(env: Mapping[str, str]) -> list[str]:
@@ -82,6 +87,7 @@ def _iter_strings(value: Any) -> Iterator[str]:
             yield current
         elif isinstance(current, dict):
             stack.extend(current.values())
+            stack.extend(current.keys())
         elif isinstance(current, (list, tuple)):
             stack.extend(current)
 
@@ -98,9 +104,9 @@ def _scan_findings(
     counts: dict[str, int] = {}
     total_budget = TOTAL_SCAN_CHARS
     for text in _iter_strings(value):
-        if total_budget <= 0:
-            break
-        chunk = text[: min(MAX_SCAN_CHARS, total_budget)]
+        if len(text) > MAX_SCAN_CHARS or len(text) > total_budget:
+            raise ScanLimitExceeded("Input exceeds the scan budget")
+        chunk = text
         total_budget -= len(chunk)
         result = datafog.scan(
             chunk,
@@ -191,8 +197,20 @@ def run(payload: dict, env: Mapping[str, str]) -> tuple[int, str]:
         if handler is None:
             return _EXIT_OK, ""
         return _EXIT_OK, handler(payload, env)
+    except ScanLimitExceeded:
+        event = payload.get("hook_event_name")
+        reason = "DataFog PII firewall: input exceeds the scan budget and was not fully scanned. Split the input before proceeding."
+        if event == "PreToolUse":
+            return _EXIT_OK, _emit(
+                event,
+                {
+                    "permissionDecision": _action(env),
+                    "permissionDecisionReason": reason,
+                },
+            )
+        return _EXIT_OK, _emit(event, {"additionalContext": reason})
     except Exception as exc:  # noqa: BLE001 — fail open by design
-        print(f"datafog-hook error (fail-open): {exc}", file=sys.stderr)
+        print(f"datafog-hook error (fail-open): {type(exc).__name__}", file=sys.stderr)
         return _EXIT_FAIL_OPEN, ""
 
 
@@ -206,7 +224,10 @@ def main() -> None:
         if not isinstance(payload, dict):
             payload = {}
     except Exception as exc:  # noqa: BLE001 — fail open by design
-        print(f"datafog-hook: invalid hook payload (fail-open): {exc}", file=sys.stderr)
+        print(
+            f"datafog-hook: invalid hook payload (fail-open): {type(exc).__name__}",
+            file=sys.stderr,
+        )
         sys.exit(_EXIT_FAIL_OPEN)
 
     code, stdout = run(payload, os.environ)

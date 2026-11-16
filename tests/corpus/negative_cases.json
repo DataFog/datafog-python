@@ -49,7 +49,16 @@
   {
     "id": "markdown-link",
     "input": "See [RFC 1918](https://example.com/rfc1918)",
-    "expected_entities": []
+    "expected_entities": [],
+    "permitted_gliner_entities": [
+      {
+        "type": "URL",
+        "text": "https://example.com/rfc1918",
+        "start": 15,
+        "end": 42
+      }
+    ],
+    "permitted_gliner_reason": "PY-M14 restores the existing GLiNER URL label. This exact public URL is valid URL detection; it must not become EMAIL, PHONE or IP_ADDRESS."
   },
   {
     "id": "code-symbol",
@@ -74,6 +83,15 @@
   {
     "id": "url-with-at",
     "input": "https://example.com/@user/profile is a URL path",
-    "expected_entities": []
+    "expected_entities": [],
+    "permitted_gliner_entities": [
+      {
+        "type": "URL",
+        "text": "https://example.com/@user/profile",
+        "start": 0,
+        "end": 33
+      }
+    ],
+    "permitted_gliner_reason": "PY-M14 restores the existing GLiNER URL label. This exact public URL is valid URL detection; it must not become EMAIL, PHONE or IP_ADDRESS."
   }
 ]

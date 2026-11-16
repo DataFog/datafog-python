@@ -10,7 +10,8 @@ import datafog
 
 EMAIL = "jane.doe@" "example.com"
 OTHER_EMAIL = "sid@" "example.com"
-TIMESTAMP_LIKE = "17830" "25668"  # ten digits: matches the PHONE pattern
+TIMESTAMP_LIKE = "44123" "45678"  # ten digits, NANP-shaped: both backends match
+LEADING_ONE_TIMESTAMP = "17830" "25668"  # native reads the leading 1 as a country code
 
 
 class TestExactAllowlist:
@@ -54,6 +55,23 @@ class TestPatternAllowlist:
         )
         assert result.entities == []
 
+    def test_leading_one_timestamp_is_a_documented_native_delta(self):
+        # The native NANP check reads a leading 1 as a country code and needs a
+        # nine-digit national number after it, so this misses; the Python engine
+        # matches. Recorded rather than silently accepted.
+        assert (
+            datafog.scan(f"created {LEADING_ONE_TIMESTAMP}", engine="regex").entities
+            == []
+        )
+        assert (
+            len(
+                datafog.scan(
+                    f"created {LEADING_ONE_TIMESTAMP}", engine="regex", backend="python"
+                ).entities
+            )
+            == 1
+        )
+
     def test_pattern_matches_full_entity_text_only(self):
         result = datafog.scan(
             f"mail {EMAIL}", engine="regex", allowlist_patterns=[r"^jane\."]
@@ -75,13 +93,15 @@ class TestPatternAllowlist:
 
 
 class TestReDoSGuards:
-    def test_catastrophic_pattern_rejected(self):
-        with pytest.raises(ValueError, match="catastrophic backtracking"):
-            datafog.scan("text", engine="regex", allowlist_patterns=[r"(a+)+$"])
+    def test_nested_quantifier_uses_bounded_matching(self):
+        assert datafog.scan(
+            "a@b.com", engine="regex", allowlist_patterns=[r"(a+)+$"]
+        ).entities
 
-    def test_nested_star_rejected(self):
-        with pytest.raises(ValueError, match="catastrophic backtracking"):
-            datafog.scan("text", engine="regex", allowlist_patterns=[r"(.*)*"])
+    def test_safe_nested_star_is_supported(self):
+        assert not datafog.scan(
+            "a@b.com", engine="regex", allowlist_patterns=[r"(.*)*"]
+        ).entities
 
     def test_overlong_pattern_rejected(self):
         with pytest.raises(ValueError, match="at most"):

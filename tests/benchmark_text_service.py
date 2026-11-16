@@ -107,7 +107,7 @@ def test_spacy_performance(benchmark, sample_text_10kb, spacy_service):
 
     # Verify spaCy found expected entities
     assert "PERSON" in result or "PER" in result
-    assert "ORG" in result
+    assert "ORGANIZATION" in result
 
     # Print some stats about the results
     entity_counts = {key: len(values) for key, values in result.items() if values}
@@ -178,7 +178,7 @@ def test_auto_engine_fallback_performance(benchmark, spacy_only_text, auto_servi
     )
 
     # Check if we have spaCy entities (depends on spaCy availability)
-    spacy_entities = ["PERSON", "ORG", "GPE", "CARDINAL", "DATE", "TIME"]
+    spacy_entities = ["PERSON", "ORGANIZATION", "LOCATION", "ADDRESS"]
     has_spacy_entities = any(entity in result for entity in spacy_entities)
 
     # If no spaCy entities, check if spaCy is available

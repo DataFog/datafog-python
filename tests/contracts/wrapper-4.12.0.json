@@ -1,0 +1,972 @@
+{
+  "wrapper_version": "4.12.0",
+  "core_versions": ["1.4.0", "1.5.0"],
+  "source_oracle": "4.8.1.json (unchanged)",
+  "review": "2026-11-15 PDF remediation: explicit reviewed wrapper changes, not a regenerated historical oracle",
+  "cases": {
+    "selection-unknown": {
+      "classification": "validation-difference",
+      "reason": "PY-M6 rejects unknown entity labels instead of silently disabling detection.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "Unsupported entity_types for rust/regex: NOT_A_TYPE"
+        },
+        "warnings": []
+      }
+    },
+    "redact-token": {
+      "classification": "behavioral-fix",
+      "reason": "PY-L7 reuses one collision-safe token for repeated values.",
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2] [EMAIL_1] [SSN_1]",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com",
+              "[EMAIL_2]": "b@example.com",
+              "[SSN_1]": "123-45-6789"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "SSN",
+                  "text": "123-45-6789",
+                  "start": 42,
+                  "end": 53,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    "engine-redact-token": {
+      "classification": "behavioral-fix",
+      "reason": "PY-L7 reuses one collision-safe token for repeated values.",
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_2] [EMAIL_1]",
+            "mapping": {
+              "[EMAIL_1]": "a@example.com",
+              "[EMAIL_2]": "b@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 0,
+                  "end": 13,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "b@example.com",
+                  "start": 14,
+                  "end": 27,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "a@example.com",
+                  "start": 28,
+                  "end": 41,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    "explicit-invalid-bounds": {
+      "classification": "validation-difference",
+      "reason": "PY-L7 rejects malformed explicit spans rather than silently skipping them.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "entities must contain valid ranges whose text matches the source"
+        },
+        "warnings": []
+      }
+    },
+    "explicit-mismatched-text": {
+      "classification": "validation-difference",
+      "reason": "PY-L7 rejects explicit span text that differs from the source.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "entities must contain valid ranges whose text matches the source"
+        },
+        "warnings": []
+      }
+    },
+    "error-invalid-pattern": {
+      "classification": "validation-difference",
+      "reason": "PY-M9 uses a timeout-capable matcher, whose syntax diagnostic counts positions differently.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "allowlist_patterns contains an invalid regex: '[' (unterminated character set at position 1)"
+        },
+        "warnings": []
+      }
+    },
+    "error-unsafe-pattern": {
+      "classification": "behavioral-fix",
+      "reason": "PY-M9 allows nested groups under a hard matching timeout instead of a bypassable syntax heuristic.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    "error-oversized-pattern": {
+      "classification": "validation-difference",
+      "reason": "PY-M9 validates both pattern type and length with an explicit diagnostic.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "allowlist_patterns entries must be strings of at most 512 characters"
+        },
+        "warnings": []
+      }
+    },
+    "facade-sanitize": {
+      "classification": "behavioral-fix",
+      "reason": "PY-L7 reuses the same token when the same entity value repeats.",
+      "expected": {
+        "value": "[EMAIL_1] [EMAIL_1]",
+        "warnings": []
+      }
+    },
+    "facade-filter_output": {
+      "classification": "behavioral-fix",
+      "reason": "PY-L7 reuses the same token when the same entity value repeats.",
+      "expected": {
+        "value": {
+          "result_type": "RedactResult",
+          "fields": {
+            "redacted_text": "[EMAIL_1] [EMAIL_1]",
+            "mapping": {
+              "[EMAIL_1]": "alice@example.com"
+            },
+            "entities": [
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 0,
+                  "end": 17,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              },
+              {
+                "result_type": "Entity",
+                "fields": {
+                  "type": "EMAIL",
+                  "text": "alice@example.com",
+                  "start": 18,
+                  "end": 35,
+                  "confidence": 1.0,
+                  "engine": "regex"
+                }
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    },
+    "facade-detect": {
+      "classification": "diagnostic-difference",
+      "reason": "PY-L3 retirement notices identify the current release that still provides the shim.",
+      "expected": {
+        "value": [
+          {
+            "type": "EMAIL",
+            "value": "alice@example.com",
+            "start": 0,
+            "end": 17
+          },
+          {
+            "type": "EMAIL",
+            "value": "alice@example.com",
+            "start": 18,
+            "end": 35
+          }
+        ],
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.detect() is deprecated and will be removed in 5.0. Use datafog.scan() instead. Last supported version is 4.12.0. Pin it with: pip install \"datafog==4.12.0\". The earlier promise to retain this shim through 5.x has been revised. See docs/retirement.rst."
+          }
+        ]
+      }
+    },
+    "facade-anonymize_text": {
+      "classification": "behavioral-fix",
+      "reason": "PY-L7 reuses the same token when the same entity value repeats.",
+      "expected": {
+        "value": "[EMAIL_1] [EMAIL_1]",
+        "warnings": []
+      }
+    },
+    "facade-process": {
+      "classification": "diagnostic-difference",
+      "reason": "PY-L3 retirement notices identify the current release that still provides the shim.",
+      "expected": {
+        "value": {
+          "original": "alice@example.com alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            },
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 18,
+              "end": 35
+            }
+          ]
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated and will be removed in 5.0. Use datafog.scan() or datafog.redact() instead. Last supported version is 4.12.0. Pin it with: pip install \"datafog==4.12.0\". The earlier promise to retain this shim through 5.x has been revised. See docs/retirement.rst."
+          }
+        ]
+      }
+    },
+    "process-redact": {
+      "classification": "diagnostic-difference",
+      "reason": "PY-L3 retirement notices identify the current release that still provides the shim.",
+      "expected": {
+        "value": {
+          "original": "alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            }
+          ],
+          "anonymized": "[EMAIL_REDACTED]"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated and will be removed in 5.0. Use datafog.scan() or datafog.redact() instead. Last supported version is 4.12.0. Pin it with: pip install \"datafog==4.12.0\". The earlier promise to retain this shim through 5.x has been revised. See docs/retirement.rst."
+          }
+        ]
+      }
+    },
+    "process-replace": {
+      "classification": "diagnostic-difference",
+      "reason": "PY-L3 retirement notices identify the current release that still provides the shim.",
+      "expected": {
+        "value": {
+          "original": "alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            }
+          ],
+          "anonymized": "[EMAIL_XXXXX]"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated and will be removed in 5.0. Use datafog.scan() or datafog.redact() instead. Last supported version is 4.12.0. Pin it with: pip install \"datafog==4.12.0\". The earlier promise to retain this shim through 5.x has been revised. See docs/retirement.rst."
+          }
+        ]
+      }
+    },
+    "process-hash": {
+      "classification": "diagnostic-difference",
+      "reason": "PY-L3 retirement notices identify the current release. Legacy default MD5 and its eight-character prefix remain compatible; explicit algorithms and keyed HMAC are additional options.",
+      "expected": {
+        "value": {
+          "original": "alice@example.com",
+          "findings": [
+            {
+              "type": "EMAIL",
+              "value": "alice@example.com",
+              "start": 0,
+              "end": 17
+            }
+          ],
+          "anonymized": "[EMAIL_c160f8cc]"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated and will be removed in 5.0. Use datafog.scan() or datafog.redact() instead. Last supported version is 4.12.0. Pin it with: pip install \"datafog==4.12.0\". The earlier promise to retain this shim through 5.x has been revised. See docs/retirement.rst."
+          }
+        ]
+      }
+    },
+    "process-invalid": {
+      "classification": "validation-difference",
+      "reason": "PY-L5 rejects an invalid anonymization method instead of choosing an undocumented fallback; PY-L3 updates the notice.",
+      "expected": {
+        "error": {
+          "type": "ValueError",
+          "message": "method must be 'redact', 'replace', or 'hash'"
+        },
+        "warnings": [
+          {
+            "type": "FutureWarning",
+            "message": "datafog.process() is deprecated and will be removed in 5.0. Use datafog.scan() or datafog.redact() instead. Last supported version is 4.12.0. Pin it with: pip install \"datafog==4.12.0\". The earlier promise to retain this shim through 5.x has been revised. See docs/retirement.rst."
+          }
+        ]
+      }
+    },
+    "service-default": {
+      "classification": "behavioral-fix",
+      "reason": "PY-H3/PY-L6 route TextService through shared native detection and return populated canonical labels.",
+      "expected": {
+        "value": {
+          "EMAIL": ["alice@example.com"]
+        },
+        "warnings": []
+      }
+    },
+    "service-german": {
+      "classification": "behavioral-fix",
+      "reason": "PY-H3/PY-L6 route TextService through shared native detection with overlap resolution and populated canonical labels.",
+      "expected": {
+        "value": {
+          "DE_TAX_ID": ["12345678901"]
+        },
+        "warnings": []
+      }
+    },
+    "service-batch": {
+      "classification": "behavioral-fix",
+      "reason": "PY-H3/PY-L6 route every TextService batch member through shared native detection, returning populated canonical labels.",
+      "expected": {
+        "value": [
+          {
+            "EMAIL": ["alice@example.com"]
+          },
+          {}
+        ],
+        "warnings": []
+      }
+    },
+    "public-signatures": {
+      "classification": "signature-addition",
+      "reason": "PY-M7 adds keyword-only hash_type/hash_key while preserving existing unkeyed output widths and omitted legacy hash defaults; TextService custom models use the engine gliner_model keyword; backend remains keyword-only.",
+      "expected": {
+        "value": {
+          "datafog:scan": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "backend",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog:redact": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "preset",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "backend",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "hash_type",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": "sha256"
+              },
+              {
+                "name": "hash_key",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog:protect": {
+            "parameters": [
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "on_detect",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "redact"
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog:detect": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:process": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "anonymize",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": false
+              },
+              {
+                "name": "method",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "redact"
+              },
+              {
+                "name": "hash_type",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "hash_key",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog:sanitize": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "kwargs",
+                "kind": "VAR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:scan_prompt": {
+            "parameters": [
+              {
+                "name": "prompt",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "kwargs",
+                "kind": "VAR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:filter_output": {
+            "parameters": [
+              {
+                "name": "output",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "kwargs",
+                "kind": "VAR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ]
+          },
+          "datafog:create_guardrail": {
+            "parameters": [
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "regex"
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "on_detect",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "redact"
+              }
+            ]
+          },
+          "datafog.engine:Entity": {
+            "parameters": [
+              {
+                "name": "type",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "start",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "end",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "confidence",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ],
+            "fields": ["type", "text", "start", "end", "confidence", "engine"]
+          },
+          "datafog.engine:ScanResult": {
+            "parameters": [
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine_used",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ],
+            "fields": ["entities", "text", "engine_used"]
+          },
+          "datafog.engine:RedactResult": {
+            "parameters": [
+              {
+                "name": "redacted_text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "mapping",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              }
+            ],
+            "fields": ["redacted_text", "mapping", "entities"]
+          },
+          "datafog.engine:scan": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "smart"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "backend",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "gliner_model",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog.engine:redact": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "entities",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "hash_type",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": "sha256"
+              },
+              {
+                "name": "hash_key",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              }
+            ]
+          },
+          "datafog.engine:scan_and_redact": {
+            "parameters": [
+              {
+                "name": "text",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": true,
+                "default": null
+              },
+              {
+                "name": "engine",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "smart"
+              },
+              {
+                "name": "entity_types",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "strategy",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": "token"
+              },
+              {
+                "name": "locales",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "allowlist_patterns",
+                "kind": "POSITIONAL_OR_KEYWORD",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "backend",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              },
+              {
+                "name": "hash_type",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": "sha256"
+              },
+              {
+                "name": "hash_key",
+                "kind": "KEYWORD_ONLY",
+                "required": false,
+                "default": null
+              }
+            ]
+          }
+        },
+        "warnings": []
+      }
+    }
+  }
+}

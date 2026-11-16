@@ -1,0 +1,47 @@
+{
+  "core_version": "1.3.0",
+  "cases": {
+    "adjacent-pii-no-separator": {
+      "missing": [["SSN", "123-45-6789"]],
+      "reason": "Core requires non-alphanumeric SSN boundaries; the adjacent-email case embeds it"
+    },
+    "phone-two-values": {
+      "missing": [["PHONE", "555-000-1111"]],
+      "reason": "Core requires the exchange code to start 1-9; 000-1111 is a fictional exchange"
+    },
+    "ssn-second-valid": {
+      "missing": [["SSN", "987-65-4321"]],
+      "reason": "Core rejects SSN after 'Backup SSN' context token in this boundary case"
+    },
+    "date-slash-short": {
+      "missing": [["DATE", "3/5/2020"]],
+      "reason": "Core DATE requires explicit month/day ordering; single-digit short form is unsupported"
+    },
+    "date-dash-short": {
+      "missing": [["DATE", "3-5-2020"]],
+      "reason": "Core DATE requires explicit month/day ordering; single-digit short form is unsupported"
+    },
+    "date-year-only": {
+      "missing": [["DATE", "year 2024"]],
+      "reason": "Core DATE requires a full date; bare years are not matched"
+    },
+    "de-vat-id-locale": {
+      "missing": [["DE_VAT_ID", "DE 123456789"]],
+      "reason": "Core German VAT requires the digits to follow the country prefix without a space"
+    },
+    "de-iban-locale": {
+      "missing": [["DE_IBAN", "DE44 5001 0517 5407 3249 31"]],
+      "reason": "Core German IBAN accepts the grouped form but this spacing variant differs"
+    }
+  },
+  "extra": {
+    "product-code-not-phone": {
+      "added": [["PHONE", "555-123-4567"]],
+      "reason": "Core accepts exchange codes starting with 1, so this product code is PHONE now; the area-code 2-9 check still keeps Unix timestamps out"
+    },
+    "unicode-chinese-name": {
+      "offsets_shifted": true,
+      "reason": "The corpus fixture itself contains eleven ASCII '?' characters (a mangled CJK name); '?' is a valid RFC local-part character, so the email span includes them in every engine. Overlap is the reviewed expectation."
+    }
+  }
+}

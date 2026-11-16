@@ -1,5 +1,5 @@
 {
-  "core_version": "0.4.0",
+  "core_version": "1.5.0",
   "cases": {
     "scan-observation-invalid-card": {
       "classification": "detector-difference",
@@ -41,6 +41,37 @@
         },
         "warnings": []
       }
+    },
+    "scan-observation-ambiguous-number": {
+      "classification": "detector-difference",
+      "reason": "Core's North American area-code check requires a leading digit of 2-9, so a bare 10-digit run starting with 1 stays undetected. This is the deliberate Unix-timestamp protection; Python 4.8.1 matches it.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "Invoice 1234567890",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
+    },
+    "locale-default-DE_TAX_ID": {
+      "classification": "detector-difference",
+      "reason": "CORE-17/PY-L2 suppress a German tax identifier from the generic PHONE detector even when German detectors are not activated. Explicit locale selection still detects DE_TAX_ID.",
+      "expected": {
+        "value": {
+          "result_type": "ScanResult",
+          "fields": {
+            "entities": [],
+            "text": "Steuer-ID 12345678901 liegt vor.",
+            "engine_used": "regex"
+          }
+        },
+        "warnings": []
+      }
     }
-  }
+  },
+  "review": "Core 1.5 candidate qualification retains reviewed historical differences and documents the contextual tax-ID correction. Wrapper 4.12 fixes are layered separately in wrapper-4.12.0.json."
 }

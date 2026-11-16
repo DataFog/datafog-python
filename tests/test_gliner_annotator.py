@@ -11,8 +11,8 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 
-@pytest.fixture(scope="session", autouse=True)
-def mock_gliner_module():
+@pytest.fixture(autouse=True)
+def mock_gliner_module(monkeypatch):
     """Mock the gliner module for all tests."""
     # Create a mock gliner module
     mock_gliner = MagicMock()
@@ -20,22 +20,42 @@ def mock_gliner_module():
 
     # Configure the mock model behavior
     mock_model = MagicMock()
-    mock_model.predict_entities.return_value = [
-        {"label": "person", "text": "John Doe", "start": 0, "end": 8},
-        {"label": "email", "text": "john@example.com", "start": 20, "end": 36},
-        {"label": "phone number", "text": "555-123-4567", "start": 50, "end": 62},
-    ]
+
+    def predict(text, labels):
+        findings = []
+        for label, value in [
+            ("person", "John Doe"),
+            ("email", "john@example.com"),
+            ("phone number", "555-123-4567"),
+        ]:
+            start = text.find(value)
+            if start >= 0 and label in labels:
+                findings.append(
+                    {
+                        "label": label,
+                        "text": value,
+                        "start": start,
+                        "end": start + len(value),
+                    }
+                )
+        return findings
+
+    mock_model.predict_entities.side_effect = predict
     mock_gliner_class.from_pretrained.return_value = mock_model
     mock_gliner.GLiNER = mock_gliner_class
 
-    # Add to sys.modules to make import work
-    sys.modules["gliner"] = mock_gliner
+    from datafog import engine
 
+    gliner_factory, spacy_factory = (
+        engine._get_gliner_annotator,
+        engine._get_spacy_annotator,
+    )
+    gliner_factory.cache_clear()
+    spacy_factory.cache_clear()
+    monkeypatch.setitem(sys.modules, "gliner", mock_gliner)
     yield mock_gliner_class, mock_model
-
-    # Cleanup
-    if "gliner" in sys.modules:
-        del sys.modules["gliner"]
+    gliner_factory.cache_clear()
+    spacy_factory.cache_clear()
 
 
 class TestGLiNERAnnotatorWithDependencies:
@@ -119,15 +139,9 @@ class TestGLiNERAnnotatorWithDependencies:
         # Create text longer than MAXIMAL_STRING_SIZE
         long_text = "A" * 1000001  # Exceeds 1M character limit
 
-        with patch(
-            "datafog.processing.text_processing.gliner_annotator.logging"
-        ) as mock_logging:
-            result = annotator.annotate(long_text)
-
-            # Should log a warning about truncation
-            mock_logging.warning.assert_called_once()
-            # Should still return a valid result
-            assert isinstance(result, dict)
+        with pytest.raises(ValueError, match="exceeds 1000000"):
+            annotator.annotate(long_text)
+        mock_model.predict_entities.assert_not_called()
 
     def test_gliner_download_model(self, mock_gliner_module):
         """Test GLiNER model download functionality."""
@@ -326,21 +340,19 @@ class TestTextServiceGLiNERIntegration:
             ):
                 TextService(engine="gliner")
 
-    def test_text_service_smart_engine_without_dependencies(self):
-        """Test smart engine degrades gracefully when GLiNER dependencies are missing."""
+    def test_text_service_smart_engine_without_dependencies(self, monkeypatch):
+        """Missing optional engines preserve the structured native layer."""
+        from datafog import engine
         from datafog.services.text_service import TextService
 
-        with patch.object(TextService, "_create_gliner_annotator", return_value=None):
-            with patch.object(
-                TextService, "_create_spacy_annotator", return_value=None
-            ):
-                service = TextService(engine="smart")
-                with pytest.warns(UserWarning, match="GLiNER not available"):
-                    result = service.annotate_text_sync(
-                        "John Doe from Acme Corporation needs follow up."
-                    )
-                assert "EMAIL" in result
-                assert result["EMAIL"] == []
+        unavailable = engine._UnavailableAnnotator("optional model unavailable")
+        monkeypatch.setattr(engine, "_get_gliner_annotator", lambda: unavailable)
+        monkeypatch.setattr(engine, "_get_spacy_annotator", lambda: unavailable)
+        with pytest.warns(UserWarning, match="GLiNER unavailable"):
+            result = TextService(engine="smart").annotate_text_sync(
+                "mail john@example.com"
+            )
+        assert result == {"EMAIL": ["john@example.com"]}
 
     def test_text_service_valid_engines(self):
         """Test that all valid engines are accepted."""
@@ -382,10 +394,10 @@ class TestTextServiceGLiNERIntegration:
                         assert service.engine == engine
 
     def test_text_service_invalid_engine(self):
-        """Test that invalid engines raise AssertionError."""
+        """Test that invalid engines raise a configuration error."""
         from datafog.services.text_service import TextService
 
-        with pytest.raises(AssertionError, match="Invalid engine"):
+        with pytest.raises(ValueError, match="engine must be one of"):
             TextService(engine="invalid_engine")
 
     @pytest.mark.parametrize(
@@ -414,30 +426,14 @@ class TestTextServiceGLiNERIntegration:
         result_above_threshold = {"TYPE1": ["entity1"] * (expected_count + 1)}
         assert service._cascade_should_stop(engine, result_above_threshold)
 
-    def test_smart_cascade_flow(self, mock_gliner_annotator):
-        """Test the smart cascading flow."""
+    def test_smart_engine_combines_gliner_with_structured_detection(self):
+        """GLiNER adds exact NER spans without removing structured findings."""
         from datafog.services.text_service import TextService
 
-        # Inject annotators directly to keep this cascade test deterministic
-        # across Python versions and import ordering.
-        mock_regex = Mock()
-        mock_regex.annotate.return_value = {"EMAIL": []}
-
-        mock_spacy = Mock()
-        mock_spacy.annotate.return_value = {"PERSON": ["John Doe"]}
-
-        service = TextService(engine="smart")
-        service._regex_annotator = mock_regex
-        service._gliner_annotator = mock_gliner_annotator
-        service._gliner_import_attempted = True
-        service._spacy_annotator = mock_spacy
-        service._spacy_import_attempted = True
-
-        service.annotate_text_sync("John Doe works at john@example.com")
-
-        # Should have tried regex first, then GLiNER.
-        mock_regex.annotate.assert_called_once()
-        mock_gliner_annotator.annotate.assert_called_once()
+        text = "John Doe owns 6011111111111117 and john@example.com"
+        result = TextService(engine="smart").annotate_text_sync(text, structured=True)
+        assert {item.label for item in result} == {"PERSON", "CREDIT_CARD", "EMAIL"}
+        assert all(text[item.start : item.end] == item.text for item in result)
 
 
 # Test CLI updates as well

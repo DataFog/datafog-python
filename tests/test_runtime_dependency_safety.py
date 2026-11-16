@@ -42,8 +42,7 @@ def test_runtime_code_does_not_install_packages() -> None:
 
 
 def test_ocr_and_spark_public_services_do_not_require_optional_imports() -> None:
-    _run_isolated_python(
-        """
+    _run_isolated_python("""
 import importlib.abc
 import sys
 
@@ -74,8 +73,7 @@ assert SparkService is not None
 assert TextService is not None
 assert datafog.ImageService is ImageService
 assert datafog.SparkService is SparkService
-"""
-    )
+""")
 
 
 def test_spacy_pii_missing_model_requires_explicit_download(

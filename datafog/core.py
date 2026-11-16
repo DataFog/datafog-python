@@ -89,6 +89,9 @@ def anonymize_text(
     text: str,
     method: Union[str, AnonymizerType] = "redact",
     locales: List[str] | None = None,
+    *,
+    hash_type: str = "sha256",
+    hash_key: bytes | None = None,
 ) -> str:
     """
     Simple text anonymization using lightweight regex engine.
@@ -103,7 +106,7 @@ def anonymize_text(
     Example:
         >>> result = anonymize_text("Contact john@example.com", method="redact")
         >>> print(result)
-        "Contact [EMAIL_REDACTED]"
+        "Contact [EMAIL_1]"
     """
     import time as _time
 
@@ -129,6 +132,8 @@ def anonymize_text(
             engine=REGEX_ENGINE,
             strategy=strategy_map[method],
             locales=locales,
+            hash_type=hash_type,
+            hash_key=hash_key,
         )
 
         try:
@@ -211,18 +216,29 @@ def scan_text(
     return result
 
 
-def get_supported_entities(locales: List[str] | None = None) -> List[str]:
+def get_supported_entities(
+    locales: List[str] | None = None, *, backend: str | None = None
+) -> List[str]:
     """
-    Get list of PII entity types supported by the regex engine.
+    Get the selected backend's supported entity types, including opt-in labels.
 
     Returns:
         List of supported entity type names
 
     Example:
         >>> entities = get_supported_entities()
-        >>> print(entities)
-        ['EMAIL', 'PHONE', 'SSN', 'CREDIT_CARD', 'IP_ADDRESS', 'DATE', 'ZIP_CODE']
+        >>> "EMAIL" in entities
+        True
     """
+    from datafog.engine import _require_core, resolve_backend
+
+    if resolve_backend(backend, "regex") == "rust":
+        from datafog._core_capabilities import _read_capabilities, scan_configs
+
+        core = _require_core()
+        supported, _, _ = _read_capabilities(core.capabilities)
+        scan_configs(core, set(), locales)
+        return sorted(supported)
     annotator = RegexAnnotator(locales=locales)
     legacy_map = {"DOB": "DATE", "ZIP": "ZIP_CODE"}
     result = []

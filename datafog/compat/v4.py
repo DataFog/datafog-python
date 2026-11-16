@@ -6,6 +6,7 @@ not include the deprecated detect/process shims.
 
 from ..engine import Entity, RedactResult, ScanResult
 from ..engine import redact as _redact_entities
+from ..engine import resolve_backend
 from ..engine import scan as _scan
 from ..engine import scan_and_redact as _scan_and_redact
 
@@ -29,13 +30,13 @@ def scan(
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
     *,
-    backend: str = "python",
+    backend: str | None = None,
 ) -> ScanResult:
     """
-    Scan with the legacy result schema; Rust detection is opt-in.
+    Scan with the legacy result schema.
 
-    Defaults to the lightweight regex engine so the core install works without
-    optional dependency fallback warnings.
+    Backend selection follows ``datafog.engine.resolve_backend``: native when
+    ``datafog-core`` is importable, otherwise Python with a one-time warning.
 
     ``allowlist`` exempts exact entity texts (your own support address, doc
     placeholders); ``allowlist_patterns`` exempts entities whose full text
@@ -64,7 +65,9 @@ def redact(
     allowlist: list[str] | None = None,
     allowlist_patterns: list[str] | None = None,
     *,
-    backend: str = "python",
+    backend: str | None = None,
+    hash_type: str = "sha256",
+    hash_key: bytes | None = None,
 ) -> RedactResult:
     """
     Redact with legacy strategies and result schema.
@@ -75,8 +78,8 @@ def redact(
     full-text regex match respectively); they apply to the scan path and are
     rejected when explicit ``entities`` are supplied.
     """
-    if backend not in ("python", "rust"):
-        raise ValueError("backend must be one of: python, rust")
+    # Validate the backend even when explicit entities skip the scan path.
+    resolve_backend(backend, engine)
 
     if preset is not None:
         try:
@@ -91,7 +94,13 @@ def redact(
                 "allowlist/allowlist_patterns cannot be combined with explicit "
                 "entities; filter the entities before calling redact"
             )
-        return _redact_entities(text=text, entities=entities, strategy=strategy)
+        return _redact_entities(
+            text=text,
+            entities=entities,
+            strategy=strategy,
+            hash_type=hash_type,
+            hash_key=hash_key,
+        )
 
     return _scan_and_redact(
         text=text,
@@ -102,4 +111,6 @@ def redact(
         allowlist=allowlist,
         allowlist_patterns=allowlist_patterns,
         backend=backend,
+        hash_type=hash_type,
+        hash_key=hash_key,
     )

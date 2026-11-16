@@ -198,7 +198,7 @@ def test_redact_invalid_strategy_raises_value_error() -> None:
         redact("test", entities=[], strategy="invalid")
 
 
-def test_redact_ignores_invalid_spans() -> None:
+def test_redact_rejects_invalid_spans() -> None:
     text = "hello"
     entities = [
         Entity(
@@ -219,9 +219,8 @@ def test_redact_ignores_invalid_spans() -> None:
         ),
     ]
 
-    result = redact(text=text, entities=entities, strategy="token")
-    assert result.redacted_text == text
-    assert result.mapping == {}
+    with pytest.raises(ValueError, match="valid ranges"):
+        redact(text=text, entities=entities, strategy="token")
 
 
 def test_scan_and_redact_combines_operations() -> None:
